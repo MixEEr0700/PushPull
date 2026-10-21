@@ -276,6 +276,12 @@ class IndexedDBMigration(BrowserHarness):
             self.assertEqual(self.state(),original)
         self.assertEqual(len(self.alerts),len(invalid))
         self.assertEqual(self.local_raw(),RAW)
+        # v1 permitted arbitrary extension fields. Its version, rather than an
+        # extension named 'format', must determine legacy compatibility.
+        extended={**FIXTURE,'format':'pushpull-backup'}
+        self.import_data(json.dumps(extended))
+        self.assertEqual(self.state(),extended)
+        self.assertEqual(self.local_raw(),RAW)
 
     def test_actual_browser_process_close_and_reopen_persistent_profile(self):
         executable=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium')

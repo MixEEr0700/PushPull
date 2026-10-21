@@ -111,7 +111,7 @@ const PushPullDB = (() => {
   }
   function parseBackup(value) {
     // Validate prototype keys for the entire envelope through the v1 boundary too.
-    if (value?.format === 'pushpull-backup') {
+    if (value?.format === 'pushpull-backup' && value.version !== 1) {
       if (value.version !== 2 || Object.keys(value).some(k=>!['format','version','data','catalog','archives'].includes(k))) throw Error('Nieobsługiwana wersja kopii');
       PushPullStorage.validate({...value.data, backupEnvelope:value});
       return {data:PushPullStorage.validate(value.data), catalog:validateCatalog(value.data,value.catalog),archives:validateArchives(value.archives || [])};
