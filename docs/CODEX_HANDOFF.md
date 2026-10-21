@@ -1,5 +1,7 @@
 # Aplikacja Treningowa — aktualne przekazanie
 
+Etap 5A: [audyt V2](V2_PLAN_AUDIT_STAGE_5A.md) jest częściowy — dokument trenera zwraca 401; wymagany pełny eksport. [Propozycja modelu](MODEL_EXTENSION_STAGE_5B_PROPOSAL.md) nie jest implementacją. Parametry aktywnego planu i dane pozostają bez zmian; [wyniki kontroli](STAGE_5A_TEST_REPORT.md).
+
 Etap 4 zmienia nazwę użytkową bez zmiany tożsamości PWA i danych. Aktualny kierunek: [aneks planu](PROJECT_PLAN_ANNEX_STAGE_4.md), [architektura i model](TARGET_ARCHITECTURE_STAGE_4.md), [raport testów](STAGE_4_TEST_REPORT.md). Drive, nowy silnik planów i raport trenera są wyłącznie projektowane. Poniżej pozostaje historyczny zapis etapów 1–3; opisy dawnych braków nie oznaczają obecnego stanu.
 
 # PushPull — import i przekazanie do Codexa
