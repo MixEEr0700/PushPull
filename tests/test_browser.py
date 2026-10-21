@@ -1,0 +1,298 @@
+"""Run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+Uses installed Playwright + Chromium; starts its own local HTTP server.
+"""
+import datetime
+import functools
+import http.server
+import json
+import os
+from pathlib import Path
+import subprocess
+import shutil
+import threading
+import unittest
+from playwright.sync_api import sync_playwright, expect
+
+ROOT = Path(__file__).resolve().parents[1]
+KEY = 'pushpull_skeleton_v1'
+BASE = '92390b1449bd61c4c6fdc41ccf8a272e5ff914d3'
+
+class QuietServer(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+class BrowserRegression(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(QuietServer, directory=str(ROOT)))
+        cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
+        cls.thread.start()
+        cls.url = f'http://127.0.0.1:{cls.server.server_port}/'
+        cls.pw = sync_playwright().start()
+        cls.browser = cls.pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'), args=['--no-sandbox'])
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.browser.close()
+        cls.pw.stop()
+        cls.server.shutdown()
+        cls.server.server_close()
+        cls.thread.join()
+
+    def new_context(self, **options):
+        options.setdefault('viewport', {'width':390,'height':844})
+        context = self.browser.new_context(timezone_id='Europe/Warsaw', **options)
+        self.addCleanup(context.close)
+        return context
+
+    def setUp(self):
+        self.context = self.new_context(service_workers='block')
+        self.page = self.context.new_page()
+        self.alerts = []
+        self.confirm = True
+        self.page.on('dialog', self.dialog)
+        self.errors = []
+        self.page.on('pageerror', lambda error: self.errors.append(str(error)))
+        self.page.clock.install(time=datetime.datetime(2026, 10, 21, 10, 0, tzinfo=datetime.timezone.utc))
+        self.page.goto(self.url)
+
+    def tearDown(self):
+        self.assertEqual(self.errors, [])
+
+    def dialog(self, dialog):
+        if dialog.type == 'alert':
+            self.alerts.append(dialog.message)
+            dialog.accept()
+        elif self.confirm:
+            dialog.accept()
+        else:
+            dialog.dismiss()
+
+    def state(self):
+        return self.page.evaluate(f'JSON.parse(localStorage.getItem({json.dumps(KEY)}))')
+
+    def raw(self):
+        return self.page.evaluate(f'localStorage.getItem({json.dumps(KEY)})')
+
+    def start(self, date='2026-10-21'):
+        self.page.locator('#trainingDate').fill(date)
+        self.page.locator('[data-act=start]').click()
+        expect(self.page.locator('[data-act=finish]')).to_be_visible()
+
+    def result(self, kg='100', reps='10'):
+        self.page.locator('[data-expand="PUSH-A-1"]').click()
+        self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-main=kg]').fill(kg)
+        self.page.locator('[data-main=reps]').fill(reps)
+
+    def save(self):
+        self.page.locator('.seriesResultForm [type=submit]').click()
+        expect(self.page.locator('.seriesResultForm')).to_have_count(0)
+
+    def import_data(self, content):
+        self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':content.encode()})
+        self.page.wait_for_function("document.querySelector('#importFile')?.value === '' || !document.querySelector('#importFile')")
+
+    def settings(self):
+        self.page.locator('[data-tab=settings]').click()
+
+    def test_full_rotation_and_manual_choice(self):
+        for current, next_type in [('PUSH A','PULL A'),('PULL A','PUSH B'),('PUSH B','PULL B'),('PULL B','PUSH A')]:
+            self.start()
+            self.assertEqual(self.state()['sessions'][-1]['type'], current)
+            self.page.locator('[data-act=finish]').click()
+            self.assertEqual(self.state()['nextType'], next_type)
+        self.page.locator('[data-type="PUSH B"]').click()
+        self.start()
+        self.assertEqual(self.state()['sessions'][-1]['type'], 'PUSH B')
+
+    def test_series_tonnage_history_notes_and_reload(self):
+        self.start()
+        self.result()
+        self.page.locator('[data-series-toggle]').click()
+        self.page.locator('[data-series-remove="2"]').click()
+        self.page.locator('[data-series-index="1"][data-field=kg]').fill('80')
+        self.page.locator('[data-series-index="1"][data-field=reps]').fill('8')
+        self.assertEqual(self.page.locator('.series-total strong').inner_text().replace('\xa0','').replace(' ',''), '1640kg')
+        self.save()
+        self.assertEqual(len(self.state()['entries'][0]['series']), 2)
+        self.page.locator('#notesForm textarea').fill('Łopatki stabilnie')
+        self.page.locator('#notesForm button').click()
+        self.page.locator('[data-panel=stats]').click()
+        expect(self.page.locator('.stat-tile.selected strong')).to_contain_text('640')
+        for metric in ['weight','reps','pace','tonnage']:
+            self.page.locator(f'[data-metric={metric}]').click()
+            expect(self.page.locator('.stat-chart')).to_be_visible()
+            expect(self.page.locator('.stat-table')).to_be_visible()
+        self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-tab=calendar]').click()
+        self.page.locator('[data-act=openSession]').click()
+        if self.page.locator('[data-expand="PUSH-A-1"]').get_attribute('aria-expanded') == 'false':
+            self.page.locator('[data-expand="PUSH-A-1"]').click()
+        self.page.locator('[data-panel=historicalResult]').click()
+        self.page.locator('[data-series-toggle]').click()
+        self.page.locator('[data-series-index="1"][data-field=kg]').fill('85')
+        self.save()
+        self.page.locator('#historicalDate [name=date]').fill('2026-10-20')
+        self.page.locator('#historicalDate button').click()
+        saved=self.state()
+        self.assertEqual(len(saved['entries']),1)
+        self.assertEqual(saved['nextType'],'PULL A')
+        self.assertEqual(saved['sessions'][0]['date'],'2026-10-20')
+        self.assertEqual(saved['entries'][0]['series'][1]['kg'],'85')
+        self.page.reload()
+        self.assertEqual(self.state(),saved)
+        self.assertEqual(saved['exercises']['PUSH A'][0]['notes'],'Łopatki stabilnie')
+        self.page.locator('[data-tab=calendar]').click()
+        self.assertIn('mark', self.page.locator('[data-day="2026-10-20"]').get_attribute('class').split())
+
+    def test_calendar_navigation_in_warsaw(self):
+        self.page.locator('[data-tab=calendar]').click()
+        self.page.locator('[data-act=nextMonth]').click()
+        expect(self.page.locator('.row.between.card strong')).to_have_text('listopad 2026')
+        self.page.locator('[data-act=prevMonth]').click()
+        expect(self.page.locator('.row.between.card strong')).to_have_text('październik 2026')
+        self.page.locator('[data-act=prevMonth]').click()
+        expect(self.page.locator('.row.between.card strong')).to_have_text('wrzesień 2026')
+
+    def test_export_import_cancel_backup_restore_and_invalid_file(self):
+        self.start(); self.result(); self.save()
+        original=self.raw()
+        self.settings()
+        with self.page.expect_download() as download:
+            self.page.locator('[data-act=export]').click()
+        exported=Path(download.value.path()).read_text()
+        self.assertEqual(json.loads(exported),json.loads(original))
+        replacement=json.loads(exported)
+        replacement['exercises']['PUSH A'][0]['notes']='Importowane'
+        self.confirm=False
+        self.import_data(json.dumps(replacement))
+        self.assertEqual(self.raw(),original)
+        self.assertEqual(self.page.evaluate('localStorage.length'),1)
+        self.confirm=True
+        self.import_data(json.dumps(replacement))
+        self.settings()
+        expect(self.page.locator('#backupKey option')).to_have_count(1)
+        with self.page.expect_download() as backup:
+            self.page.locator('[data-backup-export]').click()
+        backup_raw=Path(backup.value.path()).read_text()
+        self.assertEqual(backup_raw,original)
+        self.import_data(backup_raw)
+        self.assertEqual(self.state(),json.loads(original))
+        self.settings()
+        for content in ['{broken','null',json.dumps({'version':2}),json.dumps({**replacement,'activeId':'missing'})]:
+            before=self.raw()
+            self.import_data(content)
+            self.assertEqual(self.raw(),before)
+        self.assertEqual(len(self.alerts),4)
+
+    def test_corrupt_and_unsupported_boot_recovery_download_and_import(self):
+        self.start()
+        good=self.raw()
+        for bad in ['{bad',json.dumps({'version':2}),'null','']:
+            self.page.evaluate('(p)=>localStorage.setItem(p.key,p.raw)',{'key':KEY,'raw':bad})
+            self.page.reload()
+            expect(self.page.locator('[role=alert]')).to_be_visible()
+            expect(self.page.locator('[data-act=start]')).to_have_count(0)
+            self.assertEqual(self.raw(),bad)
+            with self.page.expect_download() as download:
+                self.page.locator('[data-recovery-export]').click()
+            self.assertEqual(Path(download.value.path()).read_text(),bad)
+            self.import_data(good)
+            self.assertEqual(self.state(),json.loads(good))
+            backups=self.page.evaluate('(key)=>Object.keys(localStorage).filter(k=>k.startsWith(key+"_backup_")).map(k=>localStorage.getItem(k))',KEY)
+            self.assertIn(bad,backups)
+
+    def test_quota_failure_rolls_back_ui_and_memory(self):
+        self.page.evaluate("() => {Storage.prototype.setItem=function(){throw new DOMException('Pełna pamięć','QuotaExceededError')}}")
+        self.page.locator('[data-act=start]').click()
+        expect(self.page.locator('[data-act=start]')).to_be_visible()
+        expect(self.page.locator('[data-act=finish]')).to_have_count(0)
+        self.assertIsNone(self.raw())
+        self.assertIn('Operacja przerwana',self.alerts[0])
+        self.page.reload()
+        self.start()
+        self.assertEqual(len(self.state()['sessions']),1)
+
+    def test_import_backup_failure_keeps_active_session_and_drafts(self):
+        self.start(); self.result()
+        self.page.locator('[data-main=kg]').fill('120')
+        original=self.raw()
+        self.settings()
+        self.page.evaluate("""() => {Storage.prototype.setItem=function(){throw new DOMException('Pełna pamięć','QuotaExceededError')}}""")
+        self.import_data(original)
+        self.assertEqual(self.raw(),original)
+        self.assertIn('Operacja przerwana',self.alerts[0])
+        self.page.locator('[data-tab=training]').click()
+        self.page.locator('[data-panel=result]').click()
+        expect(self.page.locator('[data-main=kg]')).to_have_value('120')
+
+    def test_storage_access_denied_is_not_a_new_database(self):
+        self.context.add_init_script("Object.defineProperty(window,'localStorage',{get(){throw new DOMException('Odmowa','SecurityError')}})")
+        self.page.reload()
+        expect(self.page.locator('[role=alert]')).to_be_visible()
+        expect(self.page.locator('[data-act=start]')).to_have_count(0)
+
+    def test_copied_custom_series_require_confirmation(self):
+        self.start();self.result()
+        self.page.locator('[data-series-toggle]').click()
+        self.page.locator('[data-series-index="1"][data-field=kg]').fill('80')
+        self.save()
+        self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="PUSH A"]').click()
+        self.start()
+        self.page.locator('[data-expand="PUSH-A-1"]').click()
+        self.page.locator('[data-panel=result]').click()
+        self.confirm=False
+        self.page.locator('[data-main=kg]').fill('110')
+        expect(self.page.locator('[data-main=kg]')).to_have_value('100')
+        self.page.locator('[data-series-toggle]').click()
+        expect(self.page.locator('[data-series-index="1"][data-field=kg]')).to_have_value('80')
+
+    def test_other_tab_change_blocks_stale_edit(self):
+        self.start()
+        other=self.context.new_page()
+        other.goto(self.url)
+        other.evaluate('(key)=>localStorage.setItem(key,"external-change")',KEY)
+        expect(self.page.locator('[role=alert]')).to_be_visible()
+        self.assertEqual(self.raw(),'external-change')
+
+    def test_mobile_visuals_match_approved_commit(self):
+        # Compare actual rendered pixels against the approved source in the same
+        # browser, fonts, viewport and clock. No regenerated golden screenshots.
+        original_app=subprocess.check_output(['git','show',f'{BASE}:app.js'],cwd=ROOT).decode()
+        original_index=subprocess.check_output(['git','show',f'{BASE}:index.html'],cwd=ROOT).decode()
+        for width,height in [(360,800),(390,844),(412,915)]:
+            baseline=self.new_context(service_workers='block', viewport={'width':width,'height':height})
+            baseline.route(self.url,lambda route: route.fulfill(body=original_index,content_type='text/html'))
+            baseline.route(self.url+'app.js',lambda route: route.fulfill(body=original_app,content_type='text/javascript'))
+            old=baseline.new_page()
+            old.clock.install(time=datetime.datetime(2026,10,21,10,0,tzinfo=datetime.timezone.utc))
+            old.goto(self.url)
+            self.page.set_viewport_size({'width':width,'height':height})
+            self.page.reload()
+            for screen in ['training','expanded','stats','calendar']:
+                for page in [old,self.page]:
+                    if screen=='expanded':page.locator('[data-expand="PUSH-A-1"]').click()
+                    if screen=='stats':page.locator('[data-panel=stats]').click()
+                    if screen=='calendar':page.locator('[data-tab=calendar]').click()
+                    page.evaluate('document.fonts.ready')
+                self.assertEqual(old.screenshot(full_page=True,animations='disabled'), self.page.screenshot(full_page=True,animations='disabled'),f'{width}x{height} {screen}')
+            baseline.close()
+
+    def test_offline_reload_and_new_cache_does_not_serve_old_app(self):
+        context=self.new_context(service_workers='allow')
+        page=context.new_page()
+        page.goto(self.url)
+        page.evaluate("caches.open('pushpull-v2').then(c=>c.put('./app.js',new Response('throw Error(\"OLD APP\")'))) ")
+        page.evaluate('navigator.serviceWorker.ready')
+        page.wait_for_function('navigator.serviceWorker.controller !== null')
+        page.locator('[data-act=start]').click()
+        before=page.evaluate('(key)=>localStorage.getItem(key)',KEY)
+        context.set_offline(True)
+        page.reload()
+        expect(page.locator('[data-act=finish]')).to_be_visible()
+        self.assertEqual(page.evaluate('(key)=>localStorage.getItem(key)',KEY),before)
+
+if __name__=='__main__':
+    unittest.main()
