@@ -1,25 +1,31 @@
-# PushPull
+# Aplikacja Treningowa
 
-Mobilny dziennik treningowy PWA na Androida. Zatwierdzony wzorzec: **PushPull v0.3 Matrix — szlif 3**.
+Mobilny dziennik treningowy offline, rozwijany w istniejącym repozytorium `MixEEr0700/PushPull`. Zachowany interfejs Matrix v0.3 — szlif 3, lokalna baza IndexedDB i pełne kopie JSON. Nazwa aplikacji nie zmienia technicznych identyfikatorów ani historii.
 
-## Stan przygotowania — 21.10.2026
-Repozytorium przygotowane organizacyjnie. **Brakuje rzeczywistego kodu zatwierdzonego szkicu. Aplikacja nie jest wdrożona ani przetestowana.** Nie utworzono zastępczej aplikacji ani nowej makiety.
+**Wersja testowa:** parametry V2 wymagają potwierdzenia z dokumentem trenera. Instalacja na fizycznym Androidzie pozostaje niewykonana. Obecnie dane rozdziela origin/profil przeglądarki; nie ma kont użytkowników ani synchronizacji Drive.
 
-- [Specyfikacja nadrzędna](PushPull_PLAN_PROJEKTU_v1.md)
-- [Instrukcje dla Codexa i kryteria testów](AGENTS.md)
+## Uruchomienie i testy
 
-## Następny krok
-Dostarczyć kompletne źródła „v0.3 Matrix — szlif 3” wraz z zasobami i dostępnymi plikami zależności. Zweryfikować kompletność, zachować oryginalną wersję w historii Git, uruchomić ją i ustalić bazę testów. Dopiero wtedy dobrać komendy instalacji/build, CI i sposób hostowania. Nie ma obecnie potwierdzonych komend uruchomienia.
+Python 3.12, Node 24; brak zależności npm. Zależności testów przeglądarkowych:
 
-Następnie: IndexedDB offline-first → walidowany eksport/import JSON i odtworzenie backupu → weryfikacja V2 z dokumentem trenera → regresja i trwałość danych → publikacja PWA HTTPS i test Androida → później Drive.
+```sh
+python3 -m pip install -r tests/requirements.txt
+python3 -m playwright install --with-deps chromium
+node --test tests/storage.test.js
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+python3 scripts/build_release.py --check
+python3 scripts/build_release.py --output dist/releases/stage-4
+python3 scripts/serve_test.py --directory dist/releases/stage-4 --port 8000
+```
 
-## Ochrona danych i interfejsu
-Zachowujemy zaakceptowany interfejs, stabilne ID ćwiczeń, historię treningów i techniki, wyniki serii oraz wersje planów. Żadnych migracji bez backupu i walidacji. Dane makietowe nie są zweryfikowanym planem treningowym.
+Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budować do nowego katalogu. Nie publikować checkoutu, backupów ani sekretów. Pełne JSON zachowywać także poza przeglądarką. Nazwy plików kopii `pushpull-*` i format kopii pozostają kompatybilne.
 
-## Dostęp i wdrożenie
-Repozytorium utworzono jako prywatne na koncie MixEEr0700, gałąź main. Przeglądarka pozwala właścicielowi odczytywać i zapisywać pliki. Próba odczytu przez konektor GitHub zwróciła 404; jego dostęp do nowego repozytorium oraz dostęp środowiska Codex wymagają odrębnego potwierdzenia. Nie zmieniano uprawnień integracji ani nie dodawano współpracowników.
+## Dokumentacja
 
-Hosting, manifest, service worker, automatyczne wdrożenie oraz CI nie zostały skonfigurowane przed otrzymaniem kodu. Nie publikować danych treningowych, eksportów ani sekretów w repozytorium lub artefaktach hostingu.
+- [Plan historyczny](PushPull_PLAN_PROJEKTU_v1.md) i [aneks etapu 4](docs/PROJECT_PLAN_ANNEX_STAGE_4.md).
+- [Architektura docelowa, model, migracja, Drive i hosting](docs/TARGET_ARCHITECTURE_STAGE_4.md).
+- [Ochrona danych](docs/DATA_SAFETY_STAGE_1.md), [IndexedDB i odzyskiwanie](docs/INDEXEDDB_MIGRATION_STAGE_2.md).
+- [Testowe HTTPS](docs/PWA_TEST_DEPLOYMENT_STAGE_3.md), [instalacja i testy Androida](docs/ANDROID_TEST_CHECKLIST.md).
+- [Raport etapu 4](docs/STAGE_4_TEST_REPORT.md), [przekazanie](docs/CODEX_HANDOFF.md), [zasady pracy](AGENTS.md).
 
-## Weryfikacja
-Potwierdzono utworzenie repozytorium i zapis dokumentacji przez interfejs GitHub. Testów aplikacji nie wykonano: brak źródeł. Kryteria gotowości i plan testów znajdują się w specyfikacji i AGENTS.md.
+Zachowany [poprzedni README](docs/README_BEFORE_STAGE_4.md) dokumentuje stan sprzed importu źródeł; nie opisuje aktualnych możliwości aplikacji.

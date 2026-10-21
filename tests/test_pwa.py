@@ -25,6 +25,7 @@ FIXTURE=json.loads((ROOT/'tests/fixtures/v1.json').read_text())
 RAW=' '+json.dumps(FIXTURE,ensure_ascii=False)+'\n'
 KEY='pushpull_skeleton_v1'
 STAGE2='120b8547b31926705e75079c69109c06cac9f9c8'
+STAGE3='adadf8f8c45af3693de559f09971759a53ea1bb0'
 
 class ArtifactBuild(unittest.TestCase):
     def test_allowlist_determinism_and_worker_freshness(self):
@@ -40,6 +41,17 @@ class ArtifactBuild(unittest.TestCase):
             with self.assertRaises(ValueError):build(tmp)
             with self.assertRaises(ValueError):verify_release(tmp)
             self.assertEqual((Path(tmp)/'private-backup.json').read_text(),'do not overwrite')
+
+    def test_rename_preserves_pwa_identity_icons_and_data_contract(self):
+        old=json.loads(subprocess.check_output(['git','show',STAGE3+':manifest.webmanifest'],cwd=ROOT))
+        current=json.loads((ROOT/'manifest.webmanifest').read_text())
+        self.assertEqual(current['name'],'Aplikacja Treningowa')
+        self.assertEqual(current['short_name'],'Aplikacja Treningowa')
+        self.assertIn('Aplikacja Treningowa',current['description'])
+        for field in set(old)-{'name','short_name','description'}:
+            self.assertEqual(current[field],old[field],field)
+        for name in ['style.css','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','storage.js','indexeddb.js','app.js','scripts/service-worker.template.js','PushPull_PLAN_PROJEKTU_v1.md']:
+            self.assertEqual((ROOT/name).read_bytes(),subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT),name)
 
     def test_artifact_server_refuses_modified_assets_and_source_checkout(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -241,6 +253,45 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.page.reload();self.ready()
         self.assertEqual(self.snapshot(),before)
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+
+    def test_stage3_rename_update_keeps_identity_complete_backup_and_offline_name(self):
+        old=self.path/'stage3'
+        for name in [*ASSETS,'sw.js']:
+            dest=old/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT))
+        self.controller['directory']=old
+        self.seed();self.page.goto(self.url);self.ready()
+        expect(self.page).to_have_title('PushPull · Dziennik')
+        before=self.snapshot()
+        old_manifest=json.loads(self.context.new_cdp_session(self.page).send('Page.getAppManifest')['data'])
+        self.controller['directory']=self.path/'a'
+        self.wait_update()
+        expect(self.page).to_have_title('PushPull · Dziennik') # No forced reload.
+        self.assertEqual(self.snapshot(),before)
+        self.reopen()
+        expect(self.page).to_have_title('Aplikacja Treningowa')
+        expect(self.page.locator('meta[name=description]')).to_have_attribute('content','Aplikacja Treningowa — kompaktowy dziennik treningowy')
+        manifest=json.loads(self.context.new_cdp_session(self.page).send('Page.getAppManifest')['data'])
+        self.assertEqual(manifest['name'],'Aplikacja Treningowa')
+        self.assertEqual(manifest['short_name'],'Aplikacja Treningowa')
+        for field in ['id','start_url','scope','icons']:
+            self.assertEqual(manifest[field],old_manifest[field])
+        self.assertEqual(self.snapshot(),before)
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key+"_backup_test")',KEY),'old backup preserved')
+        self.context.set_offline(True);self.reopen()
+        expect(self.page).to_have_title('Aplikacja Treningowa')
+        self.assertEqual(self.snapshot(),before)
+        self.page.locator('[data-tab=settings]').click()
+        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        raw=Path(download.value.path()).read_text()
+        self.assertEqual(json.loads(raw),before)
+        self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
+        expect(self.page.locator('h1')).to_have_text('Trening')
+        restored=self.snapshot()
+        self.assertEqual(restored['data'],before['data'])
+        self.assertEqual(restored['catalog'],before['catalog'])
+        self.assertGreater(len(restored['archives']),len(before['archives']))
 
     def test_pwa_survives_browser_process_restart_offline(self):
         profile=self.path/'persistent-profile'
