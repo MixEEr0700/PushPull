@@ -1,0 +1,1 @@
+{"name": "PushPull · Dziennik treningowy", "short_name": "PushPull", "start_url": "./index.html", "scope": "./", "display": "standalone", "background_color": "#070d09", "theme_color": "#070d09", "lang": "pl", "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}]}
