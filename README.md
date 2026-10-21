@@ -22,7 +22,7 @@ Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budowa�
 
 ## Dokumentacja
 
-- [Audyt V2 — etap 5A](docs/V2_PLAN_AUDIT_STAGE_5A.md): częściowy, wymaga pełnego eksportu dokumentu trenera; [raport kontroli](docs/STAGE_5A_TEST_REPORT.md).
+- [Audyt V2 — etap 5A](docs/V2_PLAN_AUDIT_STAGE_5A.md): uzupełniony z DOCX, 34/34 pozycje; rozbieżności i decyzje przed wdrożeniem; [raport kontroli](docs/STAGE_5A_TEST_REPORT.md).
 
 - [Plan historyczny](PushPull_PLAN_PROJEKTU_v1.md) i [aneks etapu 4](docs/PROJECT_PLAN_ANNEX_STAGE_4.md).
 - [Architektura docelowa, model, migracja, Drive i hosting](docs/TARGET_ARCHITECTURE_STAGE_4.md).
