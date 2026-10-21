@@ -66,10 +66,12 @@ const PushPullStorage = (() => {
     let raw, current, error = null;
     try {
       raw = storage.getItem(KEY);
+      if(storage.getItem('pushpull_indexeddb_owner')!==null)throw Error('Dane przeniesiono do IndexedDB. Otwórz aktualną wersję aplikacji.');
       current = raw === null ? fresh() : validate(JSON.parse(raw));
     } catch (failure) { error = failure; }
     // A failed read is distinct from an absent key. Never initialize over it.
     function commit(next, {importing = false} = {}) {
+      if (storage.getItem('pushpull_indexeddb_owner')!==null)throw Error('Zapis starej wersji jest zablokowany po migracji.');
       if (raw === undefined || error && !importing) throw Error('Zapis zablokowany. Najpierw zabezpiecz i odzyskaj dane.');
       validate(next);
       const serialized = JSON.stringify(next);

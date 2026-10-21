@@ -18,10 +18,32 @@ KEY = 'pushpull_skeleton_v1'
 BASE = '92390b1449bd61c4c6fdc41ccf8a272e5ff914d3'
 
 class QuietServer(http.server.SimpleHTTPRequestHandler):
+    upgrade_latest = False
+
+    def do_GET(self):
+        prefix = '/upgrade/' if self.path.startswith('/upgrade/') else '/legacy/' if self.path.startswith('/legacy/') else None
+        if prefix:
+            asset=self.path[len(prefix):].split('?')[0] or 'index.html'
+            allowed={'index.html','app.js','storage.js','indexeddb.js','style.css','sw.js','manifest.webmanifest','icon.svg'}
+            if asset not in allowed:
+                self.send_error(404);return
+            try:
+                if prefix=='/legacy/' or not type(self).upgrade_latest:
+                    body=subprocess.check_output(['git','show','99902a22c820d228b2e6cd3cf0fb49371b1bf3ce:'+asset],cwd=ROOT,stderr=subprocess.DEVNULL)
+                else: body=(ROOT/asset).read_bytes()
+            except (subprocess.CalledProcessError,FileNotFoundError):
+                self.send_error(404);return
+            self.send_response(200)
+            self.send_header('Content-Type',self.guess_type(asset))
+            self.send_header('Cache-Control','no-store')
+            self.send_header('Content-Length',str(len(body)))
+            self.end_headers();self.wfile.write(body);return
+        super().do_GET()
+
     def log_message(self, *args):
         pass
 
-class BrowserRegression(unittest.TestCase):
+class BrowserHarness(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(QuietServer, directory=str(ROOT)))
@@ -69,10 +91,19 @@ class BrowserRegression(unittest.TestCase):
             dialog.dismiss()
 
     def state(self):
-        return self.page.evaluate(f'JSON.parse(localStorage.getItem({json.dumps(KEY)}))')
+        return self.page.evaluate("""async()=>{const db=await PushPullDB.open(()=>{throw Error('Missing database')});try{return db.value}finally{db.close()}}""")
 
     def raw(self):
-        return self.page.evaluate(f'localStorage.getItem({json.dumps(KEY)})')
+        value=self.state()
+        return json.dumps(value, ensure_ascii=False, sort_keys=True) if value is not None else None
+
+    def local_raw(self):
+        return self.page.evaluate('(key)=>localStorage.getItem(key)',KEY)
+
+    def reset_legacy(self, raw):
+        self.page.goto(self.url+'tests/')
+        self.page.evaluate("""async p=>{await new Promise((resolve,reject)=>{const r=indexedDB.deleteDatabase('pushpull');r.onsuccess=resolve;r.onerror=()=>reject(r.error)});localStorage.clear();if(p!==null)localStorage.setItem('pushpull_skeleton_v1',p)}""",raw)
+        self.page.goto(self.url)
 
     def start(self, date='2026-10-21'):
         self.page.locator('#trainingDate').fill(date)
@@ -96,6 +127,7 @@ class BrowserRegression(unittest.TestCase):
     def settings(self):
         self.page.locator('[data-tab=settings]').click()
 
+class BrowserRegression(BrowserHarness):
     def test_full_rotation_and_manual_choice(self):
         for current, next_type in [('PUSH A','PULL A'),('PULL A','PUSH B'),('PUSH B','PULL B'),('PULL B','PUSH A')]:
             self.start()
@@ -162,12 +194,12 @@ class BrowserRegression(unittest.TestCase):
         with self.page.expect_download() as download:
             self.page.locator('[data-act=export]').click()
         exported=Path(download.value.path()).read_text()
-        self.assertEqual(json.loads(exported),json.loads(original))
+        self.assertEqual(json.loads(exported)['data'],json.loads(original))
         replacement=json.loads(exported)
-        replacement['exercises']['PUSH A'][0]['notes']='Importowane'
+        replacement['data']['exercises']['PUSH A'][0]['notes']='Importowane'
         self.confirm=False
         self.import_data(json.dumps(replacement))
-        self.assertEqual(self.raw(),original)
+        self.assertEqual(self.state(),json.loads(original))
         self.assertEqual(self.page.evaluate('localStorage.length'),1)
         self.confirm=True
         self.import_data(json.dumps(replacement))
@@ -176,11 +208,11 @@ class BrowserRegression(unittest.TestCase):
         with self.page.expect_download() as backup:
             self.page.locator('[data-backup-export]').click()
         backup_raw=Path(backup.value.path()).read_text()
-        self.assertEqual(backup_raw,original)
+        self.assertEqual(json.loads(backup_raw)['data'],json.loads(original))
         self.import_data(backup_raw)
         self.assertEqual(self.state(),json.loads(original))
         self.settings()
-        for content in ['{broken','null',json.dumps({'version':2}),json.dumps({**replacement,'activeId':'missing'})]:
+        for content in ['{broken','null',json.dumps({'version':2}),json.dumps({**replacement,'data':{**replacement['data'],'activeId':'missing'}})]:
             before=self.raw()
             self.import_data(content)
             self.assertEqual(self.raw(),before)
@@ -190,25 +222,24 @@ class BrowserRegression(unittest.TestCase):
         self.start()
         good=self.raw()
         for bad in ['{bad',json.dumps({'version':2}),'null','']:
-            self.page.evaluate('(p)=>localStorage.setItem(p.key,p.raw)',{'key':KEY,'raw':bad})
-            self.page.reload()
+            self.reset_legacy(bad)
             expect(self.page.locator('[role=alert]')).to_be_visible()
             expect(self.page.locator('[data-act=start]')).to_have_count(0)
-            self.assertEqual(self.raw(),bad)
+            self.assertEqual(self.local_raw(),bad)
             with self.page.expect_download() as download:
                 self.page.locator('[data-recovery-export]').click()
             self.assertEqual(Path(download.value.path()).read_text(),bad)
             self.import_data(good)
             self.assertEqual(self.state(),json.loads(good))
-            backups=self.page.evaluate('(key)=>Object.keys(localStorage).filter(k=>k.startsWith(key+"_backup_")).map(k=>localStorage.getItem(k))',KEY)
+            backups=self.page.evaluate("async()=>{const db=await PushPullDB.open(()=>{});try{return await Promise.all(db.backups().map(id=>db.readBackup(id)))}finally{db.close()}}")
             self.assertIn(bad,backups)
 
     def test_quota_failure_rolls_back_ui_and_memory(self):
-        self.page.evaluate("() => {Storage.prototype.setItem=function(){throw new DOMException('Pełna pamięć','QuotaExceededError')}}")
+        self.page.evaluate("() => {const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(v){if(this.name==='sessions')throw new DOMException('Pełna pamięć','QuotaExceededError');return add.call(this,v)}}")
         self.page.locator('[data-act=start]').click()
         expect(self.page.locator('[data-act=start]')).to_be_visible()
         expect(self.page.locator('[data-act=finish]')).to_have_count(0)
-        self.assertIsNone(self.raw())
+        self.assertEqual(self.state()['sessions'],[])
         self.assertIn('Operacja przerwana',self.alerts[0])
         self.page.reload()
         self.start()
@@ -219,9 +250,9 @@ class BrowserRegression(unittest.TestCase):
         self.page.locator('[data-main=kg]').fill('120')
         original=self.raw()
         self.settings()
-        self.page.evaluate("""() => {Storage.prototype.setItem=function(){throw new DOMException('Pełna pamięć','QuotaExceededError')}}""")
+        self.page.evaluate("() => {const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(v){if(this.name==='backups')throw new DOMException('Pełna pamięć','QuotaExceededError');return add.call(this,v)}}")
         self.import_data(original)
-        self.assertEqual(self.raw(),original)
+        self.assertEqual(self.state(),json.loads(original))
         self.assertIn('Operacja przerwana',self.alerts[0])
         self.page.locator('[data-tab=training]').click()
         self.page.locator('[data-panel=result]').click()
@@ -255,7 +286,8 @@ class BrowserRegression(unittest.TestCase):
         other.goto(self.url)
         other.evaluate('(key)=>localStorage.setItem(key,"external-change")',KEY)
         expect(self.page.locator('[role=alert]')).to_be_visible()
-        self.assertEqual(self.raw(),'external-change')
+        self.assertEqual(self.local_raw(),'external-change')
+        self.assertEqual(len(self.state()['sessions']),1)
 
     def test_mobile_visuals_match_approved_commit(self):
         # Compare actual rendered pixels against the approved source in the same
@@ -269,8 +301,10 @@ class BrowserRegression(unittest.TestCase):
             old=baseline.new_page()
             old.clock.install(time=datetime.datetime(2026,10,21,10,0,tzinfo=datetime.timezone.utc))
             old.goto(self.url)
+            expect(old.locator('h1')).to_have_text('Trening')
             self.page.set_viewport_size({'width':width,'height':height})
             self.page.reload()
+            expect(self.page.locator('h1')).to_have_text('Trening')
             for screen in ['training','expanded','stats','calendar']:
                 for page in [old,self.page]:
                     if screen=='expanded':page.locator('[data-expand="PUSH-A-1"]').click()
@@ -288,11 +322,12 @@ class BrowserRegression(unittest.TestCase):
         page.evaluate('navigator.serviceWorker.ready')
         page.wait_for_function('navigator.serviceWorker.controller !== null')
         page.locator('[data-act=start]').click()
-        before=page.evaluate('(key)=>localStorage.getItem(key)',KEY)
+        expect(page.locator('[data-act=finish]')).to_be_visible()
+        before=page.evaluate("async()=>{const d=await PushPullDB.open(()=>{});const v=d.value;d.close();return v}")
         context.set_offline(True)
         page.reload()
         expect(page.locator('[data-act=finish]')).to_be_visible()
-        self.assertEqual(page.evaluate('(key)=>localStorage.getItem(key)',KEY),before)
+        self.assertEqual(page.evaluate("async()=>{const d=await PushPullDB.open(()=>{});const v=d.value;d.close();return v}"),before)
 
 if __name__=='__main__':
     unittest.main()

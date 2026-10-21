@@ -1,5 +1,7 @@
 # PushPull — import i przekazanie do Codexa
 
+> Poniżej zachowano historyczny audyt importu. Aktualny etap 2 wprowadza IndexedDB; model, migrację i odzyskiwanie opisuje [INDEXEDDB_MIGRATION_STAGE_2.md](INDEXEDDB_MIGRATION_STAGE_2.md), a wykonane kontrole [STAGE_2_TEST_REPORT.md](STAGE_2_TEST_REPORT.md). Ograniczenia pierwotnego importu nie są automatycznie aktualnym stanem kodu.
+
 Data: 21.10.2026. Import zatwierdzonych przez użytkownika źródeł v0.3 Matrix — szlif 3, bez modyfikacji kodu/interfejsu.
 
 ## Źródła i struktura

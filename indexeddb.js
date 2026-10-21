@@ -1,0 +1,287 @@
+/* IndexedDB source records, verified transactions and lossless v1 projection. */
+'use strict';
+const PushPullDB = (() => {
+  const NAME = 'pushpull', VERSION = 1, OWNER = 'pushpull_indexeddb_owner';
+  const TYPES = ['PUSH A', 'PULL A', 'PUSH B', 'PULL B'];
+  const TABLES = ['plans', 'planVersions', 'exercises', 'sessions', 'entries', 'sets', 'notes', 'changes'];
+  const ALL = ['meta', ...TABLES, 'backups'];
+  const clone = value => structuredClone(value);
+  const canonical = value => JSON.stringify(sort(value));
+  function sort(value) {
+    if (Array.isArray(value)) return value.map(sort);
+    if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map(k => [k, sort(value[k])]));
+    return value;
+  }
+  const request = req => new Promise((resolve, reject) => {
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  function transaction(db, mode, work) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(ALL, mode, mode === 'readwrite' ? {durability:'strict'} : undefined);
+      let result, failure;
+      tx.oncomplete = () => resolve(result);
+      tx.onabort = () => reject(failure || tx.error || Error('Transakcja przerwana'));
+      tx.onerror = () => {}; // onabort is the final outcome, never request success.
+      Promise.resolve().then(() => work(tx)).then(value => { result = value; }, error => {
+        failure = error;
+        try { tx.abort(); } catch { reject(error); }
+      });
+    });
+  }
+  async function connect() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(NAME, VERSION);
+      let abandoned = false;
+      req.onupgradeneeded = () => {
+        for (const table of ALL) req.result.createObjectStore(table, {keyPath: table === 'meta' ? 'key' : 'id'});
+      };
+      req.onblocked = () => { abandoned = true; reject(Error('Zamknij inne karty PushPull i ponów uruchomienie.')); };
+      req.onerror = () => reject(req.error);
+      req.onsuccess = () => {
+        if (abandoned) { req.result.close(); return; }
+        req.result.onversionchange = () => req.result.close();
+        resolve(req.result);
+      };
+    });
+  }
+  const digest = async value => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical(value))))).map(x=>x.toString(16).padStart(2,'0')).join('');
+  function catalogFor(data, previous = null, legacy = false) {
+    const catalog = previous ? clone(previous) : {plans:[], planVersions:[], sessionVersions:{}};
+    for (const type of TYPES) {
+      const parameters = data.exercises[type].map(ex => { const value = clone(ex); delete value.notes; return value; });
+      let plan = catalog.plans.find(p => p.id === type);
+      if (!plan) { plan = {id:type, label:'V2 — niezweryfikowany', currentVersion:null}; catalog.plans.push(plan); }
+      const current = catalog.planVersions.find(v => v.id === plan.currentVersion);
+      if (!current || canonical(current.exercises) !== canonical(parameters)) {
+        const versions = catalog.planVersions.filter(v => v.planId === type);
+        let number=versions.length+1;while(catalog.planVersions.some(v=>v.id===type+':'+number))number++;
+        const version = {id:type+':'+number, planId:type, exercises:parameters, provenance:legacy?'legacy-current-only':'recorded'};
+        catalog.planVersions.push(version); plan.currentVersion = version.id;
+      }
+    }
+    for (const session of data.sessions) if (!catalog.sessionVersions[session.id]) {
+      catalog.sessionVersions[session.id] = {versionId:catalog.plans.find(p => p.id === session.type).currentVersion, provenance:legacy?'legacy-current-only':'session-start'};
+    }
+    // Removing sessions by a deliberate import uses that import's catalog instead.
+    return catalog;
+  }
+  function validateCatalog(data, catalog) {
+    if (!catalog || Object.keys(catalog).some(k=>!['plans','planVersions','sessionVersions'].includes(k)) || !Array.isArray(catalog.plans) || !Array.isArray(catalog.planVersions) ||
+        !catalog.sessionVersions || typeof catalog.sessionVersions !== 'object' || Array.isArray(catalog.sessionVersions)) throw Error('Nieprawidłowe wersje planów');
+    const ids = new Set(), plans = new Map();
+    for (const p of catalog.plans) {
+      if (!p || !TYPES.includes(p.id) || plans.has(p.id) || typeof p.label !== 'string' || typeof p.currentVersion !== 'string') throw Error('Nieprawidłowy plan');
+      plans.set(p.id,p);
+    }
+    if (plans.size !== TYPES.length) throw Error('Brak planu');
+    for (const v of catalog.planVersions) {
+      if (!v || typeof v.id !== 'string' || !v.id || ids.has(v.id) || !plans.has(v.planId) || !['recorded','legacy-current-only'].includes(v.provenance)) throw Error('Nieprawidłowa wersja planu');
+      const probe = clone(data);
+      probe.exercises[v.planId] = (v.exercises || []).map(ex=>({...ex,notes:''}));
+      // Validate archived parameters independently of current sessions/entries.
+      probe.sessions=[];probe.entries=[];probe.changes={};probe.activeId=null;
+      PushPullStorage.validate(probe);
+      ids.add(v.id);
+    }
+    for (const p of catalog.plans) {
+      const current = catalog.planVersions.find(v => v.id === p.currentVersion && v.planId === p.id);
+      const parameters = data.exercises[p.id].map(ex=>{const x=clone(ex);delete x.notes;return x;});
+      if (!current || canonical(current.exercises) !== canonical(parameters)) throw Error('Niezgodne parametry bieżącego planu');
+    }
+    const sessions = new Map(data.sessions.map(s=>[s.id,s]));
+    if (Object.keys(catalog.sessionVersions).length !== sessions.size) throw Error('Niezgodna liczba wersji sesji');
+    for (const [id, link] of Object.entries(catalog.sessionVersions)) {
+      const session = sessions.get(id);
+      if (!session || !link || !['legacy-current-only','session-start'].includes(link.provenance) ||
+          !catalog.planVersions.some(v=>v.id===link.versionId && v.planId===session.type)) throw Error('Niezgodna wersja sesji');
+    }
+    return catalog;
+  }
+  function validateArchives(archives) {
+    if(!Array.isArray(archives))throw Error('Nieprawidłowe archiwum kopii');
+    const ids=new Set();
+    for(const item of archives){
+      if(!item || typeof item.id!=='string' || !item.id || ids.has(item.id) ||
+         typeof item.kind!=='string' || typeof item.createdAt!=='string' || !Number.isFinite(Date.parse(item.createdAt)) ||
+         !(typeof item.raw==='string' || item.raw===null))throw Error('Nieprawidłowa kopia w archiwum');
+      ids.add(item.id);
+    }
+    return archives;
+  }
+  function parseBackup(value) {
+    // Validate prototype keys for the entire envelope through the v1 boundary too.
+    if (value?.format === 'pushpull-backup') {
+      if (value.version !== 2 || Object.keys(value).some(k=>!['format','version','data','catalog','archives'].includes(k))) throw Error('Nieobsługiwana wersja kopii');
+      PushPullStorage.validate({...value.data, backupEnvelope:value});
+      return {data:PushPullStorage.validate(value.data), catalog:validateCatalog(value.data,value.catalog),archives:validateArchives(value.archives || [])};
+    }
+    const data = PushPullStorage.validate(value);
+    return {data, catalog:catalogFor(data,null,true),archives:[]};
+  }
+  function encode(data, catalog) {
+    const rows = Object.fromEntries(TABLES.map(t=>[t,[]]));
+    rows.plans = clone(catalog.plans); rows.planVersions = clone(catalog.planVersions);
+    for (const type of TYPES) data.exercises[type].forEach((ex,position)=>{
+      const value=clone(ex);delete value.notes;
+      rows.exercises.push({id:ex.id,planId:type,position,value});
+      rows.notes.push({id:ex.id,origin:'legacy-shared',value:ex.notes});
+    });
+    data.sessions.forEach((s,position)=>rows.sessions.push({id:s.id,position,value:clone(s),planVersion:clone(catalog.sessionVersions[s.id])}));
+    data.entries.forEach((e,position)=>{
+      const value=clone(e);delete value.series;
+      rows.entries.push({id:e.id,position,value,seriesKind:!Object.hasOwn(e,'series')?'absent':e.series===null?'null':'array'});
+      e.series?.forEach((value,position)=>rows.sets.push({id:JSON.stringify([e.id,position]),entryId:e.id,position,value:clone(value)}));
+    });
+    for (const [exerciseId, changes] of Object.entries(data.changes || {})) changes.forEach((value,position)=>rows.changes.push({id:JSON.stringify([exerciseId,position]),exerciseId,position,value:clone(value)}));
+    const rest=clone(data);for(const key of ['exercises','sessions','entries','changes'])delete rest[key];
+    return {rows,rest,changeKeys:Object.keys(data.changes || {}),hasChanges:Object.hasOwn(data,'changes')};
+  }
+  function decode(root, rows) {
+    const order = values => [...values].sort((a,b)=>a.position-b.position);
+    const data=clone(root.rest);
+    data.exercises=Object.fromEntries(TYPES.map(type=>[type,order(rows.exercises.filter(e=>e.planId===type)).map(e=>({...e.value,notes:rows.notes.find(n=>n.id===e.id)?.value}))]));
+    data.sessions=order(rows.sessions).map(s=>clone(s.value));
+    data.entries=order(rows.entries).map(e=>{
+      const value=clone(e.value);
+      if(e.seriesKind==='null')value.series=null;
+      else if(e.seriesKind==='array')value.series=order(rows.sets.filter(s=>s.entryId===e.id)).map(s=>clone(s.value));
+      return value;
+    });
+    if(root.hasChanges)data.changes=Object.fromEntries(root.changeKeys.map(id=>[id,order(rows.changes.filter(c=>c.exerciseId===id)).map(c=>clone(c.value))]));
+    const catalog={plans:root.catalogOrder.plans.map(id=>clone(rows.plans.find(v=>v.id===id))),planVersions:root.catalogOrder.planVersions.map(id=>clone(rows.planVersions.find(v=>v.id===id))),sessionVersions:Object.fromEntries(rows.sessions.map(s=>[s.id,clone(s.planVersion)]))};
+    return {data,catalog};
+  }
+  async function read(tx) {
+    const [root,...values]=await Promise.all([request(tx.objectStore('meta').get('state')),...TABLES.map(t=>request(tx.objectStore(t).getAll()))]);
+    return {root,rows:Object.fromEntries(TABLES.map((t,i)=>[t,values[i]]))};
+  }
+  function verifyRows(root, rows, expected) {
+    for(const table of TABLES) {
+      if(rows[table].length!==root.counts[table])throw Error('Niezgodna liczba rekordów: '+table);
+      if(expected) {
+        const ordered = list => [...list].sort((a,b)=>a.id.localeCompare(b.id));
+        if(canonical(ordered(rows[table]))!==canonical(ordered(expected[table])))throw Error('Niezgodne rekordy: '+table);
+      }
+    }
+    const value=decode(root,rows);
+    PushPullStorage.validate(value.data); validateCatalog(value.data,value.catalog);
+    const roundtrip=encode(value.data,value.catalog).rows;
+    const ordered=list=>[...list].sort((a,b)=>a.id.localeCompare(b.id));
+    for(const table of TABLES)if(canonical(ordered(rows[table]))!==canonical(ordered(roundtrip[table])))throw Error('Niespójne powiązania rekordów: '+table);
+    return value;
+  }
+  async function open(fresh) {
+    let db, root, current, catalog, raw, error=null, backupRows=[], stale=false, unverified=null;
+    let notify=()=>{};
+    const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('pushpull-indexeddb'):null;
+    const legacy=()=>localStorage.getItem(PushPullStorage.KEY);
+    const snapshot = (archives=false) => ({format:'pushpull-backup',version:2,data:clone(current),catalog:clone(catalog),archives:archives?clone(backupRows):[]});
+    function blocked(message) { stale=true;error=Error(message);notify(error); }
+    async function load() {
+      const result=await transaction(db,'readonly',async tx=>({...(await read(tx)),backups:await request(tx.objectStore('backups').getAll())}));
+      unverified=clone(result);backupRows=result.backups;
+      if(!result.root) {
+        if(TABLES.some(t=>result.rows[t].length) || result.backups.length)throw Error('Niekompletna baza. Odzyskaj kopię danych.');
+        unverified=null;return null;
+      }
+      root=result.root;unverified=clone(result);
+      if(!result.root.verified || !result.root.migration?.complete)throw Error('Migracja nie została potwierdzona.');
+      const value=verifyRows(result.root,result.rows);
+      if(await digest(value)!==result.root.digest)throw Error('Weryfikacja integralności bazy nie powiodła się.');
+      root=result.root;current=value.data;catalog=value.catalog;backupRows=result.backups;unverified=null;
+      return root;
+    }
+    async function save(data, nextCatalog, {importing=false, initializing=false, importedArchives=[]}={}) {
+      const expectedRevision=root?.revision || 0;
+      PushPullStorage.validate(data);validateCatalog(data,nextCatalog);
+      if(stale && !importing)throw Error('Dane zmieniły się. Odśwież aplikację przed zapisem.');
+      const source=legacy();
+      if(!importing && root && source!==root.legacyRaw)throw Error('Starsza wersja zmieniła dane. Zachowaj obie kopie i odzyskaj historię przez import.');
+      if(initializing && source!==raw)throw Error('Dane źródłowe zmieniły się podczas migracji. Uruchom ponownie.');
+      const encoded=encode(data,nextCatalog), checksum=await digest({data,catalog:nextCatalog});
+      const next={key:'state',rest:encoded.rest,changeKeys:encoded.changeKeys,hasChanges:encoded.hasChanges,
+        catalogOrder:{plans:nextCatalog.plans.map(p=>p.id),planVersions:nextCatalog.planVersions.map(v=>v.id)},
+        revision:expectedRevision+1,legacyRaw:source,digest:checksum,verified:false,
+        counts:Object.fromEntries(TABLES.map(t=>[t,encoded.rows[t].length])),
+        migration:root?.migration || {complete:false,source:source===null?'new':'localStorage-v1',completedAt:null}};
+      const backups=[];
+      if(!root) {
+        if(importing && unverified)backups.push({id:'recovery-records:'+crypto.randomUUID(),kind:'before-import',createdAt:new Date().toISOString(),raw:JSON.stringify({format:'pushpull-idb-recovery',version:1,...unverified})});
+        if(source!==null)backups.push({id:'migration-original:'+crypto.randomUUID(),kind:'migration',createdAt:new Date().toISOString(),raw:source});
+        for(let i=0;i<localStorage.length;i++) {
+          const id=localStorage.key(i);
+          if(id?.startsWith(PushPullStorage.KEY+'_backup_'))backups.push({id,kind:'legacy-backup',createdAt:new Date().toISOString(),raw:localStorage.getItem(id)});
+        }
+      }
+      if(importing && root)backups.push({id:'idb:'+crypto.randomUUID(),kind:'before-import',createdAt:new Date().toISOString(),raw:JSON.stringify(current?snapshot():{format:'pushpull-idb-recovery',version:1,...unverified})});
+      if(importing && root && source!==root.legacyRaw)backups.push({id:'legacy-conflict:'+crypto.randomUUID(),kind:'legacy-conflict',createdAt:new Date().toISOString(),raw:source});
+      backups.push(...clone(validateArchives(importedArchives)));
+      const additions=[];
+      for(const record of backups){
+        const existing=[...backupRows,...additions].find(b=>b.id===record.id);
+        if(existing && canonical(existing)===canonical(record))continue;
+        if(existing){record.sourceId=record.id;record.id='imported:'+crypto.randomUUID();}
+        additions.push(record);
+      }
+      backups.splice(0,backups.length,...additions);
+      await transaction(db,'readwrite',async tx=>{
+        const stored=await request(tx.objectStore('meta').get('state'));
+        if((stored?.revision || 0)!==expectedRevision)throw Error('Inna karta zapisała nowsze dane. Odśwież aplikację.');
+        if(legacy()!==source)throw Error('Starsza wersja zmieniła dane w trakcie operacji.');
+        for(const table of TABLES) {
+          tx.objectStore(table).clear();
+          for(const record of encoded.rows[table])tx.objectStore(table).add(record);
+        }
+        for(const record of backups)tx.objectStore('backups').add(record);
+        tx.objectStore('meta').put(next);
+        for(const backup of backups){const saved=await request(tx.objectStore('backups').get(backup.id));if(canonical(saved)!==canonical(backup))throw Error('Kopia nie przeszła weryfikacji.');}
+        const actual=await read(tx);
+        const decoded=verifyRows(actual.root,actual.rows,encoded.rows);
+        if(canonical(decoded)!==canonical({data,catalog:nextCatalog}))throw Error('Niepełna migracja — dane różnią się od źródła.');
+        if(legacy()!==source)throw Error('Dane źródłowe zmieniły się podczas weryfikacji.');
+        next.verified=true;next.migration={...next.migration,complete:true,completedAt:next.migration.completedAt || new Date().toISOString()};
+        tx.objectStore('meta').put(next);
+      });
+      // No visible success and no in-memory publication before transaction.oncomplete.
+      root=clone(next);current=clone(data);catalog=clone(nextCatalog);backupRows.push(...backups);raw=source;error=null;stale=false;
+      if(localStorage.getItem(OWNER)!==NAME+':'+VERSION)localStorage.setItem(OWNER,NAME+':'+VERSION);
+      channel?.postMessage({revision:root.revision});
+    }
+    try {
+      raw=legacy();
+      db=await connect();
+      if(await load()) {
+        if(raw!==root.legacyRaw)throw Error('Wykryto zapis starszej wersji. Pobierz obie historie i wybierz kopię do odzyskania.');
+        if(localStorage.getItem(OWNER)!==NAME+':'+VERSION)localStorage.setItem(OWNER,NAME+':'+VERSION);
+      } else {
+        if(localStorage.getItem(OWNER)!==null)throw Error('Brak wcześniej używanej bazy IndexedDB. Nie odtwarzamy automatycznie starej historii. Wczytaj pełną kopię.');
+        const value=raw===null?fresh():PushPullStorage.validate(JSON.parse(raw));
+        try { await save(value,catalogFor(value,null,true),{initializing:true}); }
+        catch(failure) {
+          if(!failure.message.startsWith('Inna karta') || !await load() || legacy()!==root.legacyRaw)throw failure;
+        }
+      }
+    } catch(failure) {error=failure;}
+    channel && (channel.onmessage=event=>{if(event.data?.revision>(root?.revision || 0))blocked('Dane zapisano w innej karcie. Odśwież stronę.');});
+    const storageListener=event=>{if(event.key===PushPullStorage.KEY || event.key===null)blocked('Starsza wersja zmieniła dane. Zapis wstrzymany.');};
+    window.addEventListener('storage',storageListener);
+    return {
+      get error(){return error;},get value(){return current && clone(current);},get raw(){try{return legacy()}catch{return raw}},get revision(){return root?.revision || 0;},
+      set onchange(callback){notify=callback;},
+      recovery(){return unverified?{format:'pushpull-idb-recovery',version:1,...clone(unverified)}:current?snapshot(true):null;},
+      export(){if(!current)throw Error('Brak zweryfikowanej bazy do eksportu.');return snapshot(true);},
+      async commit(data,{importing=false,importedCatalog=null,importedArchives=[]}={}) {
+        if(!db)throw Error('IndexedDB niedostępne. Odblokuj pamięć i uruchom ponownie.');
+        if(error && !importing)throw error;
+        const safe=clone(data),nextCatalog=importedCatalog || catalogFor(safe,catalog);
+        try{await save(safe,nextCatalog,{importing,importedArchives});}catch(failure){if(/Inna karta|Starsza wersja|Dane źródłowe/.test(failure.message))blocked(failure.message);throw failure;}
+      },
+      backups(){return backupRows.map(b=>b.id);},
+      backupLabel(id){const item=backupRows.find(b=>b.id===id);const label={migration:'Przed migracją','before-import':'Przed importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item.kind] || 'Kopia';return label+' · '+new Date(item.createdAt).toLocaleString('pl-PL');},
+      async readBackup(id){const item=backupRows.find(b=>b.id===id);if(!item)throw Error('Brak kopii');return item.raw;},
+      close(){channel?.close();db?.close();window.removeEventListener('storage',storageListener);}
+    };
+  }
+  return {open,parseBackup,NAME,VERSION,TABLES};
+})();
