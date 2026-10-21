@@ -1,0 +1,279 @@
+"""Real service workers + installability metadata + isolated artifact/HTTPS tests."""
+import functools
+import http.server
+import json
+import os
+from pathlib import Path
+import shutil
+import ssl
+import struct
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+import unittest
+from urllib.error import HTTPError
+from urllib.request import urlopen, Request
+from playwright.sync_api import sync_playwright, expect
+
+ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'scripts'))
+from build_release import ASSETS, FILES, build, generate
+from serve_test import ReleaseHandler, make_server, verify_release
+FIXTURE=json.loads((ROOT/'tests/fixtures/v1.json').read_text())
+RAW=' '+json.dumps(FIXTURE,ensure_ascii=False)+'\n'
+KEY='pushpull_skeleton_v1'
+STAGE2='120b8547b31926705e75079c69109c06cac9f9c8'
+
+class ArtifactBuild(unittest.TestCase):
+    def test_allowlist_determinism_and_worker_freshness(self):
+        expected=generate()
+        self.assertEqual(expected,generate())
+        self.assertEqual(expected['sw.js'],(ROOT/'sw.js').read_bytes())
+        self.assertEqual(set(expected),set(FILES))
+        with tempfile.TemporaryDirectory() as tmp:
+            build(tmp)
+            verify_release(tmp)
+            self.assertEqual(build(tmp),json.loads(expected['release.json']))
+            (Path(tmp)/'private-backup.json').write_text('do not overwrite')
+            with self.assertRaises(ValueError):build(tmp)
+            with self.assertRaises(ValueError):verify_release(tmp)
+            self.assertEqual((Path(tmp)/'private-backup.json').read_text(),'do not overwrite')
+
+    def test_artifact_server_refuses_modified_assets_and_source_checkout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            build(tmp)
+            (Path(tmp)/'app.js').write_text('modified')
+            with self.assertRaises(ValueError):verify_release(tmp)
+            with self.assertRaises(ValueError):build(tmp)
+        with self.assertRaises((OSError,ValueError)):verify_release(ROOT)
+
+    def test_verified_https_headers_mime_and_no_source_or_data_exposure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)/'dist';build(directory)
+            cert=Path(tmp)/'test-cert.pem';key=Path(tmp)/'test-key.pem'
+            subprocess.run(['openssl','req','-x509','-newkey','rsa:2048','-nodes','-days','1','-keyout',str(key),'-out',str(cert),'-subj','/CN=localhost','-addext','subjectAltName=DNS:localhost,IP:127.0.0.1','-addext','basicConstraints=critical,CA:TRUE'],check=True,capture_output=True)
+            server=make_server(directory,port=0,base_path='/PushPull/')
+            context=ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER);context.load_cert_chain(cert,key)
+            server.socket=context.wrap_socket(server.socket,server_side=True)
+            thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+            trust=ssl.create_default_context(cafile=str(cert)) # Actual chain/hostname verification, never ignore TLS errors.
+            url=f'https://localhost:{server.server_port}'
+            try:
+                for name in ['',*FILES]:
+                    with urlopen(url+'/PushPull/'+name,context=trust) as response:
+                        self.assertEqual(response.status,200)
+                        self.assertIn('no-cache',response.headers['Cache-Control'])
+                        self.assertEqual(response.headers['X-Content-Type-Options'],'nosniff')
+                        self.assertIn("frame-ancestors 'none'",response.headers['Content-Security-Policy'])
+                        self.assertIn('max-age=',response.headers['Strict-Transport-Security'])
+                        self.assertTrue(response.read())
+                with urlopen(url+'/PushPull/manifest.webmanifest',context=trust) as response:
+                    self.assertEqual(response.headers.get_content_type(),'application/manifest+json')
+                for path in ['/.git/config','/PushPull/.git/config','/PushPull/tests/fixtures/v1.json','/PushPull/docs/CODEX_HANDOFF.md','/PushPull/backup.json','/PushPull/%2e%2e/app.js','/other/']:
+                    with self.assertRaises(HTTPError) as error:urlopen(url+path,context=trust)
+                    self.assertEqual(error.exception.code,404)
+                with self.assertRaises(HTTPError) as error:urlopen(Request(url+'/PushPull/',data=b'not-uploaded',method='POST'),context=trust)
+                self.assertEqual(error.exception.code,405)
+            finally:server.shutdown();server.server_close();thread.join()
+
+class PWADeployment(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.pw=sync_playwright().start()
+        cls.browser=cls.pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox'])
+    @classmethod
+    def tearDownClass(cls):cls.browser.close();cls.pw.stop()
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory(prefix='pushpull-pwa-')
+        self.addCleanup(self.tmp.cleanup)
+        self.path=Path(self.tmp.name)
+        self.controller={'directory':self.path/'a','broken':None,'base':'/'}
+        build(self.controller['directory'])
+        controller=self.controller
+        class Handler(ReleaseHandler):
+            def __init__(self,*args,**kwargs):super().__init__(*args,directory=controller['directory'],base_path=controller['base'],**kwargs)
+            def do_GET(self):
+                if controller['broken'] and self.path.split('?')[0].endswith('/app.js'):
+                    if controller['broken']=='missing':self.send_error(404);return
+                    # A login page, changed file or mixed upload must not become a cached JS resource.
+                    body=b'<html>unexpected login or mixed release</html>'
+                    self.send_response(200);self.send_header('Content-Type','text/html');self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body);return
+                super().do_GET()
+        self.server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Handler)
+        thread=threading.Thread(target=self.server.serve_forever,daemon=True);thread.start()
+        def stop():self.server.shutdown();self.server.server_close();thread.join()
+        self.addCleanup(stop)
+        self.origin=f'http://127.0.0.1:{self.server.server_port}'
+        self.context=self.browser.new_context(service_workers='allow',viewport={'width':390,'height':844},timezone_id='Europe/Warsaw',accept_downloads=True)
+        self.addCleanup(self.context.close)
+        self.page=self.context.new_page()
+        self.page.on('dialog',lambda d:d.accept())
+    @property
+    def url(self):return self.origin+self.controller['base']
+    def seed(self):
+        self.page.add_init_script(f"if(localStorage.getItem('{KEY}')===null){{localStorage.setItem('{KEY}',{json.dumps(RAW)});localStorage.setItem('{KEY}_backup_test','old backup preserved')}}")
+    def poll(self,expression,page=None):
+        page=page or self.page
+        deadline=time.monotonic()+10
+        while not page.evaluate(expression):
+            if time.monotonic()>deadline:self.fail('Timed out: '+expression)
+            time.sleep(0.02)
+    def ready(self):
+        expect(self.page.locator('[data-act=finish]')).to_be_visible()
+        self.page.evaluate('navigator.serviceWorker.ready')
+        self.poll('navigator.serviceWorker.controller !== null')
+    def snapshot(self):
+        return self.page.evaluate("async()=>{const db=await PushPullDB.open(()=>{throw Error('No DB')});try{if(db.error)throw db.error;return db.export()}finally{db.close()}}")
+    def next_release(self,label):
+        source=self.path/('source-'+label)
+        for name in ASSETS:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,dest)
+        template=source/'scripts/service-worker.template.js';template.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/'scripts/service-worker.template.js',template)
+        with (source/'app.js').open('a') as file:file.write('\n// Test release '+label+'\n')
+        output=self.path/label;build(output,source);return output
+    def wait_update(self):
+        self.page.evaluate('async()=>{window.__pwaRegistration=await navigator.serviceWorker.getRegistration();await window.__pwaRegistration.update()}')
+        # Poll a synchronous property: a Promise itself is truthy to the polling API.
+        self.poll('window.__pwaRegistration.waiting?.state === "installed"')
+        expected='pushpull-shell-'+json.loads((self.controller['directory']/'release.json').read_text())['release']
+        self.waiting_worker=next(w for w in self.context.service_workers if w.evaluate('CACHE')==expected)
+    def reopen(self):
+        waiting=getattr(self,'waiting_worker',None)
+        if waiting:waiting.evaluate("self.__testActivated=false;self.addEventListener('activate',()=>{self.__testActivated=true})")
+        self.page.close()
+        if waiting:
+            deadline=time.monotonic()+10
+            while not waiting.evaluate('self.__testActivated && !self.registration.waiting && self.registration.active?.state === "activated"'):
+                if time.monotonic()>deadline:self.fail('Waiting worker did not activate after the final old tab closed')
+                time.sleep(0.02)
+            self.waiting_worker=None
+        self.page=self.context.new_page();self.page.on('dialog',lambda d:d.accept());self.page.goto(self.url);self.ready()
+
+    def test_manifest_png_safe_zone_and_desktop_installability(self):
+        self.context=self.pw.chromium.launch_persistent_context(self.path/'profile',executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
+        self.addCleanup(self.context.close)
+        self.page=self.context.new_page()
+        self.seed();self.page.goto(self.url);self.ready()
+        result=self.context.new_cdp_session(self.page).send('Page.getAppManifest')
+        self.assertEqual(result['errors'],[])
+        manifest=json.loads(result['data'])
+        self.assertEqual(manifest['id'],'./index.html') # Matches stage-2 implicit identity.
+        self.assertEqual(manifest['start_url'],'./index.html')
+        self.assertEqual(manifest['scope'],'./')
+        self.assertEqual(manifest['display'],'standalone')
+        self.assertFalse(manifest['prefer_related_applications'])
+        for name,size in [('icons/icon-192.png',192),('icons/icon-512.png',512),('icons/icon-maskable-512.png',512)]:
+            body=(ROOT/name).read_bytes();self.assertEqual(body[:8],b'\x89PNG\r\n\x1a\n');self.assertEqual(struct.unpack('>II',body[16:24]),(size,size))
+        icon=self.page.evaluate("""async()=>{const image=new Image();image.src='./icons/icon-maskable-512.png';await image.decode();const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');x.drawImage(image,0,0);const p=x.getImageData(0,0,512,512).data;let transparent=0,outside=0;for(let i=0;i<p.length;i+=4){if(p[i+3]!==255)transparent++;const col=(i/4)%512,row=Math.floor(i/4/512);if(p[i]>70 && Math.hypot(col+0.5-256,row+0.5-256)>512*0.4)outside++}return {transparent,outside}}""")
+        self.assertEqual(icon,{'transparent':0,'outside':0})
+        errors=self.context.new_cdp_session(self.page).send('Page.getInstallabilityErrors')['installabilityErrors']
+        self.assertEqual(errors,[]) # Desktop diagnostic, not an Android/WebAPK installation claim.
+
+    def test_subpath_offline_export_and_import_under_security_headers(self):
+        self.controller['base']='/PushPull/'
+        self.seed();self.page.goto(self.url);self.ready()
+        before=self.snapshot();self.assertEqual(before['data'],FIXTURE)
+        self.context.set_offline(True);self.page.reload();self.ready()
+        self.assertEqual(self.snapshot(),before)
+        self.page.locator('[data-tab=settings]').click()
+        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        raw=Path(download.value.path()).read_text();self.assertEqual(json.loads(raw),before)
+        self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
+        expect(self.page.locator('h1')).to_have_text('Trening')
+        self.assertEqual(self.snapshot()['data'],FIXTURE)
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+
+    def test_update_waits_for_all_tabs_and_preserves_unsaved_series_and_all_data(self):
+        self.seed();self.page.goto(self.url);self.ready()
+        before=self.snapshot()
+        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-series-toggle]').click()
+        self.page.locator('[data-series-index="1"][data-field=kg]').fill('77')
+        second=self.context.new_page();second.goto(self.url);expect(second.locator('[data-act=finish]')).to_be_visible()
+        second.evaluate("navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'})")
+        self.controller['directory']=self.next_release('b')
+        self.wait_update()
+        expect(self.page.locator('[data-series-index="1"][data-field=kg]')).to_have_value('77')
+        self.assertEqual(self.snapshot(),before)
+        second.close()
+        self.assertTrue(self.page.evaluate('navigator.serviceWorker.getRegistration().then(r=>!!r.waiting)'))
+        # Save user work before deliberately closing the final old client.
+        self.page.locator('.seriesResultForm [type=submit]').click()
+        expect(self.page.locator('.seriesResultForm')).to_have_count(0)
+        saved=self.snapshot()
+        self.reopen()
+        self.assertEqual(self.snapshot(),saved)
+        self.assertEqual(self.snapshot()['data']['entries'][-1]['series'][1]['kg'],'77')
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+        self.context.set_offline(True);self.reopen()
+        self.assertEqual(self.snapshot(),saved)
+
+    def failed_install(self,mode):
+        self.seed();self.page.goto(self.url);self.ready()
+        before=self.snapshot()
+        self.controller['directory']=self.next_release('broken-'+mode);self.controller['broken']=mode
+        new_cache='pushpull-shell-'+json.loads((self.controller['directory']/'release.json').read_text())['release']
+        # Observe the actual installing worker becoming redundant after install failure.
+        outcome=self.page.evaluate("""async()=>{const r=await navigator.serviceWorker.getRegistration();const result=new Promise(resolve=>r.addEventListener('updatefound',()=>{const w=r.installing;w.addEventListener('statechange',()=>{if(w.state==='redundant')resolve(w.state)})},{once:true}));await r.update();return result}""")
+        self.assertEqual(outcome,'redundant')
+        self.assertFalse(self.page.evaluate('(name)=>caches.has(name)',new_cache))
+        self.context.set_offline(True);self.page.reload();self.ready()
+        self.assertEqual(self.snapshot(),before)
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+    def test_missing_asset_keeps_previous_offline_release(self):self.failed_install('missing')
+    def test_hash_or_login_html_mismatch_keeps_previous_offline_release(self):self.failed_install('wrong-body')
+
+    def test_stage2_to_stage3_worker_update_retains_database_and_backups(self):
+        old=self.path/'stage2'
+        for name in ['index.html','style.css','app.js','storage.js','indexeddb.js','manifest.webmanifest','icon.svg','sw.js']:
+            dest=old/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show',STAGE2+':'+name],cwd=ROOT))
+        self.controller['directory']=old
+        self.seed();self.page.goto(self.url);self.ready()
+        before=self.snapshot()
+        self.controller['directory']=self.path/'a'
+        self.wait_update()
+        self.assertEqual(self.snapshot(),before)
+        self.reopen()
+        self.assertEqual(self.snapshot(),before)
+        self.context.set_offline(True);self.page.reload();self.ready()
+        self.assertEqual(self.snapshot(),before)
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+
+    def test_pwa_survives_browser_process_restart_offline(self):
+        profile=self.path/'persistent-profile'
+        options={'executable_path':os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),'headless':True,'args':['--no-sandbox']}
+        first=self.pw.chromium.launch_persistent_context(profile,**options)
+        try:
+            page=first.new_page()
+            page.add_init_script(f"if(localStorage.getItem('{KEY}')===null)localStorage.setItem('{KEY}',{json.dumps(RAW)})")
+            page.goto(self.url)
+            expect(page.locator('[data-act=finish]')).to_be_visible()
+            page.evaluate('navigator.serviceWorker.ready')
+            self.poll('navigator.serviceWorker.controller !== null',page)
+            before=page.evaluate("async()=>{const d=await PushPullDB.open(()=>{});try{return d.export()}finally{d.close()}}")
+        finally:first.close()
+        second=self.pw.chromium.launch_persistent_context(profile,**options)
+        try:
+            second.set_offline(True)
+            page=second.new_page();page.goto(self.url)
+            expect(page.locator('[data-act=finish]')).to_be_visible()
+            after=page.evaluate("async()=>{const d=await PushPullDB.open(()=>{});try{return d.export()}finally{d.close()}}")
+            self.assertEqual(before,after)
+            self.assertEqual(page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+        finally:second.close()
+
+    def test_evicted_asset_fails_offline_then_repairs_verified_bytes_online(self):
+        self.seed();self.page.goto(self.url);self.ready()
+        before=self.snapshot()
+        name='pushpull-shell-'+json.loads((self.controller['directory']/'release.json').read_text())['release']
+        self.page.evaluate('(name)=>caches.open(name).then(c=>c.delete(new URL("app.js",location.href).href))',name)
+        self.context.set_offline(True)
+        self.assertEqual(self.page.evaluate('fetch("./app.js").then(r=>r.status)'),503)
+        self.assertEqual(self.snapshot(),before)
+        self.context.set_offline(False)
+        self.page.reload();self.ready()
+        self.assertEqual(self.snapshot(),before)
+        self.assertTrue(self.page.evaluate('(name)=>caches.open(name).then(c=>c.match(new URL("app.js",location.href).href)).then(Boolean)',name))
