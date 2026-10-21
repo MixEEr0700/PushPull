@@ -1,0 +1,21 @@
+name: Prepare private PWA test artifact (no deployment)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/build_release.py --check
+      - run: python scripts/build_release.py --output dist/site
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pushpull-pwa-test
+          path: dist/site/
+          if-no-files-found: error
+          retention-days: 7

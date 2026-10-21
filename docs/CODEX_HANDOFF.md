@@ -1,5 +1,7 @@
 # PushPull — import i przekazanie do Codexa
 
+> Etap 3 przygotowuje testową paczkę PWA bez aktywacji hostingu. Hosting, koszty i prywatność: [PWA_TEST_DEPLOYMENT_STAGE_3.md](PWA_TEST_DEPLOYMENT_STAGE_3.md); telefon: [ANDROID_TEST_CHECKLIST.md](ANDROID_TEST_CHECKLIST.md); wykonane testy: [STAGE_3_TEST_REPORT.md](STAGE_3_TEST_REPORT.md). Testów fizycznego Androida jeszcze nie wykonano.
+
 > Poniżej zachowano historyczny audyt importu. Aktualny etap 2 wprowadza IndexedDB; model, migrację i odzyskiwanie opisuje [INDEXEDDB_MIGRATION_STAGE_2.md](INDEXEDDB_MIGRATION_STAGE_2.md), a wykonane kontrole [STAGE_2_TEST_REPORT.md](STAGE_2_TEST_REPORT.md). Ograniczenia pierwotnego importu nie są automatycznie aktualnym stanem kodu.
 
 Data: 21.10.2026. Import zatwierdzonych przez użytkownika źródeł v0.3 Matrix — szlif 3, bez modyfikacji kodu/interfejsu.

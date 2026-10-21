@@ -117,7 +117,7 @@ on('click',async e=>{
   const key=$('#backupKey').value;if(key)downloadRaw(await database.readBackup(key),'pushpull-przed-importem.json');
  }
 });
-on('input',e=>{if(e.target.matches('textarea.notes-large')){e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'}});new MutationObserver(()=>document.querySelectorAll('textarea.notes-large').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})).observe(document.getElementById('app'),{childList:true,subtree:true});render();if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+on('input',e=>{if(e.target.matches('textarea.notes-large')){e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'}});new MutationObserver(()=>document.querySelectorAll('textarea.notes-large').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})).observe(document.getElementById('app'),{childList:true,subtree:true});render();if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>{});
 
 database.onchange=error=>{recoveryError=error;render()};
 window.addEventListener('pagehide',()=>database.close());

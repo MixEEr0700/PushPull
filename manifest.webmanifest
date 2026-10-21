@@ -1,1 +1,39 @@
-{"name": "PushPull · Dziennik treningowy", "short_name": "PushPull", "start_url": "./index.html", "scope": "./", "display": "standalone", "background_color": "#070d09", "theme_color": "#070d09", "lang": "pl", "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}]}
+{
+  "name": "PushPull · Dziennik treningowy",
+  "short_name": "PushPull",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070d09",
+  "theme_color": "#070d09",
+  "lang": "pl",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "id": "./index.html",
+  "description": "Wersja testowa PushPull. Parametry planu V2 wymagają potwierdzenia z dokumentem trenera.",
+  "prefer_related_applications": false
+}
