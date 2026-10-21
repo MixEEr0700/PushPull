@@ -1,3 +1,7 @@
+# Aplikacja Treningowa — aktualne przekazanie
+
+Etap 4 zmienia nazwę użytkową bez zmiany tożsamości PWA i danych. Aktualny kierunek: [aneks planu](PROJECT_PLAN_ANNEX_STAGE_4.md), [architektura i model](TARGET_ARCHITECTURE_STAGE_4.md), [raport testów](STAGE_4_TEST_REPORT.md). Drive, nowy silnik planów i raport trenera są wyłącznie projektowane. Poniżej pozostaje historyczny zapis etapów 1–3; opisy dawnych braków nie oznaczają obecnego stanu.
+
 # PushPull — import i przekazanie do Codexa
 
 > Etap 3 przygotowuje testową paczkę PWA bez aktywacji hostingu. Hosting, koszty i prywatność: [PWA_TEST_DEPLOYMENT_STAGE_3.md](PWA_TEST_DEPLOYMENT_STAGE_3.md); telefon: [ANDROID_TEST_CHECKLIST.md](ANDROID_TEST_CHECKLIST.md); wykonane testy: [STAGE_3_TEST_REPORT.md](STAGE_3_TEST_REPORT.md). Testów fizycznego Androida jeszcze nie wykonano.

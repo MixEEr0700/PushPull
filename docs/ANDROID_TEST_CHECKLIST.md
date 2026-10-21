@@ -1,4 +1,4 @@
-# PushPull — instalacja i odbiór na prawdziwym Androidzie
+# Aplikacja Treningowa — instalacja i odbiór na prawdziwym Androidzie
 
 **Status: NIEWYKONANE na fizycznym telefonie.** Desktopowy Chromium i mobilny viewport nie potwierdzają działania Androida ani WebAPK. V2 pozostaje planem wymagającym weryfikacji; testować dane demonstracyjne, nie traktować wersji jako zatwierdzonej do codziennych treningów.
 
@@ -9,7 +9,7 @@ Wyniki wpisać dopiero po wykonaniu: model telefonu, Android, wersja Chrome/Tail
 1. Na komputerze i telefonie połączyć Tailscale z właściwym kontem/tailnetem. Udostępniony serwer musi mieć status „Available within your tailnet”. Nie włączać Funnel ani publicznych portów.
 2. Na telefonie w **zwykłym Chrome**, nie incognito ani w przeglądarce wbudowanej komunikatora, otworzyć dokładny HTTPS URL podany przez Serve. Potwierdzić prawidłowy certyfikat i brak ostrzeżeń TLS. Nie używać adresu `localhost`/`127.0.0.1` z komputera na telefonie.
 3. Poczekać na pełne pierwsze załadowanie. Jeżeli przenosisz historię z innego origin/urządzenia, najpierw pobrać pełny JSON z oryginalnej aplikacji i zachować go poza telefonem. Nowa domena nie ma automatycznie dostępu do starej bazy. Wczytać kopię w Dane → import, bez kasowania źródła.
-4. Menu Chrome → **Zainstaluj aplikację** lub **Dodaj do ekranu głównego** → dostępna opcja instalacji. Potwierdzić nazwę, ikonę i monity. Jeśli dostępny jest wyłącznie skrót, zanotować to osobno; nie oznaczać WebAPK jako PASS. Gdy proces prywatnego adresu nie pozwala zakończyć instalacji, nie publikować strony samodzielnie jako obejścia.
+4. Menu Chrome → **Zainstaluj aplikację** lub **Dodaj do ekranu głównego** → dostępna opcja instalacji. Potwierdzić nazwę „Aplikacja Treningowa”, oryginalną ikonę i monity. Jeśli dostępny jest wyłącznie skrót, zanotować to osobno; nie oznaczać WebAPK jako PASS. Gdy proces prywatnego adresu nie pozwala zakończyć instalacji, nie publikować strony samodzielnie jako obejścia.
 5. Uruchomić z ikony. Sprawdzić tryb standalone, brak zwykłego paska adresu i poprawne krawędzie ikony/maskowania. Porównać historię z kartą Chrome; nie zakładać wspólnego magazynu bez tego testu.
 6. Wykonać pełny eksport JSON w zainstalowanej aplikacji. Potwierdzić obecność pliku w Pobranych i możliwość znalezienia go przez systemowy selektor przy imporcie. Kopię zachować również poza przeglądarką/urządzeniem.
 
@@ -39,3 +39,7 @@ Wyniki wpisać dopiero po wykonaniu: model telefonu, Android, wersja Chrome/Tail
 - Ekran odzyskiwania: pobrać obie dostępne historie/kopie i postępować według [instrukcji etapu 2](INDEXEDDB_MIGRATION_STAGE_2.md). Nie nadpisywać ręcznie bazy.
 
 Pozytywny wynik checklisty nadal nie potwierdza parametrów planu V2 ani gotowości do codziennego użytku — to osobne kryteria projektu.
+
+## Dodatkowy odbiór zmiany nazwy — etap 4
+
+NIEWYKONANE na telefonie: aktualizacja wcześniej zainstalowanej aplikacji przy tym samym origin, `id`, `start_url` i `scope`; oczekiwana jedna instalacja i identyczna pełna historia/kopie. Sprawdzić nową nazwę w menu instalacji, przełączniku aplikacji i launcherze po aktualizacji. Android/Chrome może opóźnić zmianę metadanych, pokazać monit albo skrócić długą etykietę. Nie odinstalowywać i nie czyścić danych, aby wymusić nazwę. Przed testem wyeksportować pełną kopię poza telefon.

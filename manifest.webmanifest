@@ -1,6 +1,6 @@
 {
-  "name": "PushPull · Dziennik treningowy",
-  "short_name": "PushPull",
+  "name": "Aplikacja Treningowa",
+  "short_name": "Aplikacja Treningowa",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -34,6 +34,6 @@
     }
   ],
   "id": "./index.html",
-  "description": "Wersja testowa PushPull. Parametry planu V2 wymagają potwierdzenia z dokumentem trenera.",
+  "description": "Aplikacja Treningowa — wersja testowa. Parametry planu V2 wymagają potwierdzenia z dokumentem trenera.",
   "prefer_related_applications": false
 }
