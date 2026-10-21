@@ -1,0 +1,490 @@
+{
+  "version": 1,
+  "exercises": {
+    "PUSH A": [
+      {
+        "id": "PUSH-A-1",
+        "name": "Prostowanie ud obunóż",
+        "sets": 3,
+        "target": "8–10",
+        "initialKg": "105",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": "Oryginalne uwagi trenera i użytkownika\nBez zmiany treści."
+      },
+      {
+        "id": "PUSH-A-2",
+        "name": "Smith skos 30°",
+        "sets": 2,
+        "target": "5–7",
+        "initialKg": "80",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-A-3",
+        "name": "Klatka maszyna",
+        "sets": 2,
+        "target": "5–7 + backoff",
+        "initialKg": "102,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-A-4",
+        "name": "Dipy",
+        "sets": 2,
+        "target": "8–10",
+        "initialKg": "90",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-A-5",
+        "name": "Wznosy bok",
+        "sets": 3,
+        "target": "10–12 + drop",
+        "initialKg": "20",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-A-6",
+        "name": "Bayesian curl",
+        "sets": 2,
+        "target": "6–8 + backoff",
+        "initialKg": "37,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-A-7",
+        "name": "Triceps sznur zza głowy",
+        "sets": 3,
+        "target": "8–10",
+        "initialKg": "72,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-A-8",
+        "name": "Brzuch",
+        "sets": 3,
+        "target": "wg planu",
+        "initialKg": "",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      }
+    ],
+    "PULL A": [
+      {
+        "id": "PULL-A-1",
+        "name": "Uginanie ud",
+        "sets": 3,
+        "target": "8–10",
+        "initialKg": "57,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-A-2",
+        "name": "Odwodzenie ud",
+        "sets": 2,
+        "target": "10–12",
+        "initialKg": "105",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-A-3",
+        "name": "T-bar row",
+        "sets": 2,
+        "target": "5–7 + backoff",
+        "initialKg": "107,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-A-4",
+        "name": "Drążek górny",
+        "sets": 2,
+        "target": "8–10",
+        "initialKg": "92,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-A-5",
+        "name": "Wiosłowanie jednorącz",
+        "sets": 2,
+        "target": "10–12",
+        "initialKg": "42,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-A-6",
+        "name": "Odwodzenie linką",
+        "sets": 2,
+        "target": "10–12",
+        "initialKg": "25",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-A-7",
+        "name": "Biceps sznur",
+        "sets": 2,
+        "target": "6–8 + backoff",
+        "initialKg": "75",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-A-8",
+        "name": "Łydka",
+        "sets": 3,
+        "target": "wg planu",
+        "initialKg": "",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      }
+    ],
+    "PUSH B": [
+      {
+        "id": "PUSH-B-1",
+        "name": "Prostowanie ud jednonóż",
+        "sets": 3,
+        "target": "10–12",
+        "initialKg": "105",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-B-2",
+        "name": "Przywodzenie ud",
+        "sets": 2,
+        "target": "10–12",
+        "initialKg": "105",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-B-3",
+        "name": "Butterfly",
+        "sets": 2,
+        "target": "8–10",
+        "initialKg": "65",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-B-4",
+        "name": "Smith skos 60/75°",
+        "sets": 2,
+        "target": "5–7 + backoff",
+        "initialKg": "60",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-B-5",
+        "name": "Skos hantle 30°",
+        "sets": 2,
+        "target": "6–8",
+        "initialKg": "42,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-B-6",
+        "name": "Biceps supinacja",
+        "sets": 2,
+        "target": "8–10",
+        "initialKg": "22,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-B-7",
+        "name": "Cross cable triceps",
+        "sets": 3,
+        "target": "8–10",
+        "initialKg": "32,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-B-8",
+        "name": "Wznosy linka dolna",
+        "sets": 2,
+        "target": "12 / 15–20",
+        "initialKg": "25",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PUSH-B-9",
+        "name": "Brzuch",
+        "sets": 3,
+        "target": "wg planu",
+        "initialKg": "",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      }
+    ],
+    "PULL B": [
+      {
+        "id": "PULL-B-1",
+        "name": "Uginanie ud jednonóż",
+        "sets": 3,
+        "target": "8–10",
+        "initialKg": "57,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-B-2",
+        "name": "Odwodzenie ud",
+        "sets": 2,
+        "target": "10–12",
+        "initialKg": "105",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-B-3",
+        "name": "Wiosłowanie hantlem",
+        "sets": 2,
+        "target": "8–10",
+        "initialKg": "47,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-B-4",
+        "name": "Ściąganie do biodra",
+        "sets": 3,
+        "target": "8–10",
+        "initialKg": "72,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-B-5",
+        "name": "Wiosłowanie maszyna",
+        "sets": 2,
+        "target": "8–10",
+        "initialKg": "80",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-B-6",
+        "name": "Narciarz + shrugs",
+        "sets": 2,
+        "target": "8–10",
+        "initialKg": "75",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-B-7",
+        "name": "Odwrotny butterfly",
+        "sets": 3,
+        "target": "12–15 + drop",
+        "initialKg": "35",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-B-8",
+        "name": "Modlitewnik jednorącz",
+        "sets": 2,
+        "target": "8–10",
+        "initialKg": "17,5",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      },
+      {
+        "id": "PULL-B-9",
+        "name": "Łydka",
+        "sets": 3,
+        "target": "wg planu",
+        "initialKg": "",
+        "tempo": "do uzupełnienia",
+        "rir": "do uzupełnienia",
+        "notes": ""
+      }
+    ]
+  },
+  "sessions": [
+    {
+      "id": "session-1",
+      "seq": 1,
+      "type": "PUSH A",
+      "date": "2026-10-17",
+      "status": "done"
+    },
+    {
+      "id": "session-2",
+      "seq": 2,
+      "type": "PULL A",
+      "date": "2026-10-18",
+      "status": "done"
+    },
+    {
+      "id": "session-3",
+      "seq": 3,
+      "type": "PUSH B",
+      "date": "2026-10-19",
+      "status": "done"
+    },
+    {
+      "id": "session-4",
+      "seq": 4,
+      "type": "PULL B",
+      "date": "2026-10-20",
+      "status": "done"
+    },
+    {
+      "id": "session-5",
+      "seq": 5,
+      "type": "PUSH A",
+      "date": "2026-10-21",
+      "status": "active"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "sessionId": "session-1",
+      "exerciseId": "PUSH-A-1",
+      "kg": "100",
+      "reps": "10",
+      "createdAt": "2026-10-21T10:00:00.000Z",
+      "series": [
+        {
+          "kg": "100",
+          "reps": "10"
+        },
+        {
+          "kg": "80",
+          "reps": "8",
+          "annotation": "back-off"
+        }
+      ]
+    },
+    {
+      "id": "entry-2",
+      "sessionId": "session-2",
+      "exerciseId": "PULL-A-1",
+      "kg": "100",
+      "reps": "10",
+      "createdAt": "2026-10-21T10:00:00.000Z"
+    },
+    {
+      "id": "entry-3",
+      "sessionId": "session-3",
+      "exerciseId": "PUSH-B-1",
+      "kg": "100",
+      "reps": "10",
+      "createdAt": "2026-10-21T10:00:00.000Z",
+      "series": [
+        {
+          "kg": "100",
+          "reps": "10"
+        },
+        {
+          "kg": "80",
+          "reps": "8",
+          "annotation": "back-off"
+        }
+      ]
+    },
+    {
+      "id": "entry-4",
+      "sessionId": "session-4",
+      "exerciseId": "PULL-B-1",
+      "kg": "100",
+      "reps": "10",
+      "createdAt": "2026-10-21T10:00:00.000Z",
+      "series": [
+        {
+          "kg": "100",
+          "reps": "10"
+        },
+        {
+          "kg": "80",
+          "reps": "8",
+          "annotation": "back-off"
+        }
+      ]
+    },
+    {
+      "id": "entry-5",
+      "sessionId": "session-5",
+      "exerciseId": "PUSH-A-1",
+      "kg": "100",
+      "reps": "10",
+      "createdAt": "2026-10-21T10:00:00.000Z",
+      "series": [
+        {
+          "kg": "100",
+          "reps": "10"
+        },
+        {
+          "kg": "80",
+          "reps": "8",
+          "annotation": "back-off"
+        }
+      ]
+    }
+  ],
+  "changes": {
+    "PUSH-A-1": [
+      {
+        "date": "2026-10-18",
+        "kind": "Poprawa techniki",
+        "text": "Pełny zakres ruchu"
+      }
+    ]
+  },
+  "nextType": "PUSH A",
+  "activeId": "session-5",
+  "extension": {
+    "retained": "Zażółć gęślą jaźń"
+  }
+}

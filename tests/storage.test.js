@@ -33,3 +33,5 @@ test('recovery import backs up unsupported raw without parsing it',()=>{const st
 test('other-tab change aborts before backup/write',()=>{const store=memory(JSON.stringify(fixture())),db=open(store,fresh);store.map.set(KEY,'other tab');assert.throws(()=>db.commit(fresh(),{importing:true}));assert.equal(store.getItem(KEY),'other tab');assert.equal(store.length,1)});
 
 test('legacy fallback decimal session and entry IDs remain valid',()=>{const d=fixture();d.sessions[0].id='17700000000.25';d.entries[0].sessionId=d.sessions[0].id;d.entries[0].id='17700000001.75';assert.equal(validate(d),d)});
+
+test('updated legacy adapter refuses writes and imports after IndexedDB ownership',()=>{const raw=JSON.stringify(fixture()),store=memory(raw);store.map.set('pushpull_indexeddb_owner','pushpull:1');const db=open(store,fresh);assert.ok(db.error);assert.throws(()=>db.commit(fresh()));assert.throws(()=>db.commit(fresh(),{importing:true}));assert.equal(store.getItem(KEY),raw)});
