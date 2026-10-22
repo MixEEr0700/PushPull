@@ -193,13 +193,15 @@ const PushPullDB = (() => {
       if(!result.root.verified || !result.root.migration?.complete)throw Error('Migracja nie została potwierdzona.');
       const value=verifyRows(result.root,result.rows);
       if(await digest(value)!==result.root.digest)throw Error('Weryfikacja integralności bazy nie powiodła się.');
+      if(value.data.trainingJournal && !result.modelState)throw Error('Nowy dziennik wymaga pełnej kopii v3. Nie zmieniono danych.');
       if(result.modelState)await (await modelAPI()).verifyLegacyModel(result.modelState,value,result.root.revision);
       modelState=result.modelState || null;
       root=result.root;current=value.data;catalog=value.catalog;backupRows=result.backups;unverified=null;
       return root;
     }
-    async function save(data, nextCatalog, {importing=false, initializing=false, importedArchives=[]}={}) {
-      const expectedRevision=root?.revision || 0,expectedModel=modelState;
+    async function save(data, nextCatalog, {importing=false, initializing=false, importedArchives=[],modelOwnerId=null}={}) {
+      const expectedRevision=root?.revision || 0,expectedModel=modelState || (importing?unverified?.modelState || null:null);
+      if(data.trainingJournal && !expectedModel && modelOwnerId===null)throw Error('Nowy dziennik wymaga importu pełnej kopii v3.');
       PushPullStorage.validate(data);validateCatalog(data,nextCatalog);
       if(stale && !importing)throw Error('Dane zmieniły się. Odśwież aplikację przed zapisem.');
       const source=legacy();
@@ -231,11 +233,11 @@ const PushPullDB = (() => {
         additions.push(record);
       }
       backups.splice(0,backups.length,...additions);
-      const api=expectedModel?await modelAPI():null;
+      const api=expectedModel || modelOwnerId!==null?await modelAPI():null;
       const modelSource=api?{format:'pushpull-backup',version:2,data,catalog:nextCatalog,archives:[...backupRows,...backups]}:null;
       if(api)api.portable(modelSource); // Never silently discard non-JSON legacy extensions.
       const nextModel=api?{key:MODEL_KEY,revision:next.revision,document:await api.createLegacyModel(
-        JSON.stringify(modelSource),{ownerId:expectedModel.document.payload.model.ownerId,createdAt:new Date().toISOString()})}:null;
+        JSON.stringify(modelSource),{ownerId:modelOwnerId??expectedModel.document.payload.model.ownerId,createdAt:new Date().toISOString()})}:null;
       await transaction(db,'readwrite',async tx=>{
         const stored=await request(tx.objectStore('meta').get('state'));
         const storedModel=await request(tx.objectStore('meta').get(MODEL_KEY));
@@ -316,6 +318,11 @@ const PushPullDB = (() => {
     }
     return {
       prepareModel,
+      async importModelBackup(text){
+        if(!db)throw Error('IndexedDB niedostępne.');
+        const parsed=await (await modelAPI()).parseModelBackup(text);
+        await save(clone(parsed.data),clone(parsed.catalog),{importing:true,importedArchives:clone(parsed.archives || []),modelOwnerId:parsed.document.payload.model.ownerId});
+      },
       async exportModelBackup(){
         if(error)throw error;
         if(!modelState)throw Error('Model nie został przygotowany.');
@@ -341,5 +348,5 @@ const PushPullDB = (() => {
       close(){channel?.close();db?.close();window.removeEventListener('storage',storageListener);}
     };
   }
-  return {open,parseBackup,NAME,VERSION,TABLES};
+  return {open,parseBackup,async parseModelBackup(text){return (await modelAPI()).parseModelBackup(text)},NAME,VERSION,TABLES};
 })();

@@ -1,4 +1,5 @@
 /** Minimal bridge to the existing journal, not a new plan or result editor. */
+import {project} from './journal.mjs';
 import {createModel} from './training-model.mjs';
 import {createBackup,validateBackup,exportBackup,readLegacyBackup} from './backup.mjs';
 import {canonical,portable,requireThat as check} from './backup-json.mjs';
@@ -8,7 +9,7 @@ function payload(raw,ownerId) {
   const legacy=readLegacyBackup(raw);
   check(legacy.formatVersion===2,'migration requires the complete v2 backup');
   const data=legacy.data,exercises=Object.values(data.exercises).flat();
-  return {
+  return project(data,{
     model:createModel({schemaVersion:1,ownerId,
       exercises:exercises.map(e=>({id:e.id,name:e.name,status:'unresolved',legacyId:e.id,source:source(e.id)})),
       // Legacy names/targets do not identify historical machines or prescriptions.
@@ -19,7 +20,7 @@ function payload(raw,ownerId) {
       legacyPlanLink:legacy.catalog.sessionVersions[s.id]})),
     resultRecords:data.entries.map(e=>({id:e.id,sessionId:e.sessionId,binding:'uninterpreted',payloadVersion:1,data:e})),
     legacySources:[{id:'current-legacy',formatVersion:2,semantics:'legacy-unknown',raw}]
-  };
+  });
 }
 /** Retain every legacy record/extension, with no inferred plan, role, side or kg. */
 export async function createLegacyModel(raw,{ownerId,createdAt}) {
@@ -36,3 +37,14 @@ export async function verifyLegacyModel(state,{data,catalog},revision) {
   return document;
 }
 export {exportBackup,readLegacyBackup,portable};
+/** Restore only this journal's lossless source-backed format; never flatten a
+ * generic future v3 document into legacy data and silently discard its records. */
+export async function parseModelBackup(raw) {
+  const {previewBackup,restoreBackup}=await import('./backup.mjs');
+  const restored=await restoreBackup(await previewBackup(raw)),d=restored.restored;
+  check(restored.formatVersion===3 && d.payload.model,'expected source-backed v3');
+  const original=d.payload.legacySources[0]?.raw,legacy=readLegacyBackup(original);
+  const expected=await createLegacyModel(original,{ownerId:d.payload.model.ownerId,createdAt:d.createdAt});
+  check(canonical(expected)===canonical(d),'unsupported backup contents; original file must be preserved');
+  return {...legacy.original,document:d};
+}

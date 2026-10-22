@@ -22,6 +22,8 @@ Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budowa�
 
 ## Dokumentacja
 
+- [Dziennik — pierwsza część funkcjonalna](docs/FUNCTIONAL_JOURNAL_PART_1.md): świadome włączenie, sesje ze snapshotem, serie, kalendarz i pełne odtwarzanie v3; bez aktywacji nowego V2 i edytorów struktur specjalnych.
+
 - [Minimalna migracja — etap 5B / krok C](docs/MINIMAL_MIGRATION_STAGE_5B_C.md): jawna migracja testowa, wspólny transakcyjny zapis i najkrótsza ścieżka do telefonu.
 
 - [Pełne kopie nowego modelu — etap 5B / krok B](docs/BACKUP_STAGE_5B_B.md): działające API v3, bezstratny odczyt v1/v2 i odtworzenie w pamięci; bez migracji i podłączenia do aplikacji.
