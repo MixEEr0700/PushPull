@@ -11,7 +11,7 @@ Python 3.12, Node 24; brak zależności npm. Zależności testów przeglądarkow
 ```sh
 python3 -m pip install -r tests/requirements.txt
 python3 -m playwright install --with-deps chromium
-node --test tests/storage.test.js
+node --test tests/*.test.*
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 python3 scripts/build_release.py --check
 python3 scripts/build_release.py --output dist/releases/stage-4
@@ -21,6 +21,8 @@ python3 scripts/serve_test.py --directory dist/releases/stage-4 --port 8000
 Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budować do nowego katalogu. Nie publikować checkoutu, backupów ani sekretów. Pełne JSON zachowywać także poza przeglądarką. Nazwy plików kopii `pushpull-*` i format kopii pozostają kompatybilne.
 
 ## Dokumentacja
+
+- [Model danych — etap 5B / krok A](docs/DATA_MODEL_STAGE_5B_A.md): odseparowane kontrakty i walidacja; bez podłączenia do treningu, migracji i aktywacji.
 
 - [Audyt V2 — etap 5A](docs/V2_PLAN_AUDIT_STAGE_5A.md): zakończone porównanie DOCX 34/34 i rejestr decyzji właściciela D1–D9; [raport kontroli](docs/STAGE_5A_TEST_REPORT.md).
 
