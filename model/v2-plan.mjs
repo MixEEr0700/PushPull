@@ -43,7 +43,9 @@ export function views(model,versionId,type,data){
   const targets=model.sets.filter(s=>s.positionId===p.id).sort((a,b)=>a.order-b.order),group=model.groups.find(g=>g.positionIds.includes(p.id));
   return {id:p.exerciseId,name:p.label,sets:targets.length||'?',target:targets.map(t=>(t.role==='backoff'?'back-off ':'')+t.reps.min+'–'+t.reps.max).join(' / ')||'nieokreślone',tempo:targets[0]?.tempo?.join(' ')??'nieokreślone',rir:targets[0]?.rir?.min??'nieokreślone',initialKg:'',v2:true,journalVariantId:p.variantId,positionId:p.id,sideMode:p.sideMode,loadConvention:p.loadConvention,targets:targets.map(t=>({...t,drop:model.drops.some(d=>d.setId===t.id)})),group,notes:data?.trainingJournal?.model.userNotes.find(n=>n.exerciseId===p.exerciseId&&n.origin==='user')?.text??'',sharedNotes:Object.values(data?.exercises??{}).flat().find(e=>e.id===p.exerciseId)?.notes??'',instructions:model.coachInstructions.filter(i=>i.positionId===p.id||i.positionId===null).map(i=>i.text).join('\n')};
  };
- const result=[];
- for(const p of positions){const g=model.groups.find(g=>g.positionIds.includes(p.id));if(g){if(g.positionIds[0]!==p.id)continue;const members=g.positionIds.map(id=>one(positions.find(p=>p.id===id)));result.push({...members[0],id:p.slotId,name:'Narciarz + szrugsy',members,description:'2 rundy · 8–10 każde ćwiczenie · 15 s między ćwiczeniami',notes:'',journalOnly:true});}else result.push(one(p));}
- return result;
+ // One view per original position, including each independent group member.
+ return positions.map(p=>{const view=one(p);if(!view.group)return view;
+  const suffix=String.fromCharCode(65+view.group.positionIds.indexOf(p.id));
+  return {...view,name:p.slotId+suffix+' · '+view.name,description:'Superseria A/B · 2 rundy · 8–10 · 15 s między ćwiczeniami'};
+ });
 }
