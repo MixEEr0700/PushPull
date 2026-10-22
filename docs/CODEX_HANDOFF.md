@@ -1,5 +1,7 @@
 # Aplikacja Treningowa — aktualne przekazanie
 
+Pierwsza część funkcjonalna po PR #8: [użycie, zakres i ograniczenia](FUNCTIONAL_JOURNAL_PART_1.md). Nowy zapis włącza się jawnie w Dane; przyszłe sesje mają snapshot i trwałe serie, kalendarz/statystyki odczytują kontekst, kopie v3 są podłączone do importu/eksportu. Dotychczasowy plan pozostaje niezweryfikowany. Pełny V2, back-off/drop/strony/grupy oraz aktywacja nadal niegotowe; nie rozpoczęto hostingu/Drive. Poniższe opisy A–C są historycznym stanem ich zakończenia.
+
 Etap 5B/C: [minimalna migracja, API i droga do telefonu](MINIMAL_MIGRATION_STAGE_5B_C.md). Model jest dodatkowym rekordem istniejącej bazy, przygotowywanym tylko jawnie przez `prepareModel`; `app.js` nie uruchamia migracji. Po niej obecny commit zapisuje źródło i projekcję atomowo. Bez nowego planu/edytora, zmiany Matrix, publikacji i Drive. Następny priorytet po zatwierdzeniu: funkcjonalny trening i telefon, nie dalsza infrastruktura. Poniższe etapy A/B opisują ich historyczny stan zakończenia.
 
 Etap 5B, krok B: osobno zlecony mechanizm pełnych kopii nowego modelu. [Format/API i ograniczenia](BACKUP_STAGE_5B_B.md), [raport testów](STAGE_5B_B_TEST_REPORT.md). Implementacja tworzy i weryfikuje v3 oraz odtwarza odrębny stan w pamięci; odczytuje bezstratnie v1/v2. Brak integracji z aktywnym dziennikiem, migracji i kroków C–H. Poniższy akapit A opisuje stan jego zakończenia przed zleceniem B.
