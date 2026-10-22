@@ -71,6 +71,10 @@ class V2Training(BrowserHarness):
         self.page.reload();self.ready()
         self.page.locator('[data-act=finish]').click()
         form=self.history_edit(sid,'PUSH-A-3')
+        self.confirm=False;form.locator('[data-quick=kg]').fill('90')
+        expect(form.locator('[data-row="2"][data-field=kg]')).to_have_value('70')
+        expect(form.locator('[data-row="0"][data-field=kg]')).to_have_value('100')
+        self.confirm=True
         form.locator('[data-row="2"][data-field=kg]').fill('60')
         self.save_form(form)
         self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'],saved['trainingJournal']['sessionSnapshots'])

@@ -4,7 +4,12 @@ const drafts=new Map(),key=(id,sid)=>sid+'::'+id;
 export const clear=()=>drafts.clear();
 export function editor(ex,sid,entry,last){
  const k=key(ex.id,sid);let d=drafts.get(k);
- if(!d){d={ex,performance:entry?.performance?structuredClone(entry.performance):newPerformance(ex,last?.performance),open:false,custom:false};drafts.set(k,d);}
+ if(!d){
+  const performance=entry?.performance?structuredClone(entry.performance):newPerformance(ex,last?.performance);
+  const first=performance.rows[0].segments[0];
+  const custom=performance.rows.some(r=>r.segments.some(s=>s.kg!==first.kg||s.reps!==first.reps));
+  d={ex,performance,open:false,custom};drafts.set(k,d);
+ }
  return `<div class="panel"><h3>${esc(ex.name)}</h3><form class="performanceForm" novalidate data-id="${ex.id}" data-session="${sid}">${contents(d)}<button class="btn primary wide spaced" type="submit">${entry?'Zapisz korektę':'Zapisz wynik'}</button></form></div>`;
 }
 function contents(d){const ex=d.ex,p=d.performance;return `<p class="hint">${esc(p.loadConvention.description)}. Tonaż: suma zapisanych kg × powtórzenia; bez mnożenia przez dwa.</p>${ex.loadConvention.basis===null?`<label>Znaczenie ciężaru<select data-load-basis><option value="">Nieokreślone</option>${[['per-implement','Jeden hantel'],['machine-indication','Wskazanie urządzenia'],['combined','Łącznie']].map(([v,l])=>`<option value="${v}" ${p.loadConvention.basis===v?'selected':''}>${l}</option>`).join('')}</select></label>`:''}<div class="grid2"><label>Szybki ciężar${ex.sideMode==='required'?' · lewa strona':''}<input data-quick="kg" inputmode="decimal" aria-label="Szybki ciężar"></label><label>Powtórzenia<input data-quick="reps" inputmode="numeric" aria-label="Szybkie powtórzenia"></label></div><p class="hint">Szybki wpis uzupełnia główne segmenty wszystkich serii. Back-off i drop poprawisz poniżej.</p><button type="button" class="btn wide" data-rich-action="toggle">✎ ${d.open?'Zwiń':'Edytuj'} serie</button><div data-rich-details ${d.open?'':'hidden'}>${details(d)}</div><p class="series-total">Tonaż: <strong>${flatten(p).reduce((n,s)=>n+(Number(s.kg.replace(',','.'))||0)*(Number(s.reps)||0),0).toLocaleString('pl-PL')} kg</strong></p>`;}
