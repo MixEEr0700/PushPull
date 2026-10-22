@@ -37,6 +37,19 @@ W PR #10 dwa człony mają już oddzielne rekordy/wyniki, lecz przedstawiane są
 - Ochrona ma być proporcjonalna: niezawodne szkice, lokalny zapis offline, kopie, ochrona przed przypadkowym nadpisaniem i uczciwy stan synchronizacji. Przy integracji Google wystarczą standardowe mechanizmy autoryzacji Google, bez autorskiego systemu użytkowników.
 - Zachować sprawną instalację i wygodę obsługi na Androidzie jako najważniejszy cel. Publikacja hostingu i połączenie konta Google pozostają odrębnymi operacjami wykonywanymi świadomie.
 
+## Zasada nadrzędna — trwałość treningów ponad poufnością (22.10.2026)
+Właściciel jednoznacznie zatwierdził hierarchię priorytetów: **najważniejsze jest, aby zapisany lub wpisywany trening nie zginął; prywatność informacji o ciężarach jest sprawą drugorzędną**. Nie zwiększać ryzyka utraty danych przez nadmiernie restrykcyjne zabezpieczenia, konieczność logowania, zależność od sieci ani rozbudowaną infrastrukturę.
+
+Wymagania realizacyjne:
+1. **Local-first:** każda istotna edycja formularza niezwłocznie tworzy trwały lokalny szkic, nawet offline; po restarcie i ubiciu procesu umożliwić wznowienie.
+2. **Potwierdzenie:** kliknięcie „Zapisz wynik” oznacza sukces dopiero po zakończeniu i weryfikacji trwałego zapisu. Nie pokazywać fałszywych sukcesów; błędy są widoczne, a dane pozostają do ponowienia/pobrania.
+3. **Bez utraty i nadpisania:** nie kasować szkiców przed potwierdzonym zapisem ich wyników, chronić ID/snapshoty/historię i nowsze wpisy. Zakończenie sesji nie może po cichu odrzucać niedokończonych danych.
+4. **Automatyczna kopia Drive:** po każdym zatwierdzonym wyniku i po zakończeniu sesji inicjować synchronizację; bez Internetu pracować lokalnie i ponawiać po powrocie sieci/uruchomieniu aplikacji. Rozdzielić stan lokalnego zapisu i synchronizacji, żeby użytkownik wiedział, co faktycznie utrwalono.
+5. **Praktyczny test niezawodności przed codziennym używaniem:** wpis → wymuszone zamknięcie → odzyskanie; zapis → restart → zachowany wynik; offline → zapis → ponowienie synchronizacji; błąd zapisu → brak utraty szkicu.
+6. **Proporcjonalne bezpieczeństwo:** HTTPS i standardowe uprawnienia Google pozostają konieczne. Nie budować systemu bankowego, ale również nie publikować indywidualnej historii treningów bez potrzeby.
+
+Nie obiecywać matematycznej niezniszczalności danych: awaria urządzenia przed ukończeniem zapisu, usunięcie pamięci i inne zdarzenia mogą prowadzić do straty. Celem jest minimalizacja ryzyka, jawna sygnalizacja stanu i szybkie odzyskiwanie.
+
 ## Kryteria i ograniczenia
 - Proste codzienne działanie na telefonie ważniejsze niż dodatkowa infrastruktura i liczba testów.
 - Odrębnie raportować: implementację, testy automatyczne, fizyczny telefon, realne dane i produkcyjne wdrożenie.
