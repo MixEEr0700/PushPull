@@ -1,6 +1,7 @@
 /** Data-only plans. Pure staging: callers commit the returned clone atomically. */
 import {parseJson,portable,canonical,record} from './backup-json.mjs';
 import {validateModel} from './training-model.mjs';
+import {PLAN_ID} from './v2-plan.mjs';
 import {initialize,sourceExercises} from './journal.mjs';
 const tables=['exercises','variants','positions','sets','drops','groups','coachInstructions'];
 const fields={
@@ -13,8 +14,8 @@ const fields={
  coachInstructions:'id planVersionId positionId revision text confirmation source'
 };
 const check=(ok,message)=>{if(!ok)throw TypeError('Plan: '+message);};
-const id=x=>typeof x==='string'&&/^[A-Za-z0-9_.:-]+$/.test(x)&&!['__proto__','constructor','prototype'].includes(x);
-const exerciseId=x=>typeof x==='string'&&/^[A-Za-z0-9_.-]+$/.test(x)&&!['__proto__','constructor','prototype'].includes(x);
+const id=x=>typeof x==='string'&&/^[A-Za-z0-9_.:-]+$/.test(x)&&!Object.hasOwn(Object.prototype,x)&&!['__proto__','constructor','prototype'].includes(x);
+const exerciseId=x=>typeof x==='string'&&/^[A-Za-z0-9_.-]+$/.test(x)&&!Object.hasOwn(Object.prototype,x)&&!['__proto__','constructor','prototype'].includes(x);
 function shape(x,keys){check(record(x),'oczekiwano obiektu');const names=keys.split(' ');check(Object.keys(x).every(k=>names.includes(k))&&names.every(k=>Object.hasOwn(x,k)),'brakujące pola lub nieznany protokół (wymaga obsługi w aplikacji): '+keys);}
 function safeKeys(x){if(x&&typeof x==='object')for(const [k,v] of Object.entries(x)){check(!['__proto__','constructor','prototype'].includes(k),'niedozwolony klucz');safeKeys(v);}}
 const same=(a,b)=>canonical(a)===canonical(b);
@@ -27,6 +28,7 @@ function packetShape(p){
  shape(p.approval,'status reference approvedAt');check(p.approval.status==='approved'&&typeof p.approval.reference==='string'&&p.approval.reference.trim()&&typeof p.approval.approvedAt==='string'&&Number.isFinite(Date.parse(p.approval.approvedAt)),'wymagana deklaracja zatwierdzenia planu przez właściciela');
  shape(p.planVersion,'id planId number label units executionVersion source');check(p.planVersion.executionVersion===2,'protokół wymaga obsługi w aplikacji');
  check(id(p.planVersion.id)&&id(p.planVersion.planId),'niepoprawne ID wersji/planu');
+ check(p.planVersion.id!==PLAN_ID,'ID wbudowanego V2 jest zarezerwowane; użyj nowego ID wersji');
  check(Array.isArray(p.planVersion.units),'brak jednostek');
  for(const u of p.planVersion.units){shape(u,'id name order');check(['PUSH A','PULL A','PUSH B','PULL B'].includes(u.id)||exerciseId(u.id),'niepoprawne ID jednostki');}
  for(const key of tables){check(Array.isArray(p[key]),'brak tabeli '+key);for(const row of p[key]){shape(row,fields[key]);check(id(row.id),'niepoprawne ID '+key);shape(row.source,'kind reference recordedAt');}}

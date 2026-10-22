@@ -31,7 +31,7 @@ Korzeń zawiera dokładnie:
 
 `executionVersion:2` oznacza istniejący protokół wyników (serie/segmenty/strony), a wersję treningową określają `planVersion.id`, `number` i `label`.
 
-`units` ma dowolną dodatnią liczbę `{id,name,order}`. Każda jednostka musi zawierać ćwiczenia. Nowe ID jednostek i ćwiczeń: litery ASCII, cyfry, `_`, `-`, `.`; istniejące cztery ID `PUSH A` itd. pozostają dozwolone. Pozostałe nowe ID mogą zawierać też `:`. ID nie może być kluczem prototypu. Kolejność jednostek/pozycji jest jawna, unikalna; kolejność serii zaczyna się od 0 bez luk. Dla obecnego dziennika dana tożsamość może wystąpić tylko raz w jednej jednostce, ale w wielu jednostkach/wersjach może zachować to samo ID.
+`units` ma dowolną dodatnią liczbę `{id,name,order}`. Każda jednostka musi zawierać ćwiczenia. Nowe ID jednostek i ćwiczeń: litery ASCII, cyfry, `_`, `-`, `.`; istniejące cztery ID `PUSH A` itd. pozostają dozwolone. Pozostałe nowe ID mogą zawierać też `:`. ID nie może być kluczem prototypu. ID wersji wbudowanego V2 jest zarezerwowane i nie może oznaczać importowanego planu. Kolejność jednostek/pozycji jest jawna, unikalna; kolejność serii zaczyna się od 0 bez luk. Dla obecnego dziennika dana tożsamość może wystąpić tylko raz w jednej jednostce, ale w wielu jednostkach/wersjach może zachować to samo ID.
 
 Definicje rekordów (wszystkie wymienione pola obowiązkowe):
 

@@ -4,6 +4,7 @@ import {runInNewContext} from 'node:vm';
 import {readFileSync} from 'node:fs';
 import {parsePlan,stagePlan,previewPlan,stageActivation} from '../model/plan-import.mjs';
 import {startSession,exercisesFor,recordEntry,advance,nextType} from '../model/journal.mjs';
+import {PLAN_ID} from '../model/v2-plan.mjs';
 import {newPerformance,flatten} from '../model/performance.mjs';
 import {createLegacyModel,parseModelBackup} from '../model/legacy-model.mjs';
 import {exportBackup} from '../model/backup.mjs';
@@ -38,8 +39,9 @@ test('structured new units, backoff, drops, sides, unknown targets and complete 
 
 test('invalid plans, unsupported protocols and ID collisions leave source intact',()=>{
  const data=legacy(),before=structuredClone(data),valid=fixture();
- for(const mutate of [p=>p.version=2,p=>p.sets[0].reps={min:10,max:2},p=>p.positions[0].sideMode='magic',p=>p.groups[0].kind='circuit',p=>p.groups[0].rounds=3,p=>p.groups[0].positionIds.reverse(),p=>p.drops[0].segments=[],p=>p.positions[0].loadConvention.unit='lb',p=>p.continuity.pop(),p=>p.userNotes=[],p=>p.positions[0].exerciseId='PUSH-A-1',p=>p.sets[0].unknownProtocol=true,p=>p.sets[0].positionId='missing']){const bad=structuredClone(valid);mutate(bad);assert.throws(()=>stagePlan(data,bad));assert.deepEqual(data,before);}
+ for(const mutate of [p=>p.version=2,p=>p.planVersion.units[0].id='toString',p=>p.exercises[0].id='toString',p=>p.sets[0].reps={min:10,max:2},p=>p.positions[0].sideMode='magic',p=>p.groups[0].kind='circuit',p=>p.groups[0].rounds=3,p=>p.groups[0].positionIds.reverse(),p=>p.drops[0].segments=[],p=>p.positions[0].loadConvention.unit='lb',p=>p.continuity.pop(),p=>p.userNotes=[],p=>p.positions[0].exerciseId='PUSH-A-1',p=>p.sets[0].unknownProtocol=true,p=>p.sets[0].positionId='missing']){const bad=structuredClone(valid);mutate(bad);assert.throws(()=>stagePlan(data,bad));assert.deepEqual(data,before);}
  assert.throws(()=>parsePlan('{"format":1,"format":2}'),/duplicate/);
+ const reserved=JSON.parse(JSON.stringify(valid).replaceAll('synthetic-v3',PLAN_ID));assert.throws(()=>stagePlan(data,reserved),/zarezerwowane/);
  const imported=stagePlan(data,valid);assert.throws(()=>stagePlan(imported,valid),/już zapisana/);
  const collision=v4(valid);collision.variants[0].machine='Different machine under old ID';assert.throws(()=>stagePlan(imported,collision),/kolizja/);
  const changed=v4(valid);changed.continuity[0].relation='new';assert.throws(()=>stagePlan(imported,changed),/ciągłości/);
