@@ -252,6 +252,36 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(self.page.evaluate(read),model)
         self.assertEqual(self.snapshot(),before)
 
+    def test_v2_results_offline_after_worker_update(self):
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-tab=settings]').click()
+        self.page.locator('[data-preview-v2]').click()
+        with self.page.expect_download():self.page.locator('[data-activate-v2]').click()
+        expect(self.page.get_by_text('V2 aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="PULL A"]').click();self.page.locator('[data-act=start]').click()
+        self.page.locator('[data-expand="PULL-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        form=self.page.locator('.performanceForm');form.locator('[data-rich-action=toggle]').click()
+        for el in form.locator('[data-field=kg]').all():el.fill('25')
+        for el in form.locator('[data-field=reps]').all():el.fill('8')
+        form.locator('[type=submit]').click()
+        expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        before=self.snapshot()
+        self.page.evaluate("navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(r=>r.update())")
+        self.controller['directory']=self.next_release('v2-update')
+        self.wait_update();self.reopen()
+        self.context.set_offline(True);self.page.reload();self.ready()
+        self.assertEqual(self.snapshot(),before)
+        self.page.locator('[data-expand="PULL-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        form=self.page.locator('.performanceForm');form.locator('[data-rich-action=toggle]').click()
+        expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('25')
+        form.locator('[data-row="1"][data-field=kg]').fill('20')
+        form.locator('[type=submit]').click()
+        expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        self.page.reload();self.ready()
+        self.assertEqual(self.snapshot()['data']['entries'][-1]['performance']['rows'][1]['segments'][0]['kg'],'20')
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+
     def test_stage2_to_stage3_worker_update_retains_database_and_backups(self):
         old=self.path/'stage2'
         for name in ['index.html','style.css','app.js','storage.js','indexeddb.js','manifest.webmanifest','icon.svg','sw.js']:
