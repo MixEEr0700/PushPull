@@ -318,6 +318,32 @@ const PushPullDB = (() => {
     }
     return {
       prepareModel,
+      // Drafts live in the existing meta store, outside source/model/statistics.
+      // They remain writable even when a stale official-history handle is blocked.
+      async readDrafts(){
+        if(!db)throw Error('IndexedDB niedostępne.');
+        return transaction(db,'readonly',async tx=>(await request(tx.objectStore('meta').getAll())).filter(r=>r.key.startsWith('workout-draft:')));
+      },
+      async writeDraft(record,expectedToken){
+        if(!db)throw Error('IndexedDB niedostępne.');
+        if(record.key!=='workout-draft:'+record.id)throw Error('Nieprawidłowy klucz szkicu.');
+        const safe=clone(record);
+        await transaction(db,'readwrite',async tx=>{
+          const store=tx.objectStore('meta'),old=await request(store.get(safe.key));
+          if((old?.token??null)!==expectedToken)throw Error('Szkic zmienił się w innej karcie. Zachowano obie wersje.');
+          store.put(safe);
+          if(canonical(await request(store.get(safe.key)))!==canonical(safe))throw Error('Nie udało się zweryfikować szkicu.');
+        });
+      },
+      async removeDraft(record){
+        if(typeof record.id!=='string'||record.key!=='workout-draft:'+record.id)throw Error('Nieprawidłowy klucz szkicu.');
+        if(!db)throw Error('IndexedDB niedostępne.');
+        return transaction(db,'readwrite',async tx=>{
+          const store=tx.objectStore('meta'),old=await request(store.get(record.key));
+          if(old && old.token!==record.token && !(old.id===record.id && old.sequence<record.sequence))return false; // Preserve newer edits; an older row may be covered by the recovered buffer.
+          store.delete(record.key);return true;
+        });
+      },
       async importModelBackup(text){
         if(!db)throw Error('IndexedDB niedostępne.');
         const parsed=await (await modelAPI()).parseModelBackup(text);

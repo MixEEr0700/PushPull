@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 ASSETS=(
     'index.html','style.css','app.js','storage.js','indexeddb.js',
     'model/training-model.mjs','model/backup.mjs','model/backup-json.mjs',
-    'model/legacy-backup.mjs','model/legacy-model.mjs','model/v2-plan-data.mjs','model/v2-plan.mjs','model/performance.mjs','model/performance-editor.mjs','model/journal.mjs',
+    'model/legacy-backup.mjs','model/legacy-model.mjs','model/v2-plan-data.mjs','model/v2-plan.mjs','model/performance.mjs','model/performance-editor.mjs','model/workout-drafts.mjs','model/journal.mjs',
     'manifest.webmanifest','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png',
 )
 FILES=(*ASSETS,'sw.js','release.json')

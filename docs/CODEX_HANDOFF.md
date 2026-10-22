@@ -1,3 +1,5 @@
+Aktualna poprawka: [automatyczne szkice i odzyskiwanie treningu](WORKOUT_DRAFT_RECOVERY.md), niezależne karty superserii A/B bez zmiany ich ID lub snapshotów. Wymaga PR #10; nie scala ani nie publikuje go.
+
 Aktualny etap funkcjonalny V2: [obsługa, decyzje O1–O3 i dane](V2_FUNCTIONAL_JOURNAL.md). Podgląd i osobna aktywacja planu, cele/back-off/drop/L/P/grupa, historia i pełne kopie v3 są podłączone do istniejącego dziennika. Nie wykonano wdrożenia ani testów fizycznego Androida. Poniższe opisy etapów zachowano historycznie.
 
 # Aplikacja Treningowa — aktualne przekazanie
