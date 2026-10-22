@@ -34,7 +34,7 @@ Tonaż nowych wyników = suma **każdego faktycznie zapisanego segmentu każdej 
 
 Instrukcje źródłowe są tylko do odczytu: etykiety C1 (trener), C2/U (historyczne uwagi, autor nieustalony) i D/O (właściciel) pozostają rozróżnione. Cytaty C2 nie zawierają liczbowych historycznych wyników. Własne notatki są oddzielnymi UserNote (`origin:user`). Dawne wspólne notatki pozostają nienaruszone i widoczne osobno; nie przypisujemy im autora. Znaczniki techniki zachowują dotychczasowy zapis.
 
-Nie zmieniono schematu ani wersji IndexedDB, storage.js, indexeddb.js, CSS, ikon, manifestu/tożsamości PWA ani oryginalnego localStorage. Nowe ćwiczenia mają w dokumencie kompatybilności znacznik `journalOnly`, aby nie pojawiały się w dawnych sesjach. Zapis korzysta z istniejącego CAS i transakcji źródło+model; sukces wyświetlamy po ich zakończeniu. Po błędzie draft pozostaje dostępny do poprawki/powtórzenia. Robocze, niezapisane formularze nadal nie przeżywają zamknięcia strony — zapisuj wynik przed wyjściem.
+Nie zmieniono schematu ani wersji IndexedDB, storage.js, indexeddb.js, CSS, ikon, manifestu/tożsamości PWA ani oryginalnego localStorage. Nowe ćwiczenia mają w dokumencie kompatybilności znacznik `journalOnly`, aby nie pojawiały się w dawnych sesjach. Zapis korzysta z istniejącego CAS i transakcji źródło+model; sukces wyświetlamy po ich zakończeniu. Po błędzie draft pozostaje dostępny do poprawki/powtórzenia. Aktualizacja po PR #10: robocze formularze mają [trwałe szkice i odzyskiwanie](WORKOUT_DRAFT_RECOVERY.md), a para jest prezentowana w osobnych kartach A/B.
 
 ## Weryfikacja i telefon
 

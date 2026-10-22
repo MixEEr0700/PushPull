@@ -102,6 +102,9 @@ class ModelMigration(BrowserHarness):
         self.page.locator('[data-panel=result]').click()
         self.page.locator('[data-main=kg]').fill('110')
         self.page.locator('[data-main=reps]').fill('10')
+        # Draft persistence is independent of the approved source/model transaction.
+        expect(self.page.locator('[data-draft-status]')).to_have_text('Szkic zapisany lokalnie · wynik niezatwierdzony')
+        before=self.records()
         # The form is already visible before submit; wait for the actual async failure.
         with self.page.expect_event('dialog'):
             self.page.locator('.seriesResultForm [type=submit]').click()
