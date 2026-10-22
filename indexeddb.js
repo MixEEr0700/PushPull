@@ -336,6 +336,7 @@ const PushPullDB = (() => {
         });
       },
       async removeDraft(record){
+        if(typeof record.id!=='string'||record.key!=='workout-draft:'+record.id)throw Error('Nieprawidłowy klucz szkicu.');
         if(!db)throw Error('IndexedDB niedostępne.');
         return transaction(db,'readwrite',async tx=>{
           const store=tx.objectStore('meta'),old=await request(store.get(record.key));

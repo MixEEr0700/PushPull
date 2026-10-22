@@ -33,6 +33,7 @@ class WorkoutDrafts(BrowserHarness):
 
     def test_series_close_reopen_conflict_and_explicit_discard(self):
         self.activate();form=self.open_result('PUSH A','PUSH-A-3');before=self.state()
+        self.assertTrue(self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{try{await d.removeDraft({key:'state',id:'not-a-draft',token:null});return false}catch(e){return e.message.includes('klucz szkicu')}}finally{d.close()}}"""))
         self.fill_rows(form,'100','6')
         form.locator('[data-row="2"][data-field=kg]').fill('70')
         form.locator('[data-row="2"][data-field=reps]').fill('10');self.persisted(form)

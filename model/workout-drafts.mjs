@@ -54,7 +54,7 @@ export async function openDrafts(database){
   get records(){return clone(records);},get error(){return storageError;},get readError(){return readError;},
   reload,
   reset(){active.clear();restored.clear();return reload();},
-  compatible(record,binding){return record?.version===1&&same(record.context,binding.context)&&same(record.baseline,binding.baseline)&&editorValueValid(record.kind,record.value);},
+  compatible(record,binding){return record?.version===1&&typeof record.id==='string'&&record.key==='workout-draft:'+record.id&&typeof record.token==='string'&&Number.isSafeInteger(record.sequence)&&record.sequence>0&&same(record.context,binding.context)&&same(record.baseline,binding.baseline)&&editorValueValid(record.kind,record.value);},
   take(sessionId,exerciseId){const k=key(sessionId,exerciseId),value=restored.get(k);restored.delete(k);return value&&clone(value);},
   resume(record,binding){
    if(!api.compatible(record,binding))throw Error('Szkic nie odpowiada obecnej sesji lub wynikowi. Pobierz go do odzyskania; nie nadpisano danych.');
