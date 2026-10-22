@@ -50,7 +50,7 @@ const PushPullDB = (() => {
   const digest = async value => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical(value))))).map(x=>x.toString(16).padStart(2,'0')).join('');
   function catalogFor(data, previous = null, legacy = false) {
     const catalog = previous ? clone(previous) : {plans:[], planVersions:[], sessionVersions:{}};
-    for (const type of TYPES) {
+    for (const type of Object.keys(data.exercises)) {
       const parameters = data.exercises[type].map(ex => { const value = clone(ex); delete value.notes; return value; });
       let plan = catalog.plans.find(p => p.id === type);
       if (!plan) { plan = {id:type, label:'V2 — niezweryfikowany', currentVersion:null}; catalog.plans.push(plan); }
@@ -73,10 +73,10 @@ const PushPullDB = (() => {
         !catalog.sessionVersions || typeof catalog.sessionVersions !== 'object' || Array.isArray(catalog.sessionVersions)) throw Error('Nieprawidłowe wersje planów');
     const ids = new Set(), plans = new Map();
     for (const p of catalog.plans) {
-      if (!p || !TYPES.includes(p.id) || plans.has(p.id) || typeof p.label !== 'string' || typeof p.currentVersion !== 'string') throw Error('Nieprawidłowy plan');
+      if (!p || !Object.hasOwn(data.exercises,p.id) || plans.has(p.id) || typeof p.label !== 'string' || typeof p.currentVersion !== 'string') throw Error('Nieprawidłowy plan');
       plans.set(p.id,p);
     }
-    if (plans.size !== TYPES.length) throw Error('Brak planu');
+    if (plans.size !== Object.keys(data.exercises).length) throw Error('Brak planu');
     for (const v of catalog.planVersions) {
       if (!v || typeof v.id !== 'string' || !v.id || ids.has(v.id) || !plans.has(v.planId) || !['recorded','legacy-current-only'].includes(v.provenance)) throw Error('Nieprawidłowa wersja planu');
       const probe = clone(data);
@@ -124,7 +124,7 @@ const PushPullDB = (() => {
   function encode(data, catalog) {
     const rows = Object.fromEntries(TABLES.map(t=>[t,[]]));
     rows.plans = clone(catalog.plans); rows.planVersions = clone(catalog.planVersions);
-    for (const type of TYPES) data.exercises[type].forEach((ex,position)=>{
+    for (const type of Object.keys(data.exercises)) data.exercises[type].forEach((ex,position)=>{
       const value=clone(ex);delete value.notes;
       rows.exercises.push({id:ex.id,planId:type,position,value});
       rows.notes.push({id:ex.id,origin:'legacy-shared',value:ex.notes});
@@ -142,7 +142,7 @@ const PushPullDB = (() => {
   function decode(root, rows) {
     const order = values => [...values].sort((a,b)=>a.position-b.position);
     const data=clone(root.rest);
-    data.exercises=Object.fromEntries(TYPES.map(type=>[type,order(rows.exercises.filter(e=>e.planId===type)).map(e=>({...e.value,notes:rows.notes.find(n=>n.id===e.id)?.value}))]));
+    data.exercises=Object.fromEntries(root.catalogOrder.plans.map(type=>[type,order(rows.exercises.filter(e=>e.planId===type)).map(e=>({...e.value,notes:rows.notes.find(n=>n.id===e.id)?.value}))]));
     data.sessions=order(rows.sessions).map(s=>clone(s.value));
     data.entries=order(rows.entries).map(e=>{
       const value=clone(e.value);
@@ -199,7 +199,7 @@ const PushPullDB = (() => {
       root=result.root;current=value.data;catalog=value.catalog;backupRows=result.backups;unverified=null;
       return root;
     }
-    async function save(data, nextCatalog, {importing=false, initializing=false, importedArchives=[],modelOwnerId=null}={}) {
+    async function save(data, nextCatalog, {importing=false, initializing=false, importedArchives=[],modelOwnerId=null,backupBefore=false}={}) {
       const expectedRevision=root?.revision || 0,expectedModel=modelState || (importing?unverified?.modelState || null:null);
       if(data.trainingJournal && !expectedModel && modelOwnerId===null)throw Error('Nowy dziennik wymaga importu pełnej kopii v3.');
       PushPullStorage.validate(data);validateCatalog(data,nextCatalog);
@@ -222,7 +222,7 @@ const PushPullDB = (() => {
           if(id?.startsWith(PushPullStorage.KEY+'_backup_'))backups.push({id,kind:'legacy-backup',createdAt:new Date().toISOString(),raw:localStorage.getItem(id)});
         }
       }
-      if(importing && root)backups.push({id:'idb:'+crypto.randomUUID(),kind:'before-import',createdAt:new Date().toISOString(),raw:JSON.stringify(expectedModel?expectedModel.document:current?snapshot():{format:'pushpull-idb-recovery',version:1,...unverified})});
+      if((importing || backupBefore) && root)backups.push({id:'idb:'+crypto.randomUUID(),kind:'before-import',createdAt:new Date().toISOString(),raw:JSON.stringify(expectedModel?expectedModel.document:current?snapshot():{format:'pushpull-idb-recovery',version:1,...unverified})});
       if(importing && root && source!==root.legacyRaw)backups.push({id:'legacy-conflict:'+crypto.randomUUID(),kind:'legacy-conflict',createdAt:new Date().toISOString(),raw:source});
       backups.push(...clone(validateArchives(importedArchives)));
       const additions=[];
@@ -379,11 +379,11 @@ const PushPullDB = (() => {
       set onchange(callback){notify=callback;},
       recovery(){return unverified?{format:'pushpull-idb-recovery',version:1,...clone(unverified)}:current?snapshot(true):null;},
       export(){if(!current)throw Error('Brak zweryfikowanej bazy do eksportu.');return snapshot(true);},
-      async commit(data,{importing=false,importedCatalog=null,importedArchives=[]}={}) {
+      async commit(data,{importing=false,importedCatalog=null,importedArchives=[],backupBefore=false}={}) {
         if(!db)throw Error('IndexedDB niedostępne. Odblokuj pamięć i uruchom ponownie.');
         if(error && !importing)throw error;
         const safe=clone(data),nextCatalog=importedCatalog || catalogFor(safe,catalog);
-        try{await save(safe,nextCatalog,{importing,importedArchives});}catch(failure){if(/Inna karta|Starsza wersja|Dane źródłowe|Model zmienił/.test(failure.message))blocked(failure.message);throw failure;}
+        try{await save(safe,nextCatalog,{importing,importedArchives,backupBefore});}catch(failure){if(/Inna karta|Starsza wersja|Dane źródłowe|Model zmienił/.test(failure.message))blocked(failure.message);throw failure;}
       },
       backups(){return backupRows.map(b=>b.id);},
       backupLabel(id){const item=backupRows.find(b=>b.id===id);const label={migration:'Przed migracją','before-import':'Przed importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item.kind] || 'Kopia';return label+' · '+new Date(item.createdAt).toLocaleString('pl-PL');},

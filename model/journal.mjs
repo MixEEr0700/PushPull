@@ -37,6 +37,18 @@ export function prepareSourceSession(data,session){
 export function initialize(ownerId) {
   return {version:1,model:{schemaVersion:1,ownerId,exercises:[],variants:[],planVersions:[],positions:[],sets:[],drops:[],groups:[],coachInstructions:[],userNotes:[]},sessionSnapshots:[]};
 }
+export function structuredSnapshot(snap){return !!snap?.model.planVersions.some(v=>v.id===snap.planVersionId&&v.executionVersion===2);}
+export function units(data,session=null){
+ const snap=session&&snapshotFor(data,session.id),m=snap?.model??data.trainingJournal?.model,id=snap?.planVersionId??data.trainingJournal?.activePlanVersionId;
+ return (m?.planVersions.find(v=>v.id===id)?.units??['PUSH A','PULL A','PUSH B','PULL B'].map((id,order)=>({id,name:id,order}))).slice().sort((a,b)=>a.order-b.order);
+}
+export function nextType(data){const list=units(data);return list.some(u=>u.id===data.trainingJournal?.nextUnitId)?data.trainingJournal.nextUnitId:list.some(u=>u.id===data.nextType)?data.nextType:list[0].id;}
+export function unitLabel(data,session){return units(data,session).find(u=>u.id===session.type)?.name??session.type;}
+export function advance(data,session){
+ const list=units(data),snap=snapshotFor(data,session.id);
+ if(data.trainingJournal?.activePlanVersionId){if(snap?.planVersionId!==data.trainingJournal.activePlanVersionId)return;data.trainingJournal.nextUnitId=list[(list.findIndex(u=>u.id===session.type)+1)%list.length].id;}
+ const legacy=['PUSH A','PULL A','PUSH B','PULL B'];if(legacy.includes(session.type))data.nextType=legacy[(legacy.indexOf(session.type)+1)%legacy.length];
+}
 export function snapshotFor(data,sessionId) {return data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===sessionId)??null;}
 export function exercisesFor(data,session) {
   const snap=snapshotFor(data,session?.id);
@@ -46,7 +58,7 @@ export function exercisesFor(data,session) {
       const ex=registry.find(e=>e.id===id);return {...ex,displayNumber:ex.displayNumber??original.findIndex(e=>e.id===id)+1};
     }):original;
   }
-  if(snap.planVersionId===PLAN_ID)return views(snap.model,snap.planVersionId,session.type,data);
+  if(structuredSnapshot(snap))return views(snap.model,snap.planVersionId,session.type,data);
   return snap.model.positions.filter(p=>p.planVersionId===snap.planVersionId && p.unitId===snap.unitId).sort((a,b)=>a.order-b.order).map(p=>({
     ...structuredClone(p.legacyExercise),initialKg:'',journalVariantId:p.variantId,
     notes:Object.values(data.exercises).flat().find(e=>e.id===p.exerciseId)?.notes??''}));
@@ -78,7 +90,7 @@ export function recordEntry(data,entry) {
   const p=snap.model.positions.find(p=>p.exerciseId===entry.exerciseId && p.planVersionId===snap.planVersionId && p.unitId===snap.unitId);
   check(p && Array.isArray(entry.series) && entry.series.length,'native result needs complete series');
   entry.journalSnapshotId=snap.id;entry.journalPositionId=p.id;entry.journalVariantId=p.variantId;
-  if(snap.planVersionId===PLAN_ID&&entry.performance){entry.series=flatten(entry.performance);validatePerformance(entry.performance,snap,entry);return;}
+  if(structuredSnapshot(snap)&&entry.performance){entry.series=flatten(entry.performance);validatePerformance(entry.performance,snap,entry);return;}
   entry.series=entry.series.map((r,i)=>({...r,id:r.id??crypto.randomUUID(),setId:Object.hasOwn(r,'setId')?r.setId:(snap.model.sets.find(s=>s.positionId===p.id && s.order===i)?.id??null)}));
 }
 /** Project known native records into backup B, retaining all legacy source too. */
@@ -103,9 +115,9 @@ export function project(data,base) {
     const e=r.data,snap=snaps.get(e.sessionId);
     if(!snap){check(!e.journalSnapshotId,'result snapshot missing');resultRecords.push(r);continue;}
     check(e.journalSnapshotId===snap.id && Array.isArray(e.series) && e.series.length,'native result lost its series');
-    const metadata={...e};delete metadata.series;if(snap.planVersionId===PLAN_ID)delete metadata.performance;
-    check(snap.planVersionId!==PLAN_ID||e.performance,'V2 result requires structured performance');
-    if(snap.planVersionId===PLAN_ID&&e.performance){const refs=validatePerformance(e.performance,snap,e);resultReferences.push(...refs);e.performance.rows.forEach((row,order)=>resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:2,data:{...row,order,loadConvention:e.performance.loadConvention,entryId:e.id,entryMetadata:metadata}}));continue;}
+    const metadata={...e};delete metadata.series;if(structuredSnapshot(snap))delete metadata.performance;
+    check(!structuredSnapshot(snap)||e.performance,'V2 result requires structured performance');
+    if(structuredSnapshot(snap)&&e.performance){const refs=validatePerformance(e.performance,snap,e);resultReferences.push(...refs);e.performance.rows.forEach((row,order)=>resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:2,data:{...row,order,loadConvention:e.performance.loadConvention,entryId:e.id,entryMetadata:metadata}}));continue;}
     e.series.forEach((row,order)=>{
       check(!Object.hasOwn(row,'segments') && !Object.hasOwn(row,'side') && !Object.hasOwn(row,'groupId'),'unsupported performance structure');
       check(typeof row.id==='string' && Object.hasOwn(row,'setId'),'series identity missing');

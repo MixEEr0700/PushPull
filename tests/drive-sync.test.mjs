@@ -111,3 +111,22 @@ test('another tab switching accounts cannot send data with the old tab token',as
  const count=old.transport.creates;await old.sync.retryNow();assert.equal(old.transport.creates,count);
  assert.match(old.sync.status.detail,/Połącz Google/);assert.equal(db.state.selected,'account-B');
 });
+
+test('imported future plans use the existing complete v3 Drive queue and restore unchanged',async()=>{
+ const {stagePlan,stageActivation}=await import('../model/plan-import.mjs');
+ const {createLegacyModel}=await import('../model/legacy-model.mjs');
+ const {exportBackup}=await import('../model/backup.mjs');
+ const {runInNewContext}=await import('node:vm');
+ const db=new Database(),drive=new Drive(),{sync}=await setup(db,drive);await flush(sync);
+ const config=clone(db.state),p=JSON.parse(readFileSync(new URL('fixtures/plan-v3.json',import.meta.url)));
+ db.value=stageActivation(stagePlan(db.value,p,'test-owner'),p.planVersion.id,'2026-10-22T12:01:00.000Z');db.revision++;
+ const adapter=runInNewContext(readFileSync('storage.js','utf8')+'\n'+readFileSync('indexeddb.js','utf8')+'\nPushPullDB',{structuredClone,crypto:globalThis.crypto});
+ const {catalog}=adapter.parseBackup(db.value),backup=await exportBackup(await createLegacyModel(JSON.stringify({format:'pushpull-backup',version:2,data:db.value,catalog,archives:[]}),{ownerId:'test-owner',createdAt:'2026-10-22T12:02:00.000Z'}));
+ db.model={};db.exportModelBackup=async()=>backup;
+ drive.authenticated=false;sync.localChanged();await sync.retryNow();assert.equal(drive.files.size,1);
+ assert.equal(db.state.clientId,config.clientId);assert.deepEqual(db.state.selected,config.selected);
+ drive.authenticated=true;await flush(sync);assert.equal(sync.status.label,'Zsynchronizowano');
+ const g=graph(await drive.list()),node=await readNode(drive,g.nodes.get(g.heads[0])),restored=await inspectBackup(node.backup);
+ assert.deepEqual(restored.data,db.value);assert.deepEqual(restored.data.trainingJournal.importedPlans,[p]);
+ assert.equal(restored.data.entries.length,fixture().entries.length);sync.close();
+});

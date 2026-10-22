@@ -1,3 +1,5 @@
+Aktualne Issue #21: [import kolejnych planów jako danych](PLAN_IMPORT_ISSUE_21.md), walidacja i podgląd, zapis nieaktywny i osobna aktywacja dla przyszłych sesji. Bez zmiany rozpoczętych sesji, historii, szkiców i snapshotów. Brak zmiany protokołu Drive, migracji schematu IndexedDB i publikacji; testy wyłącznie syntetyczne. Poniższe akapity dokumentują wcześniejsze etapy.
+
 Aktualna poprawka: [automatyczne szkice i odzyskiwanie treningu](WORKOUT_DRAFT_RECOVERY.md), niezależne karty superserii A/B bez zmiany ich ID lub snapshotów. Wymaga PR #10; nie scala ani nie publikuje go.
 
 Aktualny etap funkcjonalny V2: [obsługa, decyzje O1–O3 i dane](V2_FUNCTIONAL_JOURNAL.md). Podgląd i osobna aktywacja planu, cele/back-off/drop/L/P/grupa, historia i pełne kopie v3 są podłączone do istniejącego dziennika. Nie wykonano wdrożenia ani testów fizycznego Androida. Poniższe opisy etapów zachowano historycznie.

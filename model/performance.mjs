@@ -5,7 +5,7 @@ export function validatePerformance(performance,snapshot,entry){
  check(performance?.version===2&&Array.isArray(performance.rows)&&performance.rows.length,'missing performance');
  const position=snapshot.model.positions.find(p=>p.id===entry.journalPositionId);
  check(position?.exerciseId===entry.exerciseId&&position.variantId===entry.journalVariantId,'performance position mismatch');
- check(canonical(performance.loadConvention)===canonical(position.loadConvention)||position.loadConvention.basis===null&&performance.loadConvention.unit==='kg'&&['per-implement','combined','machine-indication',null].includes(performance.loadConvention.basis),'load convention mismatch');
+ check(canonical(performance.loadConvention)===canonical(position.loadConvention)||position.loadConvention.basis===null&&performance.loadConvention.unit===position.loadConvention.unit&&['per-implement','combined','machine-indication',null].includes(performance.loadConvention.basis),'load convention mismatch');
  const ids=new Set(),refs=[],bindings=new Set();
  for(const row of performance.rows){
   check(typeof row.id==='string'&&row.id&&!ids.has(row.id),'duplicate row ID');ids.add(row.id);
