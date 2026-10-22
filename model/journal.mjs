@@ -2,6 +2,8 @@
  * This records the current app plan, never activates or interprets the V2 draft.
  */
 import {createModel,captureSessionSnapshot,validateModel,validateSessionSnapshot,createResultReference} from './training-model.mjs';
+import {views,PLAN_ID} from './v2-plan.mjs';
+import {validatePerformance,flatten} from './performance.mjs';
 import {canonical,requireThat as check} from './backup-json.mjs';
 const source=(reference,recordedAt=null)=>({kind:'legacy',reference,recordedAt});
 export function initialize(ownerId) {
@@ -10,7 +12,8 @@ export function initialize(ownerId) {
 export function snapshotFor(data,sessionId) {return data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===sessionId)??null;}
 export function exercisesFor(data,session) {
   const snap=snapshotFor(data,session?.id);
-  if(!snap)return data.exercises[session.type]||[];
+  if(!snap)return (data.exercises[session.type]||[]).filter(e=>!e.journalOnly);
+  if(snap.planVersionId===PLAN_ID)return views(snap.model,snap.planVersionId,session.type,data);
   return snap.model.positions.filter(p=>p.planVersionId===snap.planVersionId && p.unitId===snap.unitId).sort((a,b)=>a.order-b.order).map(p=>({
     ...structuredClone(p.legacyExercise),initialKg:'',journalVariantId:p.variantId,
     notes:Object.values(data.exercises).flat().find(e=>e.id===p.exerciseId)?.notes??''}));
@@ -18,6 +21,7 @@ export function exercisesFor(data,session) {
 export async function startSession(data,session,startedAt) {
   const j=data.trainingJournal;check(j?.version===1,'unsupported journal');
   check(!snapshotFor(data,session.id),'session already has a snapshot');
+  if(j.activePlanVersionId){const snapshot=captureSessionSnapshot(j.model,{id:crypto.randomUUID(),sessionId:session.id,planVersionId:j.activePlanVersionId,unitId:session.type,startedAt});j.sessionSnapshots.push(structuredClone(snapshot));session.journalSnapshotId=snapshot.id;return;}
   const exercises=data.exercises[session.type].map(e=>{const x=structuredClone(e);delete x.notes;return x;});
   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical(exercises)))),b=>b.toString(16).padStart(2,'0')).join('');
   const versionId='observed:'+session.type+':'+hash,m=j.model;
@@ -41,6 +45,7 @@ export function recordEntry(data,entry) {
   const p=snap.model.positions.find(p=>p.exerciseId===entry.exerciseId && p.planVersionId===snap.planVersionId && p.unitId===snap.unitId);
   check(p && Array.isArray(entry.series) && entry.series.length,'native result needs complete series');
   entry.journalSnapshotId=snap.id;entry.journalPositionId=p.id;entry.journalVariantId=p.variantId;
+  if(entry.performance){entry.series=flatten(entry.performance);validatePerformance(entry.performance,snap,entry);return;}
   entry.series=entry.series.map((r,i)=>({...r,id:r.id??crypto.randomUUID(),setId:Object.hasOwn(r,'setId')?r.setId:(snap.model.sets.find(s=>s.positionId===p.id && s.order===i)?.id??null)}));
 }
 /** Project known native records into backup B, retaining all legacy source too. */
@@ -48,14 +53,14 @@ export function project(data,base) {
   const j=data.trainingJournal;if(!j)return base;
   check(j.version===1 && j.model?.ownerId===base.model.ownerId,'journal version/owner mismatch');
   validateModel(j.model);
-  check(j.model.drops.length===0 && j.model.groups.length===0 && j.model.sets.every(s=>s.role===null && s.side===null),'this journal version supports flat series only');
+  if(j.activePlanVersionId)check(j.model.planVersions.some(p=>p.id===j.activePlanVersionId),'active plan missing');
   check(Array.isArray(j.sessionSnapshots),'missing session snapshots');
   const snaps=new Map();
   for(const snap of j.sessionSnapshots) {
     validateSessionSnapshot(snap);check(!snaps.has(snap.sessionId),'duplicate session snapshot');snaps.set(snap.sessionId,snap);
     check(data.sessions.some(s=>s.id===snap.sessionId && s.journalSnapshotId===snap.id),'orphan snapshot');
   }
-  const model=createModel({...j.model,exercises:[...base.model.exercises,...j.model.exercises.filter(e=>!base.model.exercises.some(b=>b.id===e.id))],userNotes:base.model.userNotes});
+  const model=createModel({...j.model,exercises:[...base.model.exercises,...j.model.exercises.filter(e=>!base.model.exercises.some(b=>b.id===e.id))],userNotes:[...base.model.userNotes,...j.model.userNotes]});
   const sessionRecords=base.sessionRecords.map(r=>{
     const snap=snaps.get(r.id);check(!r.data.journalSnapshotId || snap?.id===r.data.journalSnapshotId,'session snapshot missing');
     return snap?{...r,snapshotId:snap.id}:r;
@@ -65,7 +70,9 @@ export function project(data,base) {
     const e=r.data,snap=snaps.get(e.sessionId);
     if(!snap){check(!e.journalSnapshotId,'result snapshot missing');resultRecords.push(r);continue;}
     check(e.journalSnapshotId===snap.id && Array.isArray(e.series) && e.series.length,'native result lost its series');
-    const metadata={...e};delete metadata.series;
+    const metadata={...e};delete metadata.series;delete metadata.performance;
+    check(snap.planVersionId!==PLAN_ID||e.performance,'V2 result requires structured performance');
+    if(e.performance){const refs=validatePerformance(e.performance,snap,e);resultReferences.push(...refs);e.performance.rows.forEach((row,order)=>resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:2,data:{...row,order,loadConvention:e.performance.loadConvention,entryId:e.id,entryMetadata:metadata}}));continue;}
     e.series.forEach((row,order)=>{
       check(!Object.hasOwn(row,'segments') && !Object.hasOwn(row,'side') && !Object.hasOwn(row,'groupId'),'unsupported performance structure');
       check(typeof row.id==='string' && Object.hasOwn(row,'setId'),'series identity missing');
@@ -78,6 +85,7 @@ export function project(data,base) {
 }
 /** Preview only a context whose actual source parameters still match. */
 export function previewExercises(data,type) {
+  if(data.trainingJournal?.activePlanVersionId)return views(data.trainingJournal.model,data.trainingJournal.activePlanVersionId,type,data);
   const current=data.exercises[type].map(e=>{const x={...e};delete x.notes;return x;});
   const match=data.trainingJournal?.sessionSnapshots.slice().reverse().find(s=>s.unitId===type &&
     canonical(s.model.positions.filter(p=>p.planVersionId===s.planVersionId && p.unitId===s.unitId).sort((a,b)=>a.order-b.order).map(p=>p.legacyExercise))===canonical(current));
