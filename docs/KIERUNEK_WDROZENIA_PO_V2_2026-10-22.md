@@ -31,6 +31,12 @@ W PR #10 dwa człony mają już oddzielne rekordy/wyniki, lecz przedstawiane są
 - **Konflikty i niezawodność**: żadne ciche nadpisywanie nowszej historii starszą kopią; walidacja integralności, bezpieczne odtwarzanie na innym telefonie, brak duplikacji wyników i jawny status synchronizacji (zsynchronizowano / oczekuje / offline / błąd).
 - **Zakres**: to zatwierdzony kontrakt przyszłej implementacji, NIE funkcja dostępna w PR #10/#11. Google Drive wymaga osobnej implementacji, konfiguracji OAuth i rzeczywistych testów; nie uruchamiać połączenia z kontem bez świadomej zgody.
 
+## Decyzja właściciela — prostota zamiast nadmiernych zabezpieczeń (22.10.2026)
+- To prywatny dziennik ciężarów i treningów, a nie system finansowy. Nie projektować bankowej infrastruktury, dodatkowych kont, własnego backendu ani logowania do samej aplikacji bez realnej potrzeby.
+- Właściciel akceptuje publicznie dostępny adres PWA przez HTTPS. Publiczna dostępność plików aplikacji nie oznacza zgody na publiczną publikację jego historii treningów; wyniki pozostają lokalnie, a przyszłe kopie na jego własnym Google Drive.
+- Ochrona ma być proporcjonalna: niezawodne szkice, lokalny zapis offline, kopie, ochrona przed przypadkowym nadpisaniem i uczciwy stan synchronizacji. Przy integracji Google wystarczą standardowe mechanizmy autoryzacji Google, bez autorskiego systemu użytkowników.
+- Zachować sprawną instalację i wygodę obsługi na Androidzie jako najważniejszy cel. Publikacja hostingu i połączenie konta Google pozostają odrębnymi operacjami wykonywanymi świadomie.
+
 ## Kryteria i ograniczenia
 - Proste codzienne działanie na telefonie ważniejsze niż dodatkowa infrastruktura i liczba testów.
 - Odrębnie raportować: implementację, testy automatyczne, fizyczny telefon, realne dane i produkcyjne wdrożenie.
