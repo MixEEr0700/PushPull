@@ -23,6 +23,14 @@ W PR #10 dwa człony mają już oddzielne rekordy/wyniki, lecz przedstawiane są
 4. Uniwersalny **import kolejnych wersji planu jako danych**, bez przebudowy kodu aplikacji: właściciel przekazuje nowy dokument → wyjaśniamy tylko niejasności → przygotowujemy wersjonowany plik danych → aplikacja pokazuje różnice i świadomie aktywuje nowy plan. Stare sesje/snapshoty pozostają przy poprzednim planie. W PR #10 dane V2 są wydzielone do `model/v2-plan-data.mjs`, ale nadal dostarczane wraz z kodem; uniwersalnego importu planu NIE ma.
 5. **Przed regularnym używaniem na telefonie** dodać automatyczny lokalny zapis i odzyskiwanie szkiców rozpoczętej sesji (w tym kg, powtórzenia, strony L/P, segmenty dropsetów i człony superserii). To wymaganie obowiązkowe, nie kosmetyczna poprawka po wystąpieniu utraty wyników. Zapis szkicu powinien działać offline, po każdej istotnej edycji, bez potrzeby klikania Zapisz. Po restarcie/ubiciu procesu/odświeżeniu aplikacja musi proponować wznowienie. Szkic oddzielić od zatwierdzonych wyników i statystyk; usuwać go dopiero po potwierdzeniu trwałego zapisu albo świadomym odrzuceniu. Weryfikować przypadek przerwania podczas edycji i odzyskanie bez utraty zatwierdzonych danych.
 
+## Zatwierdzona zasada synchronizacji z Google Drive (22.10.2026)
+- **Szkic niezapisanych pól** (kg, reps, strony, back-off, drop, osobne A/B) pozostaje lokalnym automatycznym szkicem odzyskiwania. Nie jest zatwierdzonym wynikiem, nie zasila statystyk i nie wymaga Internetu.
+- **Każdy zatwierdzony wynik** musi najpierw zostać trwale zapisany lokalnie, a następnie wyzwala automatyczną synchronizację aktualnych danych z Google Drive, jeżeli jest aktywne połączenie i autoryzacja.
+- **Zakończenie treningu** po lokalnym zapisie uruchamia dodatkową synchronizację pełnej aktualnej historii, statystyk i informacji o sesjach. Zamykanie aplikacji nie może być potrzebne do synchronizacji.
+- **Offline / przerwana sieć / wygasła autoryzacja**: trening działa normalnie; zatwierdzone zmiany zachowują status oczekujących, są ponawiane po odzyskaniu połączenia i ponownym uruchomieniu aplikacji. Nie wolno pokazywać sukcesu, zanim Drive potwierdzi zapis.
+- **Konflikty i niezawodność**: żadne ciche nadpisywanie nowszej historii starszą kopią; walidacja integralności, bezpieczne odtwarzanie na innym telefonie, brak duplikacji wyników i jawny status synchronizacji (zsynchronizowano / oczekuje / offline / błąd).
+- **Zakres**: to zatwierdzony kontrakt przyszłej implementacji, NIE funkcja dostępna w PR #10/#11. Google Drive wymaga osobnej implementacji, konfiguracji OAuth i rzeczywistych testów; nie uruchamiać połączenia z kontem bez świadomej zgody.
+
 ## Kryteria i ograniczenia
 - Proste codzienne działanie na telefonie ważniejsze niż dodatkowa infrastruktura i liczba testów.
 - Odrębnie raportować: implementację, testy automatyczne, fizyczny telefon, realne dane i produkcyjne wdrożenie.
