@@ -318,6 +318,23 @@ const PushPullDB = (() => {
     }
     return {
       prepareModel,
+      // Sync metadata stays outside workout records, snapshots and JSON backups.
+      // The official state.revision is the durable dirty marker, even if this fails.
+      async readDriveState(){
+        if(!db)throw Error('IndexedDB niedostępne.');
+        return transaction(db,'readonly',tx=>request(tx.objectStore('meta').get('drive-sync-v1')));
+      },
+      async writeDriveState(value,expectedToken){
+        if(!db)throw Error('IndexedDB niedostępne.');
+        const next={...clone(value),key:'drive-sync-v1',token:crypto.randomUUID()};
+        return transaction(db,'readwrite',async tx=>{
+          const store=tx.objectStore('meta'),old=await request(store.get(next.key));
+          if((old?.token??null)!==expectedToken)throw Error('Stan Drive zmienił się w innej karcie. Odśwież synchronizację.');
+          store.put(next);
+          if(canonical(await request(store.get(next.key)))!==canonical(next))throw Error('Nie zweryfikowano stanu Drive.');
+          return next;
+        });
+      },
       // Drafts live in the existing meta store, outside source/model/statistics.
       // They remain writable even when a stale official-history handle is blocked.
       async readDrafts(){

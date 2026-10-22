@@ -228,7 +228,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue14-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','cf9b765:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','cf9b765:'+name],cwd=ROOT))
         old_release=self.path/'issue14-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -309,7 +309,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue17-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','16e131a:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','16e131a:'+name],cwd=ROOT))
         old_release=self.path/'issue17-old';build(old_release,source)
         current_release=self.controller['directory']
         def check_cards():
