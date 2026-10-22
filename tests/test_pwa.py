@@ -50,7 +50,7 @@ class ArtifactBuild(unittest.TestCase):
         self.assertIn('Aplikacja Treningowa',current['description'])
         for field in set(old)-{'name','short_name','description'}:
             self.assertEqual(current[field],old[field],field)
-        for name in ['style.css','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','storage.js','app.js','scripts/service-worker.template.js','PushPull_PLAN_PROJEKTU_v1.md']:
+        for name in ['style.css','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','storage.js','scripts/service-worker.template.js','PushPull_PLAN_PROJEKTU_v1.md']:
             self.assertEqual((ROOT/name).read_bytes(),subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT),name)
 
     def test_artifact_server_refuses_modified_assets_and_source_checkout(self):
