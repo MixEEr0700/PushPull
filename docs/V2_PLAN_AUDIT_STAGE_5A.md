@@ -1,6 +1,6 @@
 # Etap 5A — audyt V2 na podstawie oryginalnego DOCX
 
-**Status: porównano wszystkie 34 pozycje załącznika; rozbieżności i decyzje poniżej. Aktywny plan NIEZMIENIONY.** Kontynuacja istniejącego PR #5, gałąź `feature/stage-5a-v2-audit`; baza aplikacji `4540fa01441766280a80b60bda667e99a78a2711` (main po PR #4). Odczyt źródła nie oznacza zatwierdzenia korekt ani gotowości modelu do ich wdrożenia.
+**Status: audyt źródłowy 34/34 zakończony; decyzje właściciela D1–D9 z 22.10.2026 odnotowane. Aktywny plan NIEZMIENIONY.** Kontynuacja istniejącego PR #5, gałąź `feature/stage-5a-v2-audit`; baza aplikacji `4540fa01441766280a80b60bda667e99a78a2711` (main po PR #4). Odczyt źródła i decyzje właściciela nie oznaczają implementacji ani aktywacji. [Projekt 34 pozycji przyszłego planu](V2_NEXT_PLAN_DRAFT_STAGE_5A.md) oddziela źródło trenera od wybranych wariantów; O1–O3 to pozostałe otwarte dane. Dokumentacja modelu jest przygotowywana na podstawie D8, bez zgody na wdrożenie.
 
 ## Źródło, kompletność i lokalizatory
 
@@ -18,23 +18,23 @@ Porównywana aplikacja: inicjalny plan `raw` i `initialExercises` w [app.js:6–
 | --- | --- | --- |
 | T1/R1–R2 | „RIR - Ilość ruchów w zapasie.”; „RIR 1 - 1 ruch w zapasie, RIR 0-1 - bardzo blisko upadku.” | To legenda, nie przypisanie RIR 1 czy 0–1 do ćwiczeń. Wszystkie 30 sparametryzowanych pozycji mają w C1 **RIR 0**; cztery pozycje Brzuch/Łydka nie mają lokalnego RIR. Aplikacja: wszędzie `do uzupełnienia`. |
 | T1/R3–R4 | „Tempo 1010 - 1sek ruch negatywny, 0sek pauzy w rozciągnięciu, 1sek (jak najszybsza) faza koncetryczna, 0 sekund pauzy w spięciu.” | Kolejność faz znana. **1010 jest przykładem legendy**, nie tempem całego planu; w ćwiczeniach występuje 2010, 2011, 2111 i 3111. Nie zamieniamy „1sek” na dowolną inną instrukcję ani nie rozwiązujemy samodzielnie napięcia z „jak najszybsza”. |
-| T1/R5 | „Przerwy w 1-2 ćwiczeniu 3-5 minut minimum.” | Aplikacja nie ma strukturalnego celu przerwy. Zachować oryginalne sformułowanie; znaczenie „minimum” przy zakresie 3–5 wymaga potwierdzenia przed ścisłym timerem. |
+| T1/R5 | „Przerwy w 1-2 ćwiczeniu 3-5 minut minimum.” | Aplikacja nie ma strukturalnego celu przerwy. D9: zachować oryginalne sformułowanie; bez automatycznego timera i bez zamiany niejasnego „minimum” na ścisły próg. |
 | T1/R6 | „Przerwy w pozostałych, 2-3 minuty, masz być świeży w trakcie serii.” | Brak modelu przerw. Nie przenosić tego wbrew szczegółowym 15 sekundom wewnątrz pary PULL B 6. |
 | T1/R7 | „KAŻDA SERIA DO UPADKU MAKSYMALNEGO” | Ogólne zalecenie dokumentu, nie polecenie zmiany aplikacji. Brak rozstrzygnięcia zakresu dla niesparametryzowanych Brzucha/Łydki i relacji do technicznych kryteriów zakończenia. Nie dopisujemy im RIR/tempa/serii. |
 
 ## Zasady kwalifikacji i odczytu tabel
 
-C1 traktujemy jako bazowe zalecenie planu. C2 rozdzielono na **instrukcję techniczną**, **zapis wykonania**, **zmianę wariantu/ustawienia** i **niejednoznaczny komentarz**. Nie ma metadanych autorstwa/chronologii C2; cytowane wskazówki techniczne nie są automatycznie uznane za późniejszą obowiązującą zmianę C1. Warianty z C2 wymagają decyzji właściciela/trenera, gdy konkurują z C1. `👍` nie dodaje parametrów.
+C1 traktujemy jako bazowe zalecenie planu. C2 rozdzielono na **instrukcję techniczną**, **zapis wykonania**, **zmianę wariantu/ustawienia** i **niejednoznaczny komentarz**. Nie ma metadanych autorstwa/chronologii C2; cytowane wskazówki techniczne nie są automatycznie uznane za późniejszą obowiązującą zmianę C1. Wnioski tabel porównawczych opisują stan audytu przed wyborami właściciela. Zatwierdzone później warianty D2 dotyczą wyłącznie projektu przyszłej wersji i nie zmieniają C1 ani historii. `👍` nie dodaje parametrów.
 
 Aplikacja dla każdego wiersza ma `rir='do uzupełnienia'`, `tempo='do uzupełnienia'`, `notes=''`; brak osobnej instrukcji trenera i brak struktur drop/grup/celów serii. Te wartości dotyczą **każdego wiersza**, nie prywatnych notatek użytkownika. Pole `initialKg` pokazano tylko jako podpowiedź kodu przy braku wcześniejszego wyniku: **to nie obowiązkowy ciężar nowego planu**. Liczb z C2 nie przenosimy do zaleceń, nie importujemy ich do historii.
 
-Proponowane poprawki są wyłącznie materiałem do akceptacji. **W** = uzupełnić pełną nazwę/wariant z C1 przy zachowaniu istniejącego exerciseId; **RT** = po akceptacji zapisać RIR/tempo dokładnie z C1 (format wyświetlania `2 1 1 1`, bez zmiany kolejności faz). Tam, gdzie nazwa kodu jest tylko skrótem, nie uznajemy tego za inne ćwiczenie. **Z** = brak parametrów, pozostawić nieokreślone zamiast zgadywać. Luki modelu z macierzy: **M1** cele per seria, **M2** back-off, **M3** drop, **M4** seria łączona, **M5** instrukcje/notatki, **M6** strona/ręka/noga, **M7** przerwy, **M8** historyczna prezentacja wersji.
+Propozycje w tabelach poniżej są historycznymi wnioskami audytu DOCX z 21.10.2026. Ich dawne odwołania do pytań D1–D9 nie są ponowną prośbą o podjęcie decyzji już dostarczonych. Aktualny projekt po decyzjach jest w [tabeli nowego planu](V2_NEXT_PLAN_DRAFT_STAGE_5A.md). **W** = uzupełnić pełną nazwę/wariant z C1 przy zachowaniu istniejącego exerciseId; **RT** = po akceptacji zapisać RIR/tempo dokładnie z C1 (format wyświetlania `2 1 1 1`, bez zmiany kolejności faz). Tam, gdzie nazwa kodu jest tylko skrótem, nie uznajemy tego za inne ćwiczenie. **Z** = brak parametrów, pozostawić nieokreślone zamiast zgadywać. Luki modelu z macierzy: **M1** cele per seria, **M2** back-off, **M3** drop, **M4** seria łączona, **M5** instrukcje/notatki, **M6** strona/ręka/noga, **M7** przerwy, **M8** historyczna prezentacja wersji.
 
 Statusy dotyczą oddzielnie pól: w kolumnie różnic wskazano wartości zgodne, a status wiersza obejmuje rozbieżne/brakujące pola. `brak obsługi` może współwystępować z `rozbieżne`. Brak parametrów źródła nie jest liczbą zero. Cztery Z mają status `niejednoznaczne` dla proponowanych docelowych parametrów: **wiemy**, że lokalnego zalecenia w C1 nie ma, lecz nie znamy wartości do wpisania.
 
 ## PUSH A — porównanie 8/8 pozycji
 
-| Pozycja / istniejący ID | Oryginalne zalecenie (pełne C1) | Aktualne wartości kodu | Dokładna różnica | Proponowana poprawka (NIEWDROŻONA) | Źródło / status |
+| Pozycja / istniejący ID | Oryginalne zalecenie (pełne C1) | Aktualne wartości kodu | Dokładna różnica | Wniosek audytu przed decyzjami właściciela (historyczny, NIEWDROŻONY) | Źródło / status |
 | --- | --- | --- | --- | --- | --- |
 | 1. `PUSH-A-1` | 1.Prostowanie ud siedząc obunóż <br>3x8-10 <br>RIR 0 2111 | Prostowanie ud obunóż; 3 serie; target `8–10`; kg demo `105`; RT placeholder, notes puste | Liczba 3 i zakres 8–10 zgodne; nazwa pomija „siedząc”. Wspólne braki RT/instrukcji opisane wyżej. | W + RT; nie przejmować jednonóż z C2. | T2/R1/C1; **rozbieżne** |
 | 2. `PUSH-A-2` | 2.Wyciskanie smith skos dodatni 30* <br>2x5-7 <br>RIR 0 2010 | Smith skos 30°; 2 serie; target `5–7`; kg demo `80`; RT placeholder, notes puste | 2×5–7 zgodne; skrót nazwy pomija wyciskanie i dodatni skos. Wspólne braki RT/instrukcji opisane wyżej. | W + RT. | T2/R2/C1; **rozbieżne** |
@@ -46,6 +46,8 @@ Statusy dotyczą oddzielnie pól: w kolumnie różnic wskazano wartości zgodne,
 | 8. `PUSH-A-8` | 8.Brzuch | Brzuch; 3 serie; target `wg planu`; kg demo ``; RT placeholder, notes puste | Źródło tylko „Brzuch”; kod bez podstawy ustala 3 serie i „wg planu”. Wspólne braki RT/instrukcji opisane wyżej. | Z: bez liczby serii/zakresu/RIR/tempa, ćwiczenie do ustalenia D1; zachować historię. | T2/R8/C1; **niejednoznaczne** |
 
 ### Uwagi techniczne i historia — ta sama kolejność
+
+Stan analizy źródła przed decyzjami właściciela. Cytaty i historyczne wyniki pozostają bez zmian; aktualny wybór wariantu jest odnotowany osobno w D2.
 
 | ID | Instrukcja / uwaga techniczna C2 | Co oddzielamy od zaleceń | Źródło |
 | --- | --- | --- | --- |
@@ -60,7 +62,7 @@ Statusy dotyczą oddzielnie pól: w kolumnie różnic wskazano wartości zgodne,
 
 ## PULL A — porównanie 8/8 pozycji
 
-| Pozycja / istniejący ID | Oryginalne zalecenie (pełne C1) | Aktualne wartości kodu | Dokładna różnica | Proponowana poprawka (NIEWDROŻONA) | Źródło / status |
+| Pozycja / istniejący ID | Oryginalne zalecenie (pełne C1) | Aktualne wartości kodu | Dokładna różnica | Wniosek audytu przed decyzjami właściciela (historyczny, NIEWDROŻONY) | Źródło / status |
 | --- | --- | --- | --- | --- | --- |
 | 1. `PULL-A-1` | 1.Uginanie ud siedząc/leżąc maszyna <br>3x8-10 <br>RIR 0 2111 | Uginanie ud; 3 serie; target `8–10`; kg demo `57,5`; RT placeholder, notes puste | 3×8–10 zgodne; brak siedząc/leżąc i maszyny. C2 zawiera jednonóż, C1 tego nie nakazuje. Wspólne braki RT/instrukcji opisane wyżej. | W + RT; wariant jednonóż wymaga D2. | T3/R1/C1; **rozbieżne; niejednoznaczne** |
 | 2. `PULL-A-2` | 2.Odwodzenie ud siedząc maszyna <br>2x10-12 <br>RIR 0 2111 | Odwodzenie ud; 2 serie; target `10–12`; kg demo `105`; RT placeholder, notes puste | 2×10–12 zgodne; brak siedzącej maszyny w nazwie. Wspólne braki RT/instrukcji opisane wyżej. | W + RT. | T3/R2/C1; **rozbieżne** |
@@ -72,6 +74,8 @@ Statusy dotyczą oddzielnie pól: w kolumnie różnic wskazano wartości zgodne,
 | 8. `PULL-A-8` | 8.Łydka | Łydka; 3 serie; target `wg planu`; kg demo ``; RT placeholder, notes puste | Źródło tylko „Łydka”; kod bez podstawy ustala 3 serie i „wg planu”. Wspólne braki RT/instrukcji opisane wyżej. | Z; D1. | T3/R8/C1; **niejednoznaczne** |
 
 ### Uwagi techniczne i historia — ta sama kolejność
+
+Stan analizy źródła przed decyzjami właściciela. Cytaty i historyczne wyniki pozostają bez zmian; aktualny wybór wariantu jest odnotowany osobno w D2.
 
 | ID | Instrukcja / uwaga techniczna C2 | Co oddzielamy od zaleceń | Źródło |
 | --- | --- | --- | --- |
@@ -86,7 +90,7 @@ Statusy dotyczą oddzielnie pól: w kolumnie różnic wskazano wartości zgodne,
 
 ## PUSH B — porównanie 9/9 pozycji
 
-| Pozycja / istniejący ID | Oryginalne zalecenie (pełne C1) | Aktualne wartości kodu | Dokładna różnica | Proponowana poprawka (NIEWDROŻONA) | Źródło / status |
+| Pozycja / istniejący ID | Oryginalne zalecenie (pełne C1) | Aktualne wartości kodu | Dokładna różnica | Wniosek audytu przed decyzjami właściciela (historyczny, NIEWDROŻONY) | Źródło / status |
 | --- | --- | --- | --- | --- | --- |
 | 1. `PUSH-B-1` | 1.Prostowanie ud siedząc jednonóż <br>3x10-12 na nogę <br>RIR 0 2111 | Prostowanie ud jednonóż; 3 serie; target `10–12`; kg demo `105`; RT placeholder, notes puste | 3×10–12 liczbowo zgodne; brak „na nogę” i siedząc. Kod initialKg=105 odpowiada liczbie z kontekstu obunóż C2, a nie celowi dla nogi. Wspólne braki RT/instrukcji opisane wyżej. | W + RT; nie przepisujemy 105 jako zalecenia jednonóż; D2 dla obunóż. M6. | T4/R1/C1; **rozbieżne; brak obsługi** |
 | 2. `PUSH-B-2` | 2.Przywodzenie ud siedząc maszyna <br>2x10-12 <br>RIR 0 2111 | Przywodzenie ud; 2 serie; target `10–12`; kg demo `105`; RT placeholder, notes puste | 2×10–12 zgodne; brak siedzącej maszyny w nazwie. Wspólne braki RT/instrukcji opisane wyżej. | W + RT. | T4/R2/C1; **rozbieżne** |
@@ -99,6 +103,8 @@ Statusy dotyczą oddzielnie pól: w kolumnie różnic wskazano wartości zgodne,
 | 9. `PUSH-B-9` | 9.Brzuch | Brzuch; 3 serie; target `wg planu`; kg demo ``; RT placeholder, notes puste | Źródło tylko „Brzuch”; kod bez podstawy ustala 3 serie i „wg planu”. Wspólne braki RT/instrukcji opisane wyżej. | Z; D1. | T4/R9/C1; **niejednoznaczne** |
 
 ### Uwagi techniczne i historia — ta sama kolejność
+
+Stan analizy źródła przed decyzjami właściciela. Cytaty i historyczne wyniki pozostają bez zmian; aktualny wybór wariantu jest odnotowany osobno w D2.
 
 | ID | Instrukcja / uwaga techniczna C2 | Co oddzielamy od zaleceń | Źródło |
 | --- | --- | --- | --- |
@@ -114,7 +120,7 @@ Statusy dotyczą oddzielnie pól: w kolumnie różnic wskazano wartości zgodne,
 
 ## PULL B — porównanie 9/9 pozycji
 
-| Pozycja / istniejący ID | Oryginalne zalecenie (pełne C1) | Aktualne wartości kodu | Dokładna różnica | Proponowana poprawka (NIEWDROŻONA) | Źródło / status |
+| Pozycja / istniejący ID | Oryginalne zalecenie (pełne C1) | Aktualne wartości kodu | Dokładna różnica | Wniosek audytu przed decyzjami właściciela (historyczny, NIEWDROŻONY) | Źródło / status |
 | --- | --- | --- | --- | --- | --- |
 | 1. `PULL-B-1` | 1.Uginanie ud siedząc/leżąc maszyna jednonóż <br>3x8-10 na nogę <br>RIR 0 2111 | Uginanie ud jednonóż; 3 serie; target `8–10`; kg demo `57,5`; RT placeholder, notes puste | 3×8–10 liczbowo zgodne; kod pomija „na nogę” i siedząc/leżąc maszynę. Wspólne braki RT/instrukcji opisane wyżej. | W + RT; jawna strona. M6. | T5/R1/C1; **rozbieżne; brak obsługi** |
 | 2. `PULL-B-2` | 2.Odwodzenie ud siedząc maszyna <br>2x10-12 <br>RIR 0 2111 | Odwodzenie ud; 2 serie; target `10–12`; kg demo `105`; RT placeholder, notes puste | 2×10–12 zgodne; brak siedzącej maszyny w nazwie. Wspólne braki RT/instrukcji opisane wyżej. | W + RT. | T5/R2/C1; **rozbieżne** |
@@ -127,6 +133,8 @@ Statusy dotyczą oddzielnie pól: w kolumnie różnic wskazano wartości zgodne,
 | 9. `PULL-B-9` | 9.Łydka | Łydka; 3 serie; target `wg planu`; kg demo ``; RT placeholder, notes puste | Źródło tylko „Łydka”; kod bez podstawy ustala 3 serie i „wg planu”. Wspólne braki RT/instrukcji opisane wyżej. | Z; D1. | T5/R9/C1; **niejednoznaczne** |
 
 ### Uwagi techniczne i historia — ta sama kolejność
+
+Stan analizy źródła przed decyzjami właściciela. Cytaty i historyczne wyniki pozostają bez zmian; aktualny wybór wariantu jest odnotowany osobno w D2.
 
 | ID | Instrukcja / uwaga techniczna C2 | Co oddzielamy od zaleceń | Źródło |
 | --- | --- | --- | --- |
@@ -166,29 +174,41 @@ Nieznane pola JSON bywają zachowane przez `PushPullStorage.validate` i klonowan
 - **Pięć pominiętych back-offów:** PUSH-A-3 i PULL-A-3 i PUSH-B-4: 2×5–7 + 1×8–10; PUSH-A-6 i PULL-A-7: 2×6–8 + 1×10–12. W każdej pozycji kod ma 2 serie, a C1 określa łącznie 3. Dokument nie podaje stałego procentu redukcji ciężaru; nie wyliczamy go z logów C2.
 - **Dwa dropsety „każda seria”:** PUSH-A-5: 3×10–12 z przykładowym dobiciem do max; PULL-B-7: 3×12–15 z drop. Plan nie określa stałej pełnej tabeli ciężarów wszystkich segmentów. Przykład „20kg x12 -> 12kg xmax” jest przykładem, nie nakazem tych kilogramów. Ciąg C2 „35, 30, 20” nie ma pewnej semantyki — nie wpisujemy go jako obowiązkowych trzech segmentów.
 - **PUSH-B-8:** C1 jednoznacznie 1×12 + 1×15–20, a nie dwie identyczne serie ani niewiążąca alternatywa. Brak w C1 etykiety back-off/drop i reguły obciążenia; niższy wynik ciężaru w C2 tego nie ustanawia.
-- **PULL-B-6:** C1 jednoznacznie seria łączona narciarz drążek łamany + szrugsy hantle, 2×8–10 dla obu i 15 sekund między ćwiczeniami. Nie nazywamy automatycznie superserią bez przerwy. Szrugsy C2: siad okrakiem brzuchem do oparcia 60/70°. Brak obsługi dwóch odrębnych wyników w tej grupie. Do potwierdzenia: dokładna organizacja rund, zastosowanie tempa do obu i przerwa po całej parze.
-- **30 pozycji ma RIR 0 i konkretne tempo:** 2111 — 14, 2010 — 14, 2011 — 1 (PULL-A-5), 3111 — 1 (PUSH-A-4). Kod wszystkich ma placeholdery, także czterech pozycji bez lokalnych parametrów. Nie stosować jednego tempa ani RIR z przykładowej legendy.
+- **PULL-B-6:** C1 jednoznacznie seria łączona narciarz drążek łamany + szrugsy hantle, 2×8–10 dla obu i 15 sekund między ćwiczeniami. Nie nazywamy automatycznie superserią bez przerwy. Szrugsy C2: siad okrakiem brzuchem do oparcia 60/70°. Brak obsługi dwóch odrębnych wyników w tej grupie. D4 właściciela potwierdza dwie rundy, 8–10 obu ćwiczeń i 15 sekund wewnątrz; przerwa po parze pozostaje nieokreślona. RIR/tempo cytowane jako zapis C1 dla pozycji, bez nowej interpretacji D9.
+- **30 pozycji ma RIR 0 i konkretne tempo:** 2111 — 14, 2010 — 14, 2011 — 1 (PULL-A-5), 3111 — 1 (PUSH-A-4). Kod wszystkich ma placeholdery, także czterech pozycji bez lokalnych parametrów. Nie stosować jednego tempa ani RIR z przykładowej legendy. Liczniki opisują oryginał DOCX, nie potwierdzenie parametrów istotnie zmienionych wariantów nowego planu.
 - **Cztery niesparametryzowane pozycje:** PUSH-A-8/PUSH-B-9 Brzuch, PULL-A-8/PULL-B-9 Łydka. W ich C1 brak serii, powtórzeń, RIR, tempa i konkretnego wariantu. Kodowe 3 serie nie mają oparcia w załączniku. Docelowe wartości nadal nieznane; aktualny walidator wymaga dodatniej liczby serii, więc nie da się uczciwie zastąpić ich zerem/null bez osobnego etapu modelu.
 - **Wariant a zapis wykonania:** np. PUSH-B-1 C1 jednonóż na nogę, podczas gdy C2 przechodzi do obunóż i dochodzi do 105. To dowód rozbieżności kontekstu podpowiedzi `initialKg`, nie nowe zalecenie 105 kg na nogę. Analogicznie liczby C2 dla pozostałych ćwiczeń nie stają się ciężarem planu.
 - **Instrukcje:** puste wspólne `notes` w świeżym kodzie nie odtwarzają wskazówek C1/C2. Tekst `exampleDescriptions` nie jest źródłem; ma niezgodne klucze np. `PUSH A-5` vs `PUSH-A-5`. Nie naprawiamy go w tym PR. Nie wolno skopiować instrukcji do pola nadpisującego istniejące własne notatki.
 
-Weryfikacja tekstu i zestawienie różnic są wykonane. **Aktualizacja aktywnego V2 pozostaje wstrzymana:** wymaga rozstrzygnięć poniżej, osobnego etapu brakujących funkcji i testów. Nie zamieniać braków modelu na sam opis w `target`/`notes`.
+Weryfikacja tekstu i zestawienie różnic są wykonane; odnotowano kompletne przekazane decyzje D1–D9. **Aktualizacja aktywnego V2 pozostaje wstrzymana:** wymaga przyszłego osobno zleconego etapu modelu, otwartych danych O1–O3 oraz świadomej aktywacji D7. Nie zamieniać braków modelu na sam opis w `target`/`notes`.
 
-## Decyzje do zatwierdzenia po odczycie DOCX
+## Decyzje właściciela D1–D9
 
-| ID | Dokładna decyzja / niejasność | Źródło i bezpieczne zachowanie do decyzji |
+**Źródło decyzji: właściciel aplikacji, wklejony tekst „Aplikacja Treningowa — zakończenie audytu V2, decyzje właściciela D1–D9”, otrzymany 22.10.2026.** Są to ustalenia dla przyszłej wersji planu i przygotowania modelu. Nie zastępują dokumentu trenera, nie potwierdzają dat wcześniejszych zmian, nie zmieniają wyników ani aktywnego planu. Pierwotny plik urywał się w 3.8; właściciel następnie dostarczył pełne uzupełnienie sekcji 3–5 w odpowiedzi w rozmowie. Uwzględniono także rozdzielenie tożsamości/wykonania/pozycji, kolejność małych PR, kontrolę regresji i zakres wyłącznie dokumentacyjny. Nie wymyślano brakującej końcówki.
+
+| Decyzja | Ustalenie właściciela | Stan po decyzji / wpływ na projekt |
 | --- | --- | --- |
-| D1 | Brzuch/Łydka: jakie ćwiczenie i czy ma być dodatkowa specyfikacja serii/zakresów/RIR/tempa? Jak stosować do nich globalne „KAŻDA SERIA…”? | T2/R8, T3/R8, T4/R9, T5/R9 i T1/R7. Dokument nie podaje lokalnych parametrów; nie dopisujemy 3 serii ani RIR/tempa. Uzyskać zalecenie właściciela/trenera lub zaakceptować jawny brak w nowym modelu. |
-| D2 | Które warianty/korekty C2 mają obecnie zastępować C1 i od kiedy? | PUSH-A-1 obunóż/jednonóż; PUSH-A-4 dipy/rozpiętki/maszyna; PULL-A-1 jednonóż; PULL-A-3 niższe siodło; PULL-A-5 wariant wyciągu; PUSH-B-1 jednonóż/obunóż; PUSH-B-7 rekomendowane jednorącz; PULL-B-3 alternatywna ławka; PULL-B-4 jednorącz/oburącz i maszyna/wyciąg; PULL-B-5 inna maszyna/uchwyt. Nie ma dat/autora uwag; nie nadajemy im automatycznego pierwszeństwa ani nowego exerciseId. |
-| D3 | Dla drop: ile segmentów, które cele i czy poza opisanym przykładem są konkretne zasady do ustalenia? Czy „35,30,20” oznacza segmenty jednej serii? | T2/R5 i T5/R7. Obowiązek drop w każdej serii jest jasny. Niejasny jest kompletny schemat segmentów/redukcji. Nie żądamy ponownej decyzji co do samego obowiązku drop ani nie traktujemy ciężarów przykładu jako stałych. |
-| D4 | Seria łączona: organizacja 2× dla obu, przerwy po parze, tempo obu członków; czy komentarz „max” ma zmieniać 8–10 szrugsów? | T5/R6 C1/C2 oraz T1. Zachować C1: oba 8–10, 15 s wewnątrz. Modelować dwa wyniki i proponowane dwie rundy, ale nie zgadywać niepodanej przerwy po grupie ani pierwszeństwa „max”. |
-| D5 | Jak reprezentować stronę i tonaż wyników „na rękę/na nogę”, masę jednego hantla vs pary i maszynę vs wyciąg? | PULL-A-5/6, PUSH-B-1/8, PULL-B-1/3/4/8 i warianty C1 (np. Bayesian/Cross cable). Kod nie ma side/unit/loadConvention. Nie mnożymy wstecz przez 2 i nie konwertujemy historycznych kilogramów po domyśle. |
-| D6 | Które instrukcje C2 są autorstwa trenera i obowiązują teraz? Jak rozdzielić stare `legacy-shared` i datować technikę? | C2 zawiera imperatywne wskazówki oraz znaczniki „Poprawa tech.”/„Poprawiona techm” bez dat/autora. Zachować literalny tekst i pochodzenie, nie zmyślać dat; instrukcja trenera i notatka własna w osobnych polach dopiero po migracji. |
-| D7 | Czy porównanie ma obejmować prywatne zmiany planu na telefonie i jaka data aktywacji nowej wersji ma obowiązywać? | Audyt porównuje repozytorium, nie prywatną bazę. Ewentualnie dostarczyć same parametry/pochodzenie zmian, bez historii ciężarów. Aktywna i historyczne sesje nie zmieniają snapshotów przy akceptacji nowego planu. |
-| D8 | Zatwierdzić odrębny etap modelu i późniejsze poprawki parametrów, bez naruszania Matrix i historii. | [Propozycja modelu/migracji](MODEL_EXTENSION_STAGE_5B_PROPOSAL.md): M1–M8, wersjonowane instrukcje, side i brak parametrów. Bieżący PR nie implementuje ani nie migruje. Niezbędne rozszerzenia wprowadzania danych wymagają osobnej akceptacji. |
-| D9 | Czy „3-5 minut minimum” ma być zakresem czy minimalnym progiem zależnym od ćwiczenia? Jak rozumieć maksymalny upadek wobec uwag o pozycji/spotterze i przykładu „1sek (jak najszybsza)”? | T1/R3–R7, T3/R1, T2/R4. Cytujemy bez rozstrzygania sprzecznych/nieostrych sformułowań; nie dodajemy timerów ani reguł automatycznego zakończenia. |
+| D1 — Brzuch i łydki | Pozostają w planie jako pozycje do uzupełnienia później; nie zgadywać ćwiczenia, serii, zakresu, RIR, tempa. | **Zatwierdzone odroczenie**, nie pytanie o wpisanie wartości teraz. Cztery pozycje mają nieokreślone cele w projekcie; kod/historia bez zmian. |
+| D2 — aktualne warianty | Zatwierdzone 10 wyborów: PUSH-A-1/4, PULL-A-1/3/5, PUSH-B-1/7, PULL-B-3/4/5. | **Wybory zatwierdzone** dla przyszłej wersji. [Tabela 10 wariantów z klasyfikacją C1/C2 i źródłem decyzji](V2_NEXT_PLAN_DRAFT_STAGE_5A.md#dziesięć-wariantów-d2-i-ich-relacja-do-dokumentu). Istotnie zmienione cele pozostają niepotwierdzone (O2), a maszyna PUSH-A-4 nierozpoznana (O1). Legacy zachowane; przy rzeczywistej zamianie odrębna tożsamość/mapowanie, a nie podmiana dipów w historii. |
+| D3 — dropsety | Elastyczna liczba segmentów, każdy z własnym ciężarem i powtórzeniami; drop w każdej serii, gdzie wynika z DOCX. Bez narzuconego procentu i kilogramów. | **Zatwierdzony projekt**, bez implementacji. Stała liczba segmentów nie jest otwartą decyzją. Ciąg ciężarów C2 nie staje się obowiązkowym schematem. |
+| D4 — seria łączona | Narciarz + szrugsy: dwie rundy, cel 8–10 obu ćwiczeń, 15 s między członkami, osobne wyniki. Bez celu „max” i nieznanej przerwy po parze. | **Zatwierdzone**; model przyszłej grupy/rund jest określony. Przerwa po parze pozostaje nieokreślona, nie wymaga zgadywania ani wpisania wartości teraz. |
+| D5 — jednostronne | Oddzielny zapis lewej/prawej strony; szybkie kopiowanie z indywidualną korektą. Jawna konwencja obciążenia, bez mnożenia starych wyników/tonażu przez 2. | **Zatwierdzony projekt** interakcji i modelu. Konkretne konwencje sprzętu uzupełnić jawnie (O3); nie odgadywać konwencji starych zapisów. |
+| D6 — instrukcje/notatki | Wersjonowane instrukcje trenera oddzielne od edytowalnych notatek własnych. `legacy-shared` pozostaje bez zgadywania autora i dat. | **Zatwierdzony projekt**. Nie przypisywać automatycznie autorstwa uwag C2, nie rozcinać starego tekstu i nie nadpisywać go importem instrukcji. |
+| D7 — aktywacja | Nowa wersja dopiero po świadomej aktywacji; bez modyfikacji trwających/historycznych sesji. Data aktywacji podczas faktycznej przyszłej operacji. | **Zatwierdzona zasada**, nie dokonana aktywacja. Brak `activatedAt` w danych/dokumencie projektu; data niniejszej decyzji to wyłącznie data dokumentacyjna. |
+| D8 — model | Zgoda wyłącznie na przygotowanie osobnego etapu modelu i bezstratnej migracji, bez zgody na implementację. Zakres: cele per seria, back-off/drop/superserie/strony/warianty, instrukcje, wersje i snapshoty. | **Przygotowanie zatwierdzone, implementacja NIEZATWIERDZONA.** [Projekt etapu](MODEL_EXTENSION_STAGE_5B_PROPOSAL.md) uzupełniony. Nie tworzono nowego PR ani migracji. |
+| D9 — przerwy/instrukcje | Zachować oryginalne zapisy, bez automatycznych timerów, wymuszania końca serii i ścisłej interpretacji niejednoznacznych sformułowań. | **Zatwierdzone zachowanie oryginału**. Ogólne „minimum” i opis upadku pozostają tekstem źródłowym, nie wracają jako pytania o automatyzację w tym etapie. |
 
-Nie są już pytaniami: liczba back-off (jedna dodatkowa), ich zakresy, rozdział 12 i 15–20 w PUSH-B-8 oraz obecność połączonych ćwiczeń/15 s w PULL-B-6 — te dane są jawne. Nie zgadujemy procentu redukcji ani ciężaru początkowego. Nie wymaga to ponownej zgody na samo prowadzenie audytu i aktualizację PR, które zostały zlecone.
+## Projekt nowej wersji i pozostałe otwarte dane
+
+[Tabela wszystkich 34 pozycji](V2_NEXT_PLAN_DRAFT_STAGE_5A.md#docelowa-tabela-34-pozycji-projekt) zawiera ID legacy, jednostkę, pozycję, nazwę/wybrany wariant, serie, zakresy, RIR, tempo, struktury specjalne, instrukcje i status potwierdzenia. Każdy z 10 wariantów D2 ma odrębne wskazanie „decyzja właściciela” oraz relację do C1/C2; oryginalnych parametrów trenera nie przepisano jako nowych ustaleń właściciela.
+
+Pozostają **wyłącznie** O1: tożsamość maszyny PUSH-A-4, O2a–O2e: potwierdzenie zastosowania serii/zakresów/RIR/tempa do pięciu istotnie zmienionych wariantów, O3: jawne konwencje obciążenia dla przyszłych danych. Szczegóły i źródłowe wartości odniesienia: [lista otwarta](V2_NEXT_PLAN_DRAFT_STAGE_5A.md#pozostałe-rzeczywiście-otwarte-kwestie). Przyjęcie ostrożnej kwalifikacji O2 nie podważa zatwierdzonego wyboru wariantu D2: wybrany wariant i jego parametry to dwie osobne decyzje.
+
+D1 jest świadomym odroczeniem, D3 daje elastyczną liczbę segmentów, D4 ustala dwie rundy i odrzuca „max”, D5 określa strony/kopiowanie, D6 chroni legacy, D7 rezerwuje datę na przyszłą aktywację, D8 nie zezwala na implementację, D9 wyklucza wymuszoną interpretację. Nie prosimy ponownie o te decyzje. Dawne komentarze/daty pozostają nieznane z definicji, nie są blokadą audytu. Audyt dokumentacyjny i rejestr przekazanych decyzji zakończone; projekt jest kompletnym zestawieniem 34 pozycji z jawnie niepotwierdzonymi polami, a nie gotowym planem do aktywacji.
+
+## Następne prace — projekt, nie zgoda na kod
+
+[Kolejność małych PR A–H](MODEL_EXTENSION_STAGE_5B_PROPOSAL.md#proponowana-kolejność-małych-pr) prowadzi od kontraktów modelu i pełnej kopii przez addytywną migrację/snapshoty do edytora serii/stron, segmentów drop, par/rund i dopiero świadomej aktywacji. Każdy etap ma odrębne kryteria i testy. Nie utworzono żadnego z tych PR. Przed implementacją potrzebne jest **osobne zlecenie właściciela (D8)**; O1/O2 są dodatkowo bramką dla przygotowania i aktywacji konkretnych zmienionych ćwiczeń, O3 dla prawidłowego wprowadzania nowych obciążeń. Ogólny model można projektować z jawnymi brakami; nie wolno wypełniać ich przykładowymi liczbami i uznawać za plan właściciela.
 
 ## Kontrola dokumentu a instrukcje dla agenta
 
