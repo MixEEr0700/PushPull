@@ -45,9 +45,10 @@ class V2Presentation(BrowserHarness):
         snapshot=self.state()['trainingJournal']['sessionSnapshots'][-1]
         self.assertEqual(self.page.locator('[data-expand="PULL-B-6"]').count(),0)
         self.assertEqual(self.page.locator('.exercise-card').count(),10) # 9 slots, pair A/B.
-        for eid,label in [('PULL-B-6-SKI','PULL-B-6A · Narciarz'),('PULL-B-6-SHRUGS','PULL-B-6B · Szrugsy')]:
+        for eid,label in [('PULL-B-6-SKI','Narciarz'),('PULL-B-6-SHRUGS','Szrugsy')]:
             card=self.page.locator('.exercise-card').filter(has=self.page.locator(f'[data-expand="{eid}"]'))
-            expect(card).to_contain_text(label)
+            expect(card.locator('.name')).to_have_text(label)
+            expect(card.locator('.exercise-description')).to_have_count(0)
             expect(card).to_contain_text('2 serie · 8–10 / 8–10 powt. · Tempo 2 0 1 0 · RIR 0')
             card.locator('[data-expand]').click()
             card.locator('.expanded details > summary').click()

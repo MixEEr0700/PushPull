@@ -92,7 +92,7 @@ class WorkoutDrafts(BrowserHarness):
         self.page.on('pageerror',lambda e:self.errors.append(str(e)))
         self.page.goto(self.url)
         self.activate();form=self.open_result('PULL B','PULL-B-6-SKI');self.fill_rows(form,'50','8');self.persisted(form)
-        expect(self.page.locator('[data-expand="PULL-B-6-SKI"]')).to_contain_text('PULL-B-6A')
+        expect(self.page.locator('[data-expand="PULL-B-6-SKI"] .name')).to_have_text('Narciarz')
         self.page.locator('[data-expand="PULL-B-6-SHRUGS"]').click();self.page.locator('[data-panel=result]').click()
         form_b=self.page.locator('.performanceForm');form_b.locator('[data-rich-action=toggle]').click()
         self.fill_rows(form_b,'15','10');self.persisted(form_b)
