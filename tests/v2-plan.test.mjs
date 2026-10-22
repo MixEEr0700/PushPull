@@ -13,7 +13,13 @@ test('approved 34 slots: owner decisions, unknown targets, back-offs and indepen
  const chest=m.positions.find(p=>p.slotId==='PUSH-A-4');assert.equal(chest.exerciseId,'PUSH-A-4-CHEST-PRESS');assert.equal(m.exercises.find(e=>e.id===chest.exerciseId).legacyId,null);
  assert.deepEqual(m.sets.filter(s=>s.positionId===chest.id).map(s=>s.reps),[{min:8,max:10},{min:8,max:10}]);
  assert.deepEqual(m.sets.find(s=>s.positionId===chest.id).tempo,[3,1,1,1]);
- assert.deepEqual(['PUSH A','PULL A','PUSH B','PULL B'].map(t=>views(m,PLAN_ID,t,{}).length),[8,8,9,9]);
+ assert.deepEqual(['PUSH A','PULL A','PUSH B','PULL B'].map(t=>views(m,PLAN_ID,t,{}).length),[8,8,9,10]);
+ const pair=views(m,PLAN_ID,'PULL B',{}).filter(v=>v.group);
+ assert.deepEqual(pair.map(v=>v.id),['PULL-B-6-SKI','PULL-B-6-SHRUGS']);
+ assert.deepEqual(pair.map(v=>v.positionId),m.groups[0].positionIds);
+ assert.ok(pair[0].name.startsWith('PULL-B-6A · Narciarz'));
+ assert.ok(pair[1].name.startsWith('PULL-B-6B · Szrugsy'));
+ assert.ok(pair.every(v=>!v.members&&v.sets===2&&v.tempo==='2 0 1 0'&&v.rir===0&&v.instructions));
  assert.ok(m.sets.every(s=>s.rir.min===0));assert.ok(!JSON.stringify(m).includes('initialKg'));
 });
 

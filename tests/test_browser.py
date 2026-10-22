@@ -311,6 +311,11 @@ class BrowserRegression(BrowserHarness):
                     if screen=='stats':page.locator('[data-panel=stats]').click()
                     if screen=='calendar':page.locator('[data-tab=calendar]').click()
                     page.evaluate('document.fonts.ready')
+                if screen!='calendar':
+                    # Issue #12 intentionally clarifies the source skeleton. Mask only
+                    # that copy for the original pixel comparison; exercise UI stays exact.
+                    self.page.locator('[data-source-plan-hint]').evaluate_all('(els)=>els.forEach(el=>el.remove())')
+                    self.page.locator('.eyebrow').evaluate('(el)=>el.textContent="PUSH / PULL V2 · SZKIELET"')
                 self.assertEqual(old.screenshot(full_page=True,animations='disabled'), self.page.screenshot(full_page=True,animations='disabled'),f'{width}x{height} {screen}')
             baseline.close()
 
