@@ -94,6 +94,8 @@ test('changing Google accounts requires explicit disconnect; old account queues 
 });
 
 test('private node metadata deduplicates ambiguous retries and rejects corrupt relationships',async()=>{
+ const extended=fixture();extended.data={opaque:'legacy extension'};
+ assert.deepEqual((await inspectBackup(JSON.stringify(extended))).data,extended);
  const node=await makeNode(JSON.stringify(fixture()),[]),meta=properties(node);
  const f={id:'file',appProperties:meta};assert.equal(graph([f,{...f,id:'duplicate'}]).nodes.size,1);
  assert.throws(()=>graph([f,{...f,appProperties:{...meta,digest:'a'.repeat(64)}}]),/Konflikt/);

@@ -11,7 +11,7 @@ const hash=async x=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-25
 export async function inspectBackup(text){
  const value=JSON.parse(text);
  if(value.version===3)return parseModelBackup(text);
- const legacy=readLegacyBackup(text);return legacy.original?.data?legacy.original:{data:legacy.data};
+ const legacy=readLegacyBackup(text);return legacy.formatVersion===2?legacy.original:{data:legacy.data};
 }
 export async function makeNode(backup,parents){
  await inspectBackup(backup);
