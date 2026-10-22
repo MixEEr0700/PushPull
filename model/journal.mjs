@@ -1,5 +1,5 @@
-/** First functional slice: explicit opt-in, observed session plans and flat series.
- * This records the current app plan, never activates or interprets the V2 draft.
+/** Native journal adapter: observed legacy snapshots and explicitly activated V2.
+ * Existing flat results and opaque legacy metadata retain their original meaning.
  */
 import {createModel,captureSessionSnapshot,validateModel,validateSessionSnapshot,createResultReference} from './training-model.mjs';
 import {views,PLAN_ID} from './v2-plan.mjs';
@@ -45,7 +45,7 @@ export function recordEntry(data,entry) {
   const p=snap.model.positions.find(p=>p.exerciseId===entry.exerciseId && p.planVersionId===snap.planVersionId && p.unitId===snap.unitId);
   check(p && Array.isArray(entry.series) && entry.series.length,'native result needs complete series');
   entry.journalSnapshotId=snap.id;entry.journalPositionId=p.id;entry.journalVariantId=p.variantId;
-  if(entry.performance){entry.series=flatten(entry.performance);validatePerformance(entry.performance,snap,entry);return;}
+  if(snap.planVersionId===PLAN_ID&&entry.performance){entry.series=flatten(entry.performance);validatePerformance(entry.performance,snap,entry);return;}
   entry.series=entry.series.map((r,i)=>({...r,id:r.id??crypto.randomUUID(),setId:Object.hasOwn(r,'setId')?r.setId:(snap.model.sets.find(s=>s.positionId===p.id && s.order===i)?.id??null)}));
 }
 /** Project known native records into backup B, retaining all legacy source too. */
@@ -70,9 +70,9 @@ export function project(data,base) {
     const e=r.data,snap=snaps.get(e.sessionId);
     if(!snap){check(!e.journalSnapshotId,'result snapshot missing');resultRecords.push(r);continue;}
     check(e.journalSnapshotId===snap.id && Array.isArray(e.series) && e.series.length,'native result lost its series');
-    const metadata={...e};delete metadata.series;delete metadata.performance;
+    const metadata={...e};delete metadata.series;if(snap.planVersionId===PLAN_ID)delete metadata.performance;
     check(snap.planVersionId!==PLAN_ID||e.performance,'V2 result requires structured performance');
-    if(e.performance){const refs=validatePerformance(e.performance,snap,e);resultReferences.push(...refs);e.performance.rows.forEach((row,order)=>resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:2,data:{...row,order,loadConvention:e.performance.loadConvention,entryId:e.id,entryMetadata:metadata}}));continue;}
+    if(snap.planVersionId===PLAN_ID&&e.performance){const refs=validatePerformance(e.performance,snap,e);resultReferences.push(...refs);e.performance.rows.forEach((row,order)=>resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:2,data:{...row,order,loadConvention:e.performance.loadConvention,entryId:e.id,entryMetadata:metadata}}));continue;}
     e.series.forEach((row,order)=>{
       check(!Object.hasOwn(row,'segments') && !Object.hasOwn(row,'side') && !Object.hasOwn(row,'groupId'),'unsupported performance structure');
       check(typeof row.id==='string' && Object.hasOwn(row,'setId'),'series identity missing');

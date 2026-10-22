@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildPlan,views,activate,PLAN_ID,SLOTS} from '../model/v2-plan.mjs';
-import {initialize,startSession,recordEntry} from '../model/journal.mjs';
+import {initialize,startSession,recordEntry,project} from '../model/journal.mjs';
 import {newPerformance,flatten,validatePerformance} from '../model/performance.mjs';
 import {captureSessionSnapshot} from '../model/training-model.mjs';
 
@@ -40,4 +40,9 @@ test('activation affects only future snapshots, does not add new chest to old se
  const current={id:'new',type:'PUSH A'};await startSession(data,current,'2026-10-22T12:00:00.000Z');
  assert.equal(data.trainingJournal.sessionSnapshots[1].planVersionId,PLAN_ID);
  assert.equal(data.trainingJournal.sessionSnapshots[0].model.sets[0].reps,null);
+ // An opaque pre-V2 extension named 'performance' must not be reinterpreted or lost.
+ data.sessions=[old,current];const entry={id:'old-entry',exerciseId:'PUSH-A-1',sessionId:old.id,kg:'10',reps:'8',series:[{kg:'10',reps:'8'}],performance:{unknown:'legacy extension'}};
+ recordEntry(data,entry);
+ const projected=project(data,{model:data.trainingJournal.model,sessionRecords:data.sessions.map(s=>({id:s.id,data:s,snapshotId:null})),resultRecords:[{id:entry.id,data:entry}],legacySources:[]});
+ assert.deepEqual(projected.resultRecords[0].data.entryMetadata.performance,entry.performance);
 });

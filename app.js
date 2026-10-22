@@ -58,7 +58,7 @@ function lastFor(ex){return entriesFor(ex.id).find(e=>ex.journalVariantId?e.jour
 // Zwarta prezentacja ostatniego wyniku; różne serie są pokazywane oddzielnie.
 function resultSummary(entry, suffix=''){
  if(!entry)return '<span class="detail last-result">Brak zapisanego wyniku</span>';
- if(entry.performance)return rich.summary(entry,journalAPI?.snapshotFor(data,entry.sessionId)?.model.sets||[]);
+ if(entry.performance&&journalAPI?.snapshotFor(data,entry.sessionId)?.planVersionId===v2.PLAN_ID)return rich.summary(entry,journalAPI?.snapshotFor(data,entry.sessionId)?.model.sets||[]);
  const rows=Array.isArray(entry.series)&&entry.series.length?entry.series:[{kg:entry.kg,reps:entry.reps}];
  const same=rows.every(r=>String(r.kg)===String(rows[0].kg)&&String(r.reps)===String(rows[0].reps));
  const label=suffix?`<span class="last-meta">${esc(suffix)}</span>`:'';
