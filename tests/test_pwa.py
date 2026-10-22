@@ -305,6 +305,68 @@ class PWADeployment(unittest.TestCase):
         expect(self.page.locator('[data-expand="PULL-B-6-SKI"]')).to_have_count(0)
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
 
+    def test_issue17_card_copy_after_update_preserves_saved_sessions_and_drafts(self):
+        source=self.path/'issue17-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','16e131a:'+name],cwd=ROOT))
+        old_release=self.path/'issue17-old';build(old_release,source)
+        current_release=self.controller['directory']
+        def check_cards():
+            for eid,number,name in [('PULL-B-6-SKI','6A','Narciarz'),('PULL-B-6-SHRUGS','6B','Szrugsy')]:
+                button=self.page.locator(f'[data-expand="{eid}"]')
+                expect(button.locator('.num')).to_have_text(number)
+                expect(button.locator('.name')).to_have_text(name)
+                expect(button.locator('.exercise-description')).to_have_count(0)
+                for text in ['PULL-B','Para A/B','Superseria','szkielet źródłowy','2 rundy']:
+                    expect(button).not_to_contain_text(text)
+        def drafts():
+            return self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await db.readDrafts()}finally{db.close()}}')
+        for mode in ['source','observed','v2']:
+            with self.subTest(mode=mode):
+                self.context.close();self.context=self.browser.new_context(service_workers='allow',viewport={'width':390,'height':844},accept_downloads=True)
+                self.page=self.context.new_page();self.page.on('dialog',self.accept_dialog)
+                self.controller['directory']=old_release
+                self.seed();self.page.goto(self.url);self.ready()
+                self.page.locator('[data-act=finish]').click()
+                if mode!='source':
+                    self.page.locator('[data-tab=settings]').click()
+                    if mode=='v2':
+                        self.page.locator('[data-preview-v2]').click();button='[data-activate-v2]'
+                    else:button='[data-enable-journal]'
+                    with self.page.expect_download():self.page.locator(button).click()
+                    self.page.locator('[data-tab=training]').click()
+                self.page.locator('[data-type="PULL B"]').click();self.page.locator('[data-act=start]').click();self.ready()
+                for eid,kg in [('PULL-B-6-SKI','20'),('PULL-B-6-SHRUGS','10')]:
+                    self.page.locator(f'[data-expand="{eid}"]').click();self.page.locator('[data-panel=result]').click()
+                    form=self.page.locator('.performanceForm' if mode=='v2' else '.seriesResultForm')
+                    if mode=='v2':
+                        form.locator('[data-rich-action=toggle]').click()
+                        for field,value in [('kg',kg),('reps','8')]:
+                            for el in form.locator(f'input[data-field={field}]').all():el.fill(value)
+                    else:
+                        form.locator('[data-main=kg]').fill(kg);form.locator('[data-main=reps]').fill('8')
+                    expect(form.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+                    if eid.endswith('SKI'):
+                        form.locator('[type=submit]').click();expect(self.page.locator('form[data-session]')).to_have_count(0)
+                before=self.snapshot();saved_drafts=drafts();sid=before['data']['activeId']
+                self.controller['directory']=current_release;self.wait_update();self.reopen()
+                check_cards();self.assertEqual(self.snapshot(),before);self.assertEqual(drafts(),saved_drafts)
+                # Calendar uses the same labels for stored legacy and native snapshots.
+                self.page.locator('[data-tab=calendar]').click()
+                self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click();check_cards()
+                self.assertEqual(self.snapshot(),before);self.assertEqual(drafts(),saved_drafts)
+                self.page.locator('[data-tab=training]').click();self.page.locator('[data-draft-resume]').click()
+                form=self.page.locator('.performanceForm' if mode=='v2' else '.seriesResultForm')
+                expect(form).to_have_attribute('data-id','PULL-B-6-SHRUGS')
+                expect(form.locator('[data-row="0"][data-field=kg]' if mode=='v2' else '[data-main=kg]')).to_have_value('10')
+                form.locator('[type=submit]').click();expect(self.page.locator('form[data-session]')).to_have_count(0)
+                self.assertEqual(drafts(),[])
+                self.assertEqual(self.snapshot()['data']['entries'][:-1],before['data']['entries'])
+                self.page.locator('[data-act=finish]').click()
+                self.page.locator('[data-type="PULL B"]').click();check_cards()
+                self.page.locator('[data-act=start]').click();self.ready();check_cards()
+
     def failed_install(self,mode):
         self.seed();self.page.goto(self.url);self.ready()
         before=self.snapshot()
