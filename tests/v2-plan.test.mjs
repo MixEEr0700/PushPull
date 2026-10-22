@@ -52,3 +52,45 @@ test('activation affects only future snapshots, does not add new chest to old se
  const projected=project(data,{model:data.trainingJournal.model,sessionRecords:data.sessions.map(s=>({id:s.id,data:s,snapshotId:null})),resultRecords:[{id:entry.id,data:entry}],legacySources:[]});
  assert.deepEqual(projected.resultRecords[0].data.entryMetadata.performance,entry.performance);
 });
+
+test('group labels support A/B/C and retain independent position identities',()=>{
+ const m=structuredClone(buildPlan('owner')),g=m.groups[0],p=m.positions.find(p=>p.id===g.positionIds[1]);
+ const third={...p,id:p.id+':third',exerciseId:'test-third',order:p.order+0.5,label:'Third member'};
+ m.positions.push(third);g.positionIds.push(third.id);
+ const pair=views(m,PLAN_ID,'PULL B',{}).filter(e=>e.group);
+ assert.deepEqual(pair.map(e=>e.displayNumber),['6A','6B','6C']);
+ assert.deepEqual(pair.map(e=>e.positionId),g.positionIds);
+ assert.ok(pair[2].name.startsWith('PULL-B-6C'));
+});
+
+test('source pair revision is additive and preserves legacy sessions and observed snapshots',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const {sourceExercises,prepareSourceSession,exercisesFor,previewExercises}=await import('../model/journal.mjs');
+ for(const native of [false,true]){
+  const data=JSON.parse(readFileSync(new URL('fixtures/v1.json',import.meta.url)));
+  const legacy=data.sessions.find(s=>s.type==='PULL B'),before=structuredClone(data);
+  if(native){data.trainingJournal=initialize('owner');await startSession(data,legacy,'2026-10-22T10:00:00.000Z');}
+  const snapshots=structuredClone(data.trainingJournal?.sessionSnapshots);
+  const preview=sourceExercises(data,'PULL B');
+  assert.equal(preview.length,10);assert.equal(data.exercises['PULL B'].length,9);
+  assert.deepEqual(preview.filter(e=>e.sourceGroupId).map(e=>[e.id,e.initialKg,e.notes]),[['PULL-B-6-SKI','',''],['PULL-B-6-SHRUGS','','']]);
+  const current={id:'source-new',type:'PULL B'};prepareSourceSession(data,current);
+  if(native)await startSession(data,current,'2026-10-22T11:00:00.000Z');
+  assert.equal(exercisesFor(data,current).length,10);
+  assert.equal(exercisesFor(data,current).find(e=>e.id==='PULL-B-7').displayNumber,7);
+  assert.equal(exercisesFor(data,legacy).length,9);
+  assert.ok(exercisesFor(data,legacy).some(e=>e.id==='PULL-B-6'));
+  assert.deepEqual(data.exercises['PULL B'].slice(0,9),before.exercises['PULL B']);
+  assert.deepEqual(data.entries,before.entries);assert.deepEqual(data.changes,before.changes);
+  assert.equal(data.exercises['PULL B'].length,11);
+  prepareSourceSession(data,{id:'next',type:'PULL B'});assert.equal(data.exercises['PULL B'].length,11);
+  if(native){
+   assert.deepEqual(data.trainingJournal.sessionSnapshots.slice(0,1),snapshots);
+   assert.equal(previewExercises(data,'PULL B').length,10);
+   assert.ok(data.trainingJournal.sessionSnapshots[1].model.sets.every(s=>s.rir===null&&s.tempo===null));
+   activate(data,'2026-10-22T12:00:00.000Z');
+   assert.ok(exercisesFor(data,current).every(e=>!e.v2));
+   assert.equal(previewExercises(data,'PULL B').length,10);
+  }
+ }
+});

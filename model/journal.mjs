@@ -2,17 +2,50 @@
  * Existing flat results and opaque legacy metadata retain their original meaning.
  */
 import {createModel,captureSessionSnapshot,validateModel,validateSessionSnapshot,createResultReference} from './training-model.mjs';
-import {views,PLAN_ID} from './v2-plan.mjs';
+import {views,PLAN_ID,groupMemberNumber} from './v2-plan.mjs';
 import {validatePerformance,flatten} from './performance.mjs';
 import {canonical,requireThat as check} from './backup-json.mjs';
 const source=(reference,recordedAt=null)=>({kind:'legacy',reference,recordedAt});
+/** Additive source-plan revision, projected without changing any stored plan on load.
+ * The opaque historical PULL-B-6 is retained; no kg/notes/technique are inferred.
+ */
+export function sourceExercises(data,type){
+ const visible=data.exercises[type].filter(e=>!e.journalOnly);
+ if(type!=='PULL B')return visible;
+ return visible.flatMap((e,index)=>{
+  if(e.id!=='PULL-B-6')return [{...e,displayNumber:index+1}];
+  return [['SKI','Narciarz'],['SHRUGS','Szrugsy']].map(([id,name],index)=>({
+   id:'PULL-B-6-'+id,name:groupMemberNumber('PULL-B-6',index)+' · '+name,
+   displayNumber:groupMemberNumber(6,index),sets:2,target:'8–10',initialKg:'',
+   tempo:'do uzupełnienia',rir:'do uzupełnienia',
+   notes:data.exercises[type].find(x=>x.id==='PULL-B-6-'+id)?.notes??'',
+   description:'Para A/B · szkielet źródłowy; parametry trenera dostępne po aktywacji V2',
+   sourceGroupId:'PULL-B-6',journalOnly:true
+  }));
+ });
+}
+/** Called only after the user starts a new session; never edits an existing one.
+ * The additive registry allows old backup validators to resolve the new IDs.
+ */
+export function prepareSourceSession(data,session){
+ if(data.trainingJournal?.activePlanVersionId||session.type!=='PULL B')return;
+ const exercises=sourceExercises(data,session.type);
+ if(!exercises.some(e=>e.sourceGroupId==='PULL-B-6'))return;
+ for(const ex of exercises)if(!data.exercises[session.type].some(e=>e.id===ex.id))data.exercises[session.type].push(structuredClone(ex));
+ session.sourceExerciseIds=exercises.map(e=>e.id);
+}
 export function initialize(ownerId) {
   return {version:1,model:{schemaVersion:1,ownerId,exercises:[],variants:[],planVersions:[],positions:[],sets:[],drops:[],groups:[],coachInstructions:[],userNotes:[]},sessionSnapshots:[]};
 }
 export function snapshotFor(data,sessionId) {return data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===sessionId)??null;}
 export function exercisesFor(data,session) {
   const snap=snapshotFor(data,session?.id);
-  if(!snap)return (data.exercises[session.type]||[]).filter(e=>!e.journalOnly);
+  if(!snap){
+    const registry=data.exercises[session.type]||[],original=registry.filter(e=>!e.journalOnly);
+    return session.sourceExerciseIds?session.sourceExerciseIds.map(id=>{
+      const ex=registry.find(e=>e.id===id);return {...ex,displayNumber:ex.displayNumber??original.findIndex(e=>e.id===id)+1};
+    }):original;
+  }
   if(snap.planVersionId===PLAN_ID)return views(snap.model,snap.planVersionId,session.type,data);
   return snap.model.positions.filter(p=>p.planVersionId===snap.planVersionId && p.unitId===snap.unitId).sort((a,b)=>a.order-b.order).map(p=>({
     ...structuredClone(p.legacyExercise),initialKg:'',journalVariantId:p.variantId,
@@ -22,7 +55,7 @@ export async function startSession(data,session,startedAt) {
   const j=data.trainingJournal;check(j?.version===1,'unsupported journal');
   check(!snapshotFor(data,session.id),'session already has a snapshot');
   if(j.activePlanVersionId){const snapshot=captureSessionSnapshot(j.model,{id:crypto.randomUUID(),sessionId:session.id,planVersionId:j.activePlanVersionId,unitId:session.type,startedAt});j.sessionSnapshots.push(structuredClone(snapshot));session.journalSnapshotId=snapshot.id;return;}
-  const exercises=data.exercises[session.type].map(e=>{const x=structuredClone(e);delete x.notes;return x;});
+  const exercises=(session.sourceExerciseIds?sourceExercises(data,session.type):data.exercises[session.type].filter(e=>!e.journalOnly)).map(e=>{const x=structuredClone(e);delete x.notes;return x;});
   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical(exercises)))),b=>b.toString(16).padStart(2,'0')).join('');
   const versionId='observed:'+session.type+':'+hash,m=j.model;
   if(!m.planVersions.some(v=>v.id===versionId)) {
@@ -86,8 +119,9 @@ export function project(data,base) {
 /** Preview only a context whose actual source parameters still match. */
 export function previewExercises(data,type) {
   if(data.trainingJournal?.activePlanVersionId)return views(data.trainingJournal.model,data.trainingJournal.activePlanVersionId,type,data);
-  const current=data.exercises[type].map(e=>{const x={...e};delete x.notes;return x;});
+  const projected=sourceExercises(data,type);
+  const current=projected.map(e=>{const x={...e};delete x.notes;return x;});
   const match=data.trainingJournal?.sessionSnapshots.slice().reverse().find(s=>s.unitId===type &&
     canonical(s.model.positions.filter(p=>p.planVersionId===s.planVersionId && p.unitId===s.unitId).sort((a,b)=>a.order-b.order).map(p=>p.legacyExercise))===canonical(current));
-  return match?exercisesFor(data,{id:match.sessionId,type}):data.exercises[type].map(e=>({...e,initialKg:'',journalVariantId:'unrecorded-context'}));
+  return match?exercisesFor(data,{id:match.sessionId,type}):projected.map(e=>({...e,initialKg:'',journalVariantId:'unrecorded-context'}));
 }
