@@ -149,3 +149,28 @@ class JournalFlow(BrowserHarness):
         with self.page.expect_download():self.page.locator('[data-enable-journal]').click()
         expect(self.page.get_by_text('Nowy zapis włączony',exact=True)).to_be_visible()
         self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'],[])
+
+    def test_source_pair_snapshot_and_v3_roundtrip_without_v2_activation(self):
+        self.enable()
+        self.page.locator('[data-tab=training]').click()
+        self.page.locator('[data-type="PULL B"]').click();self.page.locator('[data-act=start]').click()
+        self.ready();before=self.state();snapshot=before['trainingJournal']['sessionSnapshots'][-1]
+        self.assertTrue(snapshot['planVersionId'].startswith('observed:'))
+        self.assertNotIn('activePlanVersionId',before['trainingJournal'])
+        for eid,kg in [('PULL-B-6-SKI','23'),('PULL-B-6-SHRUGS','12')]:
+            self.page.locator(f'[data-expand="{eid}"]').click();self.page.locator('[data-panel=result]').click()
+            form=self.page.locator('.seriesResultForm')
+            form.locator('[data-main=kg]').fill(kg);form.locator('[data-main=reps]').fill('8')
+            expect(form.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+            form.locator('[type=submit]').click();expect(self.page.locator('.seriesResultForm')).to_have_count(0)
+        saved=self.state()
+        self.assertEqual(saved['entries'][:-2],before['entries'])
+        self.assertEqual(saved['trainingJournal']['sessionSnapshots'][-1],snapshot)
+        self.assertTrue(all(e['journalSnapshotId']==snapshot['id'] and len(e['series'])==2 for e in saved['entries'][-2:]))
+        self.page.reload();self.ready();self.assertEqual(self.state(),saved)
+        self.settings()
+        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        raw=Path(download.value.path()).read_bytes();self.assertEqual(json.loads(raw)['version'],3)
+        self.page.locator('#importFile').set_input_files({'name':'source-pair-v3.json','mimeType':'application/json','buffer':raw})
+        self.ready();self.assertEqual(self.state(),saved)
+        self.assertFalse(self.alerts,self.alerts)

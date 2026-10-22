@@ -2,6 +2,11 @@ import {SLOTS,PLAN_ID} from './v2-plan-data.mjs';
 import {canonical,requireThat as check} from './backup-json.mjs';
 import {createModel} from './training-model.mjs';
 export {SLOTS,PLAN_ID};
+/** Presentation only: one shared slot number and A/B/C… for any group size. */
+export function groupMemberNumber(slot,index){
+ let suffix='';for(let n=index+1;n>0;n=Math.floor((n-1)/26))suffix=String.fromCharCode(65+(n-1)%26)+suffix;
+ return String(slot)+suffix;
+}
 const source=reference=>({kind:'owner',reference,recordedAt:null});
 export function buildPlan(ownerId){
  const m={schemaVersion:1,ownerId,exercises:[],variants:[],planVersions:[],positions:[],sets:[],drops:[],groups:[],coachInstructions:[],userNotes:[]};
@@ -41,11 +46,11 @@ export function views(model,versionId,type,data){
  const positions=model.positions.filter(p=>p.planVersionId===versionId&&p.unitId===type).sort((a,b)=>a.order-b.order);
  const one=p=>{
   const targets=model.sets.filter(s=>s.positionId===p.id).sort((a,b)=>a.order-b.order),group=model.groups.find(g=>g.positionIds.includes(p.id));
-  return {id:p.exerciseId,name:p.label,sets:targets.length||'?',target:targets.map(t=>(t.role==='backoff'?'back-off ':'')+t.reps.min+'–'+t.reps.max).join(' / ')||'nieokreślone',tempo:targets[0]?.tempo?.join(' ')??'nieokreślone',rir:targets[0]?.rir?.min??'nieokreślone',initialKg:'',v2:true,journalVariantId:p.variantId,positionId:p.id,sideMode:p.sideMode,loadConvention:p.loadConvention,targets:targets.map(t=>({...t,drop:model.drops.some(d=>d.setId===t.id)})),group,notes:data?.trainingJournal?.model.userNotes.find(n=>n.exerciseId===p.exerciseId&&n.origin==='user')?.text??'',sharedNotes:Object.values(data?.exercises??{}).flat().find(e=>e.id===p.exerciseId)?.notes??'',instructions:model.coachInstructions.filter(i=>i.positionId===p.id||i.positionId===null).map(i=>i.text).join('\n')};
+  return {id:p.exerciseId,name:p.label,displayNumber:p.slotOrder+1,sets:targets.length||'?',target:targets.map(t=>(t.role==='backoff'?'back-off ':'')+t.reps.min+'–'+t.reps.max).join(' / ')||'nieokreślone',tempo:targets[0]?.tempo?.join(' ')??'nieokreślone',rir:targets[0]?.rir?.min??'nieokreślone',initialKg:'',v2:true,journalVariantId:p.variantId,positionId:p.id,sideMode:p.sideMode,loadConvention:p.loadConvention,targets:targets.map(t=>({...t,drop:model.drops.some(d=>d.setId===t.id)})),group,notes:data?.trainingJournal?.model.userNotes.find(n=>n.exerciseId===p.exerciseId&&n.origin==='user')?.text??'',sharedNotes:Object.values(data?.exercises??{}).flat().find(e=>e.id===p.exerciseId)?.notes??'',instructions:model.coachInstructions.filter(i=>i.positionId===p.id||i.positionId===null).map(i=>i.text).join('\n')};
  };
  // One view per original position, including each independent group member.
  return positions.map(p=>{const view=one(p);if(!view.group)return view;
-  const suffix=String.fromCharCode(65+view.group.positionIds.indexOf(p.id));
-  return {...view,name:p.slotId+suffix+' · '+view.name,description:'Superseria A/B · 2 rundy · 8–10 · 15 s między ćwiczeniami'};
+  const index=view.group.positionIds.indexOf(p.id),number=groupMemberNumber(p.slotOrder+1,index);
+  return {...view,displayNumber:number,name:groupMemberNumber(p.slotId,index)+' · '+view.name,description:'Superseria A/B · 2 rundy · 8–10 · 15 s między ćwiczeniami'};
  });
 }

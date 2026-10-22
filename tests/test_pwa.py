@@ -121,7 +121,8 @@ class PWADeployment(unittest.TestCase):
         self.context=self.browser.new_context(service_workers='allow',viewport={'width':390,'height':844},timezone_id='Europe/Warsaw',accept_downloads=True)
         self.addCleanup(self.context.close)
         self.page=self.context.new_page()
-        self.page.on('dialog',lambda d:d.accept())
+        self.accept_dialog=lambda d:d.accept()
+        self.page.on('dialog',self.accept_dialog)
     @property
     def url(self):return self.origin+self.controller['base']
     def seed(self):
@@ -161,7 +162,7 @@ class PWADeployment(unittest.TestCase):
                 if time.monotonic()>deadline:self.fail('Waiting worker did not activate after the final old tab closed')
                 time.sleep(0.02)
             self.waiting_worker=None
-        self.page=self.context.new_page();self.page.on('dialog',lambda d:d.accept());self.page.goto(self.url);self.ready()
+        self.page=self.context.new_page();self.page.on('dialog',self.accept_dialog);self.page.goto(self.url);self.ready()
 
     def test_manifest_png_safe_zone_and_desktop_installability(self):
         self.context=self.pw.chromium.launch_persistent_context(self.path/'profile',executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
@@ -221,6 +222,88 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
+
+    def test_issue14_upgrade_saved_skeleton_draft_and_independent_source_pair(self):
+        # Real pre-fix build + persisted IDB + waiting SW; never reset app data.
+        source=self.path/'issue14-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','cf9b765:'+name],cwd=ROOT))
+        old_release=self.path/'issue14-old';build(old_release,source)
+        current_release=self.controller['directory'];self.controller['directory']=old_release
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="PULL B"]').click();self.page.locator('[data-act=start]').click()
+        self.page.locator('[data-expand="PULL-B-6"]').click();self.page.locator('[data-panel=result]').click()
+        form=self.page.locator('.seriesResultForm')
+        form.locator('[data-main=kg]').fill('73');form.locator('[data-main=reps]').fill('9')
+        expect(form.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.snapshot();old_session=before['data']['activeId']
+        self.controller['directory']=current_release;self.wait_update();self.reopen()
+        self.assertEqual(self.snapshot(),before)
+        expect(self.page.locator('[data-expand="PULL-B-6"]')).to_be_visible()
+        expect(self.page.locator('[data-expand="PULL-B-6-SKI"]')).to_have_count(0)
+        self.page.locator('[data-draft-resume]').click()
+        expect(self.page.locator('[data-main=kg]')).to_have_value('73')
+        self.page.locator('.seriesResultForm [type=submit]').click()
+        expect(self.page.locator('.seriesResultForm')).to_have_count(0)
+        historical=self.snapshot()['data']['entries'][-1]
+        self.assertEqual(historical['exerciseId'],'PULL-B-6')
+        self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="PULL B"]').click()
+        # Cancel the explicit source revision; no silent persistent change.
+        dismiss=lambda d:d.dismiss()
+        self.page.remove_listener('dialog',self.accept_dialog);self.page.on('dialog',dismiss)
+        pre_start=self.snapshot();self.page.locator('[data-act=start]').click()
+        self.assertEqual(self.snapshot(),pre_start)
+        self.page.remove_listener('dialog',dismiss);self.page.on('dialog',self.accept_dialog)
+        self.page.locator('[data-act=start]').click();self.ready()
+        expect(self.page.locator('.exercise-card')).to_have_count(10)
+        expect(self.page.locator('[data-expand="PULL-B-7"] .num')).to_have_text('7')
+        for eid,number,kg in [('PULL-B-6-SKI','6A','20'),('PULL-B-6-SHRUGS','6B','10')]:
+            button=self.page.locator(f'[data-expand="{eid}"]')
+            expect(button.locator('.num')).to_have_text(number)
+            expect(button).to_contain_text('Brak zapisanego wyniku')
+            expect(button).to_contain_text('Tempo do uzupełnienia')
+            button.click();self.page.locator('[data-panel=result]').click()
+            form=self.page.locator('.seriesResultForm')
+            expect(form.locator('[data-main=kg]')).to_have_value('')
+            expect(form.locator('[data-main=reps]')).to_have_value('')
+            form.locator('[data-main=kg]').fill(kg);form.locator('[data-main=reps]').fill('8')
+            expect(form.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        self.page.locator('[data-expand="PULL-B-6-SKI"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('.seriesResultForm [type=submit]').click()
+        expect(self.page.locator('.seriesResultForm')).to_have_count(0)
+        # Save A, lose the page, resume B offline with every series intact.
+        self.context.set_offline(True);self.reopen()
+        expect(self.page.locator('[data-draft-resume]')).to_have_count(1)
+        self.page.locator('[data-draft-resume]').click()
+        form=self.page.locator('.seriesResultForm')
+        expect(form).to_have_attribute('data-id','PULL-B-6-SHRUGS')
+        expect(form.locator('[data-main=kg]')).to_have_value('10')
+        form.locator('[data-series-toggle]').click()
+        expect(form.locator('[data-series-index][data-field=kg]')).to_have_count(2)
+        form.locator('[type=submit]').click();expect(self.page.locator('.seriesResultForm')).to_have_count(0)
+        state=self.snapshot()['data']
+        self.assertEqual(state['entries'][:-2],pre_start['data']['entries'])
+        self.assertEqual(state['exercises']['PULL B'][:9],pre_start['data']['exercises']['PULL B'])
+        self.assertEqual([e['exerciseId'] for e in state['entries'][-2:]],['PULL-B-6-SKI','PULL-B-6-SHRUGS'])
+        self.assertTrue(all(len(e['series'])==2 for e in state['entries'][-2:]))
+        for eid,total in [('PULL-B-6-SKI','320'),('PULL-B-6-SHRUGS','160')]:
+            self.page.locator(f'[data-expand="{eid}"]').click();self.page.locator('[data-panel=stats]').click()
+            expect(self.page.locator('.stat-tile').first).to_contain_text(total)
+            self.page.locator('[data-panel=history]').click()
+            expect(self.page.locator('.panel .entry')).to_have_count(1)
+        self.page.locator('[data-tab=settings]').click()
+        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        raw=Path(download.value.path()).read_bytes()
+        self.page.locator('#importFile').set_input_files({'name':'pair.json','mimeType':'application/json','buffer':raw})
+        self.ready();self.assertEqual(self.snapshot()['data'],state)
+        self.page.locator('[data-tab=calendar]').click()
+        self.page.locator(f'[data-act=openSession][data-id="{old_session}"]').click()
+        expect(self.page.locator('[data-expand="PULL-B-6"]')).to_contain_text('73 kg')
+        expect(self.page.locator('[data-expand="PULL-B-6-SKI"]')).to_have_count(0)
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
 
     def failed_install(self,mode):
         self.seed();self.page.goto(self.url);self.ready()
