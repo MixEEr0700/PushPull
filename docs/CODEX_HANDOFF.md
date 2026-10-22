@@ -1,5 +1,7 @@
 # Aplikacja Treningowa — aktualne przekazanie
 
+Etap 5B, krok B: osobno zlecony mechanizm pełnych kopii nowego modelu. [Format/API i ograniczenia](BACKUP_STAGE_5B_B.md), [raport testów](STAGE_5B_B_TEST_REPORT.md). Implementacja tworzy i weryfikuje v3 oraz odtwarza odrębny stan w pamięci; odczytuje bezstratnie v1/v2. Brak integracji z aktywnym dziennikiem, migracji i kroków C–H. Poniższy akapit A opisuje stan jego zakończenia przed zleceniem B.
+
 Etap 5B, krok A: właściciel osobno zlecił implementację niezależnych kontraktów. [Model i API](DATA_MODEL_STAGE_5B_A.md), [raport testów](STAGE_5B_A_TEST_REPORT.md). Moduł nie jest podłączony do aplikacji/PWA; brak migracji i aktywacji. Dalsze kroki B–H pozostają poza zakresem. Starsze wzmianki D8 o braku zgody na kod opisują stan przed tym zleceniem.
 
 Etap 5A: [audyt V2](V2_PLAN_AUDIT_STAGE_5A.md) zakończono na podstawie DOCX (34/34), a 22.10.2026 odnotowano zatwierdzone decyzje właściciela D1–D9. [Projekt 34 pozycji](V2_NEXT_PLAN_DRAFT_STAGE_5A.md) oddziela oryginał trenera od 10 wyborów D2; otwarte tylko O1/O2/O3. Implementacja wymaga osobnego zlecenia D8; aktywacja wyłącznie przyszłą świadomą operacją D7. [Projekt modelu i kolejność PR A–H](MODEL_EXTENSION_STAGE_5B_PROPOSAL.md) nie są implementacją. Parametry aktywnego planu i dane pozostają bez zmian; [wyniki kontroli](STAGE_5A_TEST_REPORT.md).

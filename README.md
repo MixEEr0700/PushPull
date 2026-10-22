@@ -22,6 +22,8 @@ Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budowa�
 
 ## Dokumentacja
 
+- [Pełne kopie nowego modelu — etap 5B / krok B](docs/BACKUP_STAGE_5B_B.md): działające API v3, bezstratny odczyt v1/v2 i odtworzenie w pamięci; bez migracji i podłączenia do aplikacji.
+
 - [Model danych — etap 5B / krok A](docs/DATA_MODEL_STAGE_5B_A.md): odseparowane kontrakty i walidacja; bez podłączenia do treningu, migracji i aktywacji.
 
 - [Audyt V2 — etap 5A](docs/V2_PLAN_AUDIT_STAGE_5A.md): zakończone porównanie DOCX 34/34 i rejestr decyzji właściciela D1–D9; [raport kontroli](docs/STAGE_5A_TEST_REPORT.md).
