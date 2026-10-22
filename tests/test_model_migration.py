@@ -102,7 +102,9 @@ class ModelMigration(BrowserHarness):
         self.page.locator('[data-panel=result]').click()
         self.page.locator('[data-main=kg]').fill('110')
         self.page.locator('[data-main=reps]').fill('10')
-        self.page.locator('.seriesResultForm [type=submit]').click()
+        # The form is already visible before submit; wait for the actual async failure.
+        with self.page.expect_event('dialog'):
+            self.page.locator('.seriesResultForm [type=submit]').click()
         expect(self.page.locator('.seriesResultForm')).to_be_visible()
         self.assertEqual(self.records(),before)
         expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_have_count(0)

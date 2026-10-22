@@ -1,3 +1,5 @@
+Aktualny etap funkcjonalny V2: [obsługa, decyzje O1–O3 i dane](V2_FUNCTIONAL_JOURNAL.md). Podgląd i osobna aktywacja planu, cele/back-off/drop/L/P/grupa, historia i pełne kopie v3 są podłączone do istniejącego dziennika. Nie wykonano wdrożenia ani testów fizycznego Androida. Poniższe opisy etapów zachowano historycznie.
+
 # Aplikacja Treningowa — aktualne przekazanie
 
 Pierwsza część funkcjonalna po PR #8: [użycie, zakres i ograniczenia](FUNCTIONAL_JOURNAL_PART_1.md). Nowy zapis włącza się jawnie w Dane; przyszłe sesje mają snapshot i trwałe serie, kalendarz/statystyki odczytują kontekst, kopie v3 są podłączone do importu/eksportu. Dotychczasowy plan pozostaje niezweryfikowany. Pełny V2, back-off/drop/strony/grupy oraz aktywacja nadal niegotowe; nie rozpoczęto hostingu/Drive. Poniższe opisy A–C są historycznym stanem ich zakończenia.
