@@ -1,5 +1,7 @@
 # Aplikacja Treningowa — aktualne przekazanie
 
+Etap 5B/C: [minimalna migracja, API i droga do telefonu](MINIMAL_MIGRATION_STAGE_5B_C.md). Model jest dodatkowym rekordem istniejącej bazy, przygotowywanym tylko jawnie przez `prepareModel`; `app.js` nie uruchamia migracji. Po niej obecny commit zapisuje źródło i projekcję atomowo. Bez nowego planu/edytora, zmiany Matrix, publikacji i Drive. Następny priorytet po zatwierdzeniu: funkcjonalny trening i telefon, nie dalsza infrastruktura. Poniższe etapy A/B opisują ich historyczny stan zakończenia.
+
 Etap 5B, krok B: osobno zlecony mechanizm pełnych kopii nowego modelu. [Format/API i ograniczenia](BACKUP_STAGE_5B_B.md), [raport testów](STAGE_5B_B_TEST_REPORT.md). Implementacja tworzy i weryfikuje v3 oraz odtwarza odrębny stan w pamięci; odczytuje bezstratnie v1/v2. Brak integracji z aktywnym dziennikiem, migracji i kroków C–H. Poniższy akapit A opisuje stan jego zakończenia przed zleceniem B.
 
 Etap 5B, krok A: właściciel osobno zlecił implementację niezależnych kontraktów. [Model i API](DATA_MODEL_STAGE_5B_A.md), [raport testów](STAGE_5B_A_TEST_REPORT.md). Moduł nie jest podłączony do aplikacji/PWA; brak migracji i aktywacji. Dalsze kroki B–H pozostają poza zakresem. Starsze wzmianki D8 o braku zgody na kod opisują stan przed tym zleceniem.

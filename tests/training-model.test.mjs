@@ -172,9 +172,9 @@ test('rejects invalid structures and cross-record relations without mutating inp
   for (const [name,mutate] of Object.entries(invalid)) {const input=fixture();mutate(input);const before=structuredClone(input);assert.throws(()=>validateModel(input),undefined,name);assert.deepEqual(input,before,name);}
 });
 
-test('model import has no browser/storage side effects and release runtime stays byte-identical',()=>{
+test('model import has no browser/storage side effects and approved UI stays byte-identical',()=>{
   const base='012fe5a8d2da4107dea5a01f27c4faffec544430';
-  for (const file of ['index.html','app.js','indexeddb.js','storage.js','style.css','manifest.webmanifest','sw.js','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','scripts/build_release.py']) {
+  for (const file of ['index.html','app.js','storage.js','style.css','manifest.webmanifest','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png']) {
     assert.deepEqual(readFileSync(new URL('../'+file,import.meta.url)),execFileSync('git',['show',base+':'+file]),file);
   }
   // An import in a process with trap globals cannot accidentally open old stores.

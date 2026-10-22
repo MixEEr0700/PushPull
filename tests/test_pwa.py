@@ -50,7 +50,7 @@ class ArtifactBuild(unittest.TestCase):
         self.assertIn('Aplikacja Treningowa',current['description'])
         for field in set(old)-{'name','short_name','description'}:
             self.assertEqual(current[field],old[field],field)
-        for name in ['style.css','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','storage.js','indexeddb.js','app.js','scripts/service-worker.template.js','PushPull_PLAN_PROJEKTU_v1.md']:
+        for name in ['style.css','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','storage.js','app.js','scripts/service-worker.template.js','PushPull_PLAN_PROJEKTU_v1.md']:
             self.assertEqual((ROOT/name).read_bytes(),subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT),name)
 
     def test_artifact_server_refuses_modified_assets_and_source_checkout(self):
@@ -237,6 +237,21 @@ class PWADeployment(unittest.TestCase):
     def test_missing_asset_keeps_previous_offline_release(self):self.failed_install('missing')
     def test_hash_or_login_html_mismatch_keeps_previous_offline_release(self):self.failed_install('wrong-body')
 
+    def test_model_bridge_offline_restart_and_worker_update(self):
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.evaluate("""async()=>{const db=await PushPullDB.open(()=>{});try{await db.prepareModel({ownerId:'offline-test',backupText:JSON.stringify(db.export())})}finally{db.close()}}""")
+        self.reopen()
+        # Drain app.js's asynchronous registration before swapping the served release.
+        self.page.evaluate("navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(r=>r.update())")
+        before=self.snapshot()
+        read="""async()=>{const db=await PushPullDB.open(()=>{});try{if(db.error)throw db.error;return JSON.parse(await db.exportModelBackup()).payload}finally{db.close()}}"""
+        model=self.page.evaluate(read)
+        self.controller['directory']=self.next_release('model-update')
+        self.wait_update();self.reopen()
+        self.context.set_offline(True);self.page.reload();self.ready()
+        self.assertEqual(self.page.evaluate(read),model)
+        self.assertEqual(self.snapshot(),before)
+
     def test_stage2_to_stage3_worker_update_retains_database_and_backups(self):
         old=self.path/'stage2'
         for name in ['index.html','style.css','app.js','storage.js','indexeddb.js','manifest.webmanifest','icon.svg','sw.js']:
@@ -256,7 +271,8 @@ class PWADeployment(unittest.TestCase):
 
     def test_stage3_rename_update_keeps_identity_complete_backup_and_offline_name(self):
         old=self.path/'stage3'
-        for name in [*ASSETS,'sw.js']:
+        # Stage 3 predates the model modules; restore its actual asset set.
+        for name in [*(name for name in ASSETS if not name.startswith('model/')),'sw.js']:
             dest=old/name;dest.parent.mkdir(parents=True,exist_ok=True)
             dest.write_bytes(subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT))
         self.controller['directory']=old

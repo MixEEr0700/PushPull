@@ -164,8 +164,8 @@ test('complete empty model is valid; incomplete export cannot masquerade as an e
   delete p.resultRecords;await assert.rejects(createBackup(p,options),/missing resultRecords/);
 });
 
-test('backup modules are not loaded by runtime and do not access storage, DOM or network',async()=>{
-  const paths=['app.js','storage.js','indexeddb.js','index.html','style.css','manifest.webmanifest','sw.js','icon.svg','scripts/build_release.py'];
+test('backup modules remain inert before explicit migration and do not access storage, DOM or network',async()=>{
+  const paths=['app.js','storage.js','index.html','style.css','manifest.webmanifest','icon.svg'];
   for (const path of paths) assert.deepEqual(readFileSync(path),execFileSync('git',['show',`063c02b5272ebb4066d498f82faf34e7353b588c:${path}`]));
   const script=`for(const k of ['indexedDB','localStorage','document','fetch'])Object.defineProperty(globalThis,k,{get(){throw Error(k+' access');}});const b=await import('./model/backup.mjs');const p={model:null,sessionSnapshots:[],resultReferences:[],sessionRecords:[],resultRecords:[],legacySources:[]};const d=await b.createBackup(p,${JSON.stringify(options)});await b.restoreBackup(await b.previewBackup(await b.exportBackup(d)));`;
   execFileSync(process.execPath,['--input-type=module','-e',script]);
