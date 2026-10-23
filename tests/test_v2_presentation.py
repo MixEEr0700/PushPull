@@ -91,3 +91,29 @@ class V2Presentation(BrowserHarness):
         expect(self.page.locator('.exercise-card .name').nth(3)).to_have_text('Dipy')
         self.assertEqual(self.page.locator('.exercise-card').count(),8)
         self.assertFalse(self.alerts,self.alerts)
+
+    def test_active_v2_preview_and_stale_activation_handler_are_read_only(self):
+        flows.V2Training.activate(self)
+        before=self.state()
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-preview-v2]').click()
+        expect(self.page.get_by_text('Podgląd aktywnego V2',exact=True)).to_be_visible()
+        expect(self.page.get_by_text('V2 jest aktywny',exact=True)).to_be_visible()
+        expect(self.page.locator('[data-activate-v2]')).to_have_count(0)
+        for unit in ['PUSH A','PULL A','PUSH B','PULL B']:
+            self.page.locator(f'[data-preview-unit="{unit}"] > summary').click()
+            expect(self.page.locator(f'[data-preview-unit="{unit}"] [data-preview-exercise]').first).to_be_visible()
+        # A queued/stale DOM action must be harmless even without a visible button.
+        self.page.evaluate('''()=>{const b=document.createElement('button');b.dataset.activateV2='';b.id='staleActivation';document.querySelector('main').append(b)}''')
+        self.page.locator('#staleActivation').click()
+        expect(self.page.locator('.toast')).to_have_text('V2 jest aktywny')
+        self.assertEqual(self.state(),before)
+        self.page.reload();expect(self.page.locator('h1')).to_have_text('Trening')
+        self.assertEqual(self.state(),before)
+        # An imported active plan must never be labeled as active V2.
+        from test_plan_import import PlanImport,PLAN
+        self.settings=lambda:self.page.locator('[data-tab=settings]').click()
+        PlanImport.preview(self,PLAN);PlanImport.store(self);PlanImport.activate(self)
+        self.page.locator('[data-preview-v2]').click()
+        expect(self.page.get_by_text('V2 jest aktywny',exact=True)).to_have_count(0)
+        expect(self.page.locator('[data-activate-v2]')).to_be_visible()
+        self.assertEqual(self.state()['trainingJournal']['activePlanVersionId'],PLAN['planVersion']['id'])
