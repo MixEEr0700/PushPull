@@ -72,6 +72,29 @@ class PlanImport(BrowserHarness):
         self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         self.assertEqual(self.local_raw(),legacy.RAW)
 
+    def test_issue36_imported_cards_count_each_exercise_independently_without_writes(self):
+        self.prepare();self.ready();self.preview();self.store();self.activate()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        def card(eid):return self.page.locator('.exercise-card').filter(has=self.page.locator(f'[data-expand="{eid}"]'))
+        for _ in range(2):
+            self.page.locator('[data-type="TEST-A"]').click();self.page.locator('[data-act=start]').click()
+            for eid in ['TEST-1','TEST-2']:
+                f=self.form(eid);self.fill(f);self.save(f)
+            self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        self.page.locator('[data-type="TEST-A"]').click()
+        for eid in ['TEST-1','TEST-2']:expect(card(eid).locator('[data-result-change]')).to_contain_text('2 sesje temu')
+        expect(card('TEST-3').locator('[data-result-change]')).to_have_count(0)
+        before=self.records();self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        self.page.locator('[data-type="TEST-A"]').click()
+        self.assertEqual(self.records(),before)
+        self.page.locator('[data-act=start]').click();f=self.form('TEST-1');self.fill(f)
+        f.locator('[data-row="0"][data-field=kg]').fill('10');self.save(f)
+        expect(card('TEST-1').locator('[data-result-change]')).to_contain_text('2 sesje temu')
+        self.page.locator('[data-act=finish]').click();self.page.locator('[data-type="TEST-A"]').click()
+        expect(card('TEST-1').locator('[data-result-change]')).to_contain_text('1 sesję temu')
+        expect(card('TEST-2').locator('[data-result-change]')).to_contain_text('2 sesje temu')
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+
     def test_invalid_file_and_atomic_failed_import_leave_history_and_plan_intact(self):
         self.prepare();self.ready();self.plans();before=self.records()
         bad=json.loads(json.dumps(PLAN));bad['sets'][0]['positionId']='missing'

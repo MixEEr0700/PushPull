@@ -32,3 +32,62 @@ export function newPerformance(ex,previous){
  }
  return {version:2,loadConvention:structuredClone(ex.loadConvention),rows};
 }
+
+// Read-only card annotation. Unknown legacy contexts are not inferred from names,
+// today's plan, technique markers or a flattened summary of a structured result.
+function comparison(data,entry){
+ const snap=data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===entry.sessionId);
+ if(!snap||snap.id!==entry.journalSnapshotId)return null;
+ const p=snap.model.positions.find(p=>p.id===entry.journalPositionId),variant=snap.model.variants.find(v=>v.id===entry.journalVariantId);
+ const performance=entry.performance,load=performance?.loadConvention;
+ if(!p||!variant||p.exerciseId!==entry.exerciseId||p.variantId!==variant.id||variant.exerciseId!==entry.exerciseId||p.planVersionId!==snap.planVersionId||p.unitId!==snap.unitId||!load?.unit||!load.basis)return null;
+ if(load.unit!==p.loadConvention.unit||p.loadConvention.basis!==null&&load.basis!==p.loadConvention.basis)return null;
+ if(performance.version!==2||!Array.isArray(performance.rows)||!performance.rows.length||!snap.model.planVersions.some(v=>v.id===snap.planVersionId&&v.executionVersion===2))return null;
+ const targets=snap.model.sets.filter(t=>t.positionId===p.id).slice().sort((a,b)=>a.order-b.order);
+ const sides=[...new Set(performance.rows.map(r=>r.side))].sort();
+ const context=canonical([entry.exerciseId,variant.id,variant.machine,variant.grip,variant.support,variant.execution,variant.laterality,p.sideMode??null,load.unit,load.basis,sides]);
+ // Storage/import retain full model validation. Rendering checks the measurement
+ // references only; revalidating every whole snapshot per row blocks long histories.
+ const extra=performance.rows.filter(r=>r.setId===null),paired=extra.some(r=>r.side!==null);
+ if(paired&&(extra.length!==2||extra.filter(r=>r.side==='left').length!==1||extra.filter(r=>r.side==='right').length!==1))return null;
+ const number=s=>String(s).replace(/^0+(?=\d)/,'').replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
+ const rows=[],bindings=new Set();
+ for(const r of performance.rows){
+  const target=targets.find(t=>t.id===r.setId),group=snap.model.groups.find(g=>g.id===r.groupId),drop=!!target&&snap.model.drops.some(d=>d.setId===target.id);
+  if(r.setId!==null&&!target||![null,'left','right'].includes(r.side)||p.sideMode==='required'&&r.side===null)return null;
+  if(r.groupId!==null&&(!group||!group.positionIds.includes(p.id)||r.round!==target?.order+1)||r.groupId===null&&r.round!==null)return null;
+  const key=canonical([r.setId,r.side,r.groupId,r.round]);if(r.setId!==null&&bindings.has(key))return null;bindings.add(key);
+  if(!Array.isArray(r.segments)||!r.segments.length||!drop&&r.segments.length!==1)return null;
+  if(r.segments.some(s=>typeof s.kg!=='string'||typeof s.reps!=='string'||!(/^\d+(\.\d+)?$/.test(s.kg))||!Number.isFinite(Number(s.kg))||!/^[1-9]\d*$/.test(s.reps)||!Number.isSafeInteger(Number(s.reps))))return null;
+  rows.push({order:target?targets.indexOf(target):targets.length+(paired?0:extra.indexOf(r)),side:r.side,
+   value:[target?.role??null,drop,group?.kind??null,r.round,r.segments.map(s=>[number(s.kg),number(s.reps)])]});
+ }
+ rows.sort((a,b)=>a.order-b.order||String(a.side).localeCompare(String(b.side)));
+ return {context,value:canonical(rows.map(r=>[r.side,r.value]))};
+}
+/** Age = length of the latest equal run among comparable completed performances.
+ * An ongoing session may supply the displayed last result, but never adds a count.
+ * UUIDs, notes, targets' kg examples and technique markers are not measurements.
+ */
+export function resultChangeAge(data,anchor){
+ if(!anchor)return null;
+ const basis=comparison(data,anchor);if(!basis)return null;
+ const sessions=new Map(data.sessions.map(s=>[s.id,s]));
+ const candidates=data.entries.filter(e=>e.exerciseId===anchor.exerciseId&&e.journalVariantId===anchor.journalVariantId&&sessions.get(e.sessionId)?.status==='done');
+ if(candidates.some(e=>!/^\d{4}-\d{2}-\d{2}$/.test(sessions.get(e.sessionId).date)||!Number.isFinite(sessions.get(e.sessionId).seq)))return null;
+ candidates.sort((a,b)=>{const sa=sessions.get(a.sessionId),sb=sessions.get(b.sessionId);return sb.date.localeCompare(sa.date)||sb.seq-sa.seq;});
+ let age=0,latest=null;const seen=new Set();
+ for(const e of candidates){
+  const current=comparison(data,e);if(!current)return null;
+  if(current.context!==basis.context)continue;
+  if(seen.has(e.sessionId))return null;seen.add(e.sessionId);
+  if(latest!==null&&latest!==current.value)return age;
+  latest=current.value;age++;
+ }
+ return age||null;
+}
+export function resultChangeLabel(age){
+ if(age===null)return 'Ostatnia zmiana: nieustalona';
+ const noun=age===1?'sesję':age%10>=2&&age%10<=4&&(age%100<12||age%100>14)?'sesje':'sesji';
+ return `Ostatnia zmiana: ${age} ${noun} temu`;
+}
