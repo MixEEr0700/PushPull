@@ -170,3 +170,12 @@ test('backup modules remain inert before explicit migration and do not access st
   const script=`for(const k of ['indexedDB','localStorage','document','fetch'])Object.defineProperty(globalThis,k,{get(){throw Error(k+' access');}});const b=await import('./model/backup.mjs');const p={model:null,sessionSnapshots:[],resultReferences:[],sessionRecords:[],resultRecords:[],legacySources:[]};const d=await b.createBackup(p,${JSON.stringify(options)});await b.restoreBackup(await b.previewBackup(await b.exportBackup(d)));`;
   execFileSync(process.execPath,['--input-type=module','-e',script]);
 });
+
+
+test('long escaped archive strings scan without regexp-stack recursion and retain boundary checks',async()=>{
+ const {parseJson}=await import('../model/backup-json.mjs');
+ const archive='"\\'.repeat(3000000),raw=JSON.stringify({archive,x:1});
+ assert.deepEqual(parseJson(raw),{archive,x:1});
+ assert.throws(()=>parseJson(raw.slice(0,-1)+',"x":2}'),/duplicate JSON property/);
+ assert.throws(()=>parseJson(raw.replace('"x":1','"x":9007199254740993')),/losslessly/);
+});
