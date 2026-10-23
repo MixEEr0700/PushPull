@@ -1,6 +1,6 @@
 import {SLOTS,PLAN_ID} from './v2-plan-data.mjs';
 import {canonical,requireThat as check} from './backup-json.mjs';
-import {createModel} from './training-model.mjs';
+import {createModel,validateModel} from './training-model.mjs';
 export {SLOTS,PLAN_ID};
 /** Presentation only: one shared slot number and A/B/C… for any group size. */
 export function groupMemberNumber(slot,index){
@@ -37,12 +37,15 @@ export function buildPlan(ownerId){
 export function activate(data,at){
  const j=data.trainingJournal;
  if(j.activePlanVersionId===PLAN_ID)return;
+ if(!j.model.planVersions.some(p=>p.id===PLAN_ID)){
  const plan=buildPlan(j.model.ownerId);
  for(const key of ['exercises','variants','planVersions','positions','sets','drops','groups','coachInstructions']){
   for(const row of plan[key]){const old=j.model[key].find(x=>x.id===row.id);if(!old)j.model[key].push(structuredClone(row));else if(key!=='exercises')check(canonical(old)===canonical(row),'Plan version conflict: preserve existing version and assign a new ID');}
  }
  for(const p of plan.positions)if(!Object.values(data.exercises).flat().some(x=>x.id===p.exerciseId))data.exercises[p.unitId].push({id:p.exerciseId,name:p.label,sets:plan.sets.filter(s=>s.positionId===p.id).length,target:'V2',initialKg:'',tempo:'',rir:'',notes:'',journalOnly:true});
- j.nextUnitId=plan.planVersions[0].units[0].id;j.activePlanVersionId=PLAN_ID;(j.activations??=[]).push({planVersionId:PLAN_ID,at});
+ }else validateModel(j.model);
+ const version=j.model.planVersions.find(p=>p.id===PLAN_ID);
+ j.nextUnitId=version.units.slice().sort((a,b)=>a.order-b.order)[0].id;j.activePlanVersionId=PLAN_ID;(j.activations??=[]).push({planVersionId:PLAN_ID,at,...(data.activeId?{ongoingSessionId:data.activeId}:{})});
 }
 export const rangeText=r=>r===null||r===undefined?'nieokreślone':r.min===r.max?String(r.min):r.min+'–'+r.max;
 export const tempoText=t=>t===null||t===undefined?'nieokreślone':t.map(x=>x??'?').join(' ');

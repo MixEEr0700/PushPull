@@ -1,5 +1,6 @@
 """Real service workers + installability metadata + isolated artifact/HTTPS tests."""
 import functools
+from datetime import datetime, timezone
 import http.server
 import json
 import os
@@ -222,6 +223,82 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
+
+    def test_issue34_saved_plan_return_periods_draft_and_cycle_after_existing_pwa_update(self):
+        source=self.path/'issue34-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','c40e173:'+name],cwd=ROOT))
+        old_release=self.path/'issue34-old';build(old_release,source)
+        current_release=self.controller['directory'];self.controller['directory']=old_release
+        self.page.clock.install(time=datetime(2026,10,21,10,tzinfo=timezone.utc))
+        self.seed();self.page.goto(self.url);self.ready()
+        def plans():
+            self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
+        def value(page=None):
+            return (page or self.page).evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}')
+        def drafts():
+            return self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
+        plans();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="PULL A"]').click();self.page.locator('[data-act=start]').click()
+        self.page.locator('[data-expand="PULL-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        f=self.page.locator('.performanceForm');f.locator('[data-quick=kg]').fill('105');f.locator('[data-quick=reps]').fill('15')
+        f.locator('[type=submit]').click();expect(f).to_have_count(0)
+        self.page.locator('[data-panel=result]').click();f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click()
+        f.locator('[data-rich-action=side-mode][data-row="4"]').click();f.locator('[data-row="4"][data-field=reps]').fill('12');f.locator('[data-row="5"][data-field=reps]').fill('14')
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        plans();self.page.locator('#planFile').set_input_files(ROOT/'tests/fixtures/plan-v3.json')
+        self.page.locator('[data-plan-save]').click();expect(self.page.get_by_text('Plan zapisany bez aktywacji',exact=True)).to_be_visible()
+        before=self.snapshot();old_drafts=drafts();sid=before['data']['activeId']
+        self.controller['directory']=current_release;self.wait_update();self.reopen();self.context.set_offline(True)
+        self.assertEqual(self.snapshot(),before);self.assertEqual(drafts(),old_drafts)
+        plans();self.page.locator('[data-plan-switch]').click();self.page.locator('#switchPlanId').select_option('synthetic-v3')
+        self.assertEqual(self.page.locator('#switchPlanId option').evaluate_all('(els)=>els.map(e=>e.value)'),['','synthetic-v3'])
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+        self.assertEqual(self.snapshot(),before);self.assertEqual(drafts(),old_drafts)
+        cancel=lambda d:d.dismiss();self.page.remove_listener('dialog',self.accept_dialog);self.page.on('dialog',cancel)
+        self.page.locator('[data-switch-activate]').click();self.page.remove_listener('dialog',cancel);self.page.on('dialog',self.accept_dialog)
+        self.assertEqual(self.snapshot(),before)
+        self.page.clock.set_fixed_time(datetime(2026,10,22,22,30,tzinfo=timezone.utc)) # 23 October in Warsaw.
+        with self.page.expect_download():self.page.locator('[data-switch-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.assertEqual(value()['trainingJournal']['nextUnitId'],'TEST-A')
+        self.page.clock.set_fixed_time(datetime(2026,10,25,12,tzinfo=timezone.utc))
+        self.page.locator('[data-plan-switch]').click();self.page.locator('#switchPlanId').select_option('v2-owner-2026-10-22')
+        self.page.locator('[data-switch-preview]').click();expect(self.page.locator('#importedPlanId')).to_have_value('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-switch-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        current=value();self.assertEqual(current['entries'],before['data']['entries']);self.assertEqual(current['sessions'],before['data']['sessions'])
+        self.assertEqual(current['trainingJournal']['sessionSnapshots'],before['data']['trainingJournal']['sessionSnapshots']);self.assertEqual(drafts(),old_drafts)
+        self.assertEqual(len(current['trainingJournal']['importedPlans']),1);self.assertEqual(current['trainingJournal']['model'],before['data']['trainingJournal']['model'])
+        v2=self.page.locator('[data-plan-row="v2-owner-2026-10-22"]');v3=self.page.locator('[data-plan-row="synthetic-v3"]')
+        expect(v2.locator('[data-plan-period]')).to_have_text(['Używany: 21.10.2026 – 23.10.2026','Używany: od 25.10.2026'])
+        expect(v3.locator('[data-plan-period]')).to_have_text(['Używany: 23.10.2026 – 25.10.2026'])
+        expect(v2).to_contain_text('Używany w 2 okresach');expect(self.page.locator('[data-plan-activate]')).to_have_count(0)
+        self.reopen();self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
+        expect(f.locator('[data-row="4"][data-field=reps]')).to_have_value('12');expect(f.locator('[data-row="5"][data-field=reps]')).to_have_value('14')
+        f.locator('[type=submit]').click();expect(f).to_have_count(0)
+        expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: 15 × 105 kg','Seria 2: 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg'])
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        self.assertEqual(value()['trainingJournal']['nextUnitId'],'PUSH A') # Old PULL A must not advance this new V2 period.
+        self.page.locator('[data-act=start]').click();self.assertEqual(value()['sessions'][-1]['type'],'PUSH A')
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible();self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A')
+        saved=value();self.page.locator('[data-tab=settings]').click()
+        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block',accept_downloads=True);self.addCleanup(other.close)
+        page=other.new_page();messages=[]
+        def accept_restore(d):messages.append((d.type,d.message));d.accept()
+        page.on('dialog',accept_restore);page.goto(self.url);page.locator('[data-tab=settings]').click()
+        page.locator('#importFile').set_input_files({'name':'full-periods.json','mimeType':'application/json','buffer':raw})
+        try:expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=30000)
+        except AssertionError as error:self.fail(str(error)+'\nRestore dialogs: '+repr(messages))
+        self.assertEqual(value(page),saved)
+        page.locator('[data-tab=settings]').click();page.locator('[data-view=plans]').click()
+        expect(page.locator('[data-plan-row="v2-owner-2026-10-22"] [data-plan-period]')).to_have_text(['Używany: 21.10.2026 – 23.10.2026','Używany: od 25.10.2026'])
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
 
     def test_issue32_compact_results_after_update_preserve_saved_history_and_asymmetric_draft(self):
         source=self.path/'issue32-old-source'

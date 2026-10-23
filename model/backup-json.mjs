@@ -26,19 +26,28 @@ export function parseJson(text) {
   requireThat(typeof text === 'string', 'expected JSON text');
   const value=JSON.parse(text);
   const stack=[];
-  const tokens= /"(?:\\.|[^"\\])*"|[{}\[\]:,]|-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?|true|false|null/g;
-  for (const match of text.matchAll(tokens)) {
-    const token=match[0];
-    if (token==='{') stack.push(new Set());
-    else if (token==='[') stack.push(null);
-    else if (token==='}' || token===']') stack.pop();
-    else if (token.startsWith('"') && /^\s*:/.test(text.slice(match.index+token.length))) {
-      const key=JSON.parse(token),keys=stack.at(-1);
-      requireThat(!keys.has(key), `duplicate JSON property ${key}`); keys.add(key);
-    } else if (/^-?\d/.test(token)) {
-      const number=Number(token);
-      requireThat(Number.isFinite(number) && !Object.is(number,-0) && decimal(token)===decimal(JSON.stringify(number)), 'number cannot be represented losslessly');
+  // JSON.parse establishes syntax. Scan strings iteratively: the former regex
+  // exhausted Chromium's regexp stack on long escaped archive strings.
+  const numberToken=/-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?/y;
+  for(let i=0;i<text.length;){
+    const c=text[i];
+    if(c==='"'){
+      let end=i+1;while(text[end]!=='"')end+=text[end]==='\\'?2:1;
+      let next=end+1;while(next<text.length&&' \t\r\n'.includes(text[next]))next++;
+      if(text[next]===':'){
+        const key=JSON.parse(text.slice(i,end+1)),keys=stack.at(-1);
+        requireThat(!keys.has(key),`duplicate JSON property ${key}`);keys.add(key);
+      }
+      i=end+1;continue;
     }
+    if(c==='{')stack.push(new Set());else if(c==='[')stack.push(null);
+    else if(c==='}'||c===']')stack.pop();
+    else if(c==='-'||c>='0'&&c<='9'){
+      numberToken.lastIndex=i;const token=numberToken.exec(text)[0],number=Number(token);
+      requireThat(Number.isFinite(number)&&!Object.is(number,-0)&&decimal(token)===decimal(JSON.stringify(number)),'number cannot be represented losslessly');
+      i+=token.length;continue;
+    }
+    i++;
   }
   return value;
 }
