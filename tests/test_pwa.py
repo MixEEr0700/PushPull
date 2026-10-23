@@ -224,6 +224,81 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
 
+    def test_issue36_change_age_after_pwa_update_edit_restore_and_offline_restart(self):
+        source=self.path/'issue36-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','fd708b0:'+name],cwd=ROOT))
+        old_release=self.path/'issue36-old';build(old_release,source)
+        current_release=self.controller['directory'];self.controller['directory']=old_release
+        self.page.clock.install(time=datetime(2026,10,23,10,tzinfo=timezone.utc))
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
+        self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        def card(page=None):
+            page=page or self.page
+            return page.locator('.exercise-card').filter(has=page.locator('[data-expand="PULL-B-1"]'))
+        def open_result(day):
+            self.page.locator('[data-type="PULL B"]').click();self.page.locator('#trainingDate').fill('2026-10-'+day)
+            self.page.locator('[data-act=start]').click()
+            if card().locator('[data-expand]').get_attribute('aria-expanded')!='true':card().locator('[data-expand]').click()
+            card().locator('[data-panel=result]').click()
+            return self.page.locator('.performanceForm')
+        def save(f):
+            f.locator('[type=submit]').click();expect(f).to_have_count(0)
+            expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        for day in ['19','20','21']:
+            f=open_result(day);f.locator('[data-quick=kg]').fill('105');f.locator('[data-quick=reps]').fill('15');save(f)
+            self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        f=open_result('22');f.locator('[data-quick=kg]').fill('95');f.locator('[data-quick=reps]').fill('12')
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.snapshot()
+        def drafts():
+            return self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
+        old_drafts=drafts()
+        self.controller['directory']=current_release;self.wait_update();self.reopen();self.context.set_offline(True)
+        expect(card().locator('.exercise-toggle .last-result')).to_have_text('15 × 105 kg')
+        expect(card().locator('[data-result-change]')).to_have_text('· Ostatnia zmiana: 3 sesje temu')
+        self.assertEqual(self.snapshot(),before);self.assertEqual(drafts(),old_drafts)
+        self.assertEqual(card().locator('[data-result-change]').count(),1)
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+        self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
+        expect(f.locator('[data-row="0"][data-field=kg]')).to_have_value('95')
+        expect(card().locator('[data-result-change]')).to_contain_text('3 sesje temu')
+        save(f)
+        expect(card().locator('.exercise-toggle .last-result')).to_have_text('12 × 95 kg')
+        expect(card().locator('[data-result-change]')).to_contain_text('3 sesje temu') # In-progress session does not count.
+        sid=self.snapshot()['data']['activeId']
+        self.page.locator('[data-act=finish]').click();self.page.locator('[data-type="PULL B"]').click()
+        expect(card().locator('[data-result-change]')).to_contain_text('1 sesję temu') # Decrease is a change, too.
+        self.page.locator('[data-tab=calendar]').click();self.page.locator('[data-day="2026-10-22"]').click()
+        self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click()
+        expect(card().locator('[data-result-change]')).to_have_count(0) # Historical result stays unannotated.
+        if card().locator('[data-expand]').get_attribute('aria-expanded')!='true':card().locator('[data-expand]').click()
+        card().locator('[data-panel=historicalResult]').click();f=self.page.locator('.performanceForm')
+        f.locator('[data-quick=kg]').fill('105');f.locator('[data-quick=reps]').fill('15');save(f)
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-type="PULL B"]').click()
+        expect(card().locator('[data-result-change]')).to_contain_text('4 sesje temu')
+        expected=self.snapshot();self.page.close();self.page=self.context.new_page();self.page.on('dialog',self.accept_dialog);self.page.goto(self.url)
+        expect(self.page.locator('[data-act=start]')).to_be_visible();self.page.locator('[data-type="PULL B"]').click()
+        expect(card().locator('[data-result-change]')).to_contain_text('4 sesje temu')
+        self.assertEqual(self.snapshot(),expected);self.assertEqual(drafts(),[])
+        self.page.locator('[data-tab=settings]').click()
+        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        raw=Path(download.value.path()).read_bytes()
+        other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
+        page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url);page.locator('[data-tab=settings]').click()
+        page.locator('#importFile').set_input_files({'name':'change-age.json','mimeType':'application/json','buffer':raw})
+        expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=30000)
+        page.locator('[data-tab=training]').click();page.locator('[data-type="PULL B"]').click()
+        expect(card(page).locator('.exercise-toggle .last-result')).to_have_text('15 × 105 kg')
+        expect(card(page).locator('[data-result-change]')).to_contain_text('4 sesje temu')
+        actual=page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}')
+        self.assertEqual(actual,expected['data']);self.assertEqual(self.snapshot(),expected)
+
     def test_issue34_saved_plan_return_periods_draft_and_cycle_after_existing_pwa_update(self):
         source=self.path/'issue34-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
