@@ -23,6 +23,21 @@ export function sessionPlanId(data,session,catalog=null){
  const recorded=!session.journalSnapshotId&&recordedVersion(catalog,session);
  return recorded?'@legacy:'+recorded.id:!session.journalSnapshotId&&Array.isArray(session.sourceExerciseIds)?SOURCE:UNASSIGNED;
 }
+// Append order records transitions. Invalid/missing timestamps never become dates.
+function activationTime(value){
+ if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,3})?(?:Z|[+-]\d\d:\d\d)$/.test(value))return null;
+ try{date(value.slice(0,10));}catch{return null;}
+ return Number.isFinite(Date.parse(value))?value:null;
+}
+export function activationPeriods(data,planId){
+ const log=Array.isArray(data.trainingJournal?.activations)?data.trainingJournal.activations:[];
+ return log.flatMap((a,i)=>{
+  if(a?.planVersionId!==planId)return [];
+  const from=activationTime(a.at),next=log[i+1],ongoing=i===log.length-1&&data.trainingJournal.activePlanVersionId===planId;
+  let to=activationTime(next?.at);if(from&&to&&Date.parse(to)<Date.parse(from))to=null;
+  return [{from,to,ongoing,uncertain:!from||!ongoing&&!to}];
+ });
+}
 export function plans(data,catalog=null){
  const j=data.trainingJournal,current=j?.activePlanVersionId??SOURCE,rows=new Map();
  function add(version,model){if(rows.has(version.id))return;const observed=version.source?.reference==='observed-at-session-start';rows.set(version.id,{id:version.id,label:observed?'Szkielet źródłowy · '+version.units.map(u=>u.name).join(', '):version.label,version,model,kind:observed?'observed':'version'});}
@@ -33,8 +48,10 @@ export function plans(data,catalog=null){
  for(const s of data.sessions){const v=recordedVersion(catalog,s),id=v&&'@legacy:'+v.id;if(v&&sessionPlanId(data,s,catalog)===id)rows.set(id,{id,label:'Szkielet zapisany · '+v.planId+' · '+v.id,kind:'recorded',version:v,model:null});}
  if(data.sessions.some(s=>sessionPlanId(data,s,catalog)===UNASSIGNED))rows.set(UNASSIGNED,{id:UNASSIGNED,label:'Nieprzypisane / historyczne',kind:'unassigned',model:null,version:null});
  return [...rows.values()].map(p=>{
-  const sessions=data.sessions.filter(s=>sessionPlanId(data,s,catalog)===p.id),activations=(j?.activations??[]).filter(a=>a.planVersionId===p.id);
-  return {...p,current:p.id===current,sessions:sessions.length,activatedAt:activations.at(-1)?.at??null,status:p.id===current?'current':sessions.length||activations.length?'previous':p.id===PLAN_ID&&!j?.model.planVersions.some(v=>v.id===PLAN_ID)?'available':'saved',canActivate:p.kind==='version'&&(p.id===PLAN_ID||!!j?.importedPlans?.some(x=>x.planVersion.id===p.id))};
+  const sessions=data.sessions.filter(s=>sessionPlanId(data,s,catalog)===p.id),activations=(Array.isArray(j?.activations)?j.activations:[]).filter(a=>a?.planVersionId===p.id),periods=activationPeriods(data,p.id);
+  const dates=sessions.filter(s=>s.status==='done'&&p.kind!=='unassigned'&&((snapshotFor(data,s.id)&&snapshotFor(data,s.id).id===s.journalSnapshotId)||!s.journalSnapshotId&&recordedVersion(catalog,s))).flatMap(s=>{try{date(s.date);return [s.date];}catch{return [];}}).sort();
+  const trainingRange=dates.length?{from:dates[0],to:dates.at(-1)}:null;
+  return {...p,current:p.id===current,sessions:sessions.length,activatedAt:activationTime(activations.at(-1)?.at),periods,trainingRange,currentPeriodUnknown:p.id===current&&!periods.some(p=>p.ongoing),status:p.id===current?'current':sessions.length||activations.length?'previous':p.id===PLAN_ID&&!j?.model.planVersions.some(v=>v.id===PLAN_ID)?'available':'saved',canActivate:p.kind==='version'&&(p.id===PLAN_ID||!!j?.importedPlans?.some(x=>x.planVersion.id===p.id))};
  }).filter(p=>p.id!==SOURCE||p.current||p.sessions);
 }
 /** One execution row = one performed set (L/P separate); drop segments are not extra sets.

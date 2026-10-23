@@ -1,3 +1,5 @@
+Aktualne Issue #34: [zmiana zapisanej wersji planu i okresy używania](PLAN_SWITCH_PERIODS_ISSUE_34.md). Minimalny wybór w Aktualnym planie, świadoma aktywacja dla przyszłych sesji, nowy cykl od pierwszej jednostki. Bez migracji historii i zmian Matrix; Issue #36 poza zakresem.
+
 Aktualne Issue #32: [kompaktowe skróty wyników na kartach](COMPACT_RESULTS_ISSUE_32.md). Wyłącznie prezentacja; zachowane formularze L/P, dane, szkice, snapshoty, plany i statystyki.
 
 Aktualne Issue #30: [Plany treningowe i statystyki tygodniowe](PLANS_WEEKLY_STATS_ISSUE_30.md). Wspólne zarządzanie V2/V3+, istniejący importer i ręczna aktywacja dla przyszłych treningów; agregaty wyłącznie odczytywane z zakończonych sesji. Bez migracji bazy, zmian planu właściciela i mechanizmu Drive.

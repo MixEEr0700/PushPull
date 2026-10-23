@@ -46,7 +46,7 @@ export function nextType(data){const list=units(data);return list.some(u=>u.id==
 export function unitLabel(data,session){return units(data,session).find(u=>u.id===session.type)?.name??session.type;}
 export function advance(data,session){
  const list=units(data),snap=snapshotFor(data,session.id);
- if(data.trainingJournal?.activePlanVersionId){if(snap?.planVersionId!==data.trainingJournal.activePlanVersionId)return;data.trainingJournal.nextUnitId=list[(list.findIndex(u=>u.id===session.type)+1)%list.length].id;}
+ if(data.trainingJournal?.activePlanVersionId){if(snap?.planVersionId!==data.trainingJournal.activePlanVersionId||data.trainingJournal.activations?.at(-1)?.ongoingSessionId===session.id)return;data.trainingJournal.nextUnitId=list[(list.findIndex(u=>u.id===session.type)+1)%list.length].id;}
  const legacy=['PUSH A','PULL A','PUSH B','PULL B'];if(legacy.includes(session.type))data.nextType=legacy[(legacy.indexOf(session.type)+1)%legacy.length];
 }
 export function snapshotFor(data,sessionId) {return data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===sessionId)??null;}
@@ -100,6 +100,7 @@ export function project(data,base) {
   validateModel(j.model);
   if(j.activePlanVersionId)check(j.model.planVersions.some(p=>p.id===j.activePlanVersionId),'active plan missing');
   check(Array.isArray(j.sessionSnapshots),'missing session snapshots');
+  for(const a of Array.isArray(j.activations)?j.activations:[])if(Object.hasOwn(a??{},'ongoingSessionId'))check(typeof a.ongoingSessionId==='string'&&data.sessions.some(s=>s.id===a.ongoingSessionId),'activation session reference missing');
   const snaps=new Map();
   for(const snap of j.sessionSnapshots) {
     validateSessionSnapshot(snap);check(!snaps.has(snap.sessionId),'duplicate session snapshot');snaps.set(snap.sessionId,snap);

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {plans,sessionPlanId,weekOf,warsawDate,weeklyStats,entryTotals,SOURCE,UNASSIGNED} from '../model/plan-overview.mjs';
-import {initialize,startSession,recordEntry} from '../model/journal.mjs';
+import {plans,sessionPlanId,weekOf,warsawDate,weeklyStats,entryTotals,activationPeriods,SOURCE,UNASSIGNED} from '../model/plan-overview.mjs';
+import {initialize,startSession,recordEntry,advance,nextType,project} from '../model/journal.mjs';
 import {activate,views,PLAN_ID} from '../model/v2-plan.mjs';
 import {newPerformance,flatten} from '../model/performance.mjs';
 import {stagePlan,stageActivation} from '../model/plan-import.mjs';
@@ -78,4 +78,47 @@ test('legacy recorded session-start versions are read-only; migration current-on
  assert.equal(report.totals.workouts,s.status==='done'?1:0);assert.deepEqual({d,catalog},before);
  catalog.sessionVersions[s.id].provenance='legacy-current-only';assert.equal(sessionPlanId(d,s,catalog),UNASSIGNED);
  catalog.sessionVersions[s.id].provenance='session-start';catalog.planVersions[0].provenance='legacy-current-only';assert.equal(sessionPlanId(d,s,catalog),UNASSIGNED);
+});
+
+
+test('reactivation has distinct actual intervals, no fabricated bounds and no date-import fallback',()=>{
+ let d=fresh();activate(d,'2026-10-01T22:30:00.000Z');d=stageActivation(stagePlan(d,incoming(),'owner'),'synthetic-v3','2026-10-10T10:00:00.000Z');activate(d,'2026-10-20T10:00:00.000Z');
+ const before=structuredClone(d),p=plans(d).find(p=>p.id===PLAN_ID);
+ assert.deepEqual(p.periods,[{from:'2026-10-01T22:30:00.000Z',to:'2026-10-10T10:00:00.000Z',ongoing:false,uncertain:false},{from:'2026-10-20T10:00:00.000Z',to:null,ongoing:true,uncertain:false}]);
+ assert.equal(warsawDate(new Date(p.periods[0].from)),'2026-10-02');assert.equal(p.activatedAt,'2026-10-20T10:00:00.000Z');assert.deepEqual(d,before);
+ d.trainingJournal.activations[1].at=null;assert.equal(activationPeriods(d,PLAN_ID)[0].uncertain,true);
+ d.trainingJournal.activations[1].at='2026-02-30T10:00:00.000Z';assert.equal(activationPeriods(d,PLAN_ID)[0].to,null);
+ d.trainingJournal.activations[1].at='2026-09-01T10:00:00.000Z';assert.equal(activationPeriods(d,PLAN_ID)[0].to,null,'a backwards phone clock must not produce an invented/sorted interval');
+});
+
+test('missing activation timestamps show only trustworthy completed session dates; correction never shifts activation',async()=>{
+ const d=fresh();activate(d,'2026-10-01T10:00:00.000Z');const s=await session(d,'PUSH A','2026-10-05',[]);d.trainingJournal.activations=[];
+ let p=plans(d).find(p=>p.id===PLAN_ID);assert.equal(p.activatedAt,null);assert.deepEqual(p.periods,[]);assert.deepEqual(p.trainingRange,{from:'2026-10-05',to:'2026-10-05'});
+ s.date='2026-09-01';assert.deepEqual(plans(d).find(p=>p.id===PLAN_ID).trainingRange,{from:'2026-09-01',to:'2026-09-01'});assert.deepEqual(activationPeriods(d,PLAN_ID),[]);
+ d.trainingJournal.activations=[{planVersionId:PLAN_ID,at:'2026-10-01T10:00:00.000Z'}];assert.equal(plans(d).find(p=>p.id===PLAN_ID).periods[0].from,'2026-10-01T10:00:00.000Z');
+ d.sessions.push({id:'unknown',status:'done',date:'2020-01-01',type:'PUSH A'},{id:'source-only',status:'done',date:'2020-01-01',type:'PULL B',sourceExerciseIds:['PULL-B-6-SKI']});
+ assert.equal(plans(d).find(p=>p.id===UNASSIGNED).trainingRange,null);assert.equal(plans(d).find(p=>p.id===SOURCE).trainingRange,null);
+ const catalog={sessionVersions:{unknown:{versionId:'stored',provenance:'session-start'}},planVersions:[{id:'stored',planId:'PUSH A',provenance:'recorded',exercises:[]}]};
+ assert.deepEqual(plans(d,catalog).find(p=>p.id==='@legacy:stored').trainingRange,{from:'2020-01-01',to:'2020-01-01'});
+ catalog.planVersions[0].provenance='legacy-current-only';assert.equal(plans(d,catalog).find(p=>p.id===UNASSIGNED).trainingRange,null);
+});
+
+test('return to stored V2 preserves its definitions and snapshots; old same-version session cannot advance a new cycle even at identical timestamps',async()=>{
+ let d=fresh();activate(d,'2026-10-01T10:00:00.000Z');const s=await session(d,'PULL A','2026-10-02',['PULL-A-1'],'active');d.activeId=s.id;
+ d.trainingJournal.model.coachInstructions[0].text='Actual stored instructions from the previous release';const original=structuredClone(d);
+ d=stageActivation(stagePlan(d,incoming(),'owner'),'synthetic-v3','2026-10-02T10:00:00.000Z');const saved=structuredClone(d.trainingJournal.model);
+ activate(d,'2026-10-02T10:00:00.000Z');assert.deepEqual(d.trainingJournal.model,saved);assert.equal(nextType(d),'PUSH A');assert.equal(d.trainingJournal.activations.at(-1).ongoingSessionId,s.id);
+ assert.deepEqual(d.sessions,original.sessions);assert.deepEqual(d.entries,original.entries);assert.deepEqual(d.trainingJournal.sessionSnapshots,original.trainingJournal.sessionSnapshots);
+ advance(d,s);assert.equal(nextType(d),'PUSH A');const unchanged=structuredClone(d);activate(d,'2026-10-03T10:00:00.000Z');assert.deepEqual(d,unchanged);
+ const newer=await session(d,'PUSH A','2026-10-02',[]);advance(d,newer);assert.equal(nextType(d),'PULL A');
+ d.trainingJournal.activations.at(-1).ongoingSessionId='missing-session';assert.throws(()=>project(d,{model:{ownerId:'owner'}}),/activation session reference/);
+});
+
+test('new activation context survives full v3 export/restore with legacy source and without rewriting the old format',async()=>{
+ const {runInNewContext}=await import('node:vm'),{createLegacyModel,parseModelBackup}=await import('../model/legacy-model.mjs'),{exportBackup}=await import('../model/backup.mjs');
+ let d=fresh();activate(d,'2026-10-01T10:00:00.000Z');const s=await session(d,'PUSH A','2026-10-02',['PUSH-A-3'],'active');d.activeId=s.id;
+ d=stageActivation(stagePlan(d,incoming(),'owner'),'synthetic-v3','2026-10-03T10:00:00.000Z');activate(d,'2026-10-04T10:00:00.000Z');
+ const db=runInNewContext(readFileSync('storage.js','utf8')+'\n'+readFileSync('indexeddb.js','utf8')+'\nPushPullDB',{structuredClone,crypto:globalThis.crypto});const {catalog}=db.parseBackup(d);
+ const raw=JSON.stringify({format:'pushpull-backup',version:2,data:d,catalog,archives:[]}),doc=await createLegacyModel(raw,{ownerId:'owner',createdAt:'2026-10-05T10:00:00.000Z'});
+ assert.deepEqual((await parseModelBackup(await exportBackup(doc))).data,d);
 });
