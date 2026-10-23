@@ -327,6 +327,9 @@ class BrowserRegression(BrowserHarness):
                     # that copy for the original pixel comparison; exercise UI stays exact.
                     self.page.locator('[data-source-plan-hint]').evaluate_all('(els)=>els.forEach(el=>el.remove())')
                     self.page.locator('.eyebrow').evaluate('(el)=>el.textContent="PUSH / PULL V2 · SZKIELET"')
+                # Issue #44 adds an authorized update/error notice. This pixel
+                # harness blocks SW; real-worker tests verify the notice itself.
+                self.page.locator('[data-pwa-notice]').evaluate_all('(els)=>els.forEach(el=>el.remove())')
                 self.assertEqual(old.screenshot(full_page=True,animations='disabled'), self.page.screenshot(full_page=True,animations='disabled'),f'{width}x{height} {screen}')
             baseline.close()
 
