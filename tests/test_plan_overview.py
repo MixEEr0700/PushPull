@@ -1,4 +1,5 @@
 """Unified plans + real local workouts; all plans/data synthetic, Google simulated."""
+from test_browser import confirm_restore
 from pathlib import Path
 import json
 from playwright.sync_api import expect
@@ -97,6 +98,7 @@ class PlanOverview(BrowserHarness):
         self.assertEqual(self.page.evaluate('async t=>(await PushPullDB.parseModelBackup(t)).data',raw),saved)
         other=self.new_context(service_workers='block');page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url)
         page.locator('[data-tab=settings]').click();page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
+        confirm_restore(page)
         expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=30000)
         page.locator('[data-tab=settings]').click();page.locator('[data-view=weekly]').click();expect(page.locator('#weeklyPlan')).to_have_value('synthetic-v4')
         self.assertEqual(page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return db.value}finally{db.close()}}'),saved)

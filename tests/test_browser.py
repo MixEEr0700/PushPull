@@ -17,6 +17,11 @@ ROOT = Path(__file__).resolve().parents[1]
 KEY = 'pushpull_skeleton_v1'
 BASE = '92390b1449bd61c4c6fdc41ccf8a272e5ff914d3'
 
+def confirm_restore(page):
+    expect(page.locator('[data-restore-confirm]')).to_be_visible(timeout=60000)
+    page.locator('[data-restore-confirm]').click()
+    expect(page.locator('[data-restore-busy]')).to_have_count(0,timeout=120000)
+
 class QuietServer(http.server.SimpleHTTPRequestHandler):
     upgrade_latest = False
 
@@ -127,7 +132,8 @@ class BrowserHarness(unittest.TestCase):
 
     def import_data(self, content):
         self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':content.encode()})
-        self.page.wait_for_function("document.querySelector('#importFile')?.value === '' || !document.querySelector('#importFile')")
+        self.page.wait_for_function("document.querySelector('[data-restore-preview],[data-restore-error]')",timeout=60000)
+        if self.page.locator('[data-restore-confirm]').count():confirm_restore(self.page)
 
     def settings(self):
         self.page.locator('[data-tab=settings]').click()

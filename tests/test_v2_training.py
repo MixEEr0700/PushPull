@@ -1,4 +1,5 @@
 """V2 in the existing phone journal, using only synthetic history."""
+from test_browser import confirm_restore
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -90,6 +91,7 @@ class V2Training(BrowserHarness):
         other=self.new_context(service_workers='block');page=other.new_page();page.on('dialog',lambda d:d.accept())
         page.goto(self.url);page.locator('[data-tab=settings]').click()
         page.locator('#importFile').set_input_files({'name':'v2.json','mimeType':'application/json','buffer':raw.encode()})
+        confirm_restore(page)
         expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible()
         actual=page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}')
         self.assertEqual(actual,expected)
@@ -157,6 +159,7 @@ class V2Training(BrowserHarness):
         other=self.new_context(service_workers='block');page=other.new_page();page.on('dialog',lambda d:d.accept())
         page.goto(self.url);page.locator('[data-tab=settings]').click()
         page.locator('#importFile').set_input_files({'name':'all-structures.json','mimeType':'application/json','buffer':raw.encode()})
+        confirm_restore(page)
         expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible()
         self.assertEqual(page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}'),expected)
 

@@ -1,4 +1,5 @@
 """Synthetic data-only V3/V4 through the existing mobile UI; no owner plan."""
+from test_browser import confirm_restore
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -131,6 +132,7 @@ class PlanImport(BrowserHarness):
         raw=Path(d.value.path()).read_bytes();backup=json.loads(raw);self.assertEqual(backup['version'],3)
         other=self.new_context(service_workers='block');page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url)
         page.locator('[data-tab=settings]').click();page.locator('#importFile').set_input_files({'name':'full.json','mimeType':'application/json','buffer':raw})
+        confirm_restore(page)
         expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible()
         actual=page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return db.value}finally{db.close()}}');self.assertEqual(actual,state)
         page.reload();expect(page.locator('[data-act=finish]')).to_be_visible()
@@ -170,10 +172,13 @@ class PlanImport(BrowserHarness):
         self.settings()
         with self.page.expect_request('https://www.googleapis.com/upload/**'):
             self.page.locator('[data-drive-action=upload]').click()
-        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=60000)
         self.assertEqual(mock.posts,2)
         current=self.state()
-        backup=ManualDriveFlow.download(self)
+        ManualDriveFlow.restore_preview(self,list(mock.files)[-1])
+        backup=json.loads(list(mock.files.values())[-1]['text'])['backup']
+        self.assertEqual(self.state(),current) # Preview never restores automatically.
+        self.page.locator('[data-restore-cancel]').click()
         self.assertEqual(self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',backup),current)
         self.assertEqual(current['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
         self.assertEqual(current['entries'],before['entries']);self.assertEqual(current['sessions'],before['sessions'])
