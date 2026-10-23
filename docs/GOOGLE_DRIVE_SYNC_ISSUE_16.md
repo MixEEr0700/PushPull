@@ -1,6 +1,11 @@
 # Google Drive — kopie i synchronizacja zatwierdzonych danych
 
+Aktualny tryb Drive: [ręczne kopie, decyzja Issue #26](GOOGLE_DRIVE_MANUAL_BACKUP_ISSUE_26.md). Opisy automatycznej synchronizacji poniżej są historyczne.
+
+
 Implementacja Issue #16, oparta na main po PR #18. Nie podłączono konta właściciela, nie utworzono projektu OAuth, nie aktywowano V2 ani ręcznego wdrożenia.
+
+Aktualizacja: [hotfix konfliktów Issue #23](GOOGLE_DRIVE_HOTFIX_ISSUE_23.md) opisuje trwały wybór lokalnej wersji, zachowanie oczekującego uploadu i potwierdzenie przez identyfikator pliku. Poniższy opis PR #19 pozostaje zapisem pierwotnej implementacji.
 
 ## Co działa w implementacji
 

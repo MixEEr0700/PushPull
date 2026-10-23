@@ -2,7 +2,15 @@
 
 Data: 22.10.2026. Punkt wyjścia: `main` `ade2a2c` (po PR #19). Gałąź `feature/issue-21-plan-import`. [Format i instrukcja](PLAN_IMPORT_ISSUE_21.md).
 
-## Końcowa weryfikacja lokalna
+## Synchronizacja istniejącego PR #24 — 23.10.2026
+
+Do gałęzi `feature/issue-21-plan-import` dołączono `main` `ef0dec6`, zachowując wcześniejsze commity importu. Rozwiązano konflikty w `app.js` (jednostki/wersje z importu oraz ręczny panel Drive z main), `tests/test_pwa.py` (oba zestawy testów) oraz wygenerowanym `sw.js`. Usunięto z `commitPlan` pozostałe wywołanie dawnej kolejki. Nie przepisano modułu `model/plan-import.mjs` ani nie zmieniono obu modułów Drive względem aktualnego main. Nowy zatwierdzony dokument kierunku i późniejsza dokumentacja main są zachowane bez zmian.
+
+Dodatkowy scenariusz Chromium sprawdza aktywny V2 z wynikiem i szkicem: podgląd/zapis V3 nie zmienia aktywnego V2, anulowanie aktywacji nie zmienia bazy, świadoma aktywacja V3 dotyczy przyszłych treningów, bieżące sesje/ID/snapshoty/wyniki/szkice pozostają, ręczne kopie Drive i pobranie pełnego JSON zachowują plany oraz historię. Import ani aktywacja nie wykonują automatycznego POST. Test PWA importu aktualizuje teraz rzeczywisty pakiet `ef0dec6` (z ręcznymi kopiami), bez resetu danych, i wykonuje import/trening offline. Zachowano także test aktualizacji z dawnym konfliktem Drive z main; brakujący w starszych pakietach, nieużywany tam moduł importu dołączamy do technicznej allowlisty testowego buildu.
+
+Wyniki końcowej pełnej regresji i GitHub Actions są w [PR #24](https://github.com/MixEEr0700/PushPull/pull/24); wcześniejsze liczby poniżej pozostają historią pierwszego przebiegu. Nie wykonano testu fizycznego Androida ani prawdziwego Google. Nie zmieniano danych właściciela. Issue #29/#30, nowy ekran planów i tygodniowe statystyki nie są częścią tej synchronizacji.
+
+## Historyczna weryfikacja przed synchronizacją z main (22.10.2026)
 
 | Weryfikacja | Wynik |
 | --- | --- |
@@ -32,7 +40,7 @@ Historyczne testy porównujące cały `storage.js` bajt po bajcie z etapem 3/A/B
 ## Niewykonane i ograniczenia
 
 - **Fizyczny Android: niewykonane**, brak rzeczywistego urządzenia. Chromium z mobilnym viewportem nie zastępuje testu na telefonie. Lista odbioru syntetycznego planu jest w instrukcji.
-- **Prawdziwe konto Google/OAuth: niewykonane**. Mock potwierdza zgodność z istniejącą synchronizacją, nie konfigurację konta ani odnowienie tokenu na Androidzie.
+- **Prawdziwe konto Google/OAuth: niewykonane**. Obecna regresja używa ręcznych kopii Drive z Issue #26; mock nie potwierdza konfiguracji konta ani odnowienia tokenu na Androidzie.
 - Nie importowano rzeczywistego nowego planu i nie aktywowano planu na urządzeniu właściciela. Brak ręcznego wdrożenia i automatycznego scalenia.
 - Import ogranicza się do istniejącego protokołu wyników: kg/null, zmienne segmenty bez osobnych celów segmentów, całościowe L/P, kolejne niezależne karty grupy. Nieznane mechaniki wymagają implementacji, zamiast cichej akceptacji opisu. Szczegółowe ograniczenia w kontrakcie pliku.
 - Plik planu nie jest kopią historii ani szkiców. Dotychczasowe szkice pozostają lokalnie; ich utrata po usunięciu danych przeglądarki nie jest rozwiązywana przez import planu. Należy zachowywać pełne kopie poza telefonem.

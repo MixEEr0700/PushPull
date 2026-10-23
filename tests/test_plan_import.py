@@ -118,3 +118,43 @@ class PlanImport(BrowserHarness):
         self.page.reload();expect(self.page.locator('[data-draft-resume]')).to_have_count(1)
         self.page.locator('[data-draft-resume]').click();expect(self.page.locator('.performanceForm')).to_have_attribute('data-id','TEST-2')
         self.assertEqual(self.local_raw(),legacy.RAW)
+
+    def test_import_keeps_active_v2_until_confirmation_and_manual_drive_preserves_full_history(self):
+        import test_v2_training as training
+        from test_drive_sync import MockGoogle,ManualDriveFlow
+        mock=MockGoogle();mock.install(self.context)
+        training.V2Training.activate(self)
+        form=training.V2Training.open_result(self,'PUSH A','PUSH-A-1')
+        training.V2Training.fill_rows(self,form,'22.25','9');training.V2Training.save_form(self,form)
+        self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-quick=kg]').fill('45.5')
+        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.state()
+        drafts=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await db.readDrafts()}finally{db.close()}}')
+        ManualDriveFlow.configure(self)
+        self.preview();self.store();saved=self.state()
+        self.assertEqual(saved['trainingJournal']['activePlanVersionId'],before['trainingJournal']['activePlanVersionId'])
+        self.assertEqual(saved['trainingJournal'].get('activations'),before['trainingJournal'].get('activations'))
+        self.assertEqual(saved['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
+        self.assertEqual(saved['sessions'],before['sessions']);self.assertEqual(saved['entries'],before['entries'])
+        self.confirm=False;self.page.locator('[data-plan-activate]').click();self.assertEqual(self.state(),saved)
+        self.assertEqual(mock.posts,0) # Preview/store/cancel never trigger cloud uploads.
+        ManualDriveFlow.upload(self)
+        self.assertEqual(mock.posts,1)
+        self.confirm=True;self.activate()
+        self.assertEqual(mock.posts,1) # Explicit plan activation remains local too.
+        with self.page.expect_request('https://www.googleapis.com/upload/**'):
+            self.page.locator('[data-drive-action=upload]').click()
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')
+        self.assertEqual(mock.posts,2)
+        current=self.state()
+        backup=ManualDriveFlow.download(self)
+        self.assertEqual(self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',backup),current)
+        self.assertEqual(current['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
+        self.assertEqual(current['entries'],before['entries']);self.assertEqual(current['sessions'],before['sessions'])
+        self.assertEqual(self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await db.readDrafts()}finally{db.close()}}'),drafts)
+        self.page.reload();self.page.locator('[data-draft-resume]').click()
+        expect(self.page.locator('.performanceForm [data-row="0"][data-field=kg]')).to_have_value('45.5')
+        self.assertEqual(self.state()['activeId'],before['activeId'])
+        self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
+        self.assertFalse(self.alerts,self.alerts)

@@ -50,7 +50,7 @@ export function createGoogleDrive({fetcher=globalThis.fetch,now=Date.now}={}){
   }
  };
  async function request(url,options={},raw=false){
-  if(!api.authenticated)throw Object.assign(Error('Połącz Google, aby wznowić synchronizację.'),{auth:true});
+  if(!api.authenticated)throw Object.assign(Error('Połącz Google, aby wykonać kopię lub ją pobrać.'),{auth:true});
   const usedToken=token;
   const response=await fetcher(url,{...options,headers:{...options.headers,Authorization:'Bearer '+usedToken},cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(30000)});
   if(!response.ok){if(response.status===401&&token===usedToken)api.clear();throw Object.assign(Error(response.status===401?'Autoryzacja Google wygasła. Połącz ponownie.':'Błąd Google Drive ('+response.status+'). Dane pozostają lokalnie.'),{auth:response.status===401,status:response.status});}

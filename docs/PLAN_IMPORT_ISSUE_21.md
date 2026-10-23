@@ -1,5 +1,8 @@
 # Import kolejnych planów V3/V4+ — Issue #21
 
+Aktualizacja PR #24 z 23.10.2026: dołączono `main` `ef0dec6`, w tym ręczne kopie Drive z PR #28 i [zatwierdzony kierunek planów/statystyk](PLANY_I_STATYSTYKI_KIERUNEK_2026-10-23.md). Ten etap zachowuje dotychczasowy import w Dane; wspólny ekran **Plany treningowe**, zastąpienie kontrolek V2 i statystyki tygodniowe z Issue #30 są odrębną przyszłą pracą, po zakończeniu tego PR i poprawki L/P z Issue #29. Nie implementowano ich tutaj.
+
+
 To rozszerzenie istniejącego dziennika. Plan jest plikiem danych, a nie nową wersją aplikacji. Nie zmieniono planu właściciela ani nie aktywowano V2. Testy używają wyłącznie syntetycznego pliku [plan-v3.json](../tests/fixtures/plan-v3.json).
 
 [Raport wykonanych testów i ograniczenia](ISSUE_21_TEST_REPORT.md).
@@ -14,7 +17,7 @@ To rozszerzenie istniejącego dziennika. Plan jest plikiem danych, a nie nową w
 6. Wybierz zapisaną wersję i **Aktywuj dla przyszłych treningów**. Osobne potwierdzenie pobiera oraz zachowuje pełną kopię sprzed aktywacji. Rozpoczęta sesja, jej wyniki i szkice pozostają przy poprzedniej wersji/snapshocie; dopiero następna sesja użyje wybranego planu. Zakończenie poprzedniej sesji nie przesuwa rotacji nowej wersji. Domyślnie nowy plan rozpoczyna się od pierwszej jednostki; można ręcznie wybrać inną.
 7. Kolejne zatwierdzone plany importuje się tak samo, bez wdrożenia aplikacji. Powrót do wcześniejszej zapisanej wersji wymaga ponownej świadomej aktywacji. Nie kasuje nowszych treningów.
 
-Import planu jest osobny od **Importuj wcześniej zapisany JSON** (pełna kopia historii). Plik planu nie może zawierać wyników, sesji, szkiców, notatek użytkownika ani ustawień Google. Nie zastępuje ani nie łączy historii automatycznie.
+Import planu jest osobny od **Importuj kopię z telefonu** (pełna kopia historii). Plik planu nie może zawierać wyników, sesji, szkiców, notatek użytkownika ani ustawień Google. Nie zastępuje ani nie łączy historii automatycznie.
 
 ## Kontrakt pliku `pushpull-plan`, wersja 1
 
@@ -56,13 +59,13 @@ Poprzednia pozycja jest opcjonalna (`null` dla nieustalonej historii). Jeśli ws
 
 Nieznane pola/protokoły, nieobsługiwana wersja, obce referencje, powtórzenia ID i próba zmiany niezmiennego rekordu są błędem przed zapisem. Nieznane protokoły wymagają rzeczywistej obsługi w aplikacji; nie są konwertowane na opis. Rozszerzenia przyszłego formatu wymagają nowej wersji kontraktu. Pomyłkę w zapisanym planie poprawia się przez nową wersję/ID, nie przez nadpisanie starego snapshotu.
 
-## Przechowywanie, kopie i synchronizacja
+## Przechowywanie i ręczne kopie
 
 `trainingJournal.model` zawiera addytywne rekordy, a `trainingJournal.importedPlans` zachowuje dokładny pakiet zatwierdzonego pliku bez danych użytkownika. `activePlanVersionId` i osobny `nextUnitId` dotyczą przyszłych sesji. Istniejące pola starej rotacji i rejestr ćwiczeń pozostają kompatybilne. Rejestr rozszerza się tylko o brakujące tożsamości; przy nieokreślonych celach jego techniczne `sets:1` służy wyłącznie zgodności starego walidatora, **nie jest zaleceniem planu**, cel nadal ma `setState:unspecified` i brak `SetPrescription`.
 
 Nie podniesiono wersji IndexedDB, nie dodano bazy, nie zmieniono Drive ani formatu pełnej kopii v3. Dotychczasowy most źródłowy zachowuje pakiety, nieaktywne wersje i referencje snapshotów. Atomowy zapis z `backupBefore` zachowuje kopię w tej samej transakcji i nadal sprawdza rewizję/inne karty. Pierwszy import włącza istniejący model przez istniejący zabezpieczony mechanizm `prepareModel`; przerwanie może pozostawić samą bezpieczną kopię/przygotowany model, ale nie częściowo aktywowany plan.
 
-Po lokalnym zapisie jest wywoływana dotychczasowa kolejka Drive; offline ani brak autoryzacji nie blokują importu, aktywacji i treningu. Import nie modyfikuje konfiguracji, wyboru konta, kopii chmurowych ani mechanizmu rozwiązywania konfliktów. Szkice pozostają w dotychczasowym lokalnym magazynie, nie w pliku planu. Pełna kopia JSON/Drive zachowuje plany i oficjalną historię; tak jak dotąd nie przenosi lokalnych szkiców na nowy telefon.
+Zgodnie z decyzją Issue #26 lokalny zapis importu ani aktywacji **nie uruchamia uploadu**. Kopię zapisuje się ręcznie w Dane → Zapisz kopię na Google Drive. Pobranie kopii z Drive daje plik JSON i nie zmienia lokalnej bazy; odtworzenie wymaga osobnego potwierdzonego importu pliku. Offline ani brak autoryzacji nie blokują importu planu, aktywacji i treningu. Import nie modyfikuje konfiguracji, wyboru konta ani istniejących kopii chmurowych. Szkice pozostają w dotychczasowym lokalnym magazynie, nie w pliku planu. Pełna kopia JSON/Drive zachowuje plany i oficjalną historię; tak jak dotąd nie przenosi lokalnych szkiców na nowy telefon.
 
 Odzyskiwanie: pobierz kopię sprzed zmiany z **Dane → Zachowane kopie danych**, obejrzyj ją i przywróć osobnym importem pełnego JSON. Przy odrzucaniu/odzyskiwaniu szkiców używaj istniejących kontrolek. Nie czyść danych przeglądarki/PWA. Zachowaj kopię poza telefonem. Zmiana pochodzenia HTTPS albo wyczyszczenie danych wymaga przywrócenia pełnej kopii.
 
@@ -70,4 +73,4 @@ Odzyskiwanie: pobierz kopię sprzed zmiany z **Dane → Zachowane kopie danych**
 
 Obsługiwane są istniejące serie, back-off, zmienne segmenty dropsetu, niezależne L/P i grupy A/B/C; nie dodano nowego protokołu treningowego. Raport dla trenera pozostaje poza tym zadaniem (kierunek Issue #20). Nie ma automatycznego czytnika PDF/DOCX ani oceny zgodności planu z dokumentem trenera.
 
-Po zatwierdzonym wdrożeniu przetestuj na fizycznym Androidzie wyłącznie syntetyczny plan w osobnym profilu testowym: instalacja/aktualizacja PWA, import bez sieci, podgląd/anulowanie, zapis nieaktywny, rozpoczęta stara sesja ze szkicem, świadoma aktywacja, przyszły trening A/B/C oraz drop/L/P, zamknięcie procesu i odzyskanie szkicu, pełny eksport/restore i synchronizacja testowego konta Drive. Rzeczywisty plan wymaga osobnego sprawdzenia i aktywacji właściciela. Ten PR nie potwierdza testów na fizycznym telefonie ani połączenia z prawdziwym Google.
+Po zatwierdzonym wdrożeniu przetestuj na fizycznym Androidzie wyłącznie syntetyczny plan w osobnym profilu testowym: instalacja/aktualizacja PWA, import bez sieci, podgląd/anulowanie, zapis nieaktywny, rozpoczęta stara sesja ze szkicem, świadoma aktywacja, przyszły trening A/B/C oraz drop/L/P, zamknięcie procesu i odzyskanie szkicu, pełny eksport/restore i ręczna kopia na testowym koncie Drive. Rzeczywisty plan wymaga osobnego sprawdzenia i aktywacji właściciela. Ten PR nie potwierdza testów na fizycznym telefonie ani połączenia z prawdziwym Google.
