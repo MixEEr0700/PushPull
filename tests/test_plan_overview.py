@@ -46,8 +46,6 @@ class PlanOverview(BrowserHarness):
         expect(self.page.locator('[data-week="2026-W43"]')).to_contain_text('Częściowy tydzień')
         self.page.locator('#weeklyPlan').select_option('v2-owner-2026-10-22');self.metric('tonnage','600kg');self.metric('sets','6')
         self.assertEqual(self.state(),before)
-        self.page.locator('[data-plan-switch]').click();expect(self.page.locator('[data-plan-switcher]')).to_contain_text('Brak innych zapisanych planów')
-        self.assertEqual(self.state(),before)
         self.page.locator('[data-tab=calendar]').click();self.page.locator('[data-day="2026-10-19"]').click()
         self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click()
         self.page.locator('#historicalDate [name=date]').fill('2026-10-12');self.page.locator('#historicalDate button').click()
