@@ -1,3 +1,5 @@
+Ponownie otwarte Issue #34: [ciągłość historii i statystyk po powrocie do planu](PLAN_CONTINUITY_ISSUE_34.md). Gotowe, zachowane definicje bez reimportu; bez fikcyjnej V1 i resetu danych. Istniejące wykresy zachowują rzeczywistą przerwę między okresami.
+
 Aktualne Issue #36: [wiek ostatniej zmiany wyniku](RESULT_CHANGE_AGE_ISSUE_36.md). Jeden dopisek obok ostatniego wyniku, porównanie zapisanych parametrów bez rekordów; wyłącznie odczyt, bez migracji i zmian Matrix/zapisu.
 
 Aktualne Issue #34: [zmiana zapisanej wersji planu i okresy używania](PLAN_SWITCH_PERIODS_ISSUE_34.md). Minimalny wybór w Aktualnym planie, świadoma aktywacja dla przyszłych sesji, nowy cykl od pierwszej jednostki. Bez migracji historii i zmian Matrix; Issue #36 poza zakresem.

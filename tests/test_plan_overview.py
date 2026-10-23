@@ -1,5 +1,6 @@
 """Unified plans + real local workouts; all plans/data synthetic, Google simulated."""
 from pathlib import Path
+import json
 from playwright.sync_api import expect
 from test_browser import BrowserHarness
 import test_v2_training as training
@@ -101,6 +102,34 @@ class PlanOverview(BrowserHarness):
         self.assertEqual(page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return db.value}finally{db.close()}}'),saved)
         self.assertFalse(self.alerts,self.alerts)
 
+    def test_complete_snapshot_only_plan_can_be_reactivated_without_import_or_changing_drafts(self):
+        packet=json.loads(json.dumps(imports.PLAN).replace('"TEST-A"','"PUSH A"').replace('"TEST-B"','"PULL A"'))
+        self.prepare();self.ready();self.preview(packet);self.store();self.activate_plan()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-act=start]').click();f=self.form('TEST-1');self.fill(f)
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        self.plans('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        # Only the synthetic fixture loses its redundant registry/packet, not its full snapshot.
+        self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=structuredClone(d.value),j=v.trainingJournal,s=j.sessionSnapshots.find(s=>s.planVersionId==='synthetic-v3');delete j.importedPlans;for(const k of ['exercises','variants','planVersions','positions','sets','drops','groups','coachInstructions'])j.model[k]=j.model[k].filter(x=>!s.model[k].some(y=>y.id===x.id));await d.commit(v)}finally{d.close()}}""")
+        self.page.reload();self.ready();before=self.state()
+        drafts=self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
+        self.plans();self.page.locator('[data-plan-switch]').click();self.page.locator('#switchPlanId').select_option('synthetic-v3')
+        self.page.locator('[data-switch-preview]').click();expect(self.page.locator('[data-selected-plan]')).to_contain_text('Test Narciarz')
+        self.confirm=False;self.page.locator('[data-switch-activate]').click();self.assertEqual(self.state(),before)
+        self.confirm=True
+        with self.page.expect_download():self.page.locator('[data-switch-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        after=self.state();self.assertEqual(after['trainingJournal']['activePlanVersionId'],'synthetic-v3')
+        self.assertEqual(after['trainingJournal']['nextUnitId'],'PUSH A');self.assertNotIn('importedPlans',after['trainingJournal'])
+        for key in ['sessions','entries','activeId']:self.assertEqual(after[key],before[key])
+        self.assertEqual(after['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
+        self.assertEqual(self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}'),drafts)
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-draft-resume]').click()
+        expect(self.page.locator('.performanceForm [data-row="0"][data-field=kg]')).to_have_value('20')
+        self.assertFalse(self.alerts,self.alerts)
+
     def test_unknown_activation_dates_use_only_verified_training_dates_and_never_backfill(self):
         training.V2Training.activate(self)
         self.page.locator('#trainingDate').fill('2026-10-19');self.page.locator('[data-act=start]').click()
@@ -112,7 +141,7 @@ class PlanOverview(BrowserHarness):
         expect(row.locator('[data-plan-period]')).to_have_text('Okres aktywacji nieustalony; treningi od 19.10.2026 do 19.10.2026')
         expect(self.page.locator('[data-plan-row="@unassigned"] [data-plan-period]')).to_have_text('Brak wiarygodnych dat')
         self.assertEqual(self.state(),before)
-        self.page.locator('[data-plan-switch]').click();expect(self.page.locator('[data-plan-switcher]')).to_contain_text('Brak innych zapisanych planów')
+        self.page.locator('[data-plan-switch]').click();expect(self.page.locator('[data-plan-switcher]')).to_contain_text('Brak innych gotowych do aktywacji wersji planu')
         self.assertEqual(self.state(),before)
         self.page.locator('[data-tab=calendar]').click();self.page.locator('[data-day="2026-10-19"]').click()
         self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click()
