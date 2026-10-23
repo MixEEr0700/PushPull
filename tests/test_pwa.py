@@ -52,7 +52,7 @@ class ArtifactBuild(unittest.TestCase):
         self.assertIn('Aplikacja Treningowa',current['description'])
         for field in set(old)-{'name','short_name','description'}:
             self.assertEqual(current[field],old[field],field)
-        for name in ['style.css','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','scripts/service-worker.template.js','PushPull_PLAN_PROJEKTU_v1.md']:
+        for name in ['style.css','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','PushPull_PLAN_PROJEKTU_v1.md']:
             self.assertEqual((ROOT/name).read_bytes(),subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT),name)
 
     def test_artifact_server_refuses_modified_assets_and_source_checkout(self):
@@ -165,6 +165,92 @@ class PWADeployment(unittest.TestCase):
                 time.sleep(0.02)
             self.waiting_worker=None
         self.page=self.context.new_page();self.page.on('dialog',self.accept_dialog);self.page.goto(self.url);self.ready()
+
+    def notification_state(self,page=None):
+        return (page or self.page).evaluate('''async()=>{const d=await PushPullDB.open(()=>{});try{return {backup:d.export(),drafts:await d.readDrafts(),drive:await d.readDriveState(),revision:d.revision,legacy:d.raw}}finally{d.close()}}''')
+
+    def test_issue44_existing_main_then_waiting_release_keeps_two_tabs_native_editor_and_history(self):
+        source=self.path/'notice-main-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','f3b403b:'+name],cwd=ROOT))
+        old_release=self.path/'notice-main';build(old_release,source)
+        current=self.controller['directory'];self.controller['directory']=old_release
+        self.seed();self.page.goto(self.url);self.ready()
+        # Synthetic large legacy history, opaque extension, and retained Google metadata.
+        self.page.evaluate('''async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value,s=v.sessions[0],e=v.entries[0];for(let n=0;n<250;n++){const id='notice-session-'+n;v.sessions.push({...s,id,seq:10+n,status:'done'});v.entries.push({...e,id:'notice-result-'+n,sessionId:id});}v.extension.notice='x'.repeat(1024*1024);await d.commit(v);const state=await d.readDriveState()??{clientId:'',enabled:false,selected:null,accounts:{},mode:'manual',deviceId:crypto.randomUUID()};state.accounts.synthetic={label:'Synthetic retained account'};await d.writeDriveState(state,state.token??null);}finally{d.close()}}''')
+        self.page.reload();self.ready()
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
+        self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="PULL A"]').click();self.page.locator('[data-act=start]').click()
+        self.page.locator('[data-expand="PULL-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        f=self.page.locator('.performanceForm');f.locator('[data-quick=kg]').fill('40');f.locator('[data-quick=reps]').fill('9')
+        f.locator('[data-rich-action=toggle]').click();f.locator('[data-rich-action=side-mode][data-row="0"]').click()
+        f.locator('[data-row="1"][data-field=kg]').fill('35')
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.notification_state()
+        self.controller['directory']=current;self.wait_update();self.reopen()
+        self.assertEqual(self.notification_state(),before)
+        release=json.loads((current/'release.json').read_text())['release'][:12]
+        self.page.locator('[data-tab=settings]').click();expect(self.page.locator('[data-pwa-version]')).to_have_text('Wersja aplikacji: '+release)
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-draft-resume]').click()
+        f=self.page.locator('.performanceForm');expect(f.locator('[data-row="1"][data-field=kg]')).to_have_value('35')
+        f.locator('[data-row="1"][data-field=kg]').focus()
+        self.page.evaluate('window.__keptEditor=document.querySelector(".performanceForm");window.__keptInput=document.activeElement')
+        other=self.context.new_page();other.goto(self.url);expect(other.locator('[data-act=finish]')).to_be_visible()
+        before=self.notification_state()
+        newer=self.next_release('notice-two-tabs');self.controller['directory']=newer;self.wait_update()
+        message='Dostępna nowa wersja PushPull. Zapisz bieżące wyniki i zamknij wszystkie okna aplikacji, następnie uruchom ją ponownie.'
+        for page in [self.page,other]:expect(page.locator('[data-pwa-notice]')).to_have_text(message,timeout=30000)
+        self.assertTrue(self.page.evaluate('window.__keptEditor===document.querySelector(".performanceForm")&&window.__keptInput===document.activeElement'))
+        self.assertEqual(self.notification_state(),before)
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+        self.page.close();self.page=other
+        self.page.locator('[data-tab=settings]').click();expect(self.page.locator('[data-pwa-version]')).to_have_text('Wersja aplikacji: '+release)
+        expect(self.page.locator('[data-pwa-notice]')).to_have_text(message)
+        self.context.set_offline(True);self.reopen()
+        self.assertEqual(self.notification_state(),before)
+        self.page.locator('[data-tab=settings]').click()
+        new_id=json.loads((newer/'release.json').read_text())['release'][:12]
+        expect(self.page.locator('[data-pwa-version]')).to_have_text('Wersja aplikacji: '+new_id)
+        expect(self.page.locator('[data-pwa-notice]')).to_be_hidden()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-draft-resume]').click()
+        expect(self.page.locator('.performanceForm [data-row="0"][data-field=kg]')).to_have_value('40')
+        expect(self.page.locator('.performanceForm [data-row="1"][data-field=kg]')).to_have_value('35')
+
+    def test_issue44_offline_bad_integrity_retry_and_independent_device_do_not_import_data(self):
+        self.page.add_init_script("ServiceWorker.prototype.postMessage=()=>{throw Error('simulated unavailable identity')}")
+        self.seed();self.page.goto(self.url);self.ready();before=self.notification_state()
+        independent=self.browser.new_context(service_workers='allow');self.addCleanup(independent.close)
+        device=independent.new_page();device.goto(self.url);expect(device.locator('[data-act=start]')).to_be_visible()
+        device.evaluate('navigator.serviceWorker.ready');device.wait_for_function('()=>navigator.serviceWorker.controller!==null')
+        other_before=self.notification_state(device)
+        self.assertNotEqual(other_before['backup']['data'],before['backup']['data'])
+        self.page.locator('[data-tab=settings]').click();self.context.set_offline(True)
+        self.page.locator('[data-pwa-check]').click()
+        expect(self.page.locator('[data-pwa-notice]')).to_contain_text('Nie udało się')
+        expect(self.page.locator('[data-pwa-notice]')).not_to_contain_text('Dostępna nowa wersja')
+        self.assertEqual(self.notification_state(),before)
+        self.context.set_offline(False);newer=self.next_release('notice-retry');self.controller['directory']=newer;self.controller['broken']='mismatch'
+        self.page.evaluate('''async()=>{const r=await navigator.serviceWorker.getRegistration();r.addEventListener('updatefound',()=>{window.__badWorker=r.installing})}''')
+        self.page.locator('[data-pwa-check]').click();self.page.wait_for_function('()=>window.__badWorker?.state==="redundant"')
+        expect(self.page.locator('[data-pwa-notice]')).to_contain_text('Nie udało się')
+        self.assertEqual(self.notification_state(),before)
+        self.assertTrue(self.page.evaluate('async()=>!(await navigator.serviceWorker.getRegistration()).waiting'))
+        retry_workers=[];self.context.on('serviceworker',lambda worker:retry_workers.append(worker))
+        self.controller['broken']=None;self.page.locator('[data-pwa-check]').click()
+        expect(self.page.locator('[data-pwa-notice]')).to_contain_text('Dostępna nowa wersja',timeout=60000)
+        expected='pushpull-shell-'+json.loads((newer/'release.json').read_text())['release']
+        self.waiting_worker=retry_workers[-1]
+        self.assertEqual(self.waiting_worker.evaluate('CACHE'),expected)
+        self.context.set_offline(True)
+        expect(self.page.locator('[data-pwa-notice]')).to_contain_text('Dostępna nowa wersja') # Already verified/cached, unlike an offline check.
+        self.assertEqual(self.notification_state(),before);self.assertEqual(self.notification_state(device),other_before)
+        self.reopen();expect(self.page.locator('[data-pwa-notice]')).to_be_hidden()
+        self.assertEqual(self.notification_state(),before);self.assertEqual(self.notification_state(device),other_before)
 
     def test_manifest_png_safe_zone_and_desktop_installability(self):
         self.context=self.pw.chromium.launch_persistent_context(self.path/'profile',executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])

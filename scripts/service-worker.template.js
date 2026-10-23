@@ -12,6 +12,13 @@ async function verified(url, asset) {
   if (hash !== asset.sha256) throw Error('PWA release integrity mismatch: ' + asset.path);
   return response;
 }
+// Read-only identity of the worker controlling THIS page, not a network release.
+// Unknown messages (including activation requests) do nothing.
+self.addEventListener('message', event => {
+  if (event.data?.type === 'PUSHPULL_RELEASE' && event.ports?.[0]) {
+    event.ports[0].postMessage({type:'PUSHPULL_RELEASE', release:CACHE.slice('pushpull-shell-'.length)});
+  }
+});
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const temporary = CACHE + '-install-' + crypto.randomUUID();
