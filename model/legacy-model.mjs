@@ -1,5 +1,6 @@
 /** Minimal bridge to the existing journal, not a new plan or result editor. */
 import {project} from './journal.mjs';
+import {storedPlanModel} from './plan-import.mjs';
 import {createModel} from './training-model.mjs';
 import {createBackup,validateBackup,exportBackup,readLegacyBackup} from './backup.mjs';
 import {canonical,portable,requireThat as check} from './backup-json.mjs';
@@ -47,4 +48,34 @@ export async function parseModelBackup(raw) {
   const expected=await createLegacyModel(original,{ownerId:d.payload.model.ownerId,createdAt:d.createdAt});
   check(canonical(expected)===canonical(d),'unsupported backup contents; original file must be preserved');
   return {...legacy.original,document:d};
+}
+
+/** Small factual summaries; no preview-only/built-in plans or invented dates. */
+export function backupSummary(data,{createdAt=null}={}){
+ if(!data)return null;
+ const j=data.trainingJournal,versions=new Map();
+ for(const m of [j?.model,...(j?.sessionSnapshots??[]).map(s=>s.model)].filter(Boolean))for(const v of m.planVersions)if(v.executionVersion===2&&!versions.has(v.id))versions.set(v.id,v);
+ for(const p of j?.importedPlans??[])if(p.planVersion?.executionVersion===2&&!versions.has(p.planVersion.id))versions.set(p.planVersion.id,p.planVersion);
+ const plans=[...versions.values()].map(v=>({id:v.id,label:v.label,complete:!!storedPlanModel(data,v.id)}));
+ const activePlanId=j?.activePlanVersionId??null;
+ return {completePlans:plans.filter(p=>p.complete).length,createdAt:typeof createdAt==='string'&&Number.isFinite(Date.parse(createdAt))?createdAt:null,plans,activePlanId,
+  activePlan:plans.find(p=>p.id===activePlanId)?.label??(activePlanId?'Nieustalona wersja · '+activePlanId:'Szkielet źródłowy'),
+  sessions:data.sessions.length,completed:data.sessions.filter(s=>s.status==='done').length,ongoing:data.sessions.filter(s=>s.status==='active').length,results:data.entries.length,
+  snapshots:j?.sessionSnapshots.length??0,activations:Array.isArray(j?.activations)?j.activations.length:0,
+  latestSession:data.sessions.map(s=>s.date).sort().at(-1)??null};
+}
+export function compareBackupData(current,incoming){
+ if(!current)return null;
+ const records=(before,after)=>{const a=new Map(before.map(r=>[r.id,r])),b=new Map(after.map(r=>[r.id,r]));return {localOnly:before.filter(r=>!b.has(r.id)).length,copyOnly:after.filter(r=>!a.has(r.id)).length,changed:after.filter(r=>a.has(r.id)&&canonical(a.get(r.id))!==canonical(r)).length};};
+ return {identical:canonical(current)===canonical(incoming),sessions:records(current.sessions,incoming.sessions),results:records(current.entries,incoming.entries)};
+}
+export async function inspectFullBackup(raw,current=null){
+ const candidate=JSON.parse(raw),parsed=candidate?.version===3?await parseModelBackup(raw):readLegacyBackup(raw);
+ const data=parsed.data;
+ return {version:candidate.version,summary:backupSummary(data,{createdAt:parsed.document?.createdAt}),comparison:compareBackupData(current,data)};
+}
+// Reuse this already precached module for large preview verification off the UI
+// thread. Storage and final import validation remain in the established importer.
+if(typeof DedicatedWorkerGlobalScope!=='undefined'&&globalThis instanceof DedicatedWorkerGlobalScope){
+ globalThis.onmessage=async({data})=>{try{globalThis.postMessage({preview:await inspectFullBackup(data.raw,data.current)});}catch(error){globalThis.postMessage({error:error.message});}};
 }

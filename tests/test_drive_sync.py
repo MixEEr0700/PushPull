@@ -5,7 +5,8 @@ from urllib.parse import urlsplit, parse_qs
 from pathlib import Path
 import subprocess
 from playwright.sync_api import expect
-from test_browser import BrowserHarness
+from test_browser import BrowserHarness, confirm_restore
+import test_plan_import as imports
 import test_indexeddb as legacy
 import test_v2_training as training
 
@@ -65,10 +66,12 @@ class ManualDriveFlow(BrowserHarness):
         self.page.locator('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')
 
-    def download(self):
-        with self.page.expect_download() as download:
-            self.page.locator('[data-drive-action=download]').click()
-        return Path(download.value.path()).read_text()
+    def restore_preview(self,file_id=None):
+        self.page.locator('[data-drive-action=restore]').click()
+        expect(self.page.locator('#driveCopy')).to_be_visible()
+        if file_id:self.page.locator('#driveCopy').select_option(file_id)
+        self.page.locator('[data-drive-action=preview]').click()
+        expect(self.page.locator('[data-restore-preview]')).to_be_visible(timeout=60000)
 
     def drafts(self):
         return self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await db.readDrafts()}finally{db.close()}}')
@@ -118,43 +121,90 @@ class ManualDriveFlow(BrowserHarness):
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden();self.assertEqual(mock.posts,1)
         self.upload();self.assertEqual(mock.posts,2);self.assertEqual(self.state(),offline)
-        backup=self.download();restored=self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',backup)
+        self.restore_preview();backup=json.loads(list(mock.files.values())[-1]['text'])['backup'];restored=self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',backup)
         self.assertEqual(restored,offline)
         self.assertEqual(len(offline['entries']),len(saved['entries'])+1)
+        self.page.locator('[data-restore-cancel]').click()
         with self.page.expect_download() as local:self.page.locator('[data-act=export]').click()
         self.assertEqual(self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',Path(local.value.path()).read_text()),offline)
         self.assertFalse(self.alerts,self.alerts)
 
-    def test_new_phone_download_only_then_cancelled_and_confirmed_import_preserves_preimage_and_drafts(self):
+    def test_two_profiles_restore_v2_and_test_from_drive_preserves_preimage_drafts_and_offline(self):
         mock=MockGoogle();mock.install(self.context);self.activate()
-        form=self.open_result('PULL B','PULL-B-6-SKI');self.fill_rows(form,'37','9');self.save_form(form)
-        cloud=self.state();self.configure();self.upload()
-        self.context.close();self.context=self.new_context(service_workers='block');mock.install(self.context)
-        self.page=self.context.new_page();self.page.on('dialog',self.dialog)
-        self.page.on('pageerror',lambda e:self.errors.append(str(e)))
-        self.prepare();self.ready();local=self.state()
-        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
-        self.page.locator('[data-main=kg]').fill('81.123')
-        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
-        drafts=self.drafts();self.configure();self.assertEqual(self.state(),local)
-        original_files=dict(mock.files);cloud_id=next(iter(mock.files));self.upload()
-        for id,old in original_files.items():self.assertEqual(mock.files[id],old)
-        mock.corrupt=True;self.page.locator('[data-drive-action=download]').click()
+        f=self.open_result('PUSH A','PUSH-A-1');self.fill_rows(f,'100','5');self.save_form(f)
+        self.page.locator('[data-act=finish]').click()
+        plan=json.loads((Path(__file__).parent/'fixtures/plan-test-3x5.json').read_text())
+        imports.PlanImport.preview(self,plan);imports.PlanImport.store(self);imports.PlanImport.activate(self)
+        self.page.locator('[data-tab=training]').click();f=self.open_result('TEST','TEST-1');self.fill_rows(f,'20','5');self.save_form(f)
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        cloud=self.state();self.configure();self.upload();self.assertEqual(mock.posts,1);files=dict(mock.files)
+        def metrics(page):return page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const m=await import('./model/plan-overview.mjs');return Object.fromEntries(d.value.trainingJournal.model.planVersions.map(p=>[p.id,m.weeklyStats(d.value,p.id,{from:'2026-10-01',to:'2026-10-31',today:'2026-11-01',catalog:d.export().catalog})]))}finally{d.close()}}""")
+        expected_metrics=metrics(self.page)
+        expected_catalog=self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.export().catalog}finally{d.close()}}')
+        # A second independent storage partition starts with V2 only.
+        self.context=self.new_context(service_workers='allow');mock.install(self.context)
+        self.page=self.context.new_page();self.page.on('dialog',self.dialog);self.page.on('pageerror',lambda e:self.errors.append(str(e)))
+        self.page.goto(self.url);self.activate();f=self.open_result('PUSH A','PUSH-A-1');self.fill_rows(f,'81.123','7')
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        local=self.state();drafts=self.drafts();self.configure();self.assertEqual(mock.posts,1)
+        mock.corrupt=True;self.page.locator('[data-drive-action=restore]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Nie znaleziono prawidłowej kopii')
-        self.assertEqual(self.state(),local);mock.corrupt=False
-        self.page.locator('[data-drive-action=download]').click()
-        expect(self.page.locator('#driveCopy')).to_be_visible()
-        expect(self.page.locator('[data-drive-status]')).to_contain_text('różne historie')
-        self.page.locator('#driveCopy').select_option(cloud_id)
-        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390)
-        backup=self.download();self.assertEqual(self.state(),local);self.assertEqual(self.drafts(),drafts)
-        def import_file():self.page.locator('#importFile').set_input_files({'name':'drive.json','mimeType':'application/json','buffer':backup.encode()})
-        self.confirm=False;import_file();self.assertEqual(self.state(),local)
-        self.confirm=True;import_file();self.ready();self.assertEqual(self.state(),cloud)
-        self.assertEqual(self.drafts(),drafts)
-        copies=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await Promise.all(db.backups().map(id=>db.readBackup(id)))}finally{db.close()}}')
-        self.assertTrue(any(json.loads(raw).get('data')==local for raw in copies if raw))
-        self.assertEqual(mock.posts,2);self.assertFalse(self.alerts,self.alerts)
+        self.assertEqual(self.state(),local);self.assertEqual(self.drafts(),drafts);mock.corrupt=False
+        self.restore_preview();preview=self.page.locator('[data-restore-preview]')
+        for text in ['Na tym urządzeniu','W wybranej kopii','TEST 3×5','ZASTĄPI','nie scala','Szkice']:expect(preview).to_contain_text(text)
+        self.assertEqual(self.state(),local);self.assertEqual(self.drafts(),drafts)
+        self.page.locator('[data-restore-cancel]').click();self.assertEqual(self.state(),local)
+        self.restore_preview();self.confirm=False;confirm_restore(self.page);self.assertEqual(self.state(),local)
+        before_keys=self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.backups()}finally{d.close()}}')
+        self.confirm=True;confirm_restore(self.page)
+        expect(self.page.locator('[data-restore-success]')).to_contain_text('TEST 3×5')
+        self.assertEqual(self.state(),cloud);self.assertEqual(self.drafts(),drafts);self.assertEqual(metrics(self.page),expected_metrics)
+        self.assertEqual(self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.export().catalog}finally{d.close()}}'),expected_catalog)
+        preimage=self.page.evaluate("""async({before,local})=>{const d=await PushPullDB.open(()=>{});try{for(const key of d.backups().filter(k=>!before.includes(k))){try{const raw=await d.readBackup(key),parsed=await(await import('./model/drive-sync.mjs')).inspectBackup(raw);const {canonical}=await import('./model/backup-json.mjs');if(canonical(parsed.data)===canonical(local))return true;}catch{}}return false;}finally{d.close()}}""",{'before':before_keys,'local':local})
+        self.assertTrue(preimage);self.assertEqual(mock.files,files);self.assertEqual(mock.posts,1)
+        expect(self.page.locator('[data-draft-download]')).to_have_count(1)
+        expect(self.page.locator('[data-draft-resume]')).to_have_count(0) # B's snapshot is not silently applied to A.
+        self.page.evaluate('navigator.serviceWorker.ready');self.page.wait_for_function('navigator.serviceWorker.controller!==null')
+        self.context.set_offline(True);self.page.close();self.page=self.context.new_page();self.page.on('dialog',self.dialog);self.page.goto(self.url)
+        expect(self.page.locator('[data-act=start]')).to_be_visible();self.assertEqual(self.state(),cloud);self.assertEqual(self.drafts(),drafts)
+        self.assertEqual(metrics(self.page),expected_metrics);self.assertEqual(mock.posts,1);self.assertFalse(self.alerts,self.alerts)
+
+    def test_restore_preview_rejects_newer_commit_from_another_tab(self):
+        self.page.add_init_script('window.BroadcastChannel=undefined');self.activate();self.settings=lambda:self.page.locator('[data-tab=settings]').click();self.settings()
+        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        raw=Path(download.value.path()).read_bytes()
+        self.page.locator('#importFile').set_input_files({'name':'old.json','mimeType':'application/json','buffer':raw})
+        expect(self.page.locator('[data-restore-preview]')).to_be_visible(timeout=60000)
+        newer=self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value;v.exercises['PUSH A'][0].notes='newer data in another tab';await d.commit(v);return d.value;}finally{d.close()}}""")
+        confirm_restore(self.page);self.assertEqual(self.state(),newer)
+        expect(self.page.locator('[data-restore-error]')).to_contain_text('innej karcie')
+        expect(self.page.locator('[data-restore-success]')).to_have_count(0)
+        self.assertTrue(self.alerts)
+        self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        self.page.locator('[data-tab=settings]').click()
+        self.page.locator('#importFile').set_input_files({'name':'old.json','mimeType':'application/json','buffer':raw})
+        expect(self.page.locator('[data-restore-preview]')).to_be_visible(timeout=60000)
+        self.page.evaluate("localStorage.setItem('pushpull_skeleton_v1',localStorage.getItem('pushpull_skeleton_v1')+' ')")
+        confirm_restore(self.page);self.assertEqual(self.state(),newer)
+        expect(self.page.locator('[data-restore-error]')).to_contain_text('od podglądu')
+
+    def test_post_commit_readback_failure_never_reports_success_and_keeps_preimage(self):
+        self.prepare();self.ready();self.page.locator('[data-tab=settings]').click()
+        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        candidate=json.loads(Path(download.value.path()).read_text());before=self.state()
+        candidate['data']['exercises']['PUSH A'][0]['notes']='restored value'
+        self.page.locator('#importFile').set_input_files({'name':'restored.json','mimeType':'application/json','buffer':json.dumps(candidate).encode()})
+        expect(self.page.locator('[data-restore-preview]')).to_be_visible(timeout=60000)
+        self.page.evaluate("""()=>{const original=IDBDatabase.prototype.transaction;window.__originalTransaction=original;IDBDatabase.prototype.transaction=function(names,mode,...rest){if(mode==='readonly'&&window.__restoreCompleted)throw Error('simulated readback failure');const tx=original.call(this,names,mode,...rest);if(mode==='readwrite')tx.addEventListener('complete',()=>window.__restoreCompleted=true);return tx;}}""")
+        confirm_restore(self.page)
+        expect(self.page.locator('[data-restore-success]')).to_have_count(0)
+        expect(self.page.locator('h1')).to_have_text('Dane wymagają odzyskania')
+        expect(self.page.locator('#backupKey')).to_be_visible()
+        self.page.evaluate('()=>{IDBDatabase.prototype.transaction=window.__originalTransaction}')
+        self.assertEqual(self.state(),candidate['data']) # Commit happened; failed post-read is never called success.
+        self.assertTrue(self.alerts)
+        preimages=self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await Promise.all(d.backups().map(k=>d.readBackup(k)))}finally{d.close()}}')
+        self.assertTrue(any(json.loads(raw).get('data')==before for raw in preimages if raw))
 
     def test_upgrade_legacy_conflict_and_running_legacy_worker_never_sends_old_outbox(self):
         mock=MockGoogle();mock.install(self.context);self.prepare();self.ready()

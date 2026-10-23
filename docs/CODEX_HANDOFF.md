@@ -1,3 +1,5 @@
+Aktualne Issue #40: [pełne przywracanie kopii Drive/JSON](BACKUP_RESTORE_ISSUE_40.md). Cztery ręczne operacje, wspólny podgląd i potwierdzenie zastąpienia; zachowane preimage i lokalne szkice, bez zmiany formatu v3/synchronizacji.
+
 Ponownie otwarte Issue #34: [ciągłość historii i statystyk po powrocie do planu](PLAN_CONTINUITY_ISSUE_34.md). Gotowe, zachowane definicje bez reimportu; bez fikcyjnej V1 i resetu danych. Istniejące wykresy zachowują rzeczywistą przerwę między okresami.
 
 Aktualne Issue #36: [wiek ostatniej zmiany wyniku](RESULT_CHANGE_AGE_ISSUE_36.md). Jeden dopisek obok ostatniego wyniku, porównanie zapisanych parametrów bez rekordów; wyłącznie odczyt, bez migracji i zmian Matrix/zapisu.

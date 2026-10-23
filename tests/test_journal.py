@@ -1,4 +1,5 @@
 """The opt-in journal through the real mobile forms, calendar and JSON controls."""
+from test_browser import confirm_restore
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -82,6 +83,7 @@ class JournalFlow(BrowserHarness):
         other=self.new_context(service_workers='block');page=other.new_page();page.on('dialog',lambda d:d.accept())
         page.goto(self.url);page.locator('[data-tab=settings]').click()
         page.locator('#importFile').set_input_files({'name':'full-v3.json','mimeType':'application/json','buffer':raw.encode()})
+        confirm_restore(page)
         expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible()
         restored=page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{if(d.error)throw d.error;return d.value}finally{d.close()}}')
         self.assertEqual(restored,corrected)
@@ -173,5 +175,6 @@ class JournalFlow(BrowserHarness):
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes();self.assertEqual(json.loads(raw)['version'],3)
         self.page.locator('#importFile').set_input_files({'name':'source-pair-v3.json','mimeType':'application/json','buffer':raw})
+        confirm_restore(self.page)
         self.ready();self.assertEqual(self.state(),saved)
         self.assertFalse(self.alerts,self.alerts)

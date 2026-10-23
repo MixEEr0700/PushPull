@@ -1,4 +1,5 @@
 """Real service workers + installability metadata + isolated artifact/HTTPS tests."""
+from test_browser import confirm_restore
 import functools
 from datetime import datetime, timezone
 import http.server
@@ -195,6 +196,7 @@ class PWADeployment(unittest.TestCase):
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_text();self.assertEqual(json.loads(raw),before)
         self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
+        confirm_restore(self.page)
         expect(self.page.locator('h1')).to_have_text('Trening')
         self.assertEqual(self.snapshot()['data'],FIXTURE)
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
@@ -223,6 +225,45 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
+
+    def test_issue40_update_preview_and_large_v3_restore_offline_keeps_local_drafts(self):
+        source=self.path/'restore-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','8d327a7:'+name],cwd=ROOT))
+        old_release=self.path/'restore-old';build(old_release,source)
+        current_release=self.controller['directory'];self.controller['directory']=old_release
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
+        self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-main=kg]').fill('81.123');self.page.locator('[data-main=reps]').fill('7')
+        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value;v.extension.large='x'.repeat(16*1024*1024);await d.commit(v)}finally{d.close()}}""")
+        self.page.reload();self.ready()
+        def value():return self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}')
+        def drafts():return self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
+        expected=value();self.page.locator('[data-tab=settings]').click()
+        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        raw=Path(download.value.path()).read_bytes();self.assertGreater(len(raw),16*1024*1024)
+        self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value;v.exercises['PUSH A'][0].notes='newer local note protected by preimage';await d.commit(v)}finally{d.close()}}""")
+        self.page.reload();self.ready();before=value();before_drafts=drafts()
+        self.controller['directory']=current_release;self.wait_update();self.reopen();self.context.set_offline(True)
+        self.assertEqual(value(),before);self.assertEqual(drafts(),before_drafts)
+        self.page.locator('[data-tab=settings]').click()
+        for text in ['Zapisz kopię na Google Drive','Przywróć z Google Drive','Pobierz kopię JSON','Przywróć z pliku JSON']:expect(self.page.get_by_text(text,exact=True)).to_be_visible()
+        self.page.evaluate('window.__previewTicks=0;window.__ticker=setInterval(()=>window.__previewTicks++,5)')
+        self.page.locator('#importFile').set_input_files({'name':'large-v3.json','mimeType':'application/json','buffer':raw})
+        expect(self.page.locator('[data-restore-preview]')).to_be_visible(timeout=90000)
+        self.assertGreater(self.page.evaluate('window.__previewTicks'),5);self.page.evaluate('clearInterval(window.__ticker)')
+        expect(self.page.locator('[data-restore-preview]')).to_contain_text('Zawartość danych jest różna')
+        self.assertEqual(value(),before);self.assertEqual(drafts(),before_drafts)
+        confirm_restore(self.page);expect(self.page.locator('[data-restore-success]')).to_contain_text('Przywrócono')
+        self.assertEqual(value(),expected);self.assertEqual(drafts(),before_drafts)
+        self.reopen();self.assertEqual(value(),expected);self.assertEqual(drafts(),before_drafts)
+        expect(self.page.locator('[data-draft-download]')).to_have_count(1)
 
     def test_issue34_return_continues_version_history_and_dated_gaps_after_pwa_update(self):
         source=self.path/'return-old-source'
@@ -310,6 +351,7 @@ class PWADeployment(unittest.TestCase):
         raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
         page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url);page.locator('[data-tab=settings]').click()
         page.locator('#importFile').set_input_files({'name':'continuous-plans.json','mimeType':'application/json','buffer':raw})
+        confirm_restore(page)
         expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=30000);self.assertEqual(value(page),saved)
         self.page.close();self.page=self.context.new_page();self.page.on('dialog',self.accept_dialog);self.page.goto(self.url)
         self.page.locator('[data-type="PUSH A"]').click();expect(self.page.locator('[data-expand="PUSH-A-1"] .last-result')).to_have_text('10 × 95 kg')
@@ -383,6 +425,7 @@ class PWADeployment(unittest.TestCase):
         other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
         page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url);page.locator('[data-tab=settings]').click()
         page.locator('#importFile').set_input_files({'name':'change-age.json','mimeType':'application/json','buffer':raw})
+        confirm_restore(page)
         expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=30000)
         page.locator('[data-tab=training]').click();page.locator('[data-type="PULL B"]').click()
         expect(card(page).locator('.exercise-toggle .last-result')).to_have_text('15 × 105 kg')
@@ -459,6 +502,7 @@ class PWADeployment(unittest.TestCase):
         def accept_restore(d):messages.append((d.type,d.message));d.accept()
         page.on('dialog',accept_restore);page.goto(self.url);page.locator('[data-tab=settings]').click()
         page.locator('#importFile').set_input_files({'name':'full-periods.json','mimeType':'application/json','buffer':raw})
+        confirm_restore(page)
         try:expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=30000)
         except AssertionError as error:self.fail(str(error)+'\nRestore dialogs: '+repr(messages))
         self.assertEqual(value(page),saved)
@@ -767,6 +811,7 @@ class PWADeployment(unittest.TestCase):
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes()
         self.page.locator('#importFile').set_input_files({'name':'pair.json','mimeType':'application/json','buffer':raw})
+        confirm_restore(self.page)
         self.ready();self.assertEqual(self.snapshot()['data'],state)
         self.page.locator('[data-tab=calendar]').click()
         self.page.locator(f'[data-act=openSession][data-id="{old_session}"]').click()
@@ -947,6 +992,7 @@ class PWADeployment(unittest.TestCase):
         raw=Path(download.value.path()).read_text()
         self.assertEqual(json.loads(raw),before)
         self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
+        confirm_restore(self.page)
         expect(self.page.locator('h1')).to_have_text('Trening')
         restored=self.snapshot()
         self.assertEqual(restored['data'],before['data'])

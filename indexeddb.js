@@ -199,12 +199,14 @@ const PushPullDB = (() => {
       root=result.root;current=value.data;catalog=value.catalog;backupRows=result.backups;unverified=null;
       return root;
     }
-    async function save(data, nextCatalog, {importing=false, initializing=false, importedArchives=[],modelOwnerId=null,backupBefore=false}={}) {
+    async function save(data, nextCatalog, {importing=false, initializing=false, importedArchives=[],modelOwnerId=null,backupBefore=false,requiredRevision=null,requiredLegacyRaw=undefined}={}) {
+      if(requiredRevision!==null&&(root?.revision||0)!==requiredRevision)throw Error('Dane zmieniły się od podglądu kopii. Otwórz podgląd ponownie.');
       const expectedRevision=root?.revision || 0,expectedModel=modelState || (importing?unverified?.modelState || null:null);
       if(data.trainingJournal && !expectedModel && modelOwnerId===null)throw Error('Nowy dziennik wymaga importu pełnej kopii v3.');
       PushPullStorage.validate(data);validateCatalog(data,nextCatalog);
       if(stale && !importing)throw Error('Dane zmieniły się. Odśwież aplikację przed zapisem.');
       const source=legacy();
+      if(requiredLegacyRaw!==undefined&&source!==requiredLegacyRaw)throw Error('Starsza wersja zmieniła dane od podglądu. Otwórz kopię ponownie.');
       if(!importing && root && source!==root.legacyRaw)throw Error('Starsza wersja zmieniła dane. Zachowaj obie kopie i odzyskaj historię przez import.');
       if(initializing && source!==raw)throw Error('Dane źródłowe zmieniły się podczas migracji. Uruchom ponownie.');
       const encoded=encode(data,nextCatalog), checksum=await digest({data,catalog:nextCatalog});
@@ -262,6 +264,13 @@ const PushPullDB = (() => {
         next.verified=true;next.migration={...next.migration,complete:true,completedAt:next.migration.completedAt || new Date().toISOString()};
         tx.objectStore('meta').put(next);
       });
+      if(importing){
+        try{
+          const actual=await transaction(db,'readonly',read);
+          if(actual.root?.revision!==next.revision)throw Error('Inna karta zmieniła dane po przywróceniu. Nie potwierdzono aktualnej zawartości.');
+          if(canonical(verifyRows(actual.root,actual.rows,encoded.rows))!==canonical({data,catalog:nextCatalog})||canonical(actual.modelState||null)!==canonical(nextModel))throw Error('Nie potwierdzono kompletności przywróconej bazy.');
+        }catch(failure){backupRows.push(...backups);blocked('Nie potwierdzono odczytu po przywróceniu. Kopia sprzed przywrócenia została zachowana. Odśwież aplikację. '+failure.message);throw error;}
+      }
       // No visible success and no in-memory publication before transaction.oncomplete.
       modelState=nextModel;
       root=clone(next);current=clone(data);catalog=clone(nextCatalog);backupRows.push(...backups);raw=source;error=null;stale=false;
@@ -362,10 +371,10 @@ const PushPullDB = (() => {
           store.delete(record.key);return true;
         });
       },
-      async importModelBackup(text){
+      async importModelBackup(text,{expectedRevision=null,expectedLegacyRaw=undefined}={}){
         if(!db)throw Error('IndexedDB niedostępne.');
         const parsed=await (await modelAPI()).parseModelBackup(text);
-        await save(clone(parsed.data),clone(parsed.catalog),{importing:true,importedArchives:clone(parsed.archives || []),modelOwnerId:parsed.document.payload.model.ownerId});
+        await save(clone(parsed.data),clone(parsed.catalog),{importing:true,importedArchives:clone(parsed.archives || []),modelOwnerId:parsed.document.payload.model.ownerId,requiredRevision:expectedRevision,requiredLegacyRaw:expectedLegacyRaw});
       },
       async exportModelBackup(){
         if(error)throw error;
@@ -380,14 +389,14 @@ const PushPullDB = (() => {
       set onchange(callback){notify=callback;},
       recovery(){return unverified?{format:'pushpull-idb-recovery',version:1,...clone(unverified)}:current?snapshot(true):null;},
       export(){if(!current)throw Error('Brak zweryfikowanej bazy do eksportu.');return snapshot(true);},
-      async commit(data,{importing=false,importedCatalog=null,importedArchives=[],backupBefore=false}={}) {
+      async commit(data,{importing=false,importedCatalog=null,importedArchives=[],backupBefore=false,expectedRevision=null,expectedLegacyRaw=undefined}={}) {
         if(!db)throw Error('IndexedDB niedostępne. Odblokuj pamięć i uruchom ponownie.');
         if(error && !importing)throw error;
         const safe=clone(data),nextCatalog=importedCatalog || catalogFor(safe,catalog);
-        try{await save(safe,nextCatalog,{importing,importedArchives,backupBefore});}catch(failure){if(/Inna karta|Starsza wersja|Dane źródłowe|Model zmienił/.test(failure.message))blocked(failure.message);throw failure;}
+        try{await save(safe,nextCatalog,{importing,importedArchives,backupBefore,requiredRevision:expectedRevision,requiredLegacyRaw:expectedLegacyRaw});}catch(failure){if(/Inna karta|Starsza wersja|Dane źródłowe|Model zmienił/.test(failure.message))blocked(failure.message);throw failure;}
       },
       backups(){return backupRows.map(b=>b.id);},
-      backupLabel(id){const item=backupRows.find(b=>b.id===id);const label={migration:'Przed migracją','before-import':'Przed importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item.kind] || 'Kopia';return label+' · '+new Date(item.createdAt).toLocaleString('pl-PL');},
+      backupLabel(id){const item=backupRows.find(b=>b.id===id);const label={migration:'Przed migracją','before-import':'Przed przywróceniem / importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item.kind] || 'Kopia';return label+' · '+new Date(item.createdAt).toLocaleString('pl-PL');},
       async readBackup(id){const item=backupRows.find(b=>b.id===id);if(!item)throw Error('Brak kopii');return item.raw;},
       close(){channel?.close();db?.close();window.removeEventListener('storage',storageListener);}
     };
