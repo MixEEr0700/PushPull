@@ -6,6 +6,7 @@ import {parseModelBackup} from './legacy-model.mjs';
 import {readLegacyBackup} from './legacy-backup.mjs';
 const uuid=x=>typeof x==='string'&&/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(x);
 const sorted=x=>[...x].sort();
+const union=(...lists)=>sorted(new Set(lists.flat()));
 const same=(a,b)=>canonical(a)===canonical(b);
 const hash=async x=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical(x)))),b=>b.toString(16).padStart(2,'0')).join('');
 export async function inspectBackup(text){
@@ -52,7 +53,7 @@ export async function readNode(transport,row){
 const initial=()=>({clientId:'',enabled:false,selected:null,accounts:{}});
 const account=()=>({base:[],ackRevision:0,outbox:null,lastSuccess:null,nextAttempt:0,failures:0});
 export async function openDriveSync({database,transport,online=()=>navigator.onLine,now=Date.now,auto=true,withLock=fn=>globalThis.navigator?.locks?navigator.locks.request('pushpull-drive-sync',fn):fn()}={}){
- let state=await database.readDriveState()??initial(),timer=null,serial=Promise.resolve(),changed=()=>{},notice='',copies=[],closed=false,connectedAccount=null;
+ let state=await database.readDriveState()??initial(),timer=null,serial=Promise.resolve(),changed=()=>{},notice='',copies=[],closed=false,connectedAccount=null,phase='idle',remoteHeads=[],reviewed=null;
  const emit=()=>changed();
  const a=()=>state.selected?state.accounts[state.selected]:null;
  async function refresh(){state=await database.readDriveState()??initial();return state;}
@@ -62,36 +63,66 @@ export async function openDriveSync({database,transport,online=()=>navigator.onL
   const result=serial.then(run);serial=result.catch(()=>{});return result;
  }
  function schedule(delay=0){if(!auto||closed)return;clearTimeout(timer);timer=setTimeout(()=>{void api.retry().catch(error=>api.report(error));},delay);}
- async function cloudGraph(){const g=graph(await transport.list());copies=[...g.nodes.values()].sort((a,b)=>(b.createdAt??'').localeCompare(a.createdAt??''));return g;}
+ async function cloudGraph(){phase='list';const g=graph(await transport.list());remoteHeads=g.heads;copies=[...g.nodes.values()].sort((a,b)=>(b.createdAt??'').localeCompare(a.createdAt??''));return g;}
  function requireConnection(){if(!state.enabled||!transport.authenticated||connectedAccount!==state.selected)throw Error('Połącz Google, aby odczytać kopie.');}
+ // `covered` contains only ancestors of acknowledged/explicitly approved bases.
+ // A search response can lag behind a direct file GET. Older approved heads do
+ // not revoke that proof; an unknown head still requires a fresh user decision.
+ function trustedView(current,g){
+  return same(g.heads,current.base)||g.heads.every(id=>union(current.covered??[],current.base).includes(id));
+ }
+ function conflict(){phase='conflict';notice='Konflikt kopii. Pojawiła się niezatwierdzona wersja Drive. Obejrzyj kopie przed wyborem.';emit();}
+ async function confirmUpload(pending,g){
+  let row=g.nodes.get(pending.node.id);
+  if(!row&&!pending.fileId){
+   phase='upload';emit();
+   const uploaded=await transport.create(JSON.stringify(pending.node),properties(pending.node));
+   if(typeof uploaded?.id!=='string'||!uploaded.id)throw Error('Google nie zwrócił identyfikatora zapisu. Ponowimy tę samą operację.');
+   pending.fileId=uploaded.id;await save(); // Survive a restart before read-back.
+  }
+  row??={id:pending.node.id,digest:pending.node.digest,parents:pending.node.parents,fileId:pending.fileId};
+  phase='verify';emit();
+  const verified=await readNode(transport,row);
+  if(!same(verified,pending.node))throw Error('Google zwrócił inną zawartość kopii.');
+  return verified;
+ }
  async function work(){
   await refresh();const current=a();if(!state.enabled||!current||database.error)return;
-  if(!online()||!transport.authenticated||connectedAccount!==state.selected){notice=!online()?'Offline — ponowimy po odzyskaniu połączenia.':'Połącz Google, aby wznowić synchronizację.';emit();return;}
+  if(!online()||!transport.authenticated||connectedAccount!==state.selected){phase=!online()?'offline':'auth';notice=!online()?'Offline — ponowimy po odzyskaniu połączenia.':'Połącz Google, aby wznowić synchronizację.';emit();return;}
   if(now()<current.nextAttempt){schedule(current.nextAttempt-now());return;}
   try{
    let g=await cloudGraph();
-   // Finish the exact durable operation before considering a newer local revision.
+   // Complete an existing immutable operation even after keepLocal. Never
+   // discard an ambiguous POST or reparent its UUID: it may already be stored.
    if(current.outbox){
     const pending=current.outbox,existing=g.nodes.get(pending.node.id);
-    if(!existing&&!same(g.heads,current.base)){notice='Konflikt kopii. Wybierz wersję do odzyskania lub świadomie zachowaj lokalną.';emit();return;}
-    if(!existing)await transport.create(JSON.stringify(pending.node),properties(pending.node));
-    g=await cloudGraph();const stored=g.nodes.get(pending.node.id);
-    if(!stored)throw Error('Google nie potwierdził obecności kopii. Ponowimy zapis.');
-    const verified=await readNode(transport,stored);
-    if(!same(verified,pending.node))throw Error('Google zwrócił inną zawartość kopii.');
-    current.base=[verified.id];current.ackRevision=pending.revision;current.outbox=null;current.lastSuccess=new Date(now()).toISOString();current.failures=0;current.nextAttempt=0;notice='';await save();
+    if(!existing&&!pending.fileId&&!trustedView(current,g)){conflict();return;}
+    const verified=await confirmUpload(pending,g);
+    g=await cloudGraph();
+    const olderOperation=current.resolution&&pending.resolutionId!==current.resolution.id;
+    current.base=olderOperation?union(current.resolution.heads,[verified.id]):[verified.id];
+    current.covered=union(current.covered??[],pending.covered??[],pending.node.parents,[verified.id]);
+    current.ackRevision=pending.revision;current.outbox=null;
+    if(!olderOperation){current.resolution=null;current.lastSuccess=new Date(now()).toISOString();}
+    current.failures=0;current.nextAttempt=0;
+    notice=trustedView(current,g)?'':'Konflikt kopii. Pojawiła się niezatwierdzona wersja Drive.';
+    phase=notice?'conflict':current.resolution?'resolution':'synced';await save();
    }
-   if(!same(g.heads,current.base)){notice='Konflikt kopii. Wybierz wersję do odzyskania lub świadomie zachowaj lokalną.';emit();return;}
-   if(current.ackRevision===database.revision){notice='';emit();return;}
+   if(!trustedView(current,g)){conflict();return;}
+   if(current.ackRevision===database.revision&&!current.resolution){phase='synced';notice='';emit();return;}
    const revision=database.revision;
    const backup=database.model?await database.exportModelBackup():JSON.stringify(database.export());
    if(database.revision!==revision||database.error){schedule();return;}
-   const node=await makeNode(backup,g.heads);
+   // Parent the last proven base, not an older search result. keepLocal's
+   // approval joins branches with a NEW full local copy, never a data merge.
+   const node=await makeNode(backup,current.base);
    if(database.revision!==revision||database.error){schedule();return;}
-   current.outbox={node,revision};await save(); // Strict IDB completion BEFORE the POST.
+   phase='enqueue';
+   current.outbox={node,revision,covered:union(current.covered??[],[...g.nodes.keys()],current.base),resolutionId:current.resolution?.id??null};
+   await save(); // Strict IDB completion BEFORE the POST.
    schedule();
   }catch(error){
-   notice=error.message;current.failures++;current.nextAttempt=now()+Math.min(600000,10000*2**Math.min(current.failures,6));
+   phase='error';notice=error.message;current.failures++;current.nextAttempt=now()+Math.min(600000,10000*2**Math.min(current.failures,6));
    try{await save();}catch{notice+=' Nie zapisano stanu synchronizacji; lokalna historia nadal oczekuje.';}
    if(!error.auth)schedule(current.nextAttempt-now());emit();
   }
@@ -100,8 +131,9 @@ export async function openDriveSync({database,transport,online=()=>navigator.onL
   set onchange(fn){changed=fn;},
   get config(){return {clientId:state.clientId,enabled:state.enabled,selected:state.selected,label:a()?.label??''};},
   get copies(){return structuredClone(copies);},
+  get diagnostics(){const current=a();return {phase,revision:database.revision,ackRevision:current?.ackRevision??0,headCount:remoteHeads.length,baseCount:current?.base.length??0,heads:remoteHeads.map(id=>id.slice(0,8)),base:(current?.base??[]).map(id=>id.slice(0,8)),covered:current?.covered?.length??0,outbox:current?.outbox?{id:current.outbox.node.id.slice(0,8),revision:current.outbox.revision,uploadReceipt:!!current.outbox.fileId}:null,resolution:!!current?.resolution};},
   get status(){
-   const current=a(),pending=state.enabled&&(!current||current.ackRevision!==database.revision||!!current.outbox);
+   const current=a(),pending=state.enabled&&(!current||current.ackRevision!==database.revision||!!current.outbox||!!current.resolution);
    const error=notice.startsWith('Błąd:')||notice.startsWith('Konflikt')||!!current?.failures;
    const label=error?'Błąd':pending?'Oczekuje na synchronizację':current?.lastSuccess?'Zsynchronizowano':'Zapisano lokalnie';
    return {label,detail:notice,lastSuccess:current?.lastSuccess??null,pending,connected:transport.authenticated&&connectedAccount===state.selected};
@@ -116,7 +148,7 @@ export async function openDriveSync({database,transport,online=()=>navigator.onL
   async disconnect(){transport.clear();connectedAccount=null;await mutex(async()=>{await refresh();state.enabled=false;state.selected=null;await save();});clearTimeout(timer);notice='Rozłączono Google. Kopie i lokalne kolejki kont pozostają zachowane.';copies=[];emit();},
   retry(){return mutex(work);},
   async retryNow(){await mutex(async()=>{await refresh();if(a()){a().nextAttempt=0;await save();}});await api.retry();},
-  async listCopies(){return mutex(async()=>{await refresh();requireConnection();const g=await cloudGraph();emit();return g.heads;});},
+  async listCopies(){return mutex(async()=>{await refresh();requireConnection();const g=await cloudGraph();reviewed={account:state.selected,clientId:state.clientId,heads:g.heads,covered:[...g.nodes.keys()]};emit();return g.heads;});},
   async preview(id){return mutex(async()=>{await refresh();requireConnection();const g=await cloudGraph(),row=g.nodes.get(id);if(!row)throw Error('Kopia nie jest już dostępna.');const node=await readNode(transport,row),parsed=await inspectBackup(node.backup);
    return {node,parsed,heads:g.heads,account:state.selected,localRevision:database.revision};});},
   async restore(ticket,apply){return mutex(async()=>{
@@ -125,14 +157,22 @@ export async function openDriveSync({database,transport,online=()=>navigator.onL
    const g=await cloudGraph();if(!same(g.heads,ticket.heads))throw Error('Kopie Drive zmieniły się od podglądu. Otwórz podgląd ponownie.');
    const node=await readNode(transport,g.nodes.get(ticket.node.id));if(!same(node,ticket.node))throw Error('Kopia zmieniła się od podglądu.');
    await apply(node.backup); // Existing transactional import preserves a local preimage.
-   a().base=g.heads;a().outbox=null;a().ackRevision=0;a().nextAttempt=0;notice='Zapisano lokalnie. Odtworzoną wersję zapiszemy jako nową kopię.';await save();schedule();emit();
+   a().base=g.heads;a().covered=[...g.nodes.keys()];a().resolution=null;a().outbox=null;a().ackRevision=0;a().nextAttempt=0;notice='Zapisano lokalnie. Odtworzoną wersję zapiszemy jako nową kopię.';await save();schedule();emit();
   });},
   async keepLocal(expectedHeads){return mutex(async()=>{
-   await refresh();requireConnection();const g=await cloudGraph();if(!same(g.heads,sorted(expectedHeads)))throw Error('Drive zmienił się. Odśwież listę kopii.');
-   // Explicit conflict resolution retains all previous immutable branches.
-   a().base=g.heads;a().outbox=null;a().ackRevision=0;a().nextAttempt=0;notice='';await save();schedule();
+   await refresh();requireConnection();
+   const expected=sorted(expectedHeads),choice=reviewed?.account===state.selected&&reviewed.clientId===state.clientId&&same(reviewed.heads,expected)?reviewed:null;
+   const g=await cloudGraph();
+   if(!same(g.heads,expected)&&(!choice||g.heads.some(id=>!choice.covered.includes(id))))throw Error('Drive zmienił się. Odśwież listę kopii.');
+   // Persist approval independently of any pending (possibly uploaded) node.
+   // Completing that older operation must not erase this newer user decision.
+   const current=a();current.base=union(current.base,expected);
+   current.covered=union(current.covered??[],choice?.covered??[],[...g.nodes.keys()],current.base);
+   current.resolution={id:crypto.randomUUID(),heads:current.base};
+   current.nextAttempt=0;current.failures=0;phase='resolution';
+   notice='Zachowano wybór lokalnej historii. Przygotowujemy nową kopię; wcześniejsze wersje pozostają.';await save();schedule();
   });},
-  report(error){notice='Błąd: '+error.message;emit();},
+  report(error){phase='error';notice='Błąd: '+error.message;emit();},
   close(){closed=true;clearTimeout(timer);transport.clear();},
  };
  if(state.clientId&&state.enabled)void transport.load?.().catch(()=>{});

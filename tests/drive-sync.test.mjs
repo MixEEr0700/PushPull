@@ -111,3 +111,82 @@ test('another tab switching accounts cannot send data with the old tab token',as
  const count=old.transport.creates;await old.sync.retryNow();assert.equal(old.transport.creates,count);
  assert.match(old.sync.status.detail,/Połącz Google/);assert.equal(db.state.selected,'account-B');
 });
+
+function addWorkout(db,label,kg){
+ const type='PUSH A',exerciseId=db.value.exercises[type][0].id;
+ const session={id:'session-'+label,seq:Math.max(...db.value.sessions.map(s=>s.seq))+1,date:'2026-10-22',type,status:'done'};
+ db.value.sessions.push(session);db.value.entries.push({id:'result-'+label,sessionId:session.id,exerciseId,kg,reps:'8',series:[{kg,reps:'8'}]});db.revision++;
+}
+async function settle(sync){for(let i=0;i<5;i++)await sync.retryNow();}
+
+test('keep local survives an older complete Drive listing and confirms upload by file ID',async()=>{
+ const cloud=await setup();await flush(cloud.sync);const rootFiles=clone(await cloud.transport.list());
+ cloud.database.change('new cloud base');await flush(cloud.sync);
+ const phone=await setup(new Database(),new Drive(cloud.transport.files));addWorkout(phone.database,'android','83');phone.database.drafts=[{id:'unfinished-side-B'}];
+ const heads=await phone.sync.listCopies(),before=clone(phone.database.value),oldCount=phone.transport.files.size;
+ phone.transport.list=async()=>clone(rootFiles);
+ await phone.sync.keepLocal(heads);
+ // Google search can return an older but internally complete graph. Direct GET
+ // by the POST's returned file ID still has the newly written document.
+ phone.transport.list=async()=>clone(rootFiles);
+ await settle(phone.sync);
+ assert.equal(phone.sync.status.label,'Zsynchronizowano');assert.ok(phone.sync.status.lastSuccess);
+ assert.deepEqual(phone.database.value,before);assert.deepEqual(phone.database.drafts,[{id:'unfinished-side-B'}]);
+ assert.equal(phone.transport.files.size,oldCount+1);
+ const all=Drive.prototype.list.call(phone.transport),g=graph(await all),node=await readNode(phone.transport,g.nodes.get(g.heads[0]));
+ assert.deepEqual((await inspectBackup(node.backup)).data,before);assert.deepEqual(node.parents,heads);
+ // Empty search results are also not proof that a confirmed parent vanished.
+ phone.transport.list=async()=>[];addWorkout(phone.database,'empty-search','84');await settle(phone.sync);
+ assert.equal(phone.sync.status.label,'Zsynchronizowano');
+ const complete=graph(await Drive.prototype.list.call(phone.transport)),latest=await readNode(phone.transport,complete.nodes.get(complete.heads[0]));
+ assert.deepEqual(latest.parents,[node.id]);assert.deepEqual((await inspectBackup(latest.backup)).data,phone.database.value);
+});
+
+test('two devices: keep local preserves pending UUID and publishes latest workout as a joined new copy',async()=>{
+ const phone=await setup();await flush(phone.sync);
+ const pc=await setup(new Database(),new Drive(phone.transport.files));
+ const ticket=await pc.sync.preview((await pc.sync.listCopies())[0]);await pc.sync.restore(ticket,t=>pc.database.restore(t));await settle(pc.sync);
+ // Explicit choice first aligns this phone to the current reviewed heads.
+ await phone.sync.keepLocal(await phone.sync.listCopies());await settle(phone.sync);
+ addWorkout(phone.database,'phone-pending','87');await phone.sync.retryNow();
+ const pending=clone(phone.database.state.accounts['account-A'].outbox);assert.ok(pending);
+ // Another client advances after the phone enqueues but before its upload.
+ await pc.sync.keepLocal(await pc.sync.listCopies());await settle(pc.sync);
+ addWorkout(pc.database,'pc-parallel','64');await settle(pc.sync);
+ addWorkout(phone.database,'phone-latest','91');
+ await phone.sync.retryNow();assert.match(phone.sync.status.detail,/Konflikt/);
+ const heads=await phone.sync.listCopies(),local=clone(phone.database.value),oldFiles=clone([...phone.transport.files.values()]);
+ await phone.sync.keepLocal(heads);
+ assert.equal(phone.database.state.accounts['account-A'].outbox.node.id,pending.node.id,'keep must retain the durable original operation');
+ phone.sync.close();phone.transport=new Drive(phone.transport.files);
+ phone.sync=await openDriveSync({database:phone.database,transport:phone.transport,online:()=>true,auto:false,withLock:fn=>fn()});await phone.sync.connect();
+ await settle(phone.sync);
+ assert.equal(phone.sync.status.label,'Zsynchronizowano');assert.equal(phone.database.state.accounts['account-A'].ackRevision,phone.database.revision);
+ const g=graph(await phone.transport.list());assert.equal(g.heads.length,1);assert.ok(g.nodes.has(pending.node.id));
+ const latest=await readNode(phone.transport,g.nodes.get(g.heads[0]));assert.deepEqual((await inspectBackup(latest.backup)).data,local);
+ for(const old of oldFiles)assert.deepEqual(phone.transport.files.get(old.id),old);
+ assert.ok([...phone.transport.files.values()].some(f=>f.text.includes('pc-parallel')));
+ assert.ok(pc.database.value.entries.some(e=>e.id==='result-pc-parallel'));
+ assert.ok(!phone.database.value.entries.some(e=>e.id==='result-pc-parallel'),'no silent merge or replacement');
+ // A new, unreviewed edit after listing still requires a fresh decision.
+ const oldChoice=await phone.sync.listCopies();addWorkout(pc.database,'pc-later','66');await pc.sync.keepLocal(await pc.sync.listCopies());await settle(pc.sync);
+ await assert.rejects(phone.sync.keepLocal(oldChoice),/Drive zmienił/);
+ addWorkout(phone.database,'phone-later','92');const count=phone.transport.files.size;await settle(phone.sync);
+ assert.match(phone.sync.status.detail,/Konflikt/);assert.equal(phone.transport.files.size,count);
+});
+
+test('POST receipt survives failed read-back and restart without duplicate upload or false success',async()=>{
+ const phone=await setup();await flush(phone.sync);const roots=clone(await phone.transport.list());
+ addWorkout(phone.database,'before-read-error','94');await phone.sync.retryNow();
+ const id=phone.database.state.accounts['account-A'].outbox.node.id;
+ const read=phone.transport.read.bind(phone.transport);let fail=true;
+ phone.transport.read=async fileId=>{if(fail)throw Error('Interrupted verification');return read(fileId);};
+ await phone.sync.retryNow();assert.equal(phone.sync.status.label,'Błąd');assert.notEqual(phone.database.state.accounts['account-A'].ackRevision,phone.database.revision);
+ assert.ok(phone.database.state.accounts['account-A'].outbox.fileId);assert.equal(phone.transport.files.size,2);
+ fail=false;phone.transport.list=async()=>clone(roots);
+ phone.sync.close();
+ const reopened=await openDriveSync({database:phone.database,transport:phone.transport,online:()=>true,auto:false,withLock:fn=>fn()});await reopened.connect();await settle(reopened);
+ assert.equal(reopened.status.label,'Zsynchronizowano');assert.equal(phone.transport.files.size,2);
+ const node=await readNode(phone.transport,graph(await Drive.prototype.list.call(phone.transport)).nodes.get(id));
+ assert.deepEqual((await inspectBackup(node.backup)).data,phone.database.value);
+});
