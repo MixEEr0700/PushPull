@@ -175,7 +175,10 @@ class PlanImport(BrowserHarness):
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')
         self.assertEqual(mock.posts,2)
         current=self.state()
-        backup=ManualDriveFlow.download(self)
+        ManualDriveFlow.restore_preview(self,list(mock.files)[-1])
+        backup=json.loads(list(mock.files.values())[-1]['text'])['backup']
+        self.assertEqual(self.state(),current) # Preview never restores automatically.
+        self.page.locator('[data-restore-cancel]').click()
         self.assertEqual(self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',backup),current)
         self.assertEqual(current['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
         self.assertEqual(current['entries'],before['entries']);self.assertEqual(current['sessions'],before['sessions'])
