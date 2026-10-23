@@ -35,7 +35,8 @@ class PlanImport(BrowserHarness):
         for x in f.locator('[data-field=kg]').all():x.fill('20')
         for x in f.locator('[data-field=reps]').all():x.fill('8')
     def save(self,f):
-        f.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        f.locator('[type=submit]').click();expect(f).to_have_count(0) # An old success toast is not confirmation of this transaction.
+        expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
 
     def test_import_preview_cancel_failure_future_only_activation_and_old_draft(self):
         self.prepare();self.ready();before=self.state()
