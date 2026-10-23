@@ -2,6 +2,8 @@
 
 Implementacja Issue #16, oparta na main po PR #18. Nie podłączono konta właściciela, nie utworzono projektu OAuth, nie aktywowano V2 ani ręcznego wdrożenia.
 
+Aktualizacja: [hotfix konfliktów Issue #23](GOOGLE_DRIVE_HOTFIX_ISSUE_23.md) opisuje trwały wybór lokalnej wersji, zachowanie oczekującego uploadu i potwierdzenie przez identyfikator pliku. Poniższy opis PR #19 pozostaje zapisem pierwotnej implementacji.
+
 ## Co działa w implementacji
 
 - Dotychczasowy zapis IndexedDB, szkice, JSON v1/v2/v3, formularze, 6A/6B, historia, statystyki, ID i snapshoty pozostają. CSS i tożsamość PWA bez zmian. Kontrolki Google są w istniejącej zakładce Dane; po konfiguracji status pojawia się również nad treningiem.

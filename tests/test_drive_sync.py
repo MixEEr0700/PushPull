@@ -9,7 +9,7 @@ import test_v2_training as training
 
 class MockGoogle:
     def __init__(self):
-        self.files={};self.posts=0;self.hold=False;self.held=[];self.error=0;self.corrupt=False;self.scopes=[]
+        self.files={};self.posts=0;self.hold=False;self.held=[];self.error=0;self.corrupt=False;self.scopes=[];self.list_files=None
     def install(self,context):
         context.route('https://accounts.google.com/gsi/client',lambda route:route.fulfill(content_type='text/javascript',body="""window.google={accounts:{oauth2:{hasGrantedAllScopes:()=>true,initTokenClient:o=>{window.__requestedScope=o.scope;return {requestAccessToken:()=>o.callback({access_token:'synthetic-google-token',expires_in:3600})}}}}};"""))
         context.route('https://www.googleapis.com/**',self.route)
@@ -32,7 +32,7 @@ class MockGoogle:
             self.files[record['id']]=record;reply({'id':record['id']});return
         if url.path.endswith('/files'):
             assert query['spaces']==['appDataFolder']
-            reply({'files':[{k:v for k,v in f.items() if k!='text'} for f in self.files.values()]});return
+            reply({'files':[{k:v for k,v in f.items() if k!='text'} for f in (self.files.values() if self.list_files is None else self.list_files)]});return
         record=self.files[url.path.rsplit('/',1)[1]]
         text=record['text'].replace('Prostowanie','TAMPERED') if self.corrupt else record['text']
         route.fulfill(headers=headers,content_type='application/json',body=text)
@@ -81,13 +81,14 @@ class DriveSyncFlow(BrowserHarness):
         expect(form_b.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         count=mock.posts;self.assertTrue(all('13.125' not in f['text'] for f in mock.files.values()))
         self.page.locator('[data-expand="PULL-B-6-SKI"]').click();self.page.locator('[data-panel=result]').click()
-        mock.hold=True;self.save_form(self.page.locator('.performanceForm'))
-        self.page.wait_for_function("document.querySelector('[data-drive-status]').textContent.includes('Oczekuje')")
-        # Google is still waiting, but the official result is already committed.
-        saved=self.state();self.assertEqual(saved['entries'][-1]['exerciseId'],'PULL-B-6-SKI')
-        self.assertEqual(len(saved['entries'][-1]['performance']['rows']),2)
-        expect(self.page.locator('[data-expand="PULL-B-6-SKI"] .name')).to_have_text('Narciarz')
-        self.page.wait_for_timeout(150)
+        mock.hold=True
+        with self.page.expect_request('https://www.googleapis.com/upload/**'):
+            self.save_form(self.page.locator('.performanceForm'))
+            self.page.wait_for_function("document.querySelector('[data-drive-status]').textContent.includes('Oczekuje')")
+            # Google is still waiting, but the official result is already committed.
+            saved=self.state();self.assertEqual(saved['entries'][-1]['exerciseId'],'PULL-B-6-SKI')
+            self.assertEqual(len(saved['entries'][-1]['performance']['rows']),2)
+            expect(self.page.locator('[data-expand="PULL-B-6-SKI"] .name')).to_have_text('Narciarz')
         self.assertGreater(mock.posts,count);self.assertTrue(mock.held)
         mock.release(500)
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Błąd')
@@ -140,6 +141,52 @@ class DriveSyncFlow(BrowserHarness):
         copies=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await Promise.all(db.backups().map(id=>db.readBackup(id)))}finally{db.close()}}')
         self.assertTrue(any(json.loads(raw).get('data')==local for raw in copies if raw))
         expect(self.page.locator('[data-expand="PULL-B-6-SKI"] .name')).to_have_text('Narciarz')
+        self.assertFalse(self.alerts,self.alerts)
+
+    def test_keep_local_upload_readback_with_stale_listing_preserves_phone_and_other_device(self):
+        # Two actual browser profiles, real IDB/OAuth adapter, simulated Google
+        # file search lagging behind POST and direct GET by returned file ID.
+        mock=MockGoogle();mock.install(self.context);self.activate();self.configure();self.synced()
+        roots=list(mock.files.values())
+        self.page.locator('[data-tab=training]').click();form=self.open_result('PULL B','PULL-B-6-SKI')
+        self.fill_rows(form,'39','9');self.save_form(form);self.synced();pc=self.state()
+        old_files=dict(mock.files)
+        self.context.close();self.context=self.new_context(service_workers='block');mock.install(self.context)
+        self.page=self.context.new_page();self.page.on('dialog',self.dialog)
+        self.page.on('pageerror',lambda e:self.errors.append(str(e)))
+        self.prepare();self.ready()
+        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        f=self.page.locator('.seriesResultForm');f.locator('[data-main=kg]').fill('81');f.locator('[data-main=reps]').fill('8')
+        f.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        # A separate unfinished result must survive cloud conflict resolution.
+        self.page.locator('[data-panel=result]').click();f=self.page.locator('.seriesResultForm')
+        f.locator('[data-main=kg]').fill('83')
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        local=self.state();self.configure()
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Konflikt')
+        self.page.locator('[data-drive-action=list]').click();expect(self.page.locator('#driveCopy')).to_be_visible()
+        # keepLocal revalidates the fresh list; subsequent workers see only the
+        # old root. Google accepts the new file, whose direct GET is available.
+        mock.hold=True
+        with self.page.expect_request('https://www.googleapis.com/upload/**'):
+            self.page.locator('[data-drive-action=keep]').click()
+        expect(self.page.locator('[data-drive-diagnostics]')).to_contain_text('"resolution":true')
+        mock.list_files=roots;self.assertTrue(mock.held);mock.release()
+        self.page.locator('[data-drive-action=retry]').click();self.synced()
+        self.assertEqual(self.state(),local)
+        for id,old in old_files.items():self.assertEqual(mock.files[id],old)
+        self.assertEqual(len(mock.files),len(old_files)+1)
+        newest=list(mock.files.values())[-1]
+        parsed=self.page.evaluate('async text=>(await import("./model/drive-sync.mjs")).inspectBackup(JSON.parse(text).backup)',newest['text'])
+        self.assertEqual(parsed['data'],local)
+        self.assertNotEqual(local,pc) # No implicit merge or cloud restore.
+        self.assertEqual(len(self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await db.readDrafts()}finally{db.close()}}')),1)
+        # The normal list eventually catches up. New workout changes still sync.
+        mock.list_files=None
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-draft-resume]').click()
+        expect(self.page.locator('[data-main=kg]')).to_have_value('83')
+        self.page.locator('.seriesResultForm [type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible();self.synced()
+        self.assertEqual(self.state()['entries'][-1]['kg'],'83')
         self.assertFalse(self.alerts,self.alerts)
 
     def test_expired_google_token_does_not_block_legacy_save_or_duplicate_results(self):
