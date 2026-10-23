@@ -1,3 +1,5 @@
+Aktualne Issue #32: [kompaktowe skróty wyników na kartach](COMPACT_RESULTS_ISSUE_32.md). Wyłącznie prezentacja; zachowane formularze L/P, dane, szkice, snapshoty, plany i statystyki.
+
 Aktualne Issue #30: [Plany treningowe i statystyki tygodniowe](PLANS_WEEKLY_STATS_ISSUE_30.md). Wspólne zarządzanie V2/V3+, istniejący importer i ręczna aktywacja dla przyszłych treningów; agregaty wyłącznie odczytywane z zakończonych sesji. Bez migracji bazy, zmian planu właściciela i mechanizmu Drive.
 
 Aktualne Issue #21: [import kolejnych planów jako danych](PLAN_IMPORT_ISSUE_21.md), walidacja i podgląd, zapis nieaktywny i osobna aktywacja dla przyszłych sesji. Bez zmiany rozpoczętych sesji, historii, szkiców i snapshotów. Brak zmiany protokołu Drive, migracji schematu IndexedDB i publikacji; testy wyłącznie syntetyczne. Poniższe akapity dokumentują wcześniejsze etapy.

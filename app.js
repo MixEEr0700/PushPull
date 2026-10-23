@@ -68,12 +68,13 @@ function lastFor(ex){return entriesFor(ex.id).find(e=>sameContext(ex,e))}
 // Zwarta prezentacja ostatniego wyniku; różne serie są pokazywane oddzielnie.
 function resultSummary(entry, suffix=''){
  if(!entry)return '<span class="detail last-result">Brak zapisanego wyniku</span>';
- if(entry.performance&&journal.structuredSnapshot(journal.snapshotFor(data,entry.sessionId)))return rich.summary(entry,journalAPI?.snapshotFor(data,entry.sessionId)?.model.sets||[],!!pairCardNames[entry.exerciseId]);
+ const snapshot=journal.snapshotFor(data,entry.sessionId);
+ if(entry.performance&&journal.structuredSnapshot(snapshot))return rich.summary(entry,snapshot.model.sets.filter(t=>t.positionId===entry.journalPositionId).map(t=>({...t,drop:snapshot.model.drops.some(d=>d.setId===t.id)})),!!pairCardNames[entry.exerciseId]);
  const rows=Array.isArray(entry.series)&&entry.series.length?entry.series:[{kg:entry.kg,reps:entry.reps}];
  const same=rows.every(r=>String(r.kg)===String(rows[0].kg)&&String(r.reps)===String(rows[0].reps));
  const label=suffix?`<span class="last-meta">${esc(suffix)}</span>`:'';
- if(same)return `<span class="detail last-result">${esc(rows[0].reps)} powt. · ${esc(rows[0].kg)} kg${rows.length>1?' · '+rows.length+' serie':''}${suffix?' · '+esc(suffix):''}</span>`;
- return `<span class="last-series"><span class="last-series-title">Ostatni wynik${suffix?' · '+esc(suffix):''}:</span>${rows.map((r,i)=>`<span class="last-series-row"><span class="last-series-number">${i+1}.</span><span>${esc(r.reps)} powt. · ${esc(r.kg)} kg</span></span>`).join('')}</span>`;
+ if(same)return `<span class="detail last-result">${esc(rows[0].reps)} × ${esc(rows[0].kg)} kg${suffix?' · '+esc(suffix):''}</span>`;
+ return `<span class="last-series"><span class="last-series-title">Ostatni wynik${suffix?' · '+esc(suffix):''}:</span>${rows.map((r,i)=>`<span class="last-series-row"><span class="last-series-number">${i+1}.</span><span>${esc(r.reps)} × ${esc(r.kg)} kg</span></span>`).join('')}</span>`;
 }
 function countSince(ex){const last=lastFor(ex);let relevant=data.sessions.filter(s=>s.status==='done'&&s.type===ex.id.split('-').slice(0,2).join(' '));if(!last)return relevant.length;let source=data.sessions.find(s=>s.id===last.sessionId);return relevant.filter(s=>s.seq>(source?.seq||0)).length}
 function main(){let s=session(),type=s?.type||chosenType||journal.nextType(data),previous=data.sessions.filter(x=>x.status==='done').sort((a,b)=>b.seq-a.seq)[0];let exs=s?sessionExercises(s):journalAPI?journalAPI.previewExercises(data,type):journal.sourceExercises(data,type);const approved=exs.some(ex=>ex.v2);

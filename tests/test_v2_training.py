@@ -62,6 +62,7 @@ class V2Training(BrowserHarness):
         form.locator('[data-row="2"][data-field=kg]').fill('70')
         form.locator('[data-row="2"][data-field=reps]').fill('10')
         self.save_form(form)
+        expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: 6 × 100 kg','Seria 2: 6 × 100 kg','Seria 3 · back-off: 10 × 70 kg'])
         saved=self.state();sid=saved['activeId'];entry=saved['entries'][-1]
         self.assertEqual(len(entry['performance']['rows']),3)
         self.page.locator('.v2NoteForm textarea').fill('Moja technika, nie instrukcja trenera')
@@ -107,6 +108,7 @@ class V2Training(BrowserHarness):
         form.locator('[data-row="1"][data-segment="2"][data-field=kg]').fill('5')
         form.locator('[data-row="1"][data-segment="2"][data-field=reps]').fill('15')
         self.save_form(form)
+        expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1 · dropset: 8 × 20 kg → 8 × 20 kg','Seria 2 · dropset: 8 × 20 kg → 8 × 20 kg → 15 × 5 kg','Seria 3 · dropset: 8 × 20 kg → 8 × 20 kg'])
         drop=self.state()['entries'][-1];drop_sid=self.state()['activeId']
         self.assertEqual([len(r['segments']) for r in drop['performance']['rows']],[2,3,2])
         self.page.locator('[data-act=finish]').click()
@@ -129,6 +131,8 @@ class V2Training(BrowserHarness):
         form=self.page.locator('.performanceForm');form.locator('[data-rich-action=toggle]').click()
         self.fill_rows(form,'15','10');self.save_form(form)
         saved=self.state();sid=saved['activeId']
+        for eid,value in [('PULL-B-6-SKI','8 × 50 kg'),('PULL-B-6-SHRUGS','10 × 15 kg')]:
+            expect(self.page.locator('.exercise-card').filter(has=self.page.locator(f'[data-expand="{eid}"]')).locator('.exercise-toggle .last-result')).to_have_text(value)
         pair=saved['entries'][-2:]
         self.assertEqual([e['exerciseId'] for e in pair],['PULL-B-6-SKI','PULL-B-6-SHRUGS'])
         self.assertTrue(all([r['round'] for r in e['performance']['rows']]==[1,2] for e in pair))

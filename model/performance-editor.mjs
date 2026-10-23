@@ -82,4 +82,29 @@ export function click(event){const b=event.target.closest('[data-rich-action]');
 }
 export function performanceFor(id,sid){const d=drafts.get(key(id,sid));d.open=true;const p=structuredClone(d.performance);for(const row of p.rows)for(const s of row.segments){s.kg=s.kg.trim().replace(',','.');s.reps=s.reps.trim();if(!/^\d+(\.\d+)?$/.test(s.kg)||!/^[1-9]\d*$/.test(s.reps))throw Error('Sprawdź ciężary i powtórzenia wszystkich serii, stron i segmentów.');}return p;}
 export function forget(id,sid){drafts.delete(key(id,sid));}
-export function summary(e,targets=[],asSets=false){if(!e)return '<span class="detail last-result">Brak zapisanego wyniku</span>';const rows=e.performance.rows;if(rows.every(r=>r.side===null&&r.segments.length===1&&r.segments[0].kg===rows[0].segments[0].kg&&r.segments[0].reps===rows[0].segments[0].reps))return `<span class="detail last-result">${esc(rows[0].segments[0].reps)} powt. · ${esc(rows[0].segments[0].kg)} kg · ${rows.length} ${rows[0].round&&!asSets?'rundy':'serie'}</span>`;return `<span class="last-series">${e.performance.rows.map((r,i)=>`<span class="last-series-row">${r.round&&!asSets?'Runda '+r.round:'Seria '+(i+1)} ${r.side==='left'?'L':r.side==='right'?'P':''}${targets.find(t=>t.id===r.setId)?.role==='backoff'?' · back-off':''}: ${r.segments.map(s=>esc(s.kg)+' kg × '+esc(s.reps)).join(' → ')}</span>`).join('')}</span>`;}
+/** Display only: pair by the editor's existing identity rules, never by values. */
+export function summary(e,targets=[],asSets=false){
+ if(!e)return '<span class="detail last-result">Brak zapisanego wyniku</span>';
+ const rows=e.performance?.rows??[];if(!rows.length)return '<span class="detail last-result">Brak pełnych danych</span>';
+ const d={performance:{rows:rows.filter(r=>Array.isArray(r.segments))}};preparePairs(d);
+ const pairs=d.sidePairs.filter(p=>{const r=rows.find(r=>r.id===p.leftId);return rows.filter(x=>x.id===p.leftId).length===1&&rows.filter(x=>x.id===p.rightId).length===1&&rows.filter(x=>x.side==='left'&&sameSet(x,r)).length===1&&rows.filter(x=>x.side==='right'&&sameSet(x,r)).length===1;}),used=new Set(),groups=[];
+ for(const [index,row] of rows.entries()){
+  if(used.has(row))continue;
+  const pair=pairs.find(p=>p.leftId===row.id||p.rightId===row.id),members=pair?[rows.find(r=>r.id===pair.leftId),rows.find(r=>r.id===pair.rightId)]:[row];
+  members.forEach(r=>used.add(r));groups.push({members,index,target:targets.find(t=>t.id===row.setId)});
+ }
+ groups.sort((a,b)=>(a.target?.order??Infinity)-(b.target?.order??Infinity)||a.index-b.index);
+ const complete=r=>Array.isArray(r.segments)&&r.segments.length>0&&r.segments.every(s=>/^\d+(\.\d+)?$/.test(s.kg??'')&&/^[1-9]\d*$/.test(s.reps??''));
+ const equal=g=>g.members.length===2&&equalSides(...g.members),unpaired=g=>g.members.length===1&&g.members[0].side!==null;
+ const special=g=>g.target?.role==='backoff'||g.target?.drop||g.members.some(r=>r.segments?.length!==1||r.round&&!asSets);
+ if(groups.length&&groups.every(g=>!unpaired(g)&&!special(g)&&g.members.every(complete)&&(g.members.length===1||equal(g)))&&groups.every(g=>equalSides(g.members[0],groups[0].members[0])&&g.members[0].groupId===groups[0].members[0].groupId)){
+  const s=groups[0].members[0].segments[0];return `<span class="detail last-result">${esc(s.reps)} × ${esc(s.kg)} kg</span>`;
+ }
+ const value=r=>(r.segments??[]).map(s=>`${esc(s.reps||'?')} × ${esc(s.kg||'?')} kg`).join(' → ')||'Brak pełnych danych';
+ let extra=Math.max(0,...groups.filter(g=>g.target).map(g=>g.target.order+1));
+ return `<span class="last-series">${groups.map(g=>{
+  const r=g.members[0],label=r.round&&!asSets?'Runda '+r.round:'Seria '+(g.target?g.target.order+1:++extra),side=x=>x.side==='left'?'L':x.side==='right'?'P':'';
+  const result=equal(g)?value(r):g.members.map(x=>`${side(x)?side(x)+' ':''}${value(x)}`).join(' · ');
+  return `<span class="last-series-row">${esc(label)}${g.target?.role==='backoff'?' · back-off':''}${g.target?.drop?' · dropset':''}: ${result}${unpaired(g)?' · para L/P nieustalona':''}${g.members.every(complete)?'':' · niepełny wynik'}</span>`;
+ }).join('')}</span>`;
+}
