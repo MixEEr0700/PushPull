@@ -223,11 +223,52 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
 
+    def test_issue30_update_preserves_active_plan_drafts_snapshots_and_offline_statistics(self):
+        source=self.path/'issue30-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-overview.mjs' else subprocess.check_output(['git','show','133bbd7:'+name],cwd=ROOT))
+        old_release=self.path/'issue30-old';build(old_release,source)
+        current_release=self.controller['directory'];self.controller['directory']=old_release
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-preview-v2]').click()
+        with self.page.expect_download():self.page.locator('[data-activate-v2]').click()
+        expect(self.page.get_by_text('V2 aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="PULL A"]').click();self.page.locator('#trainingDate').fill('2026-10-20');self.page.locator('[data-act=start]').click()
+        self.page.locator('[data-expand="PULL-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        f=self.page.locator('.performanceForm');f.locator('[data-quick=kg]').fill('10');f.locator('[data-quick=reps]').fill('10')
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.snapshot()
+        drafts=self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
+        self.controller['directory']=current_release;self.wait_update();self.reopen();self.context.set_offline(True)
+        self.assertEqual(self.snapshot(),before)
+        self.assertEqual(self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}'),drafts)
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
+        expect(self.page.locator('[data-current-plan]')).to_be_visible();expect(self.page.locator('[data-plan-activate]')).to_have_count(0)
+        self.page.locator('[data-view=data]').click();self.page.locator('[data-view=weekly]').click()
+        expect(self.page.locator('#weeklyPlan')).to_have_value('v2-owner-2026-10-22');expect(self.page.locator('[data-weekly-metric=workouts] strong')).to_have_text('0')
+        self.assertEqual(self.snapshot(),before)
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-draft-resume]').click()
+        self.page.locator('[data-rich-action=toggle]').click()
+        expect(self.page.locator('[data-row="0"][data-field=kg]')).to_have_value('10')
+        self.page.locator('.performanceForm [type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        saved=self.snapshot();self.assertEqual(saved['data']['trainingJournal']['activations'],before['data']['trainingJournal']['activations'])
+        self.assertEqual(saved['data']['trainingJournal']['sessionSnapshots'],before['data']['trainingJournal']['sessionSnapshots'])
+        self.page.reload();self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=weekly]').click()
+        self.page.locator('#weeklyRange [name=from]').fill('2026-10-19');self.page.locator('#weeklyRange [name=to]').fill('2026-10-25');self.page.locator('#weeklyRange button').click()
+        expect(self.page.locator('[data-weekly-metric=tonnage] strong')).to_have_text('600 kg')
+        expect(self.page.locator('[data-weekly-metric=sets] strong')).to_have_text('6')
+        self.assertEqual(self.snapshot(),saved)
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+
     def test_issue29_update_recovers_old_asymmetric_draft_and_active_v2_without_reactivation(self):
         source=self.path/'issue29-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','3c51bc9:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-overview.mjs' else subprocess.check_output(['git','show','3c51bc9:'+name],cwd=ROOT))
         old_release=self.path/'issue29-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -263,9 +304,9 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual([r['id'] for r in rows],[r['id'] for r in old_draft['value']['performance']['rows']])
         self.assertEqual(saved['sessions'],before['data']['sessions'])
         self.assertEqual(saved['trainingJournal']['sessionSnapshots'],before['data']['trainingJournal']['sessionSnapshots'])
-        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-preview-v2]').click()
-        expect(self.page.get_by_text('V2 jest aktywny',exact=True)).to_be_visible()
-        expect(self.page.locator('[data-activate-v2]')).to_have_count(0)
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
+        expect(self.page.locator('[data-current-plan]')).to_be_visible()
+        expect(self.page.locator('[data-plan-activate]')).to_have_count(0)
         self.assertEqual(self.snapshot()['data'],saved)
 
     def test_issue21_plan_import_offline_after_real_main_update_retains_history_and_draft(self):
@@ -273,7 +314,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue21-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-import.mjs' else subprocess.check_output(['git','show','ef0dec6:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/plan-overview.mjs'} else subprocess.check_output(['git','show','ef0dec6:'+name],cwd=ROOT))
         old=self.path/'issue21-old';build(old,source);self.controller['directory']=old
         self.seed();self.page.goto(self.url);self.ready();before=self.snapshot()
         self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
@@ -284,6 +325,7 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True)
         self.page.locator('[data-draft-resume]').click();expect(self.page.locator('[data-main=kg]')).to_have_value('63')
         self.page.locator('[data-tab=settings]').click()
+        self.page.locator('[data-view=plans]').click()
         plan=(ROOT/'tests/fixtures/plan-v3.json').read_bytes()
         self.page.locator('#planFile').set_input_files({'name':'test-v3.json','mimeType':'application/json','buffer':plan})
         expect(self.page.locator('[data-plan-preview]')).to_be_visible()
@@ -311,7 +353,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue26-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-import.mjs' else subprocess.check_output(['git','show','e93a4a5:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/plan-overview.mjs'} else subprocess.check_output(['git','show','e93a4a5:'+name],cwd=ROOT))
         old_release=self.path/'issue26-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         mock=MockGoogle();mock.install(self.context)
@@ -364,7 +406,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue14-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','cf9b765:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','cf9b765:'+name],cwd=ROOT))
         old_release=self.path/'issue14-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -445,7 +487,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue17-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','16e131a:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','16e131a:'+name],cwd=ROOT))
         old_release=self.path/'issue17-old';build(old_release,source)
         current_release=self.controller['directory']
         def check_cards():
@@ -536,9 +578,9 @@ class PWADeployment(unittest.TestCase):
     def test_v2_results_offline_after_worker_update(self):
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click()
-        self.page.locator('[data-preview-v2]').click()
-        with self.page.expect_download():self.page.locator('[data-activate-v2]').click()
-        expect(self.page.get_by_text('V2 aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-view=plans]').click();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="PULL A"]').click();self.page.locator('[data-act=start]').click()
         self.page.locator('[data-expand="PULL-A-1"]').click();self.page.locator('[data-panel=result]').click()

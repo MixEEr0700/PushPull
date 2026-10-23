@@ -13,14 +13,13 @@ class V2Training(BrowserHarness):
     def activate(self):
         self.prepare();self.ready()
         self.before=self.state()
-        self.page.locator('[data-tab=settings]').click()
-        self.page.locator('[data-preview-v2]').click()
+        self.plans('v2-owner-2026-10-22')
         self.assertNotIn('trainingJournal',self.state())
-        self.confirm=False;self.page.locator('[data-activate-v2]').click()
+        self.confirm=False;self.page.locator('[data-plan-activate]').click()
         self.assertNotIn('trainingJournal',self.state())
         self.confirm=True
-        with self.page.expect_download():self.page.locator('[data-activate-v2]').click()
-        expect(self.page.get_by_text('V2 aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         # Old in-progress session has not acquired new prescriptions.
         self.assertEqual(self.state()['sessions'],self.before['sessions'])
         self.assertEqual(self.state()['entries'],self.before['entries'])

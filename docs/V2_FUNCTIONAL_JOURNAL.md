@@ -16,13 +16,15 @@ Właściciel rozstrzygnął O1–O3 w zleceniu „Dokończenie działającej apl
 
 ## Włączenie przez użytkownika
 
-1. Dane → **Podgląd zatwierdzonego V2**. Podgląd nie zapisuje ani nie aktywuje planu.
-2. **Aktywuj V2 dla przyszłych treningów** → osobne potwierdzenie. Pobierana jest kopia dotychczasowych danych; istniejący mechanizm kroku C zabezpiecza przejście do modelu. Jeśli dziennik był już włączony, pobierana jest pełna kopia v3.
+1. Dane → **Plany treningowe** → wybierz wersję V2. Podgląd nie zapisuje ani nie aktywuje planu.
+2. **Aktywuj dla przyszłych treningów** → osobne potwierdzenie. Pobierana jest kopia dotychczasowych danych; istniejący mechanizm kroku C zabezpiecza przejście do modelu. Jeśli dziennik był już włączony, pobierana jest pełna kopia v3.
 3. Rozpoczęte sesje zachowują swój plan. Zakończ bieżącą sesję, wybierz jednostkę i rozpocznij następną, aby użyć V2.
 4. Rozwiń kartę → Zapisz wynik. **Ciężar (kg)** i powtórzenia wypełniają główne segmenty obu stron (gdy są L/P). Ołówek rozwija indywidualne cele i wyniki. Szybki wpis po ręcznej korekcie wymaga potwierdzenia.
 5. Jednostronne: szybki wpis obejmuje obie strony. Domyślnie równe L/P są połączone dla konkretnej serii; **Edytuj osobno** pozwala zapisać różne wartości, a istniejące asymetrie pozostają rozłączone. Kopiowanie L → P/P → L jest osobną świadomą operacją. Dropsety mają osobne pola segmentów i przyciski +/−. Nie narzucamy liczby segmentów.
 6. Narciarz i szrugsy: dwie rundy, dwa osobne formularze/zapisy w jednej karcie. Po zapisaniu pierwszego ćwiczenia ponownie otwórz „Zapisz wynik”, aby zapisać drugie. Robocze wartości drugiego formularza pozostają w pamięci do zapisu. Instrukcja: 15 s między ćwiczeniami; brak timera i wymyślonej przerwy po rundzie.
 7. Zakończ trening. Kalendarz → Otwórz → karta → Zapisz wynik pozwala poprawić serie bez nowej sesji. Eksport JSON zapisuje pełną kopię v3, odtwarzaną istniejącym importem.
+
+Aktualny wspólny ekran wersji i statystyki tygodniowe: [Issue #30](PLANS_WEEKLY_STATS_ISSUE_30.md). Już aktywny plan nie wymaga kolejnej aktywacji.
 
 ## Zatwierdzone parametry
 
