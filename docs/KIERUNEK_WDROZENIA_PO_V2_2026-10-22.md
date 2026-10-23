@@ -1,5 +1,12 @@
 # PushPull — zatwierdzony kierunek po funkcjonalnym V2 (22.10.2026)
 
+## Nadrzędna aktualizacja decyzji — Issue #26, 23.10.2026
+
+**Teraz: ręczne kopie Google Drive**, bez automatycznego wysyłania, kolejek retry i interfejsu konfliktów/diagnostyki. Cztery operacje: zapisz aktualną kopię na Drive, pobierz lokalny JSON, pobierz najnowszą prawidłową kopię Drive jako plik (bez importu), importuj plik po walidacji i potwierdzeniu z kopią przed importem. Każdy zapis tworzy nowy plik; stare dane/kopie pozostają. Szczegóły i przejście z dawnego konfliktu: [Issue #26](GOOGLE_DRIVE_MANUAL_BACKUP_ISSUE_26.md).
+
+**Później:** prawdziwa bezobsługowa synchronizacja nadal jest celem, ale wymaga osobnego etapu i działania bez klikania odnowienia co godzinę/po zimnym starcie. GIS token model tego nie gwarantuje. Nie dodajemy teraz backendu/OAuth offline ani natywnego klienta; nie zapisujemy sekretów/tokenów odświeżających w przeglądarce. Poniższe wymagania automatycznego wysyłania z 22.10 zachowujemy historycznie; w razie sprzeczności obowiązuje ta decyzja właściciela. Automatyczny zapis **lokalny i szkice** pozostają wymagane i działają niezależnie od chmury.
+
+
 ## Cel nadrzędny
 Przygotować praktyczny mobilny dziennik treningowy, a nie stale rozbudowywać architekturę. Zachować zatwierdzony interfejs **PushPull v0.3 Matrix — szlif 3**, dotychczasową historię, identyfikatory serii i sesji, notatki, statystyki, snapshoty oraz kopie. Zmiany stopniowe, bez przebudowy gotowych funkcji.
 

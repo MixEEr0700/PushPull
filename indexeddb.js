@@ -318,8 +318,7 @@ const PushPullDB = (() => {
     }
     return {
       prepareModel,
-      // Sync metadata stays outside workout records, snapshots and JSON backups.
-      // The official state.revision is the durable dirty marker, even if this fails.
+      // Drive settings and archived legacy queues stay outside workout backups.
       async readDriveState(){
         if(!db)throw Error('IndexedDB niedostępne.');
         return transaction(db,'readonly',tx=>request(tx.objectStore('meta').get('drive-sync-v1')));
@@ -329,7 +328,9 @@ const PushPullDB = (() => {
         const next={...clone(value),key:'drive-sync-v1',token:crypto.randomUUID()};
         return transaction(db,'readwrite',async tx=>{
           const store=tx.objectStore('meta'),old=await request(store.get(next.key));
-          if((old?.token??null)!==expectedToken)throw Error('Stan Drive zmienił się w innej karcie. Odśwież synchronizację.');
+          if((old?.token??null)!==expectedToken)throw Error('Ustawienia Google zmieniły się w innej karcie. Odśwież aplikację.');
+          // Once manual mode is chosen, stale callers must not re-enable timers.
+          if(old?.mode==='manual'){next.mode='manual';next.enabled=false;}
           store.put(next);
           if(canonical(await request(store.get(next.key)))!==canonical(next))throw Error('Nie zweryfikowano stanu Drive.');
           return next;
