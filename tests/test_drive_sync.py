@@ -63,12 +63,14 @@ class ManualDriveFlow(BrowserHarness):
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
 
     def upload(self):
+        # Full source-backed validation + verified readback can exceed the UI
+        # assertion default (5s) on CI; wait for success, never just a request.
         self.page.locator('[data-drive-action=upload]').click()
-        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=60000)
 
     def restore_preview(self,file_id=None):
         self.page.locator('[data-drive-action=restore]').click()
-        expect(self.page.locator('#driveCopy')).to_be_visible()
+        expect(self.page.locator('#driveCopy')).to_be_visible(timeout=60000)
         if file_id:self.page.locator('#driveCopy').select_option(file_id)
         self.page.locator('[data-drive-action=preview]').click()
         expect(self.page.locator('[data-restore-preview]')).to_be_visible(timeout=60000)

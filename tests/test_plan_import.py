@@ -172,7 +172,7 @@ class PlanImport(BrowserHarness):
         self.settings()
         with self.page.expect_request('https://www.googleapis.com/upload/**'):
             self.page.locator('[data-drive-action=upload]').click()
-        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=60000)
         self.assertEqual(mock.posts,2)
         current=self.state()
         ManualDriveFlow.restore_preview(self,list(mock.files)[-1])
