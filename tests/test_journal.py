@@ -12,6 +12,7 @@ class JournalFlow(BrowserHarness):
 
     def settings(self):
         self.page.locator('[data-tab=settings]').click()
+        if self.page.locator('[data-enable-journal]').count():self.page.locator('details').filter(has=self.page.locator('[data-enable-journal]')).locator('summary').click()
 
     def enable(self):
         self.prepare();self.ready()

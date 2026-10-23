@@ -1,3 +1,5 @@
+Aktualne Issue #30: [Plany treningowe i statystyki tygodniowe](PLANS_WEEKLY_STATS_ISSUE_30.md). Wspólne zarządzanie V2/V3+, istniejący importer i ręczna aktywacja dla przyszłych treningów; agregaty wyłącznie odczytywane z zakończonych sesji. Bez migracji bazy, zmian planu właściciela i mechanizmu Drive.
+
 Aktualne Issue #21: [import kolejnych planów jako danych](PLAN_IMPORT_ISSUE_21.md), walidacja i podgląd, zapis nieaktywny i osobna aktywacja dla przyszłych sesji. Bez zmiany rozpoczętych sesji, historii, szkiców i snapshotów. Brak zmiany protokołu Drive, migracji schematu IndexedDB i publikacji; testy wyłącznie syntetyczne. Poniższe akapity dokumentują wcześniejsze etapy.
 
 Aktualna poprawka: [automatyczne szkice i odzyskiwanie treningu](WORKOUT_DRAFT_RECOVERY.md), niezależne karty superserii A/B bez zmiany ich ID lub snapshotów. Wymaga PR #10; nie scala ani nie publikuje go.

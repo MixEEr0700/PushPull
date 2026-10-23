@@ -21,7 +21,7 @@ class PlanImport(BrowserHarness):
 
     def settings(self):self.page.locator('[data-tab=settings]').click()
     def preview(self,p=PLAN):
-        self.settings();self.page.locator('#planFile').set_input_files({'name':'synthetic.json','mimeType':'application/json','buffer':json.dumps(p).encode()})
+        self.plans();self.page.locator('#planFile').set_input_files({'name':'synthetic.json','mimeType':'application/json','buffer':json.dumps(p).encode()})
         expect(self.page.locator('[data-plan-preview]')).to_be_visible()
     def store(self):
         self.page.locator('[data-plan-save]').click();expect(self.page.get_by_text('Plan zapisany bez aktywacji',exact=True)).to_be_visible()
@@ -72,7 +72,7 @@ class PlanImport(BrowserHarness):
         self.assertEqual(self.local_raw(),legacy.RAW)
 
     def test_invalid_file_and_atomic_failed_import_leave_history_and_plan_intact(self):
-        self.prepare();self.ready();self.settings();before=self.records()
+        self.prepare();self.ready();self.plans();before=self.records()
         bad=json.loads(json.dumps(PLAN));bad['sets'][0]['positionId']='missing'
         self.page.locator('#planFile').set_input_files({'name':'bad.json','mimeType':'application/json','buffer':json.dumps(bad).encode()})
         expect(self.page.locator('[data-plan-error]')).to_be_visible();self.assertEqual(self.records(),before)
@@ -139,10 +139,11 @@ class PlanImport(BrowserHarness):
         self.assertEqual(saved['sessions'],before['sessions']);self.assertEqual(saved['entries'],before['entries'])
         self.confirm=False;self.page.locator('[data-plan-activate]').click();self.assertEqual(self.state(),saved)
         self.assertEqual(mock.posts,0) # Preview/store/cancel never trigger cloud uploads.
-        ManualDriveFlow.upload(self)
+        self.settings();ManualDriveFlow.upload(self)
         self.assertEqual(mock.posts,1)
-        self.confirm=True;self.activate()
+        self.confirm=True;self.plans('synthetic-v3');self.activate()
         self.assertEqual(mock.posts,1) # Explicit plan activation remains local too.
+        self.settings()
         with self.page.expect_request('https://www.googleapis.com/upload/**'):
             self.page.locator('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')

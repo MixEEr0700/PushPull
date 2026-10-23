@@ -118,6 +118,6 @@ export function previewPlan(data,p){
 }
 export function stageActivation(data,versionId,at){
  const next=structuredClone(data),j=next.trainingJournal,p=j?.importedPlans?.find(x=>x.planVersion.id===versionId);
- check(p&&j.model.planVersions.some(v=>v.id===versionId),'najpierw zapisz poprawny plan');validateModel(j.model);
+ check(p&&j.model.planVersions.some(v=>v.id===versionId),'najpierw zapisz poprawny plan');if(j.activePlanVersionId===versionId)return next;validateModel(j.model);
  j.activePlanVersionId=versionId;j.nextUnitId=ordered(p.planVersion.units)[0].id;(j.activations??=[]).push({planVersionId:versionId,at});return next;
 }
