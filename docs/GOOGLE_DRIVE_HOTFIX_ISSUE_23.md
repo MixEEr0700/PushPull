@@ -1,5 +1,8 @@
 # Issue #23 — hotfix powracającego konfliktu Drive
 
+Aktualny tryb Drive: [ręczne kopie, decyzja Issue #26](GOOGLE_DRIVE_MANUAL_BACKUP_ISSUE_26.md). Opisy automatycznej synchronizacji poniżej są historyczne.
+
+
 Punkt wyjścia: `main` `ade2a2c`, po PR #19. Osobna gałąź `fix/issue-23-drive-conflict`, bez zmian i bez scalania otwartego PR #24 (import planów). Najnowsze zlecenie właściciela nadaje temu blockerowi pierwszeństwo. Nie odczytywano danych telefonu ani prywatnego Drive właściciela.
 
 ## Przyczyna odtworzona w testach

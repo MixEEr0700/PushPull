@@ -223,6 +223,59 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
 
+    def test_issue26_update_from_conflict_preserves_data_copies_drafts_and_disables_automation(self):
+        from test_drive_sync import MockGoogle
+        source=self.path/'issue26-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','e93a4a5:'+name],cwd=ROOT))
+        old_release=self.path/'issue26-old';build(old_release,source)
+        current_release=self.controller['directory'];self.controller['directory']=old_release
+        mock=MockGoogle();mock.install(self.context)
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-tab=settings]').click()
+        self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
+        self.page.locator('#driveConfig button').click();self.page.locator('[data-drive-action=connect]').click()
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Zsynchronizowano')
+        old_files=dict(mock.files)
+        self.page.locator('[data-tab=training]').click()
+        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-main=kg]').fill('84.125')
+        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.snapshot()
+        meta=self.page.evaluate("""async()=>{const db=await PushPullDB.open(()=>{});try{
+          const s=await db.readDriveState();const node=await (await import('./model/drive-sync.mjs')).makeNode(JSON.stringify(db.export()),[]);
+          s.accounts['mock-account'].base=[crypto.randomUUID()];s.accounts['mock-account'].ackRevision=18;
+          s.accounts['mock-account'].outbox={node,revision:19};s.accounts['mock-account'].resolution={id:'old-resolution'};
+          await db.writeDriveState(s,s.token);return s;
+        }finally{db.close()}}""")
+        drafts=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await db.readDrafts()}finally{db.close()}}')
+        self.controller['directory']=current_release;self.wait_update()
+        # No forced reload of the old form. Activation waits for old clients.
+        expect(self.page.locator('[data-main=kg]')).to_have_value('84.125')
+        count=mock.posts;self.reopen()
+        self.assertEqual(self.snapshot(),before)
+        current=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return {meta:await db.readDriveState(),drafts:await db.readDrafts()}}finally{db.close()}}')
+        self.assertFalse(current['meta']['enabled']);self.assertEqual(current['meta']['mode'],'manual')
+        self.assertEqual(current['meta']['accounts'],meta['accounts']);self.assertEqual(current['drafts'],drafts)
+        self.context.set_offline(True);self.page.reload();self.ready()
+        self.page.locator('[data-draft-resume]').click();expect(self.page.locator('[data-main=kg]')).to_have_value('84.125')
+        self.page.locator('.seriesResultForm [type=submit]').click()
+        expect(self.page.locator('.seriesResultForm')).to_have_count(0)
+        today=self.snapshot();self.assertEqual(today['data']['entries'][-1]['kg'],'84.125')
+        self.context.set_offline(False);self.page.locator('[data-tab=settings]').click()
+        self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
+        self.assertEqual(mock.posts,count)
+        expect(self.page.locator('[data-drive-diagnostics]')).to_have_count(0)
+        self.page.locator('[data-drive-action=upload]').click()
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')
+        self.assertEqual(mock.posts,count+1)
+        for id,old in old_files.items():self.assertEqual(mock.files[id],old)
+        latest=list(mock.files.values())[-1]
+        parsed=self.page.evaluate('async text=>(await import("./model/drive-sync.mjs")).inspectBackup(JSON.parse(text).backup)',latest['text'])
+        self.assertEqual(parsed['data'],today['data'])
+        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+
     def test_issue14_upgrade_saved_skeleton_draft_and_independent_source_pair(self):
         # Real pre-fix build + persisted IDB + waiting SW; never reset app data.
         source=self.path/'issue14-old-source'
