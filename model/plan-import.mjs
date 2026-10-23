@@ -116,8 +116,53 @@ export function previewPlan(data,p){
  const details=incoming.filter(pos=>{const prior=old.find(o=>o.exerciseId===pos.exerciseId);return prior?!same(signature(j.model,prior),signature(incomingModel,pos)):oldExercises.some(o=>o.exerciseId===pos.exerciseId);}).map(pos=>{const prior=old.find(o=>o.exerciseId===pos.exerciseId);return {exerciseId:pos.exerciseId,label:pos.label,before:prior?signature(j.model,prior):oldExercises.find(o=>o.exerciseId===pos.exerciseId).legacyParameters,after:signature(incomingModel,pos)};});
  return {model:next.trainingJournal.model,added,removed,changed,details,unresolved};
 }
+/** Resolve real executable definitions, including complete preserved snapshots.
+ * No packet, approval, date or missing prescription is reconstructed/invented.
+ * Conflicting immutable IDs are never overwritten by a historical snapshot.
+ */
+export function storedPlanModel(data,versionId){
+ const j=data.trainingJournal;if(!j)return null;
+ const sources=[j.model,...j.sessionSnapshots.map(s=>s.model)];
+ for(const p of j.importedPlans??[])if(p.planVersion?.id===versionId){
+  try{packetShape(p);sources.push({...j.model,...Object.fromEntries(tables.map(k=>[k,p[k]])),planVersions:[p.planVersion]});}catch{ /* Invalid packets cannot enable activation. */ }
+ }
+ for(const source of sources){
+  const version=source.planVersions.find(v=>v.id===versionId);if(version?.executionVersion!==2)continue;
+  try{
+   const model={...j.model};
+   for(const key of [...tables,'planVersions']){
+    model[key]=j.model[key].slice();
+    for(const row of source[key]){const old=model[key].find(x=>x.id===row.id);check(!old||same(old,row),'kolizja zachowanej wersji');if(!old)model[key].push(row);}
+   }
+   check(source.ownerId===j.model.ownerId,'inny właściciel');validateModel(model);
+   check(id(version.id)&&id(version.planId),'nieobsługiwany identyfikator planu');
+   check(version.units.every(u=>['PUSH A','PULL A','PUSH B','PULL B'].includes(u.id)||exerciseId(u.id)),'nieobsługiwany identyfikator jednostki');
+   const positions=model.positions.filter(p=>p.planVersionId===versionId),sets=model.sets.filter(s=>positions.some(p=>p.id===s.positionId));
+   for(const u of version.units){const ps=positions.filter(p=>p.unitId===u.id);check(ps.length&&new Set(ps.map(p=>p.exerciseId)).size===ps.length,'niekompletna jednostka');}
+   for(const p of positions){
+    const targets=ordered(sets.filter(s=>s.positionId===p.id)),variant=model.variants.find(v=>v.id===p.variantId);
+    check(id(p.id)&&exerciseId(p.exerciseId)&&id(p.variantId),'nieobsługiwany identyfikator ćwiczenia');
+    check(['bilateral','optional','required'].includes(p.sideMode)&&[null,'kg'].includes(p.loadConvention.unit),'nieobsługiwany kontekst');
+    check((variant.laterality!=='bilateral'||p.sideMode==='bilateral')&&(variant.laterality!=='unilateral'||p.sideMode!=='bilateral'),'sprzeczne strony');
+    check(targets.every((s,i)=>s.order===i&&[null,'main','backoff','warmup'].includes(s.role)&&(p.sideMode==='required'?s.side==='each':s.side===null)),'nieobsługiwane serie');
+   }
+   check(model.drops.filter(d=>sets.some(s=>s.id===d.setId)).every(d=>d.segments===null),'nieobsługiwany dropset');
+   for(const g of model.groups.filter(g=>g.planVersionId===versionId)){
+    check(['paired','superset'].includes(g.kind),'nieobsługiwana grupa');
+    const ps=ordered(positions.filter(p=>p.unitId===g.unitId)),indices=g.positionIds.map(id=>ps.findIndex(p=>p.id===id));
+    check(indices.every((n,i)=>n>=0&&(i===0||n===indices[i-1]+1)),'kolejność grupy');
+    check(g.positionIds.every(id=>{const count=sets.filter(s=>s.positionId===id).length;return count>0&&(g.rounds===null||count===g.rounds);}), 'niepełne rundy');
+   }
+   return model;
+  }catch{ /* Try a complete compatible preserved definition, otherwise stay read-only. */ }
+ }
+ return null;
+}
 export function stageActivation(data,versionId,at){
- const next=structuredClone(data),j=next.trainingJournal,p=j?.importedPlans?.find(x=>x.planVersion.id===versionId);
- check(p&&j.model.planVersions.some(v=>v.id===versionId),'najpierw zapisz poprawny plan');if(j.activePlanVersionId===versionId)return next;validateModel(j.model);
- j.activePlanVersionId=versionId;j.nextUnitId=ordered(p.planVersion.units)[0].id;(j.activations??=[]).push({planVersionId:versionId,at,...(data.activeId?{ongoingSessionId:data.activeId}:{})});return next;
+ const model=storedPlanModel(data,versionId);check(model,'brak kompletnej, zgodnej wersji do aktywacji');
+ const next=structuredClone(data),j=next.trainingJournal;if(j.activePlanVersionId===versionId)return next;
+ j.model=structuredClone(model);const version=j.model.planVersions.find(v=>v.id===versionId);
+ for(const u of version.units)next.exercises[u.id]??=[];
+ for(const p of j.model.positions.filter(p=>p.planVersionId===versionId))if(!Object.values(next.exercises).flat().some(e=>e.id===p.exerciseId))next.exercises[p.unitId].push({id:p.exerciseId,name:p.label,sets:Math.max(1,j.model.sets.filter(s=>s.positionId===p.id).length),target:'',initialKg:'',tempo:'',rir:'',notes:'',journalOnly:true});
+ j.activePlanVersionId=versionId;j.nextUnitId=ordered(version.units)[0].id;(j.activations??=[]).push({planVersionId:versionId,at,...(data.activeId?{ongoingSessionId:data.activeId}:{})});return next;
 }

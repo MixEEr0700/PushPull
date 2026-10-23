@@ -2,6 +2,7 @@
 import {snapshotFor,structuredSnapshot} from './journal.mjs';
 import {flatten} from './performance.mjs';
 import {PLAN_ID,buildPlan} from './v2-plan.mjs';
+import {storedPlanModel} from './plan-import.mjs';
 export const SOURCE='@source',UNASSIGNED='@unassigned';
 export const METRICS=['tonnage','sets','reps','workouts'];
 const DAY=86400000,iso=d=>d.toISOString().slice(0,10);
@@ -38,20 +39,39 @@ export function activationPeriods(data,planId){
   return [{from,to,ongoing,uncertain:!from||!ongoing&&!to}];
  });
 }
+/** Actual session dates on the existing exercise plot; no invented observations.
+ * A missing ISO week or a known intervening plan activation breaks the line.
+ */
+export function exerciseTimeline(data,entries){
+ const sessions=new Map(data.sessions.map(s=>[s.id,s]));
+ const times=entries.map(e=>{try{return +date(sessions.get(e.sessionId)?.date);}catch{return null;}}),known=times.filter(t=>t!==null),min=Math.min(...known),max=Math.max(...known);
+ return entries.map((e,i)=>{
+  const previous=entries[i-1],s=sessions.get(e.sessionId),prior=previous&&sessions.get(previous.sessionId);
+  let split=!previous||times[i]===null||times[i-1]===null;
+  if(!split){
+   const a=activationTime(snapshotFor(data,prior.id)?.startedAt),b=activationTime(snapshotFor(data,s.id)?.startedAt),priorPlan=sessionPlanId(data,prior),plan=sessionPlanId(data,s);
+   split=+date(weekOf(s.date).from)-date(weekOf(prior.date).from)>7*DAY||priorPlan!==plan;
+   if(a&&b)split||=(data.trainingJournal?.activations??[]).some(x=>x.planVersionId!==plan&&activationTime(x.at)&&Date.parse(x.at)>Date.parse(a)&&Date.parse(x.at)<=Date.parse(b));
+  }
+  return {x:times[i]===null?null:max===min?0.5:(times[i]-min)/(max-min),split};
+ });
+}
 export function plans(data,catalog=null){
  const j=data.trainingJournal,current=j?.activePlanVersionId??SOURCE,rows=new Map();
  function add(version,model){if(rows.has(version.id))return;const observed=version.source?.reference==='observed-at-session-start';rows.set(version.id,{id:version.id,label:observed?'Szkielet źródłowy · '+version.units.map(u=>u.name).join(', '):version.label,version,model,kind:observed?'observed':'version'});}
  for(const v of j?.model.planVersions??[])add(v,j.model);
  for(const s of j?.sessionSnapshots??[]){const v=s.model.planVersions.find(v=>v.id===s.planVersionId);if(v)add(v,s.model);}
+ for(const p of j?.importedPlans??[])if(p.planVersion)add(p.planVersion,null);
  if(!rows.has(PLAN_ID)){const model=buildPlan('preview');add(model.planVersions[0],model);}
  rows.set(SOURCE,{id:SOURCE,label:'Szkielet źródłowy · zapisane ID / bieżące dane',kind:'source',model:null,version:null});
  for(const s of data.sessions){const v=recordedVersion(catalog,s),id=v&&'@legacy:'+v.id;if(v&&sessionPlanId(data,s,catalog)===id)rows.set(id,{id,label:'Szkielet zapisany · '+v.planId+' · '+v.id,kind:'recorded',version:v,model:null});}
  if(data.sessions.some(s=>sessionPlanId(data,s,catalog)===UNASSIGNED))rows.set(UNASSIGNED,{id:UNASSIGNED,label:'Nieprzypisane / historyczne',kind:'unassigned',model:null,version:null});
  return [...rows.values()].map(p=>{
+  const stored=p.kind==='version'?storedPlanModel(data,p.id):null;if(stored){p={...p,model:stored,version:stored.planVersions.find(v=>v.id===p.id)};}
   const sessions=data.sessions.filter(s=>sessionPlanId(data,s,catalog)===p.id),activations=(Array.isArray(j?.activations)?j.activations:[]).filter(a=>a?.planVersionId===p.id),periods=activationPeriods(data,p.id);
   const dates=sessions.filter(s=>s.status==='done'&&p.kind!=='unassigned'&&((snapshotFor(data,s.id)&&snapshotFor(data,s.id).id===s.journalSnapshotId)||!s.journalSnapshotId&&recordedVersion(catalog,s))).flatMap(s=>{try{date(s.date);return [s.date];}catch{return [];}}).sort();
   const trainingRange=dates.length?{from:dates[0],to:dates.at(-1)}:null;
-  return {...p,current:p.id===current,sessions:sessions.length,activatedAt:activationTime(activations.at(-1)?.at),periods,trainingRange,currentPeriodUnknown:p.id===current&&!periods.some(p=>p.ongoing),status:p.id===current?'current':sessions.length||activations.length?'previous':p.id===PLAN_ID&&!j?.model.planVersions.some(v=>v.id===PLAN_ID)?'available':'saved',canActivate:p.kind==='version'&&(p.id===PLAN_ID||!!j?.importedPlans?.some(x=>x.planVersion.id===p.id))};
+  return {...p,current:p.id===current,sessions:sessions.length,activatedAt:activationTime(activations.at(-1)?.at),periods,trainingRange,currentPeriodUnknown:p.id===current&&!periods.some(p=>p.ongoing),status:p.id===current?'current':sessions.length||activations.length?'previous':p.id===PLAN_ID&&!stored&&!j?.model.planVersions.some(v=>v.id===PLAN_ID)?'available':'saved',canActivate:p.kind==='version'&&(!!stored||p.id===PLAN_ID&&!j?.model.planVersions.some(v=>v.id===PLAN_ID)&&!j?.sessionSnapshots.some(s=>s.planVersionId===PLAN_ID))};
  }).filter(p=>p.id!==SOURCE||p.current||p.sessions);
 }
 /** One execution row = one performed set (L/P separate); drop segments are not extra sets.

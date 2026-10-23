@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {plans,sessionPlanId,weekOf,warsawDate,weeklyStats,entryTotals,activationPeriods,SOURCE,UNASSIGNED} from '../model/plan-overview.mjs';
+import {plans,sessionPlanId,weekOf,warsawDate,weeklyStats,entryTotals,activationPeriods,exerciseTimeline,SOURCE,UNASSIGNED} from '../model/plan-overview.mjs';
 import {initialize,startSession,recordEntry,advance,nextType,project} from '../model/journal.mjs';
 import {activate,views,PLAN_ID} from '../model/v2-plan.mjs';
 import {newPerformance,flatten} from '../model/performance.mjs';
-import {stagePlan,stageActivation} from '../model/plan-import.mjs';
+import {stagePlan,stageActivation,storedPlanModel} from '../model/plan-import.mjs';
 const fixture=()=>JSON.parse(readFileSync(new URL('fixtures/v1.json',import.meta.url)));
 const incoming=()=>JSON.parse(readFileSync(new URL('fixtures/plan-v3.json',import.meta.url)));
 function fresh(){const d=fixture();d.sessions=[];d.entries=[];d.activeId=null;d.trainingJournal=initialize('owner');return d;}
@@ -121,4 +121,36 @@ test('new activation context survives full v3 export/restore with legacy source 
  const db=runInNewContext(readFileSync('storage.js','utf8')+'\n'+readFileSync('indexeddb.js','utf8')+'\nPushPullDB',{structuredClone,crypto:globalThis.crypto});const {catalog}=db.parseBackup(d);
  const raw=JSON.stringify({format:'pushpull-backup',version:2,data:d,catalog,archives:[]}),doc=await createLegacyModel(raw,{ownerId:'owner',createdAt:'2026-10-05T10:00:00.000Z'});
  assert.deepEqual((await parseModelBackup(await exportBackup(doc))).data,d);
+});
+
+
+test('complete registry/snapshot plans activate without an import packet; incomplete skeletons and collisions never become V1',async()=>{
+ let d=fresh();activate(d,'2026-01-01T10:00:00.000Z');const p=incoming();d=stagePlan(d,p);
+ await session(d,'PUSH A','2026-01-02',['PUSH-A-1']);
+ d=stageActivation(d,p.planVersion.id,'2026-01-03T10:00:00.000Z');await session(d,'TEST-A','2026-01-04',['TEST-1']);
+ delete d.trainingJournal.importedPlans;const before=structuredClone(d);
+ assert.ok(plans(d).find(x=>x.id===p.planVersion.id).canActivate);assert.ok(storedPlanModel(d,p.planVersion.id));
+ d=stageActivation(d,PLAN_ID,'2026-01-05T10:00:00.000Z');assert.equal(d.trainingJournal.nextUnitId,'PUSH A');
+ // A complete snapshot still contains all original units and definitions.
+ const preserved=d.trainingJournal.sessionSnapshots.find(s=>s.planVersionId===p.planVersion.id).model;
+ for(const key of ['exercises','variants','planVersions','positions','sets','drops','groups','coachInstructions'])d.trainingJournal.model[key]=d.trainingJournal.model[key].filter(row=>!preserved[key].some(x=>x.id===row.id));
+ const source=structuredClone(d);assert.ok(plans(d).find(x=>x.id===p.planVersion.id).canActivate);assert.deepEqual(d,source);
+ const restored=stageActivation(d,p.planVersion.id,'2026-01-06T10:00:00.000Z');assert.equal(restored.trainingJournal.nextUnitId,'TEST-A');assert.deepEqual(restored.sessions,before.sessions);assert.deepEqual(restored.entries,before.entries);assert.deepEqual(restored.trainingJournal.sessionSnapshots,before.trainingJournal.sessionSnapshots);
+ const packetOnly=structuredClone(d);packetOnly.trainingJournal.sessionSnapshots=[];packetOnly.trainingJournal.importedPlans=[p];assert.ok(plans(packetOnly).find(x=>x.id===p.planVersion.id).canActivate);assert.equal(stageActivation(packetOnly,p.planVersion.id,'2026-01-06T10:00:00.000Z').trainingJournal.activePlanVersionId,p.planVersion.id);
+ const conflict=structuredClone(d);conflict.trainingJournal.model.exercises.push({...preserved.exercises[0],name:'conflicting definition'});assert.equal(storedPlanModel(conflict,p.planVersion.id),null);
+ const incomplete=structuredClone(d);incomplete.trainingJournal.sessionSnapshots=[];incomplete.trainingJournal.model.planVersions.push(p.planVersion);assert.equal(storedPlanModel(incomplete,p.planVersion.id),null);assert.equal(plans(incomplete).find(x=>x.id===p.planVersion.id).canActivate,false);
+ const skeleton=fresh();await session(skeleton,'PUSH A','2026-01-01',[]);assert.ok(plans(skeleton).filter(x=>['observed','source','unassigned'].includes(x.kind)).every(x=>!x.canActivate));
+ assert.throws(()=>stageActivation(skeleton,'imaginary-v1','2026-01-01T10:00:00.000Z'),/brak kompletnej/);
+});
+
+test('V2 A + C statistics continue across a six-month V3 period; plots keep dated gaps and no reset',async()=>{
+ let d=fresh();activate(d,'2026-01-01T10:00:00.000Z');await session(d,'PUSH A','2026-01-05',['PUSH-A-1']);await session(d,'PUSH A','2026-01-06',['PUSH-A-1']);
+ const p=incoming();d=stageActivation(stagePlan(d,p),p.planVersion.id,'2026-01-07T10:00:00.000Z');await session(d,'TEST-A','2026-04-05',['TEST-1']);
+ d=stageActivation(d,PLAN_ID,'2026-07-01T10:00:00.000Z');await session(d,'PUSH A','2026-07-06',['PUSH-A-1']);
+ const old=structuredClone(d),r=weeklyStats(d,PLAN_ID,{from:'2026-01-05',to:'2026-07-12',today:'2026-07-13'});
+ assert.equal(r.totals.workouts,3);assert.equal(r.totals.tonnage,1440);assert.ok(r.rows.slice(1,-1).every(w=>w.workouts===0&&w.tonnage===0));
+ assert.equal(activationPeriods(d,PLAN_ID).length,2);const es=d.entries.filter(e=>e.exerciseId==='PUSH-A-1'),timeline=exerciseTimeline(d,es);
+ assert.equal(timeline[0].x,0);assert.ok(timeline[1].x<0.01);assert.equal(timeline[2].x,1);assert.equal(timeline[1].split,false);assert.equal(timeline[2].split,true);assert.deepEqual(d,old);
+ // An actual switch also separates nearby periods, with no empty ISO week.
+ d.sessions.at(-1).date='2026-01-08';const last=d.trainingJournal.sessionSnapshots.find(s=>s.sessionId===es.at(-1).sessionId);last.startedAt='2026-07-06T10:00:00.000Z';assert.equal(exerciseTimeline(d,es)[2].split,true);
 });

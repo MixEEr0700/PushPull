@@ -68,7 +68,7 @@ class PlanImport(BrowserHarness):
         expect(self.page.locator('.exercise-card').first).to_contain_text('8–10')
         self.page.locator('[data-act=finish]').click();self.page.locator('[data-act=start]').click()
         expect(self.page.locator('.exercise-card').first).to_contain_text('4–6')
-        expect(self.page.locator('.exercise-card').first).to_contain_text('20 kg')
+        expect(self.page.locator('.exercise-card .last-result').first).to_have_text('Brak zapisanego wyniku') # V4 has no own result yet; never borrow V3's result.
         self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         self.assertEqual(self.local_raw(),legacy.RAW)
 
