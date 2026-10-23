@@ -223,6 +223,54 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
 
+    def test_issue32_compact_results_after_update_preserve_saved_history_and_asymmetric_draft(self):
+        source=self.path/'issue32-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','084f470:'+name],cwd=ROOT))
+        old_release=self.path/'issue32-old';build(old_release,source)
+        current_release=self.controller['directory'];self.controller['directory']=old_release
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
+        self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="PULL B"]').click();self.page.locator('[data-act=start]').click()
+        card=self.page.locator('.exercise-card').filter(has=self.page.locator('[data-expand="PULL-B-1"]'))
+        card.locator('[data-expand]').click();self.page.locator('[data-panel=result]').click()
+        f=self.page.locator('.performanceForm');f.locator('[data-quick=kg]').fill('105');f.locator('[data-quick=reps]').fill('15')
+        f.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        expect(card.locator('.exercise-toggle .last-series-row')).to_have_count(6) # Reproduces the old Android symptom.
+        self.page.locator('[data-panel=result]').click();f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click()
+        f.locator('[data-rich-action=side-mode][data-row="4"]').click()
+        f.locator('[data-row="4"][data-field=reps]').fill('12');f.locator('[data-row="5"][data-field=reps]').fill('14')
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.snapshot();sid=before['data']['activeId']
+        draft=lambda:self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
+        old_drafts=draft()
+        self.controller['directory']=current_release;self.wait_update();self.reopen();self.context.set_offline(True)
+        self.assertEqual(self.snapshot(),before);self.assertEqual(draft(),old_drafts)
+        card=self.page.locator('.exercise-card').filter(has=self.page.locator('[data-expand="PULL-B-1"]'))
+        expect(card.locator('.exercise-toggle .last-result')).to_have_text('15 × 105 kg')
+        expect(card.locator('.exercise-toggle .last-series-row')).to_have_count(0)
+        self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
+        expect(f.locator('[data-row="4"][data-field=reps]')).to_have_value('12');expect(f.locator('[data-row="5"][data-field=reps]')).to_have_value('14')
+        f.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        expected=['Seria 1: 15 × 105 kg','Seria 2: 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg']
+        expect(card.locator('.exercise-toggle .last-series-row')).to_have_text(expected)
+        saved=self.snapshot();self.assertEqual(saved['data']['trainingJournal']['sessionSnapshots'],before['data']['trainingJournal']['sessionSnapshots'])
+        self.assertEqual(saved['data']['entries'][:-1],before['data']['entries'][:-1])
+        self.assertEqual([r['id'] for r in saved['data']['entries'][-1]['performance']['rows']],[r['id'] for r in before['data']['entries'][-1]['performance']['rows']])
+        self.assertEqual(draft(),[]);self.reopen();self.assertEqual(self.snapshot(),saved)
+        self.page.locator('[data-tab=calendar]').click();self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click()
+        card=self.page.locator('.exercise-card').filter(has=self.page.locator('[data-expand="PULL-B-1"]'))
+        expect(card.locator('.exercise-toggle .last-series-row')).to_have_text(expected)
+        card.locator('[data-expand]').click();self.page.locator('[data-panel=stats]').click()
+        expect(self.page.locator('.stat-tile').first).to_contain_text('9030')
+        self.assertEqual(self.snapshot(),saved)
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+
     def test_issue30_update_preserves_active_plan_drafts_snapshots_and_offline_statistics(self):
         source=self.path/'issue30-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
