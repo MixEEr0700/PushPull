@@ -1,0 +1,755 @@
+{
+  "format": "pushpull-plan",
+  "version": 1,
+  "approval": {
+    "status": "approved",
+    "reference": "Synthetic test owner",
+    "approvedAt": "2026-10-22T12:00:00.000Z"
+  },
+  "planVersion": {
+    "id": "synthetic-v3",
+    "planId": "synthetic",
+    "number": 3,
+    "label": "TEST V3",
+    "units": [
+      {
+        "id": "TEST-A",
+        "name": "Test A",
+        "order": 0
+      },
+      {
+        "id": "TEST-B",
+        "name": "Test B",
+        "order": 1
+      }
+    ],
+    "executionVersion": 2,
+    "source": {
+      "kind": "owner",
+      "reference": "TEST — synthetic approved fixture, not a user plan",
+      "recordedAt": null
+    }
+  },
+  "exercises": [
+    {
+      "id": "TEST-1",
+      "name": "Test Narciarz",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "TEST-2",
+      "name": "Test Szrugsy",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "TEST-3",
+      "name": "Test Trzeci",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "TEST-4",
+      "name": "Test Backoff Drop",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "TEST-5",
+      "name": "Test L/P",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "TEST-6",
+      "name": "Test bez celów",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    }
+  ],
+  "variants": [
+    {
+      "id": "test-variant-1",
+      "exerciseId": "TEST-1",
+      "label": "Synthetic variant",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": null,
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "test-variant-2",
+      "exerciseId": "TEST-2",
+      "label": "Synthetic variant",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": null,
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "test-variant-3",
+      "exerciseId": "TEST-3",
+      "label": "Synthetic variant",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": null,
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "test-variant-4",
+      "exerciseId": "TEST-4",
+      "label": "Synthetic variant",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": null,
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "test-variant-5",
+      "exerciseId": "TEST-5",
+      "label": "Synthetic variant",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": null,
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "test-variant-6",
+      "exerciseId": "TEST-6",
+      "label": "Synthetic variant",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": null,
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    }
+  ],
+  "positions": [
+    {
+      "id": "v3-position-1",
+      "planVersionId": "synthetic-v3",
+      "unitId": "TEST-A",
+      "order": 0,
+      "label": "Test Narciarz",
+      "exerciseId": "TEST-1",
+      "variantId": "test-variant-1",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": "machine-indication",
+        "description": "Test indication, no conversion"
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-2",
+      "planVersionId": "synthetic-v3",
+      "unitId": "TEST-A",
+      "order": 1,
+      "label": "Test Szrugsy",
+      "exerciseId": "TEST-2",
+      "variantId": "test-variant-2",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": "machine-indication",
+        "description": "Test indication, no conversion"
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-3",
+      "planVersionId": "synthetic-v3",
+      "unitId": "TEST-A",
+      "order": 2,
+      "label": "Test Trzeci",
+      "exerciseId": "TEST-3",
+      "variantId": "test-variant-3",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": "machine-indication",
+        "description": "Test indication, no conversion"
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-4",
+      "planVersionId": "synthetic-v3",
+      "unitId": "TEST-B",
+      "order": 0,
+      "label": "Test Backoff Drop",
+      "exerciseId": "TEST-4",
+      "variantId": "test-variant-4",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": "machine-indication",
+        "description": "Test indication, no conversion"
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-5",
+      "planVersionId": "synthetic-v3",
+      "unitId": "TEST-B",
+      "order": 1,
+      "label": "Test L/P",
+      "exerciseId": "TEST-5",
+      "variantId": "test-variant-5",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": "machine-indication",
+        "description": "Test indication, no conversion"
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-6",
+      "planVersionId": "synthetic-v3",
+      "unitId": "TEST-B",
+      "order": 2,
+      "label": "Test bez celów",
+      "exerciseId": "TEST-6",
+      "variantId": "test-variant-6",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "unspecified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": "machine-indication",
+        "description": "Test indication, no conversion"
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    }
+  ],
+  "sets": [
+    {
+      "id": "v3-position-1-set-0",
+      "positionId": "v3-position-1",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 1,
+        "max": 2
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-1-set-1",
+      "positionId": "v3-position-1",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 1,
+        "max": 2
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-2-set-0",
+      "positionId": "v3-position-2",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 1,
+        "max": 2
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-2-set-1",
+      "positionId": "v3-position-2",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 1,
+        "max": 2
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-3-set-0",
+      "positionId": "v3-position-3",
+      "order": 0,
+      "role": "main",
+      "reps": null,
+      "rir": null,
+      "tempo": null,
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-3-set-1",
+      "positionId": "v3-position-3",
+      "order": 1,
+      "role": "main",
+      "reps": null,
+      "rir": null,
+      "tempo": null,
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-4-set-0",
+      "positionId": "v3-position-4",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 1,
+        "max": 2
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-4-set-1",
+      "positionId": "v3-position-4",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 1,
+        "max": 2
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-4-set-2",
+      "positionId": "v3-position-4",
+      "order": 2,
+      "role": "backoff",
+      "reps": {
+        "min": 12,
+        "max": 15
+      },
+      "rir": {
+        "min": 1,
+        "max": 2
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": "v3-position-4-set-1",
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-5-set-0",
+      "positionId": "v3-position-5",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 1,
+        "max": 2
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "v3-position-5-set-1",
+      "positionId": "v3-position-5",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 1,
+        "max": 2
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    }
+  ],
+  "drops": [
+    {
+      "id": "v3-position-4-set-0-drop",
+      "setId": "v3-position-4-set-0",
+      "segments": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "v3-group",
+      "planVersionId": "synthetic-v3",
+      "unitId": "TEST-A",
+      "kind": "superset",
+      "positionIds": [
+        "v3-position-1",
+        "v3-position-2",
+        "v3-position-3"
+      ],
+      "rounds": 2,
+      "betweenMembersSeconds": 15,
+      "afterRoundSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    }
+  ],
+  "coachInstructions": [
+    {
+      "id": "v3-global",
+      "planVersionId": "synthetic-v3",
+      "positionId": null,
+      "revision": 1,
+      "text": "Synthetic instruction. Test only.",
+      "confirmation": "unverified",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    }
+  ],
+  "continuity": [
+    {
+      "positionId": "v3-position-1",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "New synthetic exercise",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "v3-position-2",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "New synthetic exercise",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "v3-position-3",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "New synthetic exercise",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "v3-position-4",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "New synthetic exercise",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "v3-position-5",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "New synthetic exercise",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "v3-position-6",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "New synthetic exercise",
+      "source": {
+        "kind": "owner",
+        "reference": "TEST — synthetic approved fixture, not a user plan",
+        "recordedAt": null
+      }
+    }
+  ]
+}

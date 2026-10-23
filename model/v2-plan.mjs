@@ -40,16 +40,20 @@ export function activate(data,at){
   for(const row of plan[key]){const old=j.model[key].find(x=>x.id===row.id);if(!old)j.model[key].push(structuredClone(row));else if(key!=='exercises')check(canonical(old)===canonical(row),'Plan version conflict: preserve existing version and assign a new ID');}
  }
  for(const p of plan.positions)if(!Object.values(data.exercises).flat().some(x=>x.id===p.exerciseId))data.exercises[p.unitId].push({id:p.exerciseId,name:p.label,sets:plan.sets.filter(s=>s.positionId===p.id).length,target:'V2',initialKg:'',tempo:'',rir:'',notes:'',journalOnly:true});
- j.activePlanVersionId=PLAN_ID;(j.activations??=[]).push({planVersionId:PLAN_ID,at});
+ j.nextUnitId=plan.planVersions[0].units[0].id;j.activePlanVersionId=PLAN_ID;(j.activations??=[]).push({planVersionId:PLAN_ID,at});
 }
+export const rangeText=r=>r===null||r===undefined?'nieokreślone':r.min===r.max?String(r.min):r.min+'–'+r.max;
+export const tempoText=t=>t===null||t===undefined?'nieokreślone':t.map(x=>x??'?').join(' ');
 export function views(model,versionId,type,data){
  const positions=model.positions.filter(p=>p.planVersionId===versionId&&p.unitId===type).sort((a,b)=>a.order-b.order);
+ const version=model.planVersions.find(v=>v.id===versionId),imported=versionId!==PLAN_ID;
+ let number=0;const numbers=new Map();for(const p of positions){const g=model.groups.find(g=>g.positionIds.includes(p.id));if(!g||g.positionIds[0]===p.id)number++;numbers.set(p.id,g?groupMemberNumber(number,g.positionIds.indexOf(p.id)):number);}
  const one=p=>{
   const targets=model.sets.filter(s=>s.positionId===p.id).sort((a,b)=>a.order-b.order),group=model.groups.find(g=>g.positionIds.includes(p.id));
-  return {id:p.exerciseId,name:p.label,displayNumber:p.slotOrder+1,sets:targets.length||'?',target:targets.map(t=>(t.role==='backoff'?'back-off ':'')+t.reps.min+'–'+t.reps.max).join(' / ')||'nieokreślone',tempo:targets[0]?.tempo?.join(' ')??'nieokreślone',rir:targets[0]?.rir?.min??'nieokreślone',initialKg:'',v2:true,journalVariantId:p.variantId,positionId:p.id,sideMode:p.sideMode,loadConvention:p.loadConvention,targets:targets.map(t=>({...t,drop:model.drops.some(d=>d.setId===t.id)})),group,notes:data?.trainingJournal?.model.userNotes.find(n=>n.exerciseId===p.exerciseId&&n.origin==='user')?.text??'',sharedNotes:Object.values(data?.exercises??{}).flat().find(e=>e.id===p.exerciseId)?.notes??'',instructions:model.coachInstructions.filter(i=>i.positionId===p.id||i.positionId===null).map(i=>i.text).join('\n')};
+  return {id:p.exerciseId,name:p.label,displayNumber:imported?numbers.get(p.id):p.slotOrder+1,sets:targets.length||'?',target:targets.map(t=>(t.role==='backoff'?'back-off ':'')+(t.reps? t.reps.min+'–'+t.reps.max:'nieokreślone')).join(' / ')||'nieokreślone',tempo:imported?[...new Set(targets.map(t=>tempoText(t.tempo)))].join(' / ')||'nieokreślone':tempoText(targets[0]?.tempo),rir:imported?[...new Set(targets.map(t=>rangeText(t.rir)))].join(' / ')||'nieokreślone':targets[0]?.rir?.min??'nieokreślone',initialKg:'',v2:true,imported,planLabel:version.label,planVersionId:versionId,journalVariantId:p.variantId,positionId:p.id,sideMode:p.sideMode,loadConvention:p.loadConvention,targets:targets.map(t=>({...t,drop:model.drops.some(d=>d.setId===t.id)})),group,notes:data?.trainingJournal?.model.userNotes.find(n=>n.exerciseId===p.exerciseId&&n.origin==='user')?.text??'',sharedNotes:Object.values(data?.exercises??{}).flat().find(e=>e.id===p.exerciseId)?.notes??'',instructions:model.coachInstructions.filter(i=>i.planVersionId===versionId&&(i.positionId===p.id||i.positionId===null)).map(i=>i.text).join('\n')};
  };
  // One view per original position, including each independent group member.
- return positions.map(p=>{const view=one(p);if(!view.group)return view;
+ return positions.map(p=>{const view=one(p);if(!view.group||imported)return view;
   const index=view.group.positionIds.indexOf(p.id),number=groupMemberNumber(p.slotOrder+1,index);
   return {...view,displayNumber:number,name:groupMemberNumber(p.slotId,index)+' · '+view.name,description:'Superseria A/B · 2 rundy · 8–10 · 15 s między ćwiczeniami'};
  });

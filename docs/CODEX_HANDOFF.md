@@ -1,3 +1,5 @@
+Aktualne Issue #21: [import kolejnych planów jako danych](PLAN_IMPORT_ISSUE_21.md), walidacja i podgląd, zapis nieaktywny i osobna aktywacja dla przyszłych sesji. Bez zmiany rozpoczętych sesji, historii, szkiców i snapshotów. Brak zmiany protokołu Drive, migracji schematu IndexedDB i publikacji; testy wyłącznie syntetyczne. Poniższe akapity dokumentują wcześniejsze etapy.
+
 Aktualna poprawka: [automatyczne szkice i odzyskiwanie treningu](WORKOUT_DRAFT_RECOVERY.md), niezależne karty superserii A/B bez zmiany ich ID lub snapshotów. Wymaga PR #10; nie scala ani nie publikuje go.
 
 Aktualny tryb Drive: [ręczne kopie, decyzja Issue #26](GOOGLE_DRIVE_MANUAL_BACKUP_ISSUE_26.md). Opisy automatycznej synchronizacji poniżej są historyczne.

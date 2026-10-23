@@ -113,3 +113,23 @@ test('full JSON validation rejects damaged and unsupported documents, preserving
  assert.deepEqual((await inspectBackup(JSON.stringify(extended))).data,extended);
  for(const bad of ['{broken','null','{"version":900}'])await assert.rejects(makeNode(bad,[]));
 });
+
+test('imported future plans round-trip in manual v3 Drive backups without automatic upload',async()=>{
+ const {stagePlan,stageActivation}=await import('../model/plan-import.mjs');
+ const {createLegacyModel}=await import('../model/legacy-model.mjs');
+ const {exportBackup}=await import('../model/backup.mjs');
+ const {runInNewContext}=await import('node:vm');
+ const db=new Database(),drive=new Drive(),{sync}=await setup(db,drive);await sync.upload();
+ const config=clone(db.state),p=JSON.parse(readFileSync(new URL('fixtures/plan-v3.json',import.meta.url)));
+ db.value=stageActivation(stagePlan(db.value,p,'test-owner'),p.planVersion.id,'2026-10-22T12:01:00.000Z');db.revision++;
+ const adapter=runInNewContext(readFileSync('storage.js','utf8')+'\n'+readFileSync('indexeddb.js','utf8')+'\nPushPullDB',{structuredClone,crypto:globalThis.crypto});
+ const {catalog}=adapter.parseBackup(db.value),backup=await exportBackup(await createLegacyModel(JSON.stringify({format:'pushpull-backup',version:2,data:db.value,catalog,archives:[]}),{ownerId:'test-owner',createdAt:'2026-10-22T12:02:00.000Z'}));
+ db.model={};db.exportModelBackup=async()=>backup;
+ drive.authenticated=false;sync.localChanged();await sync.retryNow();assert.equal(drive.files.size,1);
+ await assert.rejects(sync.upload(),/Połącz Google/);
+ assert.equal(db.state.clientId,config.clientId);assert.deepEqual(db.state.selected,config.selected);
+ drive.authenticated=true;const {fileId}=await sync.upload();assert.match(sync.status.detail,/zapisana i zweryfikowana/);
+ const restored=await inspectBackup((await sync.download(fileId)).backup);
+ assert.deepEqual(restored.data,db.value);assert.deepEqual(restored.data.trainingJournal.importedPlans,[p]);
+ assert.equal(restored.data.entries.length,fixture().entries.length);sync.close();
+});

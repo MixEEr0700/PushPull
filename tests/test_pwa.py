@@ -50,7 +50,7 @@ class ArtifactBuild(unittest.TestCase):
         self.assertIn('Aplikacja Treningowa',current['description'])
         for field in set(old)-{'name','short_name','description'}:
             self.assertEqual(current[field],old[field],field)
-        for name in ['style.css','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','storage.js','scripts/service-worker.template.js','PushPull_PLAN_PROJEKTU_v1.md']:
+        for name in ['style.css','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','scripts/service-worker.template.js','PushPull_PLAN_PROJEKTU_v1.md']:
             self.assertEqual((ROOT/name).read_bytes(),subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT),name)
 
     def test_artifact_server_refuses_modified_assets_and_source_checkout(self):
@@ -223,12 +223,50 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
 
+    def test_issue21_plan_import_offline_after_real_main_update_retains_history_and_draft(self):
+        # Upgrade the actual pre-import main release on one origin, no clearing data.
+        source=self.path/'issue21-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-import.mjs' else subprocess.check_output(['git','show','ef0dec6:'+name],cwd=ROOT))
+        old=self.path/'issue21-old';build(old,source);self.controller['directory']=old
+        self.seed();self.page.goto(self.url);self.ready();before=self.snapshot()
+        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-main=kg]').fill('63');self.page.locator('[data-main=reps]').fill('7')
+        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        self.controller['directory']=self.next_release('issue21-plan-update');self.wait_update();self.reopen()
+        self.assertEqual(self.snapshot(),before)
+        self.context.set_offline(True)
+        self.page.locator('[data-draft-resume]').click();expect(self.page.locator('[data-main=kg]')).to_have_value('63')
+        self.page.locator('[data-tab=settings]').click()
+        plan=(ROOT/'tests/fixtures/plan-v3.json').read_bytes()
+        self.page.locator('#planFile').set_input_files({'name':'test-v3.json','mimeType':'application/json','buffer':plan})
+        expect(self.page.locator('[data-plan-preview]')).to_be_visible()
+        self.page.locator('[data-plan-save]').click();expect(self.page.get_by_text('Plan zapisany bez aktywacji',exact=True)).to_be_visible()
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.assertEqual(self.snapshot()['data']['sessions'],before['data']['sessions'])
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-panel=result]').click()
+        expect(self.page.locator('[data-main=kg]')).to_have_value('63')
+        self.page.locator('.seriesResultForm [type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        self.page.locator('[data-act=finish]').click();self.page.locator('[data-type="TEST-B"]').click();self.page.locator('[data-act=start]').click()
+        self.page.locator('[data-expand="TEST-4"]').click();self.page.locator('[data-panel=result]').click()
+        f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click()
+        for el in f.locator('[data-field=kg]').all():el.fill('21')
+        for el in f.locator('[data-field=reps]').all():el.fill('9')
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        self.reopen();self.page.locator('[data-draft-resume]').click()
+        expect(self.page.locator('.performanceForm [data-field=kg]')).to_have_count(4)
+        self.page.locator('.performanceForm [type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        saved=self.snapshot();self.reopen();self.assertEqual(self.snapshot(),saved)
+        self.assertEqual(saved['data']['entries'][-1]['performance']['rows'][0]['segments'][1]['kg'],'21')
+
     def test_issue26_update_from_conflict_preserves_data_copies_drafts_and_disables_automation(self):
         from test_drive_sync import MockGoogle
         source=self.path/'issue26-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','e93a4a5:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-import.mjs' else subprocess.check_output(['git','show','e93a4a5:'+name],cwd=ROOT))
         old_release=self.path/'issue26-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         mock=MockGoogle();mock.install(self.context)
@@ -281,7 +319,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue14-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','cf9b765:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','cf9b765:'+name],cwd=ROOT))
         old_release=self.path/'issue14-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -362,7 +400,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue17-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','16e131a:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','16e131a:'+name],cwd=ROOT))
         old_release=self.path/'issue17-old';build(old_release,source)
         current_release=self.controller['directory']
         def check_cards():

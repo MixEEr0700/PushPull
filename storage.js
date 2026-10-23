@@ -22,11 +22,13 @@ const PushPullStorage = (() => {
       }
     }
     keys(value);
-    if (!object(value.exercises) || Object.keys(value.exercises).some(k => !TYPES.includes(k)) || !Array.isArray(value.sessions) || !Array.isArray(value.entries) ||
+    const declared=(value.trainingJournal?.model?.planVersions||[]).filter(v=>v.executionVersion===2).flatMap(v=>(v.units||[]).map(u=>u.id));
+    const types=Object.keys(value.exercises||{});
+    if (!object(value.exercises) || TYPES.some(k=>!types.includes(k)) || types.some(k => !TYPES.includes(k)&&(!id(k)||!declared.includes(k))) || !Array.isArray(value.sessions) || !Array.isArray(value.entries) ||
         !TYPES.includes(value.nextType) || !(value.activeId === null || id(value.activeId))) fail('struktura bazy');
     const exercises = new Map(), sessions = new Map(), entryIds = new Set(), pairs = new Set(), sequences = new Set();
-    for (const type of TYPES) {
-      if (!Array.isArray(value.exercises[type]) || !value.exercises[type].length) fail('plan ' + type);
+    for (const type of types) {
+      if (!Array.isArray(value.exercises[type]) || !value.exercises[type].length && TYPES.includes(type)) fail('plan ' + type);
       for (const ex of value.exercises[type]) {
         if (!object(ex) || !id(ex.id) || exercises.has(ex.id) || !text(ex.name) || !ex.name.trim() ||
             !Number.isSafeInteger(ex.sets) || ex.sets < 1 ||
@@ -36,7 +38,7 @@ const PushPullStorage = (() => {
       }
     }
     for (const s of value.sessions) {
-      if (!object(s) || !id(s.id) || sessions.has(s.id) || !TYPES.includes(s.type) || !date(s.date) ||
+      if (!object(s) || !id(s.id) || sessions.has(s.id) || !types.includes(s.type) || !date(s.date) ||
           !Number.isSafeInteger(s.seq) || s.seq < 1 || sequences.has(s.seq) ||
           !['active', 'done'].includes(s.status)) fail('sesja');
       sessions.set(s.id, s); sequences.add(s.seq);
@@ -45,7 +47,7 @@ const PushPullStorage = (() => {
     if (active.length > 1 || (active[0]?.id ?? null) !== value.activeId) fail('aktywna sesja');
     for (const e of value.entries) {
       const s = sessions.get(e?.sessionId), pair = JSON.stringify([e?.sessionId, e?.exerciseId]);
-      if (!object(e) || !id(e.id) || entryIds.has(e.id) || !s || exercises.get(e.exerciseId) !== s.type ||
+      if (!object(e) || !id(e.id) || entryIds.has(e.id) || !s || (!exercises.has(e.exerciseId) || exercises.get(e.exerciseId)!==s.type && !value.trainingJournal?.sessionSnapshots?.some(n=>n.id===s.journalSnapshotId && n.sessionId===s.id && n.unitId===s.type && e.journalSnapshotId===n.id && n.model.positions.some(p=>p.id===e.journalPositionId && p.exerciseId===e.exerciseId && p.unitId===s.type && p.planVersionId===n.planVersionId))) ||
           pairs.has(pair) || !number(e.kg) || !number(e.reps, true)) fail('wynik lub relacje');
       if (e.series != null && (!Array.isArray(e.series) || !e.series.length || e.series.some(r =>
         !object(r) || !number(r.kg) || !number(r.reps, true) || !Number.isFinite(Number(r.kg) * Number(r.reps))))) fail('serie');
