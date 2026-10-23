@@ -30,3 +30,15 @@ Jeden stały dziennik z wieloma wersjami planów. Każdy nowy plan jest **danymi
 - Zachować zatwierdzony Matrix i działający lokalny zapis, eksport/import, ręczne kopie Drive. Zmiany na telefonie tylko po testach i z potwierdzeniem.
 - **Najpierw** zweryfikować i rozwiązać konflikt istniejącego PR #24 (import planów V3+), następnie ukończyć poprawkę formularzy L/P z Issue #29, **potem** wdrożyć jeden ekran Plany treningowe i statystyki tygodniowe Issue #30. Bez implementowania importu od zera ani dublowania prac.
 - Każdy PR raportuje: co zmieniono, co zachowano, testy i wynik, ograniczenia. Weryfikacja na fizycznym Androidzie przed ogłoszeniem funkcji jako potwierdzonej produkcyjnie.
+
+## Zatwierdzone doprecyzowanie: powrót do wcześniejszego planu i ciągłość statystyk (23.10.2026)
+
+**Ta decyzja zastępuje wcześniejszą sugestię rozpoczynania statystyk „od zera” przy ponownej aktywacji planu.**
+
+- Ponowna aktywacja **dokładnie tej samej wersji planu** zachowuje i kontynuuje jego historię oraz statystyki. V2 → V3 → V2 oznacza: wspólne dane statystyczne V2 z pierwszego i drugiego okresu używania. Nie usuwać, nie resetować ani nie przenosić wyników.
+- Przy przełączeniu planu **nowy okres używania** oraz nowy cykl rotacji zaczynający się od pierwszej jednostki, ale **bez resetu statystyk**. Okresy aktywacji są osobno wymienione w historii z wiarygodnymi datami.
+- Na wykresie/statystykach V2 zachować rzeczywistą oś czasu z przerwą (np. sześć miesięcy treningów V3). Nie zagęszczać jej i nie łączyć przez brakujące tygodnie w sposób sugerujący ciągłe treningi V2. Brakujące tygodnie pozostają bez ćwiczeń V2; nie interpolować wyników.
+- Wracający użytkownik widzi ostatnie zachowane wyniki danego ćwiczenia w kompatybilnym kontekście; może rozpocząć niższym ciężarem, a taka sesja trafia do dalszej wspólnej historii V2. Nie szukać rekordu ani nie podmieniać ostatniej rzeczywistej obserwacji najlepszą.
+- Przełącznik pokazuje wyłącznie **kompletne, zachowane, walidowalne wersje**, nie wymagając ponownego importu. Nie przedstawiać niepełnego historycznego szkieletu jako pełnej V1. Jeśli brak innych aktywowalnych planów, uczciwie wyjaśnić przyczynę.
+- Potwierdzenie zmiany: „Rozpoczniesz nowy okres używania planu i wrócisz do pierwszej jednostki. Poprzednie wyniki i statystyki tej wersji pozostają dostępne i będą kontynuowane”.
+- Nie zmieniać wyglądu Matrix, nawigacji, historii, snapshotów, szkiców, konwencji kg ani ręcznych kopii. Pełne kryteria odbioru i status w [Issue #34](https://github.com/MixEEr0700/PushPull/issues/34).
