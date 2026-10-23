@@ -158,3 +158,35 @@ class PlanImport(BrowserHarness):
         self.assertEqual(self.state()['activeId'],before['activeId'])
         self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
         self.assertFalse(self.alerts,self.alerts)
+
+    def test_optional_side_split_preserves_values_and_ids_for_drop_and_backoff(self):
+        p=json.loads(json.dumps(PLAN));p['positions'][3]['sideMode']='optional'
+        next(v for v in p['variants'] if v['id']==p['positions'][3]['variantId'])['laterality']='unilateral'
+        self.prepare();self.ready();self.preview(p);self.store();self.activate()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="TEST-B"]').click();self.page.locator('[data-act=start]').click()
+        f=self.form('TEST-4');self.fill(f)
+        original=self.page.evaluate('async()=> (await import("./model/performance-editor.mjs")).state("TEST-4",document.querySelector(".performanceForm").dataset.session).performance')
+        self.confirm=False;f.locator('[data-rich-action=sides]').click();self.confirm=True
+        self.assertEqual(f.locator('[data-rich-action=side-mode]').count(),0)
+        f.locator('[data-rich-action=sides]').click()
+        for row in range(6):expect(f.locator(f'[data-row="{row}"][data-segment="0"][data-field=kg]')).to_have_value('20')
+        f.locator('[data-rich-action=add-segment][data-row="0"]').click()
+        expect(f.locator('[data-row="3"][data-segment="2"][data-field=kg]')).to_be_visible()
+        f.locator('[data-row="0"][data-segment="2"][data-field=kg]').fill('5')
+        f.locator('[data-row="0"][data-segment="2"][data-field=reps]').fill('15')
+        expect(f.locator('[data-row="3"][data-segment="2"][data-field=kg]')).to_have_value('5')
+        f.locator('[data-row="2"][data-field=kg]').fill('12')
+        expect(f.locator('[data-row="5"][data-field=kg]')).to_have_value('12')
+        expect(f.locator('[data-row="1"][data-field=kg]')).to_have_value('20')
+        f.locator('[data-rich-action=side-mode][data-row="0"]').click()
+        f.locator('[data-rich-action=remove-segment][data-row="0"][data-segment="2"]').click()
+        expect(f.locator('[data-row="3"][data-segment="2"][data-field=kg]')).to_have_value('5')
+        self.save(f);entry=self.state()['entries'][-1];rows=entry['performance']['rows']
+        self.assertEqual([len(r['segments']) for r in rows],[2,1,1,3,1,1])
+        for old,new in zip(original['rows'],rows[:3]):
+            self.assertEqual(old['id'],new['id']);self.assertEqual(old['setId'],new['setId'])
+            self.assertEqual([s['id'] for s in old['segments']],[s['id'] for s in new['segments']])
+        self.assertEqual(len({r['id'] for r in rows}),6)
+        self.assertEqual(len({s['id'] for r in rows for s in r['segments']}),9)
+        self.assertFalse(self.alerts,self.alerts)

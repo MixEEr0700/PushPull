@@ -94,3 +94,24 @@ test('source pair revision is additive and preserves legacy sessions and observe
   }
  }
 });
+
+test('repeated activation of already active V2 is a complete no-op, including rotation and activation log',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const data=JSON.parse(readFileSync(new URL('fixtures/v1.json',import.meta.url)));
+ data.trainingJournal=initialize('owner');activate(data,'2026-10-23T08:00:00Z');
+ data.trainingJournal.nextUnitId='PULL B';const before=structuredClone(data);
+ activate(data,'2026-10-23T09:00:00Z');assert.deepEqual(data,before);
+});
+
+test('side linking is recoverable editor state; old asymmetric results and drafts are never normalized',async()=>{
+ const editor=await import('../model/performance-editor.mjs');
+ const ex=views(buildPlan('owner'),PLAN_ID,'PULL A',{}).find(e=>e.id==='PULL-A-1');
+ editor.editor(ex,'test-side-state',null,null);
+ const fresh=editor.state(ex.id,'test-side-state');assert.equal(fresh.sidePairs.length,3);assert.ok(fresh.sidePairs.every(p=>p.linked));
+ fresh.sidePairs[1].linked=false;editor.restore(ex.id,'test-side-state',fresh);editor.editor(ex,'test-side-state',null,null);
+ assert.deepEqual(editor.state(ex.id,'test-side-state'),fresh,'separate mode persists even with equal or empty values');
+ const old=structuredClone(fresh);delete old.sidePairs;old.performance.rows[0].segments[0].kg='40';old.performance.rows[1].segments[0].kg='35';
+ editor.restore(ex.id,'test-side-state',old);editor.editor(ex,'test-side-state',null,null);
+ const recovered=editor.state(ex.id,'test-side-state');assert.equal(recovered.sidePairs[0].linked,false);assert.deepEqual(recovered.performance,old.performance);
+ editor.forget(ex.id,'test-side-state');
+});

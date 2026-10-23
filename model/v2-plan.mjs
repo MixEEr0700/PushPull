@@ -35,7 +35,9 @@ export function buildPlan(ownerId){
 }
 /** Explicit activation only. Existing snapshots and legacy exercise rows are untouched. */
 export function activate(data,at){
- const j=data.trainingJournal,plan=buildPlan(j.model.ownerId);
+ const j=data.trainingJournal;
+ if(j.activePlanVersionId===PLAN_ID)return;
+ const plan=buildPlan(j.model.ownerId);
  for(const key of ['exercises','variants','planVersions','positions','sets','drops','groups','coachInstructions']){
   for(const row of plan[key]){const old=j.model[key].find(x=>x.id===row.id);if(!old)j.model[key].push(structuredClone(row));else if(key!=='exercises')check(canonical(old)===canonical(row),'Plan version conflict: preserve existing version and assign a new ID');}
  }

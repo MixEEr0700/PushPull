@@ -223,6 +223,51 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
 
+    def test_issue29_update_recovers_old_asymmetric_draft_and_active_v2_without_reactivation(self):
+        source=self.path/'issue29-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','3c51bc9:'+name],cwd=ROOT))
+        old_release=self.path/'issue29-old';build(old_release,source)
+        current_release=self.controller['directory'];self.controller['directory']=old_release
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-preview-v2]').click()
+        with self.page.expect_download():self.page.locator('[data-activate-v2]').click()
+        expect(self.page.get_by_text('V2 aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
+        self.page.locator('[data-type="PULL A"]').click();self.page.locator('[data-act=start]').click();self.ready()
+        self.page.locator('[data-expand="PULL-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        form=self.page.locator('.performanceForm');form.locator('[data-rich-action=toggle]').click()
+        form.locator('[data-quick=kg]').fill('40');form.locator('[data-quick=reps]').fill('9')
+        for row in [0,2,4]:form.locator(f'[data-rich-action=copy][data-row="{row}"]').click()
+        form.locator('[data-row="1"][data-field=kg]').fill('35')
+        expect(form.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.snapshot()
+        old_draft=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return (await db.readDrafts())[0]}finally{db.close()}}')
+        self.assertNotIn('sidePairs',old_draft['value'])
+        self.controller['directory']=current_release;self.wait_update();self.reopen()
+        self.assertEqual(self.snapshot(),before)
+        self.context.set_offline(True)
+        self.page.locator('[data-draft-resume]').click();form=self.page.locator('.performanceForm')
+        expect(form.get_by_label('Ciężar (kg)',exact=True)).to_be_visible()
+        expect(form.locator('[data-rich-action=side-mode][data-row="0"]')).to_have_attribute('aria-pressed','true')
+        expect(form.locator('[data-row="0"][data-field=kg]')).to_have_value('40')
+        expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('35')
+        form.locator('[data-row="0"][data-field=kg]').fill('41')
+        expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('35')
+        expect(form.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        self.page.reload();self.ready();self.page.locator('[data-draft-resume]').click()
+        form=self.page.locator('.performanceForm');expect(form.locator('[data-row="0"][data-field=kg]')).to_have_value('41')
+        form.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        saved=self.snapshot()['data'];rows=saved['entries'][-1]['performance']['rows']
+        self.assertEqual([r['id'] for r in rows],[r['id'] for r in old_draft['value']['performance']['rows']])
+        self.assertEqual(saved['sessions'],before['data']['sessions'])
+        self.assertEqual(saved['trainingJournal']['sessionSnapshots'],before['data']['trainingJournal']['sessionSnapshots'])
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-preview-v2]').click()
+        expect(self.page.get_by_text('V2 jest aktywny',exact=True)).to_be_visible()
+        expect(self.page.locator('[data-activate-v2]')).to_have_count(0)
+        self.assertEqual(self.snapshot()['data'],saved)
+
     def test_issue21_plan_import_offline_after_real_main_update_retains_history_and_draft(self):
         # Upgrade the actual pre-import main release on one origin, no clearing data.
         source=self.path/'issue21-old-source'

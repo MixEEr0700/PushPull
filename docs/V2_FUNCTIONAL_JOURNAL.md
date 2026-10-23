@@ -1,5 +1,16 @@
 # Dziennik V2 — działający przepływ
 
+Aktualizacja Issue #29 (23.10.2026), na `main` po PR #24 (`3c51bc9`): poprawka istniejącego formularza, bez zmiany modelu wyników, danych planu, schematu IndexedDB, statystyk ani Matrix. Import V3+ i ręczne kopie Drive pozostają. Dalszy wspólny ekran planów/statystyki tygodniowe to osobne Issue #30.
+
+- **Ciężar (kg)** i powtórzenia uzupełniają główne segmenty obu stron. Edycja połączonej serii działa lustrzanie w obu kierunkach tylko w tej serii; dodatkowe segmenty dropsetu mają własne wartości i ID. Dodanie/usunięcie segmentu połączonej pary obejmuje obie strony.
+- **Razem L/P → Edytuj osobno** rozłącza jedną serię. Powrót **Połącz L → P** przy rozbieżnościach wymaga potwierdzenia zastąpienia prawej strony; inne serie i ich ID pozostają. Szybki globalny wpis również wymaga potwierdzenia zastąpienia ręcznych/osobnych wartości. Dotychczasowe przyciski świadomego kopiowania pozostają.
+- Historyczne różniące się L/P oraz stare szkice startują osobno, bez nadpisania. `sidePairs` to wyłącznie stan edytora w istniejącym lokalnym szkicu (`value`), nie nowy rekord wyniku ani snapshot. Odtwarza również świadome rozłączenie równych wartości. Starsze szkice bez tego pola są odczytywane na podstawie stabilnych powiązań serii i wartości; niejednoznaczne pary pozostają osobne. Zapisane wyniki nadal zawierają niezależne strony/segmenty; tonaż liczy dotychczasowy `flatten`, bez dodatkowego mnożnika.
+- Opcjonalne **Rozdziel L/P i skopiuj wartości** wymaga świadomego potwierdzenia. Zachowuje obecne wartości i ID pierwszej strony, tworząc osobne ID drugiej; nie przelicza kg i nie zmienia starych wyników przy otwarciu.
+- Dla już aktywnego V2 podgląd pokazuje **Podgląd aktywnego V2 / V2 jest aktywny**, bez ponownej aktywacji. Handler i funkcja aktywacji mają ochronę przed powtórzeniem: brak commitu, nowej kopii, zmiany rotacji i dopisania `activations`. Przy aktywnym V3 nie pokazujemy komunikatu o aktywnym V2.
+
+Testy i wyniki lokalne/GitHub Actions są w PR Issue #29: rzeczywiste formularze, korekta historii, tryb osobny po restarcie, opcjonalny drop/back-off, stara asymetryczna instalacja PWA i pełna regresja. Testy używają syntetycznych danych. Fizyczny Android i prawdziwe konto Google pozostają niewykonane. Poniżej zachowano wcześniejszy opis wdrożenia, z aktualnymi zasadami formularza.
+
+
 Podstawa: main po PR #9 (`71558b6`), projekt 34 pozycji i D1–D9.
 Właściciel rozstrzygnął O1–O3 w zleceniu „Dokończenie działającej aplikacji treningowej V2”, 22.10.2026. Historyczny audyt i projekt pozostają zapisem wcześniejszych ustaleń; poniższe decyzje zastępują ich nieaktualny status O1–O3.
 
@@ -8,8 +19,8 @@ Właściciel rozstrzygnął O1–O3 w zleceniu „Dokończenie działającej apl
 1. Dane → **Podgląd zatwierdzonego V2**. Podgląd nie zapisuje ani nie aktywuje planu.
 2. **Aktywuj V2 dla przyszłych treningów** → osobne potwierdzenie. Pobierana jest kopia dotychczasowych danych; istniejący mechanizm kroku C zabezpiecza przejście do modelu. Jeśli dziennik był już włączony, pobierana jest pełna kopia v3.
 3. Rozpoczęte sesje zachowują swój plan. Zakończ bieżącą sesję, wybierz jednostkę i rozpocznij następną, aby użyć V2.
-4. Rozwiń kartę → Zapisz wynik. Szybki ciężar i powtórzenia wypełniają główne segmenty. Ołówek rozwija indywidualne cele i wyniki. Szybki wpis po ręcznej korekcie wymaga potwierdzenia.
-5. Jednostronne: szybki wpis dotyczy lewej strony; kopiowanie L → P/P → L jest osobną świadomą operacją. Każdą stronę można następnie poprawić. Dropsety mają osobne pola segmentów i przyciski +/−. Nie narzucamy liczby segmentów.
+4. Rozwiń kartę → Zapisz wynik. **Ciężar (kg)** i powtórzenia wypełniają główne segmenty obu stron (gdy są L/P). Ołówek rozwija indywidualne cele i wyniki. Szybki wpis po ręcznej korekcie wymaga potwierdzenia.
+5. Jednostronne: szybki wpis obejmuje obie strony. Domyślnie równe L/P są połączone dla konkretnej serii; **Edytuj osobno** pozwala zapisać różne wartości, a istniejące asymetrie pozostają rozłączone. Kopiowanie L → P/P → L jest osobną świadomą operacją. Dropsety mają osobne pola segmentów i przyciski +/−. Nie narzucamy liczby segmentów.
 6. Narciarz i szrugsy: dwie rundy, dwa osobne formularze/zapisy w jednej karcie. Po zapisaniu pierwszego ćwiczenia ponownie otwórz „Zapisz wynik”, aby zapisać drugie. Robocze wartości drugiego formularza pozostają w pamięci do zapisu. Instrukcja: 15 s między ćwiczeniami; brak timera i wymyślonej przerwy po rundzie.
 7. Zakończ trening. Kalendarz → Otwórz → karta → Zapisz wynik pozwala poprawić serie bez nowej sesji. Eksport JSON zapisuje pełną kopię v3, odtwarzaną istniejącym importem.
 

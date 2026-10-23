@@ -49,7 +49,7 @@ class V2Training(BrowserHarness):
     def history_edit(self,sid,id):
         self.page.locator('[data-tab=calendar]').click()
         self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click()
-        self.page.locator(f'[data-expand="{id}"]').click()
+        if self.page.locator(f'[data-expand="{id}"]').get_attribute('aria-expanded')!='true':self.page.locator(f'[data-expand="{id}"]').click()
         self.page.locator('[data-panel=historicalResult]').click()
         form=self.page.locator('.performanceForm').first
         form.locator('[data-rich-action=toggle]').click()
@@ -112,10 +112,10 @@ class V2Training(BrowserHarness):
         self.assertEqual([len(r['segments']) for r in drop['performance']['rows']],[2,3,2])
         self.page.locator('[data-act=finish]').click()
         form=self.open_result('PULL A','PULL-A-1')
-        # Quick input fills left only; deliberate copy then asymmetric correction.
+        # Quick input fills both sides; asymmetric correction requires explicit separation.
         form.locator('[data-quick=kg]').fill('40');form.locator('[data-quick=reps]').fill('9')
-        expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('')
-        for row in [0,2,4]:form.locator(f'[data-rich-action=copy][data-row="{row}"]').click()
+        expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('40')
+        form.locator('[data-rich-action=side-mode][data-row="0"]').click()
         form.locator('[data-row="1"][data-field=kg]').fill('35')
         self.save_form(form)
         sides=self.state()['entries'][-1]
@@ -172,3 +172,53 @@ class V2Training(BrowserHarness):
         self.page.evaluate('()=>{IDBObjectStore.prototype.put=window.__put}')
         self.save_form(form)
         self.assertEqual(len(self.state()['entries']),len(before['entries'])+1)
+
+    def test_symmetric_sides_per_set_separation_draft_restart_rejoin_and_history(self):
+        self.activate();form=self.open_result('PULL A','PULL-A-1');before=self.state()
+        expect(form.get_by_label('Ciężar (kg)',exact=True)).to_be_visible()
+        expect(form).not_to_contain_text('Szybki ciężar')
+        form.locator('[data-quick=kg]').fill('40');form.locator('[data-quick=reps]').fill('9')
+        for row in range(6):
+            expect(form.locator(f'[data-row="{row}"][data-field=kg]')).to_have_value('40')
+            expect(form.locator(f'[data-row="{row}"][data-field=reps]')).to_have_value('9')
+        form.locator('[data-row="2"][data-field=kg]').fill('45')
+        expect(form.locator('[data-row="3"][data-field=kg]')).to_have_value('45')
+        form.locator('[data-row="3"][data-field=reps]').fill('10')
+        expect(form.locator('[data-row="2"][data-field=reps]')).to_have_value('10')
+        for row in [0,1,4,5]:expect(form.locator(f'[data-row="{row}"][data-field=kg]')).to_have_value('40')
+        form.locator('[data-rich-action=side-mode][data-row="2"]').click()
+        form.locator('[data-row="3"][data-field=kg]').fill('37')
+        expect(form.locator('[data-row="2"][data-field=kg]')).to_have_value('45')
+        # Explicit separation must survive even while both sides are still equal.
+        form.locator('[data-rich-action=side-mode][data-row="0"]').click()
+        self.confirm=False;form.locator('[data-quick=kg]').fill('99');self.confirm=True
+        expect(form.locator('[data-row="3"][data-field=kg]')).to_have_value('37')
+        expect(form.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        draft=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return (await db.readDrafts())[0]}finally{db.close()}}')
+        self.assertEqual(self.state(),before)
+        self.page.reload();self.ready();self.page.locator('[data-draft-resume]').click();form=self.page.locator('.performanceForm')
+        expect(form.locator('[data-rich-action=side-mode][data-row="0"]')).to_have_attribute('aria-pressed','true')
+        form.locator('[data-row="1"][data-field=kg]').fill('38')
+        expect(form.locator('[data-row="0"][data-field=kg]')).to_have_value('40')
+        self.confirm=False;form.locator('[data-rich-action=side-mode][data-row="0"]').click()
+        expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('38')
+        self.confirm=True;form.locator('[data-rich-action=side-mode][data-row="0"]').click()
+        expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('40')
+        form.locator('[data-row="5"][data-field=kg]').fill('41')
+        expect(form.locator('[data-row="4"][data-field=kg]')).to_have_value('41')
+        self.save_form(form);saved=self.state();sid=saved['activeId'];entry=saved['entries'][-1]
+        self.assertEqual([r['id'] for r in entry['performance']['rows']],[r['id'] for r in draft['value']['performance']['rows']])
+        form=self.history_edit(sid,'PULL-A-1')
+        expect(form.locator('[data-rich-action=side-mode][data-row="2"]')).to_have_attribute('aria-pressed','true')
+        expect(form.locator('[data-row="2"][data-field=kg]')).to_have_value('45')
+        expect(form.locator('[data-row="3"][data-field=kg]')).to_have_value('37')
+        form.locator('[data-row="3"][data-field=reps]').fill('7')
+        expect(form.locator('[data-row="2"][data-field=reps]')).to_have_value('10')
+        self.save_form(form);corrected=self.state()['entries'][-1]
+        self.assertEqual(corrected['id'],entry['id'])
+        self.assertEqual([r['id'] for r in corrected['performance']['rows']],[r['id'] for r in entry['performance']['rows']])
+        self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
+        self.assertEqual(sum(float(s['kg'])*int(s['reps']) for s in corrected['series']),2167)
+        self.page.locator('[data-panel=stats]').click()
+        self.assertIn('2167',self.page.locator('.stat-tile').first.inner_text().replace('\xa0','').replace(' ',''))
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'));self.assertFalse(self.alerts,self.alerts)
