@@ -252,6 +252,30 @@ class PWADeployment(unittest.TestCase):
         self.reopen();expect(self.page.locator('[data-pwa-notice]')).to_be_hidden()
         self.assertEqual(self.notification_state(),before);self.assertEqual(self.notification_state(device),other_before)
 
+    def test_issue48_main_update_keeps_legacy_data_draft_and_advanced_options_closed(self):
+        source=self.path/'advanced-old-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','af79976:'+name],cwd=ROOT))
+        old_release=self.path/'advanced-old';build(old_release,source)
+        current=self.controller['directory'];self.controller['directory']=old_release
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-main=kg]').fill('81.25');self.page.locator('[data-main=reps]').fill('7')
+        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.notification_state()
+        self.controller['directory']=current;self.wait_update();self.reopen();self.context.set_offline(True)
+        self.assertEqual(self.notification_state(),before)
+        self.page.locator('[data-tab=settings]').click();section=self.page.locator('[data-journal-advanced]')
+        expect(section.locator('summary')).to_have_text('Opcje zaawansowane')
+        expect(section).not_to_have_attribute('open','');expect(section.locator('[data-enable-journal]')).to_be_hidden()
+        section.locator('summary').click();expect(section.locator('[data-enable-journal]')).to_be_visible()
+        self.assertEqual(self.notification_state(),before)
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-draft-resume]').click()
+        expect(self.page.locator('[data-main=kg]')).to_have_value('81.25')
+        expect(self.page.locator('[data-main=reps]')).to_have_value('7')
+
     def test_manifest_png_safe_zone_and_desktop_installability(self):
         self.context=self.pw.chromium.launch_persistent_context(self.path/'profile',executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
         self.addCleanup(self.context.close)
