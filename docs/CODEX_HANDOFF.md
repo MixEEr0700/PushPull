@@ -1,3 +1,5 @@
+Issue #45: [trzy kroki przywracania Drive](DRIVE_RESTORE_UX_ISSUE_45.md), kompaktowy podgląd i widoczne akcje; mechanizm bezpieczeństwa bez zmian.
+
 Aktualne Issue #40: [pełne przywracanie kopii Drive/JSON](BACKUP_RESTORE_ISSUE_40.md). Cztery ręczne operacje, wspólny podgląd i potwierdzenie zastąpienia; zachowane preimage i lokalne szkice, bez zmiany formatu v3/synchronizacji.
 
 Ponownie otwarte Issue #34: [ciągłość historii i statystyk po powrocie do planu](PLAN_CONTINUITY_ISSUE_34.md). Gotowe, zachowane definicje bez reimportu; bez fikcyjnej V1 i resetu danych. Istniejące wykresy zachowują rzeczywistą przerwę między okresami.
