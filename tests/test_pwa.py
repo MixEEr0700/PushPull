@@ -23,6 +23,13 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
 from build_release import ASSETS, FILES, build, generate
 from serve_test import ReleaseHandler, make_server, verify_release
+# Historical app bytes stay at their original ref. The current release builder
+# also precaches the newly introduced, unused-by-old-app v4 support modules.
+V4_ASSETS={'model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs'}
+def historical_asset(ref,name):
+    if name in V4_ASSETS:return (ROOT/name).read_bytes()
+    return subprocess.check_output(['git','show',ref+':'+name],cwd=ROOT)
+
 FIXTURE=json.loads((ROOT/'tests/fixtures/v1.json').read_text())
 RAW=' '+json.dumps(FIXTURE,ensure_ascii=False)+'\n'
 KEY='pushpull_skeleton_v1'
@@ -173,7 +180,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'notice-main-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','23e1cab:'+name],cwd=ROOT))
+            dest.write_bytes(historical_asset('23e1cab',name))
         old_release=self.path/'notice-main';build(old_release,source)
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -256,7 +263,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'advanced-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','af79976:'+name],cwd=ROOT))
+            dest.write_bytes(historical_asset('af79976',name))
         old_release=self.path/'advanced-old';build(old_release,source)
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -340,7 +347,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'restore-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','8d327a7:'+name],cwd=ROOT))
+            dest.write_bytes(historical_asset('8d327a7',name))
         old_release=self.path/'restore-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -379,7 +386,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'return-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','3a92fbf:'+name],cwd=ROOT))
+            dest.write_bytes(historical_asset('3a92fbf',name))
         old_release=self.path/'return-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.page.clock.install(time=datetime(2026,2,1,10,tzinfo=timezone.utc))
@@ -471,7 +478,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue36-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','fd708b0:'+name],cwd=ROOT))
+            dest.write_bytes(historical_asset('fd708b0',name))
         old_release=self.path/'issue36-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.page.clock.install(time=datetime(2026,10,23,10,tzinfo=timezone.utc))
@@ -547,7 +554,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue34-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','c40e173:'+name],cwd=ROOT))
+            dest.write_bytes(historical_asset('c40e173',name))
         old_release=self.path/'issue34-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.page.clock.install(time=datetime(2026,10,21,10,tzinfo=timezone.utc))
@@ -624,7 +631,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue32-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','084f470:'+name],cwd=ROOT))
+            dest.write_bytes(historical_asset('084f470',name))
         old_release=self.path/'issue32-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -672,7 +679,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue30-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-overview.mjs' else subprocess.check_output(['git','show','133bbd7:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-overview.mjs' else historical_asset('133bbd7',name))
         old_release=self.path/'issue30-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -713,7 +720,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue29-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-overview.mjs' else subprocess.check_output(['git','show','3c51bc9:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-overview.mjs' else historical_asset('3c51bc9',name))
         old_release=self.path/'issue29-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -759,7 +766,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue21-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/plan-overview.mjs'} else subprocess.check_output(['git','show','ef0dec6:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/plan-overview.mjs'} else historical_asset('ef0dec6',name))
         old=self.path/'issue21-old';build(old,source);self.controller['directory']=old
         self.seed();self.page.goto(self.url);self.ready();before=self.snapshot()
         self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
@@ -798,7 +805,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue26-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/plan-overview.mjs'} else subprocess.check_output(['git','show','e93a4a5:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/plan-overview.mjs'} else historical_asset('e93a4a5',name))
         old_release=self.path/'issue26-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         mock=MockGoogle();mock.install(self.context)
@@ -851,7 +858,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue14-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','cf9b765:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else historical_asset('cf9b765',name))
         old_release=self.path/'issue14-old';build(old_release,source)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -933,7 +940,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue17-old-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else subprocess.check_output(['git','show','16e131a:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else historical_asset('16e131a',name))
         old_release=self.path/'issue17-old';build(old_release,source)
         current_release=self.controller['directory']
         def check_cards():
