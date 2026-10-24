@@ -83,6 +83,36 @@ class ManualDriveFlow(BrowserHarness):
         self.page.on('pageerror',lambda e:self.errors.append(str(e)))
         self.page.goto(self.url);self.ready()
 
+    def test_issue45_guided_restore_actions_fit_mobile_and_choice_never_writes(self):
+        mock=MockGoogle();mock.install(self.context);self.prepare();self.ready();self.configure();self.upload()
+        before=self.state();drafts=self.drafts()
+        for width,height in [(390,844),(360,640),(1280,800)]:
+            self.page.set_viewport_size({'width':width,'height':height})
+            self.page.get_by_role('button',name='Przywróć z Google Drive',exact=True).click()
+            choice=self.page.locator('[data-drive-action=preview]')
+            expect(choice).to_have_text('Wybierz tę kopię',timeout=60000)
+            expect(self.page.locator('[data-restore-confirm]')).to_have_count(0)
+            # The next action is on screen without hunting below another form.
+            expect(choice).to_be_in_viewport(ratio=1)
+            self.page.locator('#driveCopy').select_option(list(mock.files)[0])
+            self.assertEqual(self.state(),before)
+            choice.click();preview=self.page.locator('[data-restore-preview]')
+            expect(preview).to_be_visible(timeout=60000)
+            expect(preview).to_contain_text('2. Podgląd przed przywróceniem')
+            expect(preview).to_contain_text('3. Potwierdź przywrócenie')
+            expect(preview).to_contain_text('ZASTĄPI lokalną bazę — nie scala historii')
+            expect(preview.locator('details')).not_to_have_attribute('open','')
+            confirm=self.page.get_by_role('button',name='Przywróć wybraną kopię',exact=True)
+            expect(confirm).to_be_in_viewport(ratio=1)
+            expect(preview.get_by_role('button',name='Anuluj',exact=True)).to_be_in_viewport(ratio=1)
+            self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+            self.assertEqual(self.state(),before);self.assertEqual(self.drafts(),drafts)
+            self.confirm=False;confirm_restore(self.page)
+            self.assertEqual(self.state(),before)
+            preview.get_by_role('button',name='Anuluj',exact=True).click()
+            expect(self.page.locator('[data-restore-confirm]')).to_have_count(0)
+        self.assertEqual(mock.posts,1);self.assertFalse(self.alerts,self.alerts)
+
     def test_manual_backup_only_local_ab_save_drafts_offline_restart_and_full_download(self):
         self.context.close();self.context=self.new_context(service_workers='allow')
         self.page=self.context.new_page();self.page.on('dialog',self.dialog)

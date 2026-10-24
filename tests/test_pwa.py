@@ -173,7 +173,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'notice-main-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','f3b403b:'+name],cwd=ROOT))
+            dest.write_bytes(subprocess.check_output(['git','show','23e1cab:'+name],cwd=ROOT))
         old_release=self.path/'notice-main';build(old_release,source)
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()

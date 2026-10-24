@@ -1,6 +1,6 @@
 # Issue #44 — informacja o wersji i gotowej aktualizacji
 
-Baza: `main` po PR #42 (`f3b403b`). Osobny Etap 2, rozpoczęty po pełnej lokalnej weryfikacji Etapu 1 / PR #46; jego zmian nie powielamy w tym PR.
+Baza po synchronizacji: `main` po scaleniu PR #46 (`23e1cab`). Zachowano trzyetapowe przywracanie z Issue #45; wygenerowany worker obejmuje teraz również komunikat aktualizacji, identyfikator wydania i ręczne sprawdzanie z Issue #44. Logika Drive/JSON, IndexedDB oraz dane treningowe pozostają bez zmian.
 
 ## Obsługa
 
