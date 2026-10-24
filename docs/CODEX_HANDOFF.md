@@ -1,3 +1,5 @@
+Issue #56 — izolowany dekoder v4, bez zapisu/migracji/integracji: [etap A i kontrakt](BACKUP_V4_STAGE_A.md).
+
 Issue #54 — raport do decyzji (bez migracji/kodu runtime): [rozmiar kopii i archiwa](BACKUP_SIZE_ISSUE_54.md).
 
 Issue #52: [diagnostyka pamięci i poprawka końcowego porównania Drive](DRIVE_MEMORY_ISSUE_52.md). Odtworzono awarię renderera po GET dużej kopii; usunięto zbędne ponowne serializacje bez wyłączania hashy/walidacji. Archiwa i format bez zmian; przyczyna konkretnej awarii fizycznego Androida nadal wymaga odbioru.
