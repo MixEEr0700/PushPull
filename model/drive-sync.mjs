@@ -75,7 +75,9 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
    const file=await transport.create(JSON.stringify(node),{...properties(node),mode:'manual',device:state.deviceId});
    if(!file?.id)throw Error('Google nie potwierdził pliku. Kopia mogła powstać; możesz zapisać kolejną.');
    const verified=await readNode(transport,{...node,fileId:file.id},inspect);
-   if(!same(node,verified))throw Error('Google zwrócił inną zawartość kopii. Nie potwierdzono zapisu.');
+   // readNode already checks the whole returned body against node.digest.
+   // Compare exact text without allocating two more escaped copies of a large backup.
+   if(node.backup!==verified.backup||node.digest!==verified.digest)throw Error('Google zwrócił inną zawartość kopii. Nie potwierdzono zapisu.');
    const summary=backupSummary(current,{createdAt:node.createdAt});
    notice='Kopia zapisana i zweryfikowana na Google Drive. '+new Date(node.createdAt).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'})+' · Sesje: '+summary.sessions+' · Wyniki: '+summary.results+' · Kompletne wersje planów: '+summary.completePlans+'. Szkice pozostają lokalnie.'+(database.revision!==revision?' W międzyczasie zmieniono dane lokalne — zapisz kolejną kopię.':'');
    return {fileId:file.id,revision,summary};
