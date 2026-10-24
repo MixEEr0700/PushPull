@@ -347,6 +347,16 @@ const PushPullDB = (() => {
       },
       // Drafts live in the existing meta store, outside source/model/statistics.
       // They remain writable even when a stale official-history handle is blocked.
+      async readDraftObservation(){
+        if(!db)throw Error('IndexedDB niedostępne.');
+        return transaction(db,'readonly',async tx=>{
+          const store=tx.objectStore('meta');
+          const [state,rows]=await Promise.all([request(store.get('state')),request(store.getAll(IDBKeyRange.bound('workout-draft:','workout-draft;',false,true),1025))]);
+          if(!Number.isSafeInteger(state?.revision))throw Error('Nie odczytano rewizji historii.');
+          if(rows.length>1024)throw Object.assign(Error('Limit odczytu szkiców'),{code:'draft-read-limit'});
+          return {historyRevision:state.revision,sources:rows.filter(r=>typeof r?.key==='string'&&r.key.startsWith('workout-draft:')).map(value=>({source:'idb-meta',storageKey:value.key,value}))};
+        });
+      },
       async readDrafts(){
         if(!db)throw Error('IndexedDB niedostępne.');
         return transaction(db,'readonly',async tx=>(await request(tx.objectStore('meta').getAll())).filter(r=>r.key.startsWith('workout-draft:')));
