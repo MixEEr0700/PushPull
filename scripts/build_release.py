@@ -8,7 +8,7 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 ASSETS=(
     'index.html','style.css','app.js','storage.js','indexeddb.js',
-    'model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs',
+    'model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs',
     'model/plan-overview.mjs','model/plan-import.mjs','model/drive-sync.mjs','model/google-drive.mjs','model/training-model.mjs','model/backup.mjs','model/backup-json.mjs',
     'model/legacy-backup.mjs','model/legacy-model.mjs','model/v2-plan-data.mjs','model/v2-plan.mjs','model/performance.mjs','model/performance-editor.mjs','model/workout-drafts.mjs','model/journal.mjs',
     'manifest.webmanifest','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png',

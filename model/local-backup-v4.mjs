@@ -17,3 +17,12 @@ export async function previewLocalV4(file,{signal}={}){
  // Return only a small summary: no raw, staging or restore capability retained by UI.
  return {summary:backupSummary(stage.live.data,{createdAt:stage.createdAt}),archives:stage.archives.length};
 }
+/** Opt-in v5 export; existing v4 and restore paths remain separate. */
+export async function exportLocalV5(database,options){
+ const revision=database.revision,snapshot=database.export();
+ if(!snapshot.data.trainingJournal&&database.model)throw Error('v5: starszy model bridge wymaga osobnego adaptera. Nie pominięto danych; zachowaj dotychczasową kopię v3/v4.');
+ const {exportBackupV5}=await import('./backup-v5.mjs');
+ const result=await exportBackupV5(snapshot,options);
+ if(database.revision!==revision)throw Error('Baza zmieniła się podczas eksportu. Pobierz kopię ponownie.');
+ return result;
+}

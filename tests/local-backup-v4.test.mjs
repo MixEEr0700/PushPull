@@ -31,3 +31,10 @@ test('revision change during asynchronous export refuses download result',async(
  const pending=exportLocalV4(db,{createdAt:AT});db.revision++;
  await assert.rejects(pending,/zmieniła/);
 });
+test('local v5 refuses unrepresented legacy model metadata and preserves native snapshot',async()=>{
+ const {exportLocalV5}=await import('../model/local-backup-v4.mjs');
+ await assert.rejects(exportLocalV5({export:()=>source,model:{}},{createdAt:AT}),/bridge/);
+ const result=await exportLocalV5({revision:1,export:()=>source,model:null},{createdAt:AT});
+ const stage=await(await import('../model/backup-v5.mjs')).decodeBackup(result.text);
+ assert.deepEqual(stage.live.data,source.data);assert.deepEqual(stage.archives,source.archives);
+});

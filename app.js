@@ -196,12 +196,12 @@ let localV4Busy=false,localV4Error='',localV4Preview=null,localV4Metrics=null;
 function localV4Panel(){
  const p=localV4Preview,m=localV4Metrics;
  const describe=(s,title)=>`<div><strong>${title}</strong><p class="hint">Treningi: ${s.sessions} · Wyniki: ${s.results}<br>Plany: ${s.plans.length} · Snapshoty: ${s.snapshots}<br>Aktywny plan: ${esc(s.activePlan)}<br>Wersje: ${s.plans.map(p=>esc(p.label)).join(', ')||'szkielet źródłowy'}</p></div>`;
- return `<div class="stack"><button class="btn" data-export-v4 ${localV4Busy?'disabled':''}>Pobierz kopię v4 (testowo)</button>
+ return `<div class="stack"><button class="btn" data-export-v4 ${localV4Busy?'disabled':''}>Pobierz kopię v4 (testowo)</button><button class="btn" data-export-v5 ${localV4Busy?'disabled':''}>Pobierz kopię v5 (testowo)</button><p class="hint">v5 dzieli duże archiwa na fragmenty. Przywracanie v5 nie jest dostępne. Live i całkowity rozmiar nadal podlegają limitom.</p>
  <p class="hint">v4: skompresowana kopia danych i archiwów. Przywracanie v4 nie jest jeszcze dostępne. Szkice pozostają lokalnie; możesz pobrać je osobno.</p>
  <label>Podgląd pliku v4 (bez przywracania)<input type="file" data-preview-v4 accept="application/json,.json" ${localV4Busy?'disabled':''}></label>
  ${localV4Busy?'<p class="hint" role="status" data-v4-busy>Trwa weryfikacja kopii v4…</p>':''}
  ${localV4Error?`<p class="hint warning" role="alert" data-v4-error>${esc(localV4Error)}</p>`:''}
- ${m?`<p class="hint" role="status" data-v4-metrics>${m.exported?'Kopia v4 zweryfikowana; zlecono pobranie pliku.':'Podgląd v4 zweryfikowany.'} Czas: ${m.ms} ms · Plik: ${m.bytes} B · Archiwa: ${m.archives}</p>`:''}
+ ${m?`<p class="hint" role="status" data-v4-metrics>${m.exported?'Kopia v'+m.version+' zweryfikowana; zlecono pobranie pliku.':'Podgląd v4 zweryfikowany.'} Czas: ${m.ms} ms · Plik: ${m.bytes} B · Archiwa: ${m.archives}</p>`:''}
  ${p?`<section class="stack" data-v4-preview tabindex="-1"><strong>Kopia v4 — tylko podgląd</strong>
  <div class="grid2">${p.current?describe(p.current,'Na tym urządzeniu'):'<p>Baza wymaga odzyskania.</p>'}${describe(p.summary,'W wybranej kopii')}</div>
  <p class="hint">Archiwa: ${p.archives} · Data kopii: ${esc(p.summary.createdAt||'nieustalona')}. Data kopii nie gwarantuje pełniejszej historii.</p>
@@ -312,9 +312,10 @@ async function importFullBackup(rawText,expectedRevision,expectedLegacyRaw){
 // Separate from restore candidates and the production Google Drive flow.
 on('click',async e=>{
  if(e.target.closest('[data-v4-close]')){localV4Preview=null;localV4Metrics=null;render();return;}
- if(!e.target.closest('[data-export-v4]')||localV4Busy)return;
+ const version=e.target.closest('[data-export-v5]')?5:4;
+ if(!e.target.closest('[data-export-v4],[data-export-v5]')||localV4Busy)return;
  localV4Busy=true;localV4Error='';localV4Metrics=null;const started=performance.now();render();
- try{const result=await localV4.exportLocalV4(database,{createdAt:new Date().toISOString()});downloadRaw(result.text,'pushpull-backup-v4-'+today()+'.json');localV4Metrics={exported:true,ms:Math.round(performance.now()-started),bytes:result.diagnostics.fileBytes,archives:result.diagnostics.archiveRecords};toast('Kopia v4 zweryfikowana i pobrana');}
+ try{const result=await localV4[version===5?'exportLocalV5':'exportLocalV4'](database,{createdAt:new Date().toISOString()});downloadRaw(result.text,'pushpull-backup-v'+version+'-'+today()+'.json');localV4Metrics={version,exported:true,ms:Math.round(performance.now()-started),bytes:result.diagnostics.fileBytes,archives:result.diagnostics.archiveRecords};toast('Kopia v'+version+' zweryfikowana i pobrana');}
  catch(error){localV4Error=error.message;}
  finally{localV4Busy=false;render();}
 });
