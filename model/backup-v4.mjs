@@ -139,3 +139,6 @@ export async function decodeBackup(text,{limits:overrides={},signal}={}){
  aborted(signal);
  return freeze({formatVersion:4,createdAt:d.createdAt,metadata:d.metadata,live,archives});
 }
+
+// Shared bounded parsing/policy for the separately versioned container.
+export {json as boundedBackupJson,limitsFor as backupLimits};
