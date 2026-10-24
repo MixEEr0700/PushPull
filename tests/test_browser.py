@@ -29,7 +29,7 @@ class QuietServer(http.server.SimpleHTTPRequestHandler):
         prefix = '/upgrade/' if self.path.startswith('/upgrade/') else '/legacy/' if self.path.startswith('/legacy/') else None
         if prefix:
             asset=self.path[len(prefix):].split('?')[0] or 'index.html'
-            allowed={'index.html','app.js','storage.js','indexeddb.js','style.css','sw.js','manifest.webmanifest','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','model/training-model.mjs','model/backup.mjs','model/backup-json.mjs','model/legacy-backup.mjs','model/legacy-model.mjs','model/v2-plan-data.mjs','model/v2-plan.mjs','model/performance.mjs','model/performance-editor.mjs','model/workout-drafts.mjs','model/journal.mjs','model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'}
+            allowed={'index.html','app.js','storage.js','indexeddb.js','style.css','sw.js','manifest.webmanifest','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs','model/training-model.mjs','model/backup.mjs','model/backup-json.mjs','model/legacy-backup.mjs','model/legacy-model.mjs','model/v2-plan-data.mjs','model/v2-plan.mjs','model/performance.mjs','model/performance-editor.mjs','model/workout-drafts.mjs','model/journal.mjs','model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'}
             if asset not in allowed:
                 self.send_error(404);return
             try:
