@@ -35,13 +35,13 @@ Klasyfikacja nie jest sterowaniem przywracaniem. `candidate` oznacza jedynie pop
 
 Cały v6 ma SHA-256 kanonicznego dokumentu bez własnego digest, z kompletnym history, capture i drafts.data. History zachowuje własne SHA manifestów i blobów. Draft descriptor ma SHA bajtów zapisanych oraz rozwiniętych, sprawdzane niezależnie; gzip jest odczytywany strumieniem z kontrolą faktycznej liczby bajtów przed dołączeniem, a czytnik sprawdza również CRC, fatalny UTF-8, kanoniczny token/base64 oraz bounded JSON z wykrywaniem duplicate keys. SHA to integralność, nie podpis tożsamości ani szyfrowanie.
 
-Limity z raportu zachowano: cały plik 32 MiB; draft stored/decoded po 4 MiB; pojedyncze źródło po zakodowaniu JSON <=1 MiB; <=1024 źródła i <=256 tożsamości (niepoprawne dowody bez ID także zużywają budżet). Parent ID także liczy się do budżetu tożsamości. Wspólny limit 128 MiB obejmuje live i rozwinięte tokeny logicznych fragmentów historii liczone z powtórzeniami oraz cały draft token. Jest sprawdzany przed dekompresją historii. Istniejący reader v5 dodatkowo weryfikuje swoje własne limity, referencje i sumy. Opcje mogą tylko obniżać limity, nie wyłączać/podnosić.
+Limity z raportu zachowano: cały plik 32 MiB; draft stored/decoded po 4 MiB; pojedyncze źródło po zakodowaniu JSON <=1 MiB; <=1024 źródła i <=256 tożsamości (niepoprawne dowody bez ID także zużywają budżet). Parent ID także liczy się do budżetu tożsamości. Niespójny klucz i zadeklarowane ID liczą się oddzielnie: kwarantanna nie pozwala ukryć wielu kluczy za jednym ID. Wspólny limit 128 MiB obejmuje live i rozwinięte tokeny logicznych fragmentów historii liczone z powtórzeniami oraz cały draft token. Jest sprawdzany przed dekompresją historii. Istniejący reader v5 dodatkowo weryfikuje swoje własne limity, referencje i sumy. Opcje mogą tylko obniżać limity, nie wyłączać/podnosić.
 
 Writer liczy bajty JSON/tokena przed budowaniem pełnych escapowanych stringów i klonowaniem wejść. Mutowalne wejścia przechwytywane przed pierwszym await. Po kodowaniu zawsze odczytuje całość własnym dekoderem i porównuje historyDocument, capture i WSZYSTKIE evidence, zanim zwróci wynik. Błąd/abort nie zwraca częściowego staging ani kopii. Błędy czytnika nie ujawniają urywków wejścia lub ID.
 
 ## Wykonane nowe testy
 
-11 testów Node:
+12 testów Node:
 
 - Pełne źródła IDB/LS/pamięci: konflikty, duplikaty, różne sequence i tokeny, parent/binding, dodatkowe metadata, nieukończone legacy/V2, whitespace/Unicode/NUL/samotny surogat; pełne porównanie bez zwycięzcy.
 - Natywne plany V2/TEST V3, aktywna wersja, sesje/wyniki/snapshoty i raw archiwum 65 MiB plus null — historia i dowody identyczne po roundtrip.

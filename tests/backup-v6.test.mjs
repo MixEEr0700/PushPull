@@ -111,3 +111,8 @@ test('malformed legacy/V2 rows remain exact quarantined evidence rather than abo
   assert.deepEqual(stage.draftEvidence,e);assert.equal(stage.classification[0].status,'quarantine');
  }
 });
+
+test('quarantined sources cannot bypass identity budget by claiming one ID under different keys',async()=>{
+ const sources=Array.from({length:256},(_,i)=>({source:'idb-meta',storageKey:'workout-draft:other-'+i,value:a}));
+ await assert.rejects(exportBackupV6({...input,evidence:{...evidence,sources}}),/identity limit/);
+});

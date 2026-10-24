@@ -40,6 +40,10 @@ function evidenceValid(e,l){
   }else check(false,'v6: unknown source');
   // Retain every source, including malformed evidence. No winner by date/sequence.
   identities.add(text(r?.id)?r.id:'opaque:'+s.source+':'+(s.storageKey??i));
+  if(text(r?.id)){
+   const matches=s.source==='idb-meta'?s.storageKey==='workout-draft:'+r.id:s.source==='local-buffer'?(s.storageKey==='pushpull_workout_draft_v1:'+r.id||s.storageKey==='pushpull_workout_draft_v1:'+r.id+':'+r.token):r.key==='workout-draft:'+r.id;
+   if(!matches)identities.add('unbound:'+s.source+':'+(s.storageKey??i));
+  }
   if(text(s.parent?.id))identities.add(s.parent.id);
   check(identities.size<=l.identities,'v6: identity limit');
   classification.push({status:valid?'candidate':'quarantine'});
