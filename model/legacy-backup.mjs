@@ -78,6 +78,8 @@ function validateV2(x) {
 }
 export function readLegacyBackup(raw) {
   const original=parseJson(raw);portable(original);
+  check(original?.format!=='pushpull-backup' || [1,2].includes(original.version),
+    'Nieobsługiwana wersja kopii. Użyj aplikacji obsługującej ten format.');
   if (original?.format==='pushpull-backup' && original.version===2) validateV2(original);
   else validateV1(original);
   return freeze({formatVersion:original.version,semantics:'legacy-unknown',raw,original,
