@@ -67,6 +67,11 @@ function equal(a,b){
  if(!a||!b||typeof a!=='object'||typeof b!=='object'||Array.isArray(a)!==Array.isArray(b))return false;
  const keys=Object.keys(a);return keys.length===Object.keys(b).length&&keys.every(k=>Object.hasOwn(b,k)&&equal(a[k],b[k]));
 }
+function diagnostic(error,stage,limit,codeUnits){
+ if(!/size limit/.test(error.message))return error;
+ error.message+=` [stage=${stage}; limitBytes=${limit}${codeUnits===undefined?'':`; codeUnits=${codeUnits}`}]`;
+ return error;
+}
 function detach(source,limits){
  check(source?.format==='pushpull-backup'&&source.version===2&&(source.archives===undefined||Array.isArray(source.archives)),'v4 export: expected complete v2 snapshot');
  check((source.archives??[]).length<=limits.archives,'v4 export: archive count limit');portable(source);
@@ -77,7 +82,7 @@ function detach(source,limits){
  });
  // Snapshot every mutable field before the first await, retain immutable raw
  // strings directly instead of structured-cloning the entire rescue archive.
- const liveSource={...source,archives:[]};jsonBytes(liveSource,limits.decodedBlobBytes);
+ const liveSource={...source,archives:[]};try{jsonBytes(liveSource,limits.decodedBlobBytes);}catch(error){throw diagnostic(error,'live-preflight',limits.decodedBlobBytes);}
  return {source:structuredClone(liveSource),archives:rows};
 }
 /** Input: complete detached v2 snapshot OR existing v1/v2/v3/v4 JSON text.
@@ -108,7 +113,7 @@ export async function exportBackupV4(input,{createdAt,metadata,limits:overrides=
  let fileMinimum=jsonBytes(metadata,limits.fileBytes);
  for(const {raw,...info} of archives){fileMinimum+=jsonBytes(info,limits.fileBytes);check(fileMinimum<=limits.fileBytes,'v4 export: file size limit');}
  if(source){
-  const raw=serialize(source,limits.decodedBlobBytes);
+  let raw;try{raw=serialize(source,limits.decodedBlobBytes);}catch(error){throw diagnostic(error,'live-document',limits.decodedBlobBytes);}
   if(source.data?.trainingJournal||original){
    const ownerId=original?.payload.model.ownerId??source.data.trainingJournal.model.ownerId;
    expected=await createLegacyModel(raw,{ownerId,createdAt:original?.createdAt??createdAt});
@@ -116,16 +121,17 @@ export async function exportBackupV4(input,{createdAt,metadata,limits:overrides=
     const comparable=d=>({...d,payload:{...d.payload,legacySources:[]},integrity:{...d.integrity,digest:''}});
     check(equal(comparable(original),comparable(expected)),'v4 export: model changed while separating archives');
    }
-   live=serialize(expected,limits.decodedBlobBytes);
+   try{live=serialize(expected,limits.decodedBlobBytes);}catch(error){throw diagnostic(error,'live-model',limits.decodedBlobBytes);}
   }else{expected=source;live=raw;}
  }
  check(archives.length<=limits.archives,'v4 export: archive count limit');
  const byText=new Map(),blobs=[],rows=[],archiveBlobs=new Set();let decodedTotal=0;
  let rawUnits=0,largest=0,nulls=0,duplicates=0;
- async function add(value){
+ async function add(value,stage='live-token'){
   aborted(signal);if(byText.has(value))return byText.get(value);
   check(blobs.length<limits.blobs,'v4 export: blob count limit');
-  const size=stringBytes(value,limits.decodedBlobBytes);decodedTotal+=size;
+  let size;try{size=stringBytes(value,limits.decodedBlobBytes);}catch(error){throw diagnostic(error,stage,limits.decodedBlobBytes,value.length);}
+  decodedTotal+=size;
   check(decodedTotal<=limits.totalDecodedBytes,'v4 export: aggregate size limit');
   const bytes=encodeString(value,size),decodedSha256=await sha(bytes),stored=await compress(bytes,limits.storedBlobBytes,signal);
   fileMinimum+=4*Math.ceil(stored.length/3);check(fileMinimum<=limits.fileBytes,'v4 export: file size limit');
@@ -140,7 +146,7 @@ export async function exportBackupV4(input,{createdAt,metadata,limits:overrides=
   if(raw===null)nulls++;
   else{
    check(typeof raw==='string','v4 export: archive raw');rawUnits+=raw.length;largest=Math.max(largest,raw.length);
-   blobId=await add(raw);if(archiveBlobs.has(blobId))duplicates++;archiveBlobs.add(blobId);
+   blobId=await add(raw,info.kind==='before-import'?'preimage-token':'opaque-archive-token');if(archiveBlobs.has(blobId))duplicates++;archiveBlobs.add(blobId);
   }
   rows.push({metadata:info,blobId});
  }
