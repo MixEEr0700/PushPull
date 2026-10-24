@@ -105,3 +105,20 @@ test('B1 diagnostics contain only counts and sizes, never archive IDs, raw, name
  assert.equal(text.includes('SECRET'),false);assert.ok(Object.values(diagnostics).every(Number.isSafeInteger));
  assert.equal(diagnostics.archiveRawCodeUnits,14);assert.equal(diagnostics.largestArchiveCodeUnits,14);
 });
+
+test('B1 rejects impossible file sizes before retaining base64 or cloning oversized archive metadata',async()=>{
+ const encode=globalThis.btoa,clone=globalThis.structuredClone;let encoded=0,cloned=0,liveClones=0;
+ try{
+  globalThis.btoa=value=>{encoded++;return encode(value)};
+  await assert.rejects(exportBackupV4(simple,{...options,limits:{fileBytes:512}}),/size limit/);
+  assert.equal(encoded,0);
+  const large='x'.repeat(2048);
+  globalThis.structuredClone=value=>{if(value?.allocationSentinel===large)cloned++;return clone(value)};
+  const source={...simple,archives:[{id:'meta',kind:'opaque',createdAt:AT,raw:'keep',allocationSentinel:large}]};
+  await assert.rejects(exportBackupV4(source,{...options,limits:{fileBytes:512}}),/size limit/);
+  assert.equal(cloned,0);assert.equal(source.archives[0].raw,'keep');
+  globalThis.structuredClone=value=>{if(value?.data)liveClones++;return clone(value)};
+  await assert.rejects(exportBackupV4(simple,{...options,limits:{decodedBlobBytes:512}}),/size limit/);
+  assert.equal(liveClones,0);
+ }finally{globalThis.btoa=encode;globalThis.structuredClone=clone;}
+});

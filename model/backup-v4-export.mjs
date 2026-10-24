@@ -67,13 +67,18 @@ function equal(a,b){
  if(!a||!b||typeof a!=='object'||typeof b!=='object'||Array.isArray(a)!==Array.isArray(b))return false;
  const keys=Object.keys(a);return keys.length===Object.keys(b).length&&keys.every(k=>Object.hasOwn(b,k)&&equal(a[k],b[k]));
 }
-function detach(source,limit){
+function detach(source,limits){
  check(source?.format==='pushpull-backup'&&source.version===2&&(source.archives===undefined||Array.isArray(source.archives)),'v4 export: expected complete v2 snapshot');
- check((source.archives??[]).length<=limit,'v4 export: archive count limit');portable(source);
- const rows=(source.archives??[]).map(({raw,...metadata})=>{check(raw===null||typeof raw==='string','v4 export: archive raw');return {...structuredClone(metadata),raw};});
+ check((source.archives??[]).length<=limits.archives,'v4 export: archive count limit');portable(source);
+ let metadataBytes=0;
+ const rows=(source.archives??[]).map(({raw,...metadata})=>{
+  check(raw===null||typeof raw==='string','v4 export: archive raw');metadataBytes+=jsonBytes(metadata,limits.fileBytes);
+  check(metadataBytes<=limits.fileBytes,'v4 export: file size limit');return {...structuredClone(metadata),raw};
+ });
  // Snapshot every mutable field before the first await, retain immutable raw
  // strings directly instead of structured-cloning the entire rescue archive.
- return {source:structuredClone({...source,archives:[]}),archives:rows};
+ const liveSource={...source,archives:[]};jsonBytes(liveSource,limits.decodedBlobBytes);
+ return {source:structuredClone(liveSource),archives:rows};
 }
 /** Input: complete detached v2 snapshot OR existing v1/v2/v3/v4 JSON text.
  * Returns {text,diagnostics} only after full decoder verification and equality.
@@ -82,7 +87,7 @@ function detach(source,limit){
 export async function exportBackupV4(input,{createdAt,metadata,limits:overrides={},signal}={}){
  const limits=policy(overrides);aborted(signal);
  check(typeof createdAt==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(createdAt)&&Number.isFinite(Date.parse(createdAt))&&new Date(createdAt).toISOString()===createdAt,'v4 export: explicit createdAt required');
- if(metadata!==undefined){portable(metadata);check(record(metadata),'v4 export: metadata must be a record');metadata=structuredClone(metadata);}
+ if(metadata!==undefined){portable(metadata);check(record(metadata),'v4 export: metadata must be a record');jsonBytes(metadata,limits.fileBytes);metadata=structuredClone(metadata);}
  let live,expected,archives,source,original;
  if(typeof input==='string'){
   const stage=await decodeBackup(input,{limits,signal});archives=stage.archives;
@@ -96,8 +101,12 @@ export async function exportBackupV4(input,{createdAt,metadata,limits:overrides=
    const v2=original?readLegacyBackup(original.payload.legacySources[0].raw).original:stage.live.document;
    source=structuredClone({...v2,archives:[]});
   }
- }else{const snapshot=detach(input,limits.archives);source=snapshot.source;archives=snapshot.archives;}
+ }else{const snapshot=detach(input,limits);source=snapshot.source;archives=snapshot.archives;}
  metadata??={};portable(metadata);aborted(signal);
+ // Necessary lower bound of the final file, before retaining base64 strings.
+ // Exact final sizing and the decoder still validate the complete container.
+ let fileMinimum=jsonBytes(metadata,limits.fileBytes);
+ for(const {raw,...info} of archives){fileMinimum+=jsonBytes(info,limits.fileBytes);check(fileMinimum<=limits.fileBytes,'v4 export: file size limit');}
  if(source){
   const raw=serialize(source,limits.decodedBlobBytes);
   if(source.data?.trainingJournal||original){
@@ -119,6 +128,7 @@ export async function exportBackupV4(input,{createdAt,metadata,limits:overrides=
   const size=stringBytes(value,limits.decodedBlobBytes);decodedTotal+=size;
   check(decodedTotal<=limits.totalDecodedBytes,'v4 export: aggregate size limit');
   const bytes=encodeString(value,size),decodedSha256=await sha(bytes),stored=await compress(bytes,limits.storedBlobBytes,signal);
+  fileMinimum+=4*Math.ceil(stored.length/3);check(fileMinimum<=limits.fileBytes,'v4 export: file size limit');
   const id='sha256:'+decodedSha256;
   blobs.push({id,encoding:'json-string-utf8',compression:'gzip',storedBytes:stored.length,decodedBytes:size,storedSha256:await sha(stored),decodedSha256,data:base64(stored)});
   byText.set(value,id);return id;
