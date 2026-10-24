@@ -26,3 +26,8 @@ test('preview rejects oversized input before reading and refuses legacy restore 
  await assert.rejects(previewLocalV4({size:V4_LIMITS.fileBytes+1,text:()=>assert.fail('must not read')}),/limit/);
  await assert.rejects(previewLocalV4(new Blob([JSON.stringify(old)])),/v1\/v2\/v3/);
 });
+test('revision change during asynchronous export refuses download result',async()=>{
+ const db={revision:1,export:()=>source,model:null};
+ const pending=exportLocalV4(db,{createdAt:AT});db.revision++;
+ await assert.rejects(pending,/zmieniła/);
+});

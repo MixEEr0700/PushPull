@@ -2,7 +2,9 @@
 
 Baza implementacji: `origin/main` `2adab86092b34e47194bf76fbff40ff33bfe2d1f` (etapy A i B1).
 
-W ekranie Dane dodano osobne „Pobierz kopię JSON v4” oraz „Podgląd pliku v4 (bez przywracania)”. Dotychczasowy przycisk JSON i importer v1/v2/v3 pozostają bez zmian. Nowe operacje działają lokalnie, również offline; moduły A/B1 oraz adapter są objęte allowlistą wydania i precache. Nie zmieniono stylów Matrix.
+W ekranie Dane dodano osobne „Pobierz kopię v4 (testowo)” oraz „Podgląd pliku v4 (bez przywracania)”. Dotychczasowy przycisk JSON i importer v1/v2/v3 pozostają bez zmian. Nowe operacje działają lokalnie, również offline; moduły A/B1 oraz adapter są objęte allowlistą wydania i precache. Nie zmieniono stylów Matrix.
+
+Eksport wiąże snapshot z rewizją: zmiana rewizji podczas asynchronicznej pracy odrzuca wynik bez pobierania. Interfejs pokazuje beztreściowe liczniki czasu, bajtów pliku i liczby archiwów. Podgląd zestawia bieżącą bazę z kopią.
 
 Eksport korzysta z kompletnego snapshotu istniejącego API bazy, bez konstruowania monolitycznej kopii v3 z osadzonymi archiwami dla natywnego dziennika. Dla starszego model bridge bez trainingJournal używa pełnego istniejącego eksportu modelu, aby nie pominąć metadanych spoza snapshotu v2. B1 kompresuje, weryfikuje i porównuje cały wynik przed wywołaniem pobrania. Błąd nie tworzy częściowego downloadu i nie uruchamia awaryjnego eksportu niepełnych danych.
 
@@ -12,7 +14,7 @@ Nie zmieniono IndexedDB, modelu danych, produkcyjnego Google Drive, przywracania
 
 ## Weryfikacja
 
-- Node: 143 testy PASS (w tym 3 nowe testy adaptera, ograniczenia rozmiaru i brak cichego fallbacku niepełnego bridge).
+- Node: 144 testy (w tym 4 nowe testy adaptera, ograniczenia rozmiaru i brak cichego fallbacku niepełnego bridge). Wynik końcowy w PR.
 - Chromium: nowe testy produkcyjnych przycisków sprawdzają offline po reload, 390×844, dokładne zachowanie archiwum 4 MiB i null, brak overflow, odrzucenie uszkodzonej sumy kontrolnej, brak przywracania i pełną równość rekordów wszystkich store przed/po. Błąd kompresji nie pobiera pliku. Dodatkowy test natywnego v3 porównuje pełne data/catalog/archives i usuwa wcześniejszy kandydat restore.
 - Pełna regresja Chromium i GitHub Actions: wynik w PR/opisie zadania po zakończeniu.
 - `node --check` app/storage/indexeddb/sw, `build_release.py --check`, budowa `dist/issue-60`, `git diff --check`: PASS.

@@ -3,10 +3,12 @@ import {exportBackupV4} from './backup-v4-export.mjs';
 import {decodeBackup,V4_LIMITS} from './backup-v4.mjs';
 import {backupSummary} from './legacy-model.mjs';
 export async function exportLocalV4(database,options){
- const snapshot=database.export();
+ const revision=database.revision,snapshot=database.export();
  // A pre-journal bridge can carry model metadata outside the v2 snapshot.
  const input=!snapshot.data.trainingJournal&&database.model?await database.exportModelBackup():snapshot;
- return exportBackupV4(input,options);
+ const result=await exportBackupV4(input,options);
+ if(database.revision!==revision)throw Error('Baza zmieniła się podczas eksportu. Pobierz kopię ponownie.');
+ return result;
 }
 export async function previewLocalV4(file,{signal}={}){
  if(file.size>V4_LIMITS.fileBytes)throw Error('Kopia przekracza limit rozmiaru v4. Nie zmieniono danych.');
