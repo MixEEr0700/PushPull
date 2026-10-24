@@ -42,6 +42,37 @@ class JournalFlow(BrowserHarness):
         self.page.locator('.seriesResultForm [type=submit]').click()
         expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
 
+    def test_issue48_advanced_options_legacy_confirmation_backup_and_native_plans(self):
+        from test_plan_import import PlanImport
+        self.prepare();self.ready();before=self.state();records=self.records()
+        self.page.locator('[data-tab=settings]').click()
+        section=self.page.locator('[data-journal-advanced]');button=section.locator('[data-enable-journal]')
+        expect(section.locator('summary')).to_have_text('Opcje zaawansowane')
+        expect(section).not_to_have_attribute('open','');expect(button).to_be_hidden()
+        self.assertNotIn('card',(section.get_attribute('class') or '').split())
+        section.locator('summary').click();expect(button).to_be_visible()
+        expect(section).to_contain_text('Tylko starsza baza bez wersjonowania. Przed zmianą zostanie pobrana kopia JSON. Nie aktywuje V2 i nie przenosi historii.')
+        expect(section.locator('#driveConfig')).to_have_count(0)
+        downloads=[];self.page.on('download',lambda download:downloads.append(download))
+        self.confirm=False;button.click()
+        self.assertEqual(self.records(),records);self.assertEqual(downloads,[])
+        self.confirm=True
+        with self.page.expect_download() as download:button.click()
+        expect(self.page.get_by_text('Nowy zapis włączony',exact=True)).to_be_visible()
+        backup=json.loads(Path(download.value.path()).read_text());self.assertEqual(backup['data'],before)
+        self.assertGreater(len(self.records()['backups']),len(records['backups']))
+        initialized=self.state();self.assertEqual(initialized['sessions'],before['sessions']);self.assertEqual(initialized['entries'],before['entries'])
+        self.assertEqual(initialized['trainingJournal']['sessionSnapshots'],[])
+        self.assertFalse(initialized['trainingJournal'].get('activePlanVersionId'))
+        expect(section).to_have_count(0)
+        self.plans('v2-owner-2026-10-22');PlanImport.activate(self)
+        self.settings();expect(self.page.locator('[data-enable-journal],[data-journal-advanced]')).to_have_count(0)
+        PlanImport.preview(self);PlanImport.store(self);PlanImport.activate(self)
+        self.page.reload();self.ready();self.settings()
+        expect(self.page.locator('[data-enable-journal],[data-journal-advanced]')).to_have_count(0)
+        self.assertEqual(self.state()['sessions'],before['sessions']);self.assertEqual(self.state()['entries'],before['entries'])
+        self.assertFalse(self.alerts,self.alerts)
+
     def test_real_session_restart_correction_statistics_and_v3_restore(self):
         self.enable();self.start_result()
         saved=self.state();entry=saved['entries'][-1];sid=saved['activeId']

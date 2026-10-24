@@ -1,3 +1,5 @@
+Issue #48: starszą bazę bez `trainingJournal` można inicjalizować w **Dane → Opcje zaawansowane** (domyślnie zamknięte). Potwierdzenie, pobranie kopii JSON i kopia wewnętrzna oraz handler pozostają bez zmian; inicjalizacja nie aktywuje V2. Sekcja jest oddzielona od opcji Google i nie występuje dla bazy już wersjonowanej.
+
 Issue #45: [trzy kroki przywracania Drive](DRIVE_RESTORE_UX_ISSUE_45.md), kompaktowy podgląd i widoczne akcje; mechanizm bezpieczeństwa bez zmian.
 
 Aktualne Issue #40: [pełne przywracanie kopii Drive/JSON](BACKUP_RESTORE_ISSUE_40.md). Cztery ręczne operacje, wspólny podgląd i potwierdzenie zastąpienia; zachowane preimage i lokalne szkice, bez zmiany formatu v3/synchronizacji.
