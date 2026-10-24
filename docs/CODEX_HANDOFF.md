@@ -1,3 +1,5 @@
+Issue #58 — izolowany eksporter v4 z samoweryfikacją, bez integracji B2: [etap B1](BACKUP_V4_STAGE_B1.md).
+
 Issue #56 — izolowany dekoder v4, bez zapisu/migracji/integracji: [etap A i kontrakt](BACKUP_V4_STAGE_A.md).
 
 Issue #54 — raport do decyzji (bez migracji/kodu runtime): [rozmiar kopii i archiwa](BACKUP_SIZE_ISSUE_54.md).
