@@ -1,3 +1,5 @@
+Issue #54 — raport do decyzji (bez migracji/kodu runtime): [rozmiar kopii i archiwa](BACKUP_SIZE_ISSUE_54.md).
+
 Issue #52: [diagnostyka pamięci i poprawka końcowego porównania Drive](DRIVE_MEMORY_ISSUE_52.md). Odtworzono awarię renderera po GET dużej kopii; usunięto zbędne ponowne serializacje bez wyłączania hashy/walidacji. Archiwa i format bez zmian; przyczyna konkretnej awarii fizycznego Androida nadal wymaga odbioru.
 
 Issue #48: starszą bazę bez `trainingJournal` można inicjalizować w **Dane → Opcje zaawansowane** (domyślnie zamknięte). Potwierdzenie, pobranie kopii JSON i kopia wewnętrzna oraz handler pozostają bez zmian; inicjalizacja nie aktywuje V2. Sekcja jest oddzielona od opcji Google i nie występuje dla bazy już wersjonowanej.
