@@ -208,6 +208,21 @@ function localV4Panel(){
  <p class="hint warning">Format v4: podgląd testowy, przywracanie niedostępne. Nie zmieniono danych.</p>
  <button class="btn" data-v4-close>Zamknij podgląd</button></section>`:''}</div>`;
 }
+let v5Preview=null,v5Error='',v5Busy=false,v5Controller=null,v5Sequence=0;
+function v5PreviewPanel(){const p=v5Preview;return `<div class="card stack"><label>Podgląd kopii v5<input type="file" data-preview-v5 accept="application/json,.json" ${v5Busy?'disabled':''}></label>${v5Busy?'<p role="status" data-v5-busy>Weryfikacja v5 i próba w pamięci…</p><button class="btn" data-v5-cancel>Anuluj</button>':''}${v5Error?`<p class="hint warning" role="alert" data-v5-error>${esc(v5Error)}</p>`:''}${p?`<section data-v5-preview tabindex="-1"><strong>v5 — zweryfikowany podgląd</strong><p class="hint">Plany: ${p.plans} · Aktywna wersja: ${p.activeVersion?'zapisana':'brak wersjonowanego planu'}<br>Sesje: ${p.sessions} · Wyniki: ${p.results} · Serie: ${p.series}<br>Snapshoty: ${p.snapshots} · Archiwa: ${p.archives} (puste raw null: ${p.nullArchives})</p><p class="hint" data-v5-trial>Próba w izolowanej bazie w pamięci: pełna zgodność z odczytanym plikiem.</p><p class="hint">Fragmenty są częściami archiwów, nie dodatkowymi archiwami. Szkice nie są zawarte w kopii v5; pozostają na urządzeniu. Nie porównano kompletności pliku z bieżącą bazą.</p><p class="hint warning">Nie zapisano danych do IndexedDB. Przywracanie rzeczywistej bazy nie jest dostępne.</p><button class="btn" data-v5-cancel>Zamknij podgląd</button></section>`:''}</div>`;}
+on('click',e=>{if(e.target.closest('[data-v5-cancel]')){v5Sequence++;v5Controller?.abort();v5Controller=null;v5Preview=null;v5Error='';v5Busy=false;render();}});
+on('change',e=>{
+ if(!e.target.matches('[data-preview-v5]'))return;
+ const file=e.target.files?.[0];if(!file)return;
+ v5Controller?.abort();const controller=new AbortController(),sequence=++v5Sequence;v5Controller=controller;
+ restoreSequence++;restoreCandidate=null;restoreError='';restoreSuccess='';v5Preview=null;v5Error='';v5Busy=true;render();
+ void(async()=>{try{
+  const {previewBackupV5}=await import('./model/backup-v5-preview.mjs');
+  const report=await previewBackupV5(file,{signal:controller.signal,getRevision:()=>database.revision});
+  if(sequence===v5Sequence)v5Preview=report;
+ }catch(error){if(sequence===v5Sequence)v5Error=error.name==='AbortError'?'Anulowano.':error.message;}
+ finally{if(sequence===v5Sequence){v5Busy=false;v5Controller=null;render();document.querySelector('[data-v5-preview]')?.focus();}}})();
+});
 let restoreCandidate=null,restoreError='',restoreBusy=false,restoreSequence=0,restoreSuccess='';
 const backupAPI=await import('./model/legacy-model.mjs');
 function restoreResult(){return restoreSuccess?`<p class="hint" role="status" data-restore-success>${esc(restoreSuccess)}</p>`:'';}
@@ -237,7 +252,7 @@ async function prepareRestore(raw,revision,sequence,date=null){
  restoreCandidate.summary.createdAt??=typeof date==='string'&&Number.isFinite(Date.parse(date))?date:null;
  restoreBusy=false;render();focusRestore();
 }
-function drivePanel(){return `<div class="card stack"><strong>Kopie zapasowe</strong><p class="hint">Trening i szkice zapisują się automatycznie na telefonie, także offline. Kopię zatwierdzonych danych na Drive zapisujesz ręcznie. Szkice pozostają lokalnie.</p><button class="btn primary" data-drive-action="upload" ${!drive?'disabled':''}>Zapisz kopię na Google Drive</button><button class="btn" data-drive-action="restore" ${!drive?'disabled':''}>Przywróć z Google Drive</button>${restoreChoicePanel()}${restorePanel()}${localV4Panel()}<button class="btn" data-act="export">Pobierz kopię JSON</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json"></label>${restoreResult()}<p class="hint" role="status" data-drive-status>${esc(driveStatusText())}</p>${drive?`<button class="btn" data-drive-action="connect" ${drive.config.connected?'hidden':''}>Połącz Google</button><details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</div>`;}
+function drivePanel(){return `<div class="card stack"><strong>Kopie zapasowe</strong><p class="hint">Trening i szkice zapisują się automatycznie na telefonie, także offline. Kopię zatwierdzonych danych na Drive zapisujesz ręcznie. Szkice pozostają lokalnie.</p><button class="btn primary" data-drive-action="upload" ${!drive?'disabled':''}>Zapisz kopię na Google Drive</button><button class="btn" data-drive-action="restore" ${!drive?'disabled':''}>Przywróć z Google Drive</button>${restoreChoicePanel()}${restorePanel()}${localV4Panel()}${v5PreviewPanel()}<button class="btn" data-act="export">Pobierz kopię JSON</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json"></label>${restoreResult()}<p class="hint" role="status" data-drive-status>${esc(driveStatusText())}</p>${drive?`<button class="btn" data-drive-action="connect" ${drive.config.connected?'hidden':''}>Połącz Google</button><details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</div>`;}
 function settings(){if(dataView==='plans')return planScreen();if(dataView==='weekly')return weeklyScreen();return `<div class="eyebrow">DANE</div><h1>Dane i kopia zapasowa</h1><div class="card stack"><button class="btn" data-view="plans">Plany treningowe</button><button class="btn" data-view="weekly">Statystyki ogólne</button></div>${drivePanel()}${!data.trainingJournal?'<details data-journal-advanced><summary class="btn">Opcje zaawansowane</summary><div class="stack"><p class="hint">Tylko starsza baza bez wersjonowania. Przed zmianą zostanie pobrana kopia JSON. Nie aktywuje V2 i nie przenosi historii.</p><button class="btn" data-enable-journal>Włącz zapis z wersją planu</button></div></details>':''}${backupControls()}${pwaInfo()}`}
 function importedPlanPanel(){
  const saved=data.trainingJournal?.importedPlans??[];
@@ -321,6 +336,7 @@ on('click',async e=>{
 });
 on('change',async e=>{
  if(!e.target.matches('[data-preview-v4]')||localV4Busy)return;
+ v5Sequence++;v5Controller?.abort();v5Preview=null;v5Error='';v5Busy=false;
  const file=e.target.files?.[0];if(!file)return;
  // Discard any previous restore candidate before entering read-only preview.
  restoreSequence++;restoreCandidate=null;restoreError='';restoreSuccess='';
@@ -330,7 +346,7 @@ on('change',async e=>{
  finally{localV4Busy=false;render();document.querySelector('[data-v4-preview]')?.focus();}
 });
 on('change',async e=>{if(e.target.id==='trainingDate')draftDate=e.target.value;if(e.target.id==='importFile'){
- const file=e.target.files?.[0];if(!file)return;const before=database.revision,sequence=++restoreSequence;
+ const file=e.target.files?.[0];if(!file)return;v5Sequence++;v5Controller?.abort();v5Preview=null;v5Error='';v5Busy=false;const before=database.revision,sequence=++restoreSequence;
  restoreCandidate=null;restoreError='';restoreSuccess='';restoreBusy=true;render();
  try{const raw=await file.text();await prepareRestore(raw,before,sequence);}catch(error){restoreBusy=false;restoreError=error.message;throw error;}finally{e.target.value=''}
 }});
@@ -349,6 +365,7 @@ on('click',async e=>{
 on('submit',e=>{if(e.target.id==='driveConfig'&&drive){void drive.configure(e.target.elements.clientId.value).then(()=>{driveChoices=[];if(tab==='settings')render();}).catch(error=>drive.report(error));}});
 on('click',e=>{const button=e.target.closest('[data-drive-action]');if(!button||!drive)return;
  const action=button.dataset.driveAction,selected=$('#driveCopy')?.value;
+ if(action==='restore'||action==='preview'){v5Sequence++;v5Controller?.abort();v5Preview=null;v5Error='';v5Busy=false;}
  void (async()=>{
   if(action==='connect')await drive.connect();
   if(action==='disconnect'){await drive.disconnect();driveChoices=[];}
