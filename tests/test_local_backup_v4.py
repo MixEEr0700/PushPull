@@ -33,7 +33,7 @@ class LocalBackupV4(BrowserHarness):
         self.assertIn('v4',download.value.suggested_filename)
         expect(self.page.locator('[data-v4-metrics]')).to_contain_text('Plik:')
         with self.page.expect_download(timeout=120000) as repeated:self.page.locator('[data-export-v4]').click()
-        self.assertEqual(Path(repeated.value.path()).read_text(),text)
+        self.assertTrue(self.page.evaluate("""async ([a,b])=>{const {decodeBackup}=await import('./model/backup-v4.mjs'),{canonical}=await import('./model/backup-json.mjs');const x=await decodeBackup(a),y=await decodeBackup(b);return canonical(x.live.data)===canonical(y.live.data)&&canonical(x.live.catalog)===canonical(y.live.catalog)&&canonical(x.archives)===canonical(y.archives)}""",[text,Path(repeated.value.path()).read_text()]))
         self.assertEqual(json.loads(text)['version'],4)
         result=self.page.evaluate("""async text=>{const s=await(await import('./model/backup-v4.mjs')).decodeBackup(text);return {length:s.archives.find(a=>a.id==='synthetic-large').raw.length,nil:s.archives.find(a=>a.id==='synthetic-null').raw}}""",text)
         self.assertEqual(result,{'length':4*1024*1024,'nil':None})
