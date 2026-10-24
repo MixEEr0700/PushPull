@@ -191,6 +191,9 @@ let historicalId=null;
 function backupControls(){let backups=database.backups();return `${backups.length?`<div class="card stack"><label>Zachowane kopie danych<select id="backupKey">${backups.map((key,i)=>`<option value="${esc(key)}">${i+1}. ${esc(database.backupLabel(key))}</option>`).join('')}</select></label><button class="btn" data-backup-export>↓ Pobierz kopię sprzed przywrócenia</button><p class="hint">Aby przywrócić te dane, pobierz kopię i wybierz „Przywróć z pliku JSON”. Zachowaj również kopię poza przeglądarką.</p></div>`:''}`}
 function driveStatusText(){return drive?.status.detail||'Zapis lokalny działa.'+(driveInitError?' Drive niedostępny: '+driveInitError:'');}
 function paintDrive(){document.querySelectorAll('[data-drive-status]').forEach(el=>el.textContent=driveStatusText());document.querySelectorAll('[data-drive-action="connect"]').forEach(el=>el.hidden=!!drive?.config.connected);document.querySelectorAll('[data-drive-action="upload"],[data-drive-action="restore"],[data-drive-action="preview"]').forEach(el=>el.disabled=!!drive?.status.busy);}
+const localV4=await import('./model/local-backup-v4.mjs');
+let localV4Busy=false,localV4Error='',localV4Preview=null;
+function localV4Panel(){const p=localV4Preview;return `<div class="stack"><button class="btn" data-export-v4 ${localV4Busy?'disabled':''}>Pobierz kopię JSON v4</button><p class="hint">v4: skompresowana kopia danych i archiwów. Przywracanie v4 nie jest jeszcze dostępne. Szkice pozostają lokalnie; możesz pobrać je osobno.</p><label>Podgląd pliku v4 (bez przywracania)<input type="file" data-preview-v4 accept="application/json,.json" ${localV4Busy?'disabled':''}></label>${localV4Busy?'<p class="hint" role="status" data-v4-busy>Trwa weryfikacja kopii v4…</p>':''}${localV4Error?`<p class="hint warning" role="alert" data-v4-error>${esc(localV4Error)}</p>`:''}${p?`<section class="stack" data-v4-preview tabindex="-1"><strong>Kopia v4 — tylko podgląd</strong><p class="hint">Treningi: ${p.summary.sessions} · Wyniki: ${p.summary.results}<br>Plany: ${p.summary.plans.length} · Archiwa: ${p.archives}<br>Aktywny plan: ${esc(p.summary.activePlan)}</p><p class="hint warning">Nie zmieniono danych. Przywracanie v4 nie jest dostępne.</p><button class="btn" data-v4-close>Zamknij podgląd</button></section>`:''}</div>`;}
 let restoreCandidate=null,restoreError='',restoreBusy=false,restoreSequence=0,restoreSuccess='';
 const backupAPI=await import('./model/legacy-model.mjs');
 function restoreResult(){return restoreSuccess?`<p class="hint" role="status" data-restore-success>${esc(restoreSuccess)}</p>`:'';}
@@ -220,7 +223,7 @@ async function prepareRestore(raw,revision,sequence,date=null){
  restoreCandidate.summary.createdAt??=typeof date==='string'&&Number.isFinite(Date.parse(date))?date:null;
  restoreBusy=false;render();focusRestore();
 }
-function drivePanel(){return `<div class="card stack"><strong>Kopie zapasowe</strong><p class="hint">Trening i szkice zapisują się automatycznie na telefonie, także offline. Kopię zatwierdzonych danych na Drive zapisujesz ręcznie. Szkice pozostają lokalnie.</p><button class="btn primary" data-drive-action="upload" ${!drive?'disabled':''}>Zapisz kopię na Google Drive</button><button class="btn" data-drive-action="restore" ${!drive?'disabled':''}>Przywróć z Google Drive</button>${restoreChoicePanel()}${restorePanel()}<button class="btn" data-act="export">Pobierz kopię JSON</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json"></label>${restoreResult()}<p class="hint" role="status" data-drive-status>${esc(driveStatusText())}</p>${drive?`<button class="btn" data-drive-action="connect" ${drive.config.connected?'hidden':''}>Połącz Google</button><details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</div>`;}
+function drivePanel(){return `<div class="card stack"><strong>Kopie zapasowe</strong><p class="hint">Trening i szkice zapisują się automatycznie na telefonie, także offline. Kopię zatwierdzonych danych na Drive zapisujesz ręcznie. Szkice pozostają lokalnie.</p><button class="btn primary" data-drive-action="upload" ${!drive?'disabled':''}>Zapisz kopię na Google Drive</button><button class="btn" data-drive-action="restore" ${!drive?'disabled':''}>Przywróć z Google Drive</button>${restoreChoicePanel()}${restorePanel()}${localV4Panel()}<button class="btn" data-act="export">Pobierz kopię JSON</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json"></label>${restoreResult()}<p class="hint" role="status" data-drive-status>${esc(driveStatusText())}</p>${drive?`<button class="btn" data-drive-action="connect" ${drive.config.connected?'hidden':''}>Połącz Google</button><details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</div>`;}
 function settings(){if(dataView==='plans')return planScreen();if(dataView==='weekly')return weeklyScreen();return `<div class="eyebrow">DANE</div><h1>Dane i kopia zapasowa</h1><div class="card stack"><button class="btn" data-view="plans">Plany treningowe</button><button class="btn" data-view="weekly">Statystyki ogólne</button></div>${drivePanel()}${!data.trainingJournal?'<details data-journal-advanced><summary class="btn">Opcje zaawansowane</summary><div class="stack"><p class="hint">Tylko starsza baza bez wersjonowania. Przed zmianą zostanie pobrana kopia JSON. Nie aktywuje V2 i nie przenosi historii.</p><button class="btn" data-enable-journal>Włącz zapis z wersją planu</button></div></details>':''}${backupControls()}${pwaInfo()}`}
 function importedPlanPanel(){
  const saved=data.trainingJournal?.importedPlans??[];
@@ -292,6 +295,25 @@ async function importFullBackup(rawText,expectedRevision,expectedLegacyRaw){
  restoreSuccess='Przywrócono: '+backupAPI.backupSummary(data).plans.map(p=>p.label).join(', ')+'; aktywny plan: '+backupAPI.backupSummary(data).activePlan+'; treningi: '+data.sessions.length+'; wyniki: '+data.entries.length+'. Szkice pozostają lokalnie.';restoreCandidate=null;driveChoices=[];
  render();toast('Dane zaimportowane');
 }
+// Separate from restore candidates and the production Google Drive flow.
+on('click',async e=>{
+ if(e.target.closest('[data-v4-close]')){localV4Preview=null;render();return;}
+ if(!e.target.closest('[data-export-v4]')||localV4Busy)return;
+ localV4Busy=true;localV4Error='';render();
+ try{const result=await localV4.exportLocalV4(database,{createdAt:new Date().toISOString()});downloadRaw(result.text,'pushpull-backup-v4-'+today()+'.json');toast('Kopia v4 zweryfikowana i pobrana');}
+ catch(error){localV4Error=error.message;}
+ finally{localV4Busy=false;render();}
+});
+on('change',async e=>{
+ if(!e.target.matches('[data-preview-v4]')||localV4Busy)return;
+ const file=e.target.files?.[0];if(!file)return;
+ // Discard any previous restore candidate before entering read-only preview.
+ restoreSequence++;restoreCandidate=null;restoreError='';restoreSuccess='';
+ localV4Busy=true;localV4Preview=null;localV4Error='';render();
+ try{localV4Preview=await localV4.previewLocalV4(file);}
+ catch(error){localV4Error=error.message;}
+ finally{localV4Busy=false;render();document.querySelector('[data-v4-preview]')?.focus();}
+});
 on('change',async e=>{if(e.target.id==='trainingDate')draftDate=e.target.value;if(e.target.id==='importFile'){
  const file=e.target.files?.[0];if(!file)return;const before=database.revision,sequence=++restoreSequence;
  restoreCandidate=null;restoreError='';restoreSuccess='';restoreBusy=true;render();
