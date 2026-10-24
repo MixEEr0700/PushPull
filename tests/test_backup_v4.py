@@ -69,22 +69,32 @@ class BackupV4(BrowserHarness):
         # transferred to it. The source and archive are exclusively synthetic.
         values=self.page.evaluate("""async()=>{
          const f=await import('/tests/fixtures/backup-v4-fixture.mjs'),old=await (await fetch('/tests/fixtures/v1.json')).json();
-         const v1=JSON.stringify(old),archive={id:'large',kind:'opaque',createdAt:f.AT,raw:'\\"Ł😀'.repeat(1024*1024)};
-         const start=performance.now(),d=await f.encodeFixture(v1,[archive]);
-         const source={format:'pushpull-backup',version:2,data:old,catalog:PushPullDB.parseBackup(old).catalog,archives:[archive]};
-         const v3=await f.sourceV3(source);
-         return {text:JSON.stringify(d),rawCodeUnits:archive.raw.length,oldV3Bytes:new TextEncoder().encode(v3).length,
+         const archive={id:'large',kind:'opaque',createdAt:f.AT,raw:'\\"Ł😀'.repeat(1024*1024)};
+         const start=performance.now(),source={format:'pushpull-backup',version:2,data:old,catalog:PushPullDB.parseBackup(old).catalog,archives:[]};
+         const live=await f.sourceV3(source),d=await f.encodeFixture(live,[archive]);
+         const v3=await f.sourceV3({...source,archives:[archive]});
+         const oldStart=performance.now(),oldStage=await (await import('/model/legacy-model.mjs')).parseModelBackup(v3);
+         if(oldStage.archives[0].raw!==archive.raw)throw Error('old raw mismatch');
+         const oldDecodeMs=Math.round(performance.now()-oldStart);
+         const {canonical}=await import('/model/backup-json.mjs');
+         const liveDigest=await f.hash(new TextEncoder().encode(canonical({data:oldStage.data,catalog:oldStage.catalog,model:oldStage.document.payload.model})));
+         return {text:JSON.stringify(d),liveDigest,rawCodeUnits:archive.raw.length,oldV3Bytes:new TextEncoder().encode(v3).length,oldDecodeMs,
           v4Bytes:new TextEncoder().encode(JSON.stringify(d)).length,buildMs:Math.round(performance.now()-start)};
         }""")
+        cdp=self.context.new_cdp_session(self.page)
+        values['oldHeapAfterBuildAndRead']=cdp.send('Runtime.getHeapUsage')['usedSize'];cdp.detach()
         browser=self.pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--enable-precise-memory-info','--js-flags=--max-old-space-size=128'])
         try:
             context=browser.new_context(service_workers='block');page=context.new_page();page.goto(self.url+'tests/')
             page.evaluate("async()=>{window.reader=await import('/model/backup-v4.mjs')}")
             context.set_offline(True)
-            metrics=page.evaluate("""async text=>{const start=performance.now(),stage=await reader.decodeBackup(text);return {
+            metrics=page.evaluate("""async text=>{const start=performance.now(),stage=await reader.decodeBackup(text),decodedMs=Math.round(performance.now()-start),heap=performance.memory.usedJSHeapSize;
+             const {canonical}=await import('/model/backup-json.mjs');
+             const liveDigest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical({data:stage.live.data,catalog:stage.live.catalog,model:stage.live.document.payload.model})))),b=>b.toString(16).padStart(2,'0')).join('');return {
              rawCodeUnits:stage.archives[0].raw.length,exact:stage.archives[0].raw==='\\"Ł😀'.repeat(1024*1024),
-             decodedMs:Math.round(performance.now()-start),heap:performance.memory.usedJSHeapSize}}""",values.pop('text'))
+             decodedMs,heap,liveDigest}}""",values.pop('text'))
             self.assertTrue(metrics['exact']);self.assertEqual(metrics['rawCodeUnits'],values['rawCodeUnits'])
+            self.assertEqual(metrics.pop('liveDigest'),values.pop('liveDigest'))
             self.assertLess(values['v4Bytes'],values['oldV3Bytes']//10)
             print('ISSUE56_SYNTHETIC '+json.dumps({**values,**metrics,'oldSpaceMiB':128}),flush=True)
         finally:browser.close()
