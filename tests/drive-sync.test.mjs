@@ -87,6 +87,13 @@ test('offline, authorization, failed POST or failed verification never consume r
  transport.read=read;await sync.upload();assert.equal(transport.files.size,2);
  assert.deepEqual(database.export(),before);assert.deepEqual(database.drafts,[{id:'local-only'}]);
  database.error=Error('bad database');await assert.rejects(sync.upload(),/odzyskaj/);assert.equal(transport.files.size,2);
+ database.error=null;transport.ambiguous=true;
+ const previous=new Map([...transport.files].map(([id,file])=>[id,file.text]));
+ await assert.rejects(sync.upload(),/Lost response/);assert.equal(transport.files.size,3);
+ assert.ok(!sync.status.detail.includes('zweryfikowana'));await sync.retryNow();assert.equal(transport.files.size,3);
+ await sync.upload();assert.equal(transport.files.size,4);
+ for(const [id,text] of previous)assert.ok(transport.files.get(id).text===text,'old copies must remain unchanged');
+ assert.deepEqual(database.export(),before);assert.deepEqual(database.drafts,[{id:'local-only'}]);
 });
 
 test('local revision changed while preparing export cannot upload a mixed snapshot',async()=>{
@@ -132,4 +139,25 @@ test('imported future plans round-trip in manual v3 Drive backups without automa
  const restored=await inspectBackup((await sync.download(fileId)).backup);
  assert.deepEqual(restored.data,db.value);assert.deepEqual(restored.data.trainingJournal.importedPlans,[p]);
  assert.equal(restored.data.entries.length,fixture().entries.length);sync.close();
+});
+
+test('verified large upload does not allocate another escaped backup after readback validation',async()=>{
+ const database=new Database();database.value.extension={opaque:'x'.repeat(1024*1024)};
+ const backup=JSON.stringify(database.value);let checks=0;
+ const inspect=async raw=>{const result=await inspectBackup(raw);checks++;return result;};
+ const {sync,transport}=await setup(database,new Drive(),{inspect});
+ const stringify=JSON.stringify;let uploaded;
+ try{
+  // A bounded allocation budget for the specific avoidable whole-backup copy.
+  // makeNode and readNode must still hash and fully validate the complete file.
+  JSON.stringify=function(value,...args){
+   if(checks>=2&&value===backup)throw RangeError('unbounded backup re-encoding after verified readback');
+   return stringify(value,...args);
+  };
+  uploaded=await sync.upload();
+ }finally{JSON.stringify=stringify;sync.close();}
+ assert.equal(checks,2);
+ assert.equal(transport.files.size,1);
+ assert.ok(JSON.parse(transport.files.get(uploaded.fileId).text).backup===backup,'verified backup text must remain exact');
+ assert.match(sync.status.detail,/zapisana i zweryfikowana/);
 });

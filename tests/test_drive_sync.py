@@ -1,5 +1,6 @@
 """Real Chromium journal + real IDB; only Google OAuth/HTTP is simulated."""
 import json
+import hashlib
 from datetime import datetime, timezone
 from urllib.parse import urlsplit, parse_qs
 from pathlib import Path
@@ -82,6 +83,28 @@ class ManualDriveFlow(BrowserHarness):
         self.page.close();self.page=self.context.new_page();self.page.on('dialog',self.dialog)
         self.page.on('pageerror',lambda e:self.errors.append(str(e)))
         self.page.goto(self.url);self.ready()
+
+    def test_issue52_repeated_large_v3_uploads_keep_local_state_and_previous_copies(self):
+        mock=MockGoogle();mock.install(self.context);self.activate()
+        form=self.open_result('PUSH A','PUSH-A-1');self.fill_rows(form,'80','8');self.save_form(form)
+        self.page.locator('[data-panel=result]').click();self.page.locator('[data-quick=kg]').fill('81.25')
+        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value;v.extension.large='x'.repeat(1024*1024);await d.commit(v)}finally{d.close()}}""")
+        self.page.reload();self.ready();self.configure()
+        def fingerprint():return self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const {canonical}=await import('./model/backup-json.mjs');const bytes=new TextEncoder().encode(canonical({backup:d.export(),drafts:await d.readDrafts(),revision:d.revision,drive:await d.readDriveState()}));return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('')}finally{d.close()}}""")
+        before=fingerprint();copies={};sizes=[]
+        for number in range(1,4):
+            with self.page.expect_request('https://www.googleapis.com/upload/**'):
+                self.page.locator('[data-drive-action=upload]').click()
+            expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=120000)
+            self.assertEqual(mock.posts,number);self.assertEqual(len(mock.files),number)
+            for key,digest in copies.items():self.assertEqual(hashlib.sha256(mock.files[key]['text'].encode()).hexdigest(),digest)
+            copies={key:hashlib.sha256(file['text'].encode()).hexdigest() for key,file in mock.files.items()}
+            sizes.append(len(list(mock.files.values())[-1]['text'].encode()))
+            self.assertEqual(fingerprint(),before)
+        self.assertGreater(sizes[0],1024*1024);self.assertEqual(len(set(sizes)),1)
+        self.page.reload();self.ready();self.assertEqual(fingerprint(),before)
+        self.assertFalse(self.alerts,self.alerts)
 
     def test_issue45_guided_restore_actions_fit_mobile_and_choice_never_writes(self):
         mock=MockGoogle();mock.install(self.context);self.prepare();self.ready();self.configure();self.upload()
