@@ -29,6 +29,50 @@ let drive=null,driveInitError='',driveChoices=[];
 try{const {createGoogleDrive}=await import('./model/google-drive.mjs');drive=await (await import('./model/drive-sync.mjs')).openDriveBackup({database,transport:createGoogleDrive(),inspect:raw=>inspectForRestore(raw,null)});}catch(error){driveInitError=error.message;}
 function downloadRaw(content,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 const handlers=new Map();let actions=Promise.resolve();
+// Volatile code-update information only: never touches workout data or drafts.
+const pwaStatus={ready:false,error:'',release:''};let pwaRegistration=null;
+function paintPwa(){
+ const main=document.querySelector('#app .app');if(!main)return;
+ let notice=main.querySelector('[data-pwa-notice]');
+ if(!notice){notice=document.createElement('p');notice.className='hint';notice.setAttribute('role','status');notice.setAttribute('data-pwa-notice','');main.prepend(notice);}
+ const message=pwaStatus.ready?'Dostępna nowa wersja PushPull. Zapisz bieżące wyniki i zamknij wszystkie okna aplikacji, następnie uruchom ją ponownie.':pwaStatus.error;
+ if(notice.textContent!==message)notice.textContent=message;notice.hidden=!message;
+ document.querySelectorAll('[data-pwa-version]').forEach(el=>{el.textContent='Wersja aplikacji: '+(pwaStatus.release?pwaStatus.release.slice(0,12):'identyfikator niedostępny');});
+}
+function pwaInfo(){return `<div class="card stack"><p class="hint" data-pwa-version></p><p class="hint">Wersja dotyczy kodu aplikacji. Historia i szkice są lokalne; aktualizacja nie przenosi danych między urządzeniami.</p>${'serviceWorker' in navigator?'<button class="btn" data-pwa-check>Sprawdź aktualizację</button>':''}</div>`;}
+function readPwaWaiting(){
+ pwaStatus.ready=!!navigator.serviceWorker?.controller&&pwaRegistration?.waiting?.state==='installed';
+ if(pwaStatus.ready)pwaStatus.error='';paintPwa();
+}
+function pwaFailure(){readPwaWaiting();if(!pwaStatus.ready){pwaStatus.error='Nie udało się pobrać lub zweryfikować aktualizacji. Bieżąca wersja i dane pozostają zachowane. Spróbuj ponownie w Dane.';paintPwa();}}
+function identifyPwa(){
+ const controller=navigator.serviceWorker.controller;pwaStatus.release='';paintPwa();if(!controller)return;
+ const channel=new MessageChannel(),timer=setTimeout(()=>channel.port1.close(),3000);
+ channel.port1.onmessage=({data})=>{
+  clearTimeout(timer);channel.port1.close();
+  if(controller===navigator.serviceWorker.controller&&data?.type==='PUSHPULL_RELEASE'&&/^[a-f0-9]{24}$/.test(data.release)){pwaStatus.release=data.release;paintPwa();}
+ };
+ try{controller.postMessage({type:'PUSHPULL_RELEASE'},[channel.port2]);}
+ catch{clearTimeout(timer);channel.port1.close();} // Identity failure must never block opening the journal.
+}
+function watchPwa(registration){
+ if(pwaRegistration===registration){readPwaWaiting();return;}pwaRegistration=registration;
+ const track=worker=>{
+  if(!worker)return;let installed=worker.state==='installed';
+  worker.addEventListener('statechange',()=>{
+   if(worker.state==='installed'){installed=true;setTimeout(readPwaWaiting,0);}
+   if(worker.state==='redundant'&&!installed)pwaFailure();else readPwaWaiting();
+  });
+ };
+ registration.addEventListener('updatefound',()=>track(registration.installing));
+ track(registration.installing);track(registration.waiting);readPwaWaiting();
+}
+async function registerPwa(){
+ // Existing waiting metadata is available offline, without fetching a release.
+ const existing=await navigator.serviceWorker.getRegistration();if(existing){watchPwa(existing);if(!navigator.onLine)return;}
+ watchPwa(await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}));
+}
+
 function on(event,handler){
  if(!handlers.has(event)){
   handlers.set(event,[]);
@@ -177,7 +221,7 @@ async function prepareRestore(raw,revision,sequence,date=null){
  restoreBusy=false;render();focusRestore();
 }
 function drivePanel(){return `<div class="card stack"><strong>Kopie zapasowe</strong><p class="hint">Trening i szkice zapisują się automatycznie na telefonie, także offline. Kopię zatwierdzonych danych na Drive zapisujesz ręcznie. Szkice pozostają lokalnie.</p><button class="btn primary" data-drive-action="upload" ${!drive?'disabled':''}>Zapisz kopię na Google Drive</button><button class="btn" data-drive-action="restore" ${!drive?'disabled':''}>Przywróć z Google Drive</button>${restoreChoicePanel()}${restorePanel()}<button class="btn" data-act="export">Pobierz kopię JSON</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json"></label>${restoreResult()}<p class="hint" role="status" data-drive-status>${esc(driveStatusText())}</p>${drive?`<button class="btn" data-drive-action="connect" ${drive.config.connected?'hidden':''}>Połącz Google</button><details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</div>`;}
-function settings(){if(dataView==='plans')return planScreen();if(dataView==='weekly')return weeklyScreen();return `<div class="eyebrow">DANE</div><h1>Dane i kopia zapasowa</h1><div class="card stack"><button class="btn" data-view="plans">Plany treningowe</button><button class="btn" data-view="weekly">Statystyki ogólne</button></div>${drivePanel()}${!data.trainingJournal?'<details class="card"><summary class="btn">Zapis z wersją planu</summary><button class="btn" data-enable-journal>Włącz zapis z wersją planu</button><p class="hint">Zachowa kopię i zapisze kontekst przyszłych sesji szkieletu. Nie aktywuje nowego planu.</p></details>':''}${backupControls()}`}
+function settings(){if(dataView==='plans')return planScreen();if(dataView==='weekly')return weeklyScreen();return `<div class="eyebrow">DANE</div><h1>Dane i kopia zapasowa</h1><div class="card stack"><button class="btn" data-view="plans">Plany treningowe</button><button class="btn" data-view="weekly">Statystyki ogólne</button></div>${drivePanel()}${!data.trainingJournal?'<details class="card"><summary class="btn">Zapis z wersją planu</summary><button class="btn" data-enable-journal>Włącz zapis z wersją planu</button><p class="hint">Zachowa kopię i zapisze kontekst przyszłych sesji szkieletu. Nie aktywuje nowego planu.</p></details>':''}${backupControls()}${pwaInfo()}`}
 function importedPlanPanel(){
  const saved=data.trainingJournal?.importedPlans??[];
  let preview='';
@@ -217,7 +261,7 @@ on('click',async e=>{
  }
 });
 function recovery(){return `<main class="app"><h1>Dane wymagają odzyskania</h1>${draftRecoveryPanel()}<div class="card stack" role="alert"><p>Zapis został zablokowany. Aplikacja nie wyzerowała historii ani nie nadpisała oryginalnego zapisu localStorage. Pobierz je przed próbą odzyskania. Jeśli dane zmieniono w innej karcie lub pamięć jest niedostępna, odśwież stronę po zabezpieczeniu kopii.</p><p>${esc(recoveryError.message)}</p><button class="btn" data-recovery-current>↓ Pobierz historię z IndexedDB</button><button class="btn" data-recovery-export>↓ Pobierz oryginalne dane</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json"></label></div>${restorePanel()}${backupControls()}</main>`}
-function render(){let app=$('#app');if(recoveryError){app.innerHTML=recovery();return}app.innerHTML=`<main class="app">${tab==='training'?main():tab==='calendar'?(historicalId?historical():calendar()):settings()}</main><nav class="bottom"><div class="inner"><button class="btn ${tab==='training'?'active':''}" data-tab="training">Trening</button><button class="btn ${tab==='calendar'?'active':''}" data-tab="calendar">Kalendarz</button><button class="btn ${tab==='settings'?'active':''}" data-tab="settings">Dane</button></div></nav>`}
+function render(){let app=$('#app');if(recoveryError){app.innerHTML=recovery();paintPwa();return}app.innerHTML=`<main class="app">${tab==='training'?main():tab==='calendar'?(historicalId?historical():calendar()):settings()}</main><nav class="bottom"><div class="inner"><button class="btn ${tab==='training'?'active':''}" data-tab="training">Trening</button><button class="btn ${tab==='calendar'?'active':''}" data-tab="calendar">Kalendarz</button><button class="btn ${tab==='settings'?'active':''}" data-tab="settings">Dane</button></div></nav>`;paintPwa()}
 async function finish(){let s=session();if(!s)return;await savedDrafts.flush();if(savedDrafts.records.some(r=>r.sessionId===s.id)){alert('Masz niezapisane szkice. Zapisz wyniki lub świadomie odrzuć szkice przed zakończeniem treningu.');render();return;} if(!confirm('Zakończyć '+s.type+' z dnia '+s.date+'? Wyniki będzie można poprawić w kalendarzu.'))return;s.status='done';data.activeId=null;journal.advance(data,s);chosenType=null;await persist();panel=null;render();toast('Trening zakończony')}
 async function submitResult(exId,kg,reps,sid,series=null){savedDrafts.assertCurrent(bindingFor(sid,exId));const draftTicket=savedDrafts.ticket(sid,exId);kg=kg.trim().replace(',','.');reps=reps.trim();if(!/^\d+(\.\d+)?$/.test(kg)||!/^\d+$/.test(reps)||Number(reps)<1){toast('Podaj poprawny ciężar i liczbę powtórzeń');return}let found=data.entries.find(e=>e.sessionId===sid&&e.exerciseId===exId);if(found){found.kg=kg;found.reps=reps;if(series)found.series=series;found.correctedAt=new Date().toISOString()}else {found={id:uid(),sessionId:sid,exerciseId:exId,kg,reps,series,createdAt:new Date().toISOString()};data.entries.push(found)}if(journalAPI)journalAPI.recordEntry(data,found);await persist();await savedDrafts.confirmed(sid,exId,draftTicket);panel=null;render();toast('Wynik zapisany')}
 on('input',rich.input);on('change',rich.change);on('click',rich.click);
@@ -345,7 +389,12 @@ on('click',async e=>{
  const ss=data.sessions.find(s=>s.id===record.sessionId);historicalId=ss.id===data.activeId?null:ss.id;tab=historicalId?'calendar':'training';expandedExercise=record.exerciseId;panel={id:record.exerciseId,kind:historicalId?'historicalResult':'result'};render();
 });
 
-on('input',e=>{if(e.target.matches('textarea.notes-large')){e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'}});new MutationObserver(()=>document.querySelectorAll('textarea.notes-large').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})).observe(document.getElementById('app'),{childList:true,subtree:true});render();if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>{});
+on('input',e=>{if(e.target.matches('textarea.notes-large')){e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'}});new MutationObserver(()=>document.querySelectorAll('textarea.notes-large').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})).observe(document.getElementById('app'),{childList:true,subtree:true});render();
+if('serviceWorker'in navigator&&location.protocol!=='file:'){
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{identifyPwa();readPwaWaiting();});
+ identifyPwa();void registerPwa().catch(pwaFailure);
+}
+on('click',e=>{if(e.target.closest('[data-pwa-check]')){pwaStatus.error='';paintPwa();if(!navigator.onLine){pwaFailure();return;}void (pwaRegistration?pwaRegistration.update():registerPwa()).catch(pwaFailure);}});
 
 database.onchange=error=>{recoveryError=error;render()};
 window.addEventListener('pagehide',()=>{drive?.close();database.close()});

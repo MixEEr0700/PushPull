@@ -128,7 +128,8 @@ class BrowserHarness(unittest.TestCase):
 
     def save(self):
         self.page.locator('.seriesResultForm [type=submit]').click()
-        expect(self.page.locator('.seriesResultForm')).to_have_count(0)
+        # Wait for the real asynchronous IDB commit, including cold CI runners.
+        expect(self.page.locator('.seriesResultForm')).to_have_count(0,timeout=15000)
 
     def import_data(self, content):
         self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':content.encode()})
@@ -275,6 +276,19 @@ class BrowserRegression(BrowserHarness):
         expect(self.page.locator('[role=alert]')).to_be_visible()
         expect(self.page.locator('[data-act=start]')).to_have_count(0)
 
+    def test_issue44_update_failure_during_save_click_does_not_move_submit_target(self):
+        self.page.add_init_script("navigator.serviceWorker.register=()=>new Promise((_,reject)=>{window.__rejectPwa=reject})")
+        self.page.reload();self.start();self.result()
+        self.page.locator('[data-series-toggle]').click()
+        self.page.locator('[data-series-index="1"][data-field=kg]').fill('80')
+        self.page.wait_for_function('()=>typeof window.__rejectPwa==="function"')
+        button=self.page.locator('.seriesResultForm [type=submit]')
+        button.evaluate("button=>button.addEventListener('mousedown',()=>window.__rejectPwa(Error('synthetic update failure')),{once:true})")
+        self.save()
+        self.assertEqual(len(self.state()['entries']),1)
+        self.assertEqual(self.state()['entries'][0]['series'][1]['kg'],'80')
+        self.assertFalse(self.alerts,self.alerts)
+
     def test_copied_custom_series_require_confirmation(self):
         self.start();self.result()
         self.page.locator('[data-series-toggle]').click()
@@ -327,6 +341,9 @@ class BrowserRegression(BrowserHarness):
                     # that copy for the original pixel comparison; exercise UI stays exact.
                     self.page.locator('[data-source-plan-hint]').evaluate_all('(els)=>els.forEach(el=>el.remove())')
                     self.page.locator('.eyebrow').evaluate('(el)=>el.textContent="PUSH / PULL V2 · SZKIELET"')
+                # Issue #44 adds an authorized update/error notice. This pixel
+                # harness blocks SW; real-worker tests verify the notice itself.
+                self.page.locator('[data-pwa-notice]').evaluate_all('(els)=>els.forEach(el=>el.remove())')
                 self.assertEqual(old.screenshot(full_page=True,animations='disabled'), self.page.screenshot(full_page=True,animations='disabled'),f'{width}x{height} {screen}')
             baseline.close()
 
