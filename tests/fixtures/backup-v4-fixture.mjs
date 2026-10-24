@@ -27,7 +27,7 @@ export async function encodeFixture(live,archives=[],compression='gzip'){
   live:{formatVersion:JSON.parse(live).version,blobId:liveRef},archives:rows,blobs:[...blobs.values()],integrity:{algorithm:'SHA-256',digest:''}});
 }
 export function archiveFixtures(v1,v2,v3){
- const raws=[null,'',v1,v2,v3,'  {"future":99} \n','{broken','not JSON','Ł😀\u0000\ud800\udfff','same raw','same raw',
+ const raws=[null,'',v1,v2,v3,'  {"future":99} \n','{broken','not JSON','Ł😀\u0000\ud800X\udfff','same raw','same raw',
   JSON.stringify({format:'pushpull-idb-recovery',version:1,backups:[{unverified:true}],unknown:'preserve'})];
  return raws.map((raw,i)=>({id:'archive-'+i,kind:i===11?'before-import':'synthetic',createdAt:AT,sourceId:'old-id-'+i,extension:{order:i,unknown:[null,false,'Ł']},raw}));
 }

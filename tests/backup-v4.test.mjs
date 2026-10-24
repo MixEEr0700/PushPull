@@ -28,7 +28,7 @@ test('v4 complete deterministic fixture roundtrip preserves all live data and ar
  assert.ok(staged.live.data.entries.some(e=>e.performance?.rows.some(r=>r.groupId)));
  assert.ok(staged.live.data.trainingJournal.model.sets.some(s=>s.role==='backoff'));
  assert.deepEqual(staged.live.data.changes,data.changes);
- assert.equal(staged.archives[8].raw,'Ł😀\u0000\ud800\udfff');
+ assert.equal(staged.archives[8].raw,'Ł😀\u0000\ud800X\udfff');
  assert.notEqual(staged.archives[9].id,staged.archives[10].id);
  assert.equal(fixture.archives[9].blobId,fixture.archives[10].blobId);
  assert.equal(Object.isFrozen(staged.archives[0]),true);
@@ -122,6 +122,10 @@ test('invalid UTF-8 and non-string/noncanonical blob encodings are rejected',asy
   Object.assign(b,{id:'sha256:'+digest,compression:'none',storedBytes:bytes.length,decodedBytes:bytes.length,storedSha256:digest,decodedSha256:digest,data:btoa(String.fromCharCode(...bytes))});
   d.live.blobId=b.id;await seal(d);await assert.rejects(decode(d));
  }
+ const d=await encodeFixture(v1,[{id:'padding',kind:'opaque',createdAt:AT,raw:'xx'}],'none');
+ assert.equal(d.blobs[1].data,'Inh4Ig==');
+ d.blobs[1].data='Inh4Ih=='; // Same decoded bytes, forbidden nonzero padding bits.
+ await assert.rejects(decode(d),/noncanonical base64/);
 });
 
 test('failed or cancelled decoding cannot expose partial state or modify previous staging/input',async()=>{
