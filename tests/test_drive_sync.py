@@ -188,6 +188,9 @@ class ManualDriveFlow(BrowserHarness):
         mock=MockGoogle();mock.install(self.context);self.activate()
         f=self.open_result('PUSH A','PUSH-A-1');self.fill_rows(f,'100','5');self.save_form(f)
         self.page.locator('[data-act=finish]').click()
+        # Finish awaits draft/IDB completion and a confirmation dialog. Do not
+        # send the next navigation while that asynchronous action is pending.
+        expect(self.page.locator('[data-act=start]')).to_be_visible()
         plan=json.loads((Path(__file__).parent/'fixtures/plan-test-3x5.json').read_text())
         imports.PlanImport.preview(self,plan);imports.PlanImport.store(self);imports.PlanImport.activate(self)
         self.page.locator('[data-tab=training]').click();f=self.open_result('TEST','TEST-1');self.fill_rows(f,'20','5');self.save_form(f)
