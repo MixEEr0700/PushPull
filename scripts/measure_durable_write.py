@@ -67,6 +67,9 @@ DETAIL_PROBE=r"""(() => {
 
 def instrument(name,text,detail):
     if name=='indexeddb.js':
+        completion='      tx.oncomplete = () => resolve(result);'
+        if text.count(completion)!=1:raise ValueError('Transaction completion marker mismatch')
+        text=text.replace(completion,"      tx.oncomplete = event => { if(window.__saveTx===tx)window.__writeMarks?.push({name:'strict-complete',at:performance.now(),eventTimeStamp:event.timeStamp,durability:tx.durability});resolve(result); };")
         start=text.index('    async function save(');end=text.index('    try {\n      raw=legacy();',start)
         body=text[start:end]
         for target,label in MARKERS:
@@ -77,6 +80,7 @@ def instrument(name,text,detail):
             if body.count(target)!=1:raise ValueError('Measurement marker mismatch: '+label)
             indent=target[:len(target)-len(target.lstrip())]
             body=body.replace(target,indent+f"window.__writeMarks?.push({{name:'{label}',at:performance.now()}});\n"+target,1)
+            if label=='cas-read':body=body.replace(target,indent+'window.__saveTx=tx;\n'+target,1)
         if '      const preparedSource=!!api' in body:
             body=body.replace('      const preparedSource=!!api',"      window.__writeMarks?.push({name:'source-preparation',at:performance.now()});\n      const preparedSource=!!api",1)
         text=text[:start]+body+text[end:]
@@ -150,8 +154,13 @@ def run_profile(browser,url,args,index,report):
             if page.locator(form).count():raise RuntimeError('Result not committed: '+repr(dialogs))
             sample=page.evaluate('__ui.end()')
             if not sample['durableMs'] or any(x['durability']!='strict' for x in sample['durableMs']):raise RuntimeError('Missing strict history completion')
-            sample['clickToStrictCompleteMs']=sample['durableMs'][-1]['ms']
-            marks=page.evaluate('window.__writeMarks');sample['stageMs']={a['name']:b['at']-a['at'] for a,b in zip(marks,marks[1:])}
+            sample['completionCallbackMs']=sample['durableMs'][-1]['ms']
+            marks=page.evaluate('window.__writeMarks');native=[m for m in marks if m['name']=='strict-complete']
+            if len(native)!=1 or native[0]['durability']!='strict':raise RuntimeError('Missing native strict complete marker')
+            start=page.evaluate('__ui.sample.start')
+            sample['clickToStrictCompleteMs']=native[0]['at']-start
+            sample['strictEventTimeStampMs']=native[0]['eventTimeStamp']-start
+            sample['stageMs']={a['name']:b['at']-a['at'] for a,b in zip(marks,marks[1:])}
             spans=defaultdict(float)
             for span in sample.pop('spans'):spans[span['name']]+=span['ms']
             sample['inclusiveSpansMs']=dict(spans)
@@ -178,7 +187,7 @@ def run_profile(browser,url,args,index,report):
 def summary(profiles):
     rows=[r for p in profiles for r in p['samples']]
     result={}
-    for key in ['clickToStrictCompleteMs','firstMs','fullMs','blockingMs','maxTaskMs']:
+    for key in ['clickToStrictCompleteMs','completionCallbackMs','firstMs','fullMs','blockingMs','maxTaskMs']:
         values=sorted(r[key] for r in rows if r.get(key) is not None)
         if values:result[key]={'median':median(values),'p95':values[math.ceil(.95*len(values))-1],'max':values[-1]}
     result['meanStageMs']={key:sum(r['stageMs'].get(key,0) for r in rows)/len(rows) for key in rows[0]['stageMs']}

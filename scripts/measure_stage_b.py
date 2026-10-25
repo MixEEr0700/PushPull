@@ -26,17 +26,19 @@ def main():
     parser.add_argument('--before',default='4a74d1d');parser.add_argument('--after',default='working')
     parser.add_argument('--profiles',type=int,default=3);parser.add_argument('--writes',type=int,default=8)
     parser.add_argument('--cpu',type=float,default=4);parser.add_argument('--raw-directory',type=Path,required=True)
+    parser.add_argument('--cases',nargs='+',choices=[c[0] for c in CASES])
     parser.add_argument('--output',type=Path,required=True)
     args=parser.parse_args()
     if args.profiles<1 or args.writes<1:parser.error('profiles/writes >=1')
     args.raw_directory.mkdir(parents=True,exist_ok=True);cases={}
     report={'method':{'beforeRef':args.before,'afterRef':args.after,'cpuThrottle':args.cpu,
       'profilesPerVariant':args.profiles,'writesPerProfile':args.writes,'syntheticOnly':True,
-      'timing':'__ui.begin and actual submit click in the same page evaluation; end = strict history meta/state transaction complete. No transport roundtrip between clock start and event. DOM frames are proxies, not phone touch-to-photon.',
+      'timing':'__ui.begin and actual submit click in the same page evaluation; end = save transaction oncomplete before resolving the Promise. Independent native event.timeStamp and later callback also recorded. No transport roundtrip before event. DOM frames are proxies, not phone touch-to-photon.',
       'pairing':'Fresh browser process/profile per invocation. Alternating before-after / after-before pairs. Serial execution; PWA initialized and draft durable outside save timing; all measured writes offline.',
       'statistics':'Standard median, p95 nearest rank. 8 correlated writes/profile; three independent processes. Cloud CPU throttle is not Android emulation.',
       'preservation':'Within-profile before/after history/archive SHA proofs; generated IDs/timestamps may differ between profiles.'},'rawReportSha256':{},'cases':cases}
     for label,count,archive,shape in CASES:
+        if args.cases and label not in args.cases:continue
         cases[label]={}
         for profile in range(args.profiles):
             order=['before','after'] if profile%2==0 else ['after','before']
