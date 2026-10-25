@@ -184,8 +184,8 @@ const PushPullDB = (() => {
     const catalog={plans:root.catalogOrder.plans.map(id=>clone(rows.plans.find(v=>v.id===id))),planVersions:root.catalogOrder.planVersions.map(id=>clone(rows.planVersions.find(v=>v.id===id))),sessionVersions:Object.fromEntries(rows.sessions.map(s=>[s.id,clone(s.planVersion)]))};
     return {data,catalog};
   }
-  async function read(tx) {
-    const [root,modelState,...values]=await Promise.all([request(tx.objectStore('meta').get('state')),request(tx.objectStore('meta').get(MODEL_KEY)),...TABLES.map(t=>request(tx.objectStore(t).getAll()))]);
+  async function read(tx,includeModel=true) {
+    const [root,modelState,...values]=await Promise.all([request(tx.objectStore('meta').get('state')),includeModel?request(tx.objectStore('meta').get(MODEL_KEY)):null,...TABLES.map(t=>request(tx.objectStore(t).getAll()))]);
     return {root,modelState,rows:Object.fromEntries(TABLES.map((t,i)=>[t,values[i]]))};
   }
   function verifyRows(root, rows, expected) {
@@ -202,6 +202,17 @@ const PushPullDB = (() => {
     const ordered=list=>[...list].sort((a,b)=>a.id.localeCompare(b.id));
     for(const table of TABLES)if(canonical(ordered(rows[table]))!==canonical(ordered(roundtrip[table])))throw Error('Niespójne powiązania rekordów: '+table);
     return value;
+  }
+  // A full readback must equal the immutable, validated encoder output. The
+  // encoder/decoder roundtrip was checked before opening this transaction.
+  // Unknown row/root fields and every position/value still participate.
+  function verifyPreparedRows(expectedRoot,expectedRows,actual) {
+    if(!sameStoredModel(actual.root,expectedRoot))throw Error('Niepełny odczyt kontrolny metadanych.');
+    for(const table of TABLES){
+      const rows=actual.rows[table],byId=new Map(rows.map(row=>[row.id,row]));
+      if(rows.length!==expectedRows[table].length || byId.size!==rows.length ||
+        expectedRows[table].some(row=>!sameStoredModel(byId.get(row.id),row)))throw Error('Niezgodne rekordy: '+table);
+    }
   }
   async function open(fresh) {
     let db, root, current, catalog, raw, error=null, backupRows=[], stale=false, unverified=null;
@@ -240,7 +251,7 @@ const PushPullDB = (() => {
       if(!importing && root && source!==root.legacyRaw)throw Error('Starsza wersja zmieniła dane. Zachowaj obie kopie i odzyskaj historię przez import.');
       if(initializing && source!==raw)throw Error('Dane źródłowe zmieniły się podczas migracji. Uruchom ponownie.');
       const encoded=encode(data,nextCatalog), checksum=await digest({data,catalog:nextCatalog});
-      const next={key:'state',rest:encoded.rest,changeKeys:encoded.changeKeys,hasChanges:encoded.hasChanges,
+      let next={key:'state',rest:encoded.rest,changeKeys:encoded.changeKeys,hasChanges:encoded.hasChanges,
         catalogOrder:{plans:nextCatalog.plans.map(p=>p.id),planVersions:nextCatalog.planVersions.map(v=>v.id)},
         revision:expectedRevision+1,legacyRaw:source,digest:checksum,verified:false,
         counts:Object.fromEntries(TABLES.map(t=>[t,encoded.rows[t].length])),
@@ -268,8 +279,13 @@ const PushPullDB = (() => {
       const api=expectedModel || modelOwnerId!==null?await modelAPI():null;
       const modelSource=api?{format:'pushpull-backup',version:2,data,catalog:nextCatalog,archives:[...backupRows,...backups]}:null;
       if(api)api.portable(modelSource); // Never silently discard non-JSON legacy extensions.
-      const nextModel=api?{key:MODEL_KEY,revision:next.revision,document:await api.createLegacyModel(
-        JSON.stringify(modelSource),{ownerId:modelOwnerId??expectedModel.document.payload.model.ownerId,createdAt:new Date().toISOString()})}:null;
+      const nextModel=api?{key:MODEL_KEY,revision:next.revision,document:await api.createLegacyModelFromSource(
+        modelSource,{ownerId:modelOwnerId??expectedModel.document.payload.model.ownerId,createdAt:new Date().toISOString()})}:null;
+      const preparedSource=!!api&&!importing&&!initializing;
+      if(preparedSource){
+        api.freeze(encoded);api.freeze(next);
+        if(!sameStoredModel(decode(next,encoded.rows),{data,catalog:nextCatalog}))throw Error('Niepełna migracja — dane różnią się od źródła.');
+      }
       await transaction(db,'readwrite',async tx=>{
         const stored=await request(tx.objectStore('meta').get('state'));
         const storedModel=await request(tx.objectStore('meta').get(MODEL_KEY));
@@ -283,15 +299,15 @@ const PushPullDB = (() => {
         for(const record of backups)tx.objectStore('backups').add(record);
         tx.objectStore('meta').put(next);
         for(const backup of backups){const saved=await request(tx.objectStore('backups').get(backup.id));if(canonical(saved)!==canonical(backup))throw Error('Kopia nie przeszła weryfikacji.');}
-        const actual=await read(tx);
-        const decoded=verifyRows(actual.root,actual.rows,encoded.rows);
-        if(canonical(decoded)!==canonical({data,catalog:nextCatalog}))throw Error('Niepełna migracja — dane różnią się od źródła.');
+        const actual=await read(tx,!preparedSource);
+        const decoded=preparedSource?verifyPreparedRows(next,encoded.rows,actual):verifyRows(actual.root,actual.rows,encoded.rows);
+        if(!preparedSource && canonical(decoded)!==canonical({data,catalog:nextCatalog}))throw Error('Niepełna migracja — dane różnią się od źródła.');
         if(legacy()!==source)throw Error('Dane źródłowe zmieniły się podczas weryfikacji.');
         if(nextModel){
           tx.objectStore('meta').put(nextModel);
           if(!sameStoredModel(await request(tx.objectStore('meta').get(MODEL_KEY)),nextModel))throw Error('Model nie przeszedł weryfikacji zapisu.');
         }
-        next.verified=true;next.migration={...next.migration,complete:true,completedAt:next.migration.completedAt || new Date().toISOString()};
+        next={...next,verified:true,migration:{...next.migration,complete:true,completedAt:next.migration.completedAt || new Date().toISOString()}};
         tx.objectStore('meta').put(next);
       });
       if(importing){
@@ -432,8 +448,8 @@ const PushPullDB = (() => {
       async commit(data,{importing=false,importedCatalog=null,importedArchives=[],backupBefore=false,expectedRevision=null,expectedLegacyRaw=undefined}={}) {
         if(!db)throw Error('IndexedDB niedostępne. Odblokuj pamięć i uruchom ponownie.');
         if(error && !importing)throw error;
-        const safe=clone(data),nextCatalog=importedCatalog || catalogFor(safe,catalog);
-        try{await save(safe,nextCatalog,{importing,importedArchives,backupBefore,requiredRevision:expectedRevision,requiredLegacyRaw:expectedLegacyRaw});}catch(failure){if(/Inna karta|Starsza wersja|Dane źródłowe|Model zmienił/.test(failure.message))blocked(failure.message);throw failure;}
+        const safe=clone(data),nextCatalog=importedCatalog?clone(importedCatalog):catalogFor(safe,catalog),archives=clone(importedArchives);
+        try{await save(safe,nextCatalog,{importing,importedArchives:archives,backupBefore,requiredRevision:expectedRevision,requiredLegacyRaw:expectedLegacyRaw});}catch(failure){if(/Inna karta|Starsza wersja|Dane źródłowe|Model zmienił/.test(failure.message))blocked(failure.message);throw failure;}
       },
       backups(){return backupRows.map(b=>b.id);},
       backupLabel(id){const item=backupRows.find(b=>b.id===id);const label={migration:'Przed migracją','before-import':'Przed przywróceniem / importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item.kind] || 'Kopia';return label+' · '+new Date(item.createdAt).toLocaleString('pl-PL');},

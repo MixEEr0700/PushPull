@@ -50,7 +50,7 @@ test('batched reference construction/validation matches single references and re
  assert.throws(()=>createResultReferences(mutable,specifications));
 });
 
-test('a reference batch performs one full snapshot validation, with no cross-call cache',async()=>{
+test('a reference batch visits the snapshot boundary once and rejects changed mutable input',async()=>{
  const code=readFileSync('model/training-model.mjs','utf8').replace('export function validateSessionSnapshot(x) {','export function validateSessionSnapshot(x) { snapshotValidationCalls++;');
  const measured=await import('data:text/javascript;base64,'+Buffer.from('export let snapshotValidationCalls=0;\n'+code).toString('base64'));
  const snapshot=capture(fixture()),specifications=Array.from({length:128},(_,i)=>({resultId:'row-'+i,positionId:'chest-position',setId:'main-1',side:Side.LEFT,groupId:null,round:null}));

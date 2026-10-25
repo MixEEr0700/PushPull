@@ -4,8 +4,11 @@ export function requireThat(condition, message) {
 }
 export const record = x => x !== null && typeof x === 'object' && !Array.isArray(x);
 export const identifier = x => typeof x === 'string' && x.trim().length > 0;
+const frozenGraphs=new WeakSet(),portableGraphs=new WeakSet();
 export function freeze(x) {
-  if (x && typeof x === 'object') { Object.values(x).forEach(freeze); Object.freeze(x); }
+  if (x && typeof x === 'object' && !frozenGraphs.has(x)) {
+    Object.values(x).forEach(freeze);Object.freeze(x);frozenGraphs.add(x);
+  }
   return x;
 }
 export function canonical(x) {
@@ -54,22 +57,31 @@ export function parseJson(text) {
 
 // Preserve all own JSON keys, including unfamiliar future fields. Reject values
 // JSON.stringify would silently change or discard, before cloning or hashing.
-export function portable(value, ancestors=new Set()) {
-  if (value===null || ['string','boolean'].includes(typeof value)) return;
+export function portable(value, ancestors=new Set()) { portableGraph(value,ancestors); }
+// A proof is recorded only after validating all descriptors and descendants.
+// Object.freeze at the root alone is insufficient; no caller can seed this set.
+export function immutableJSON(value) {
+  portable(value);return value!==null && typeof value==='object' && portableGraphs.has(value);
+}
+function portableGraph(value, ancestors) {
+  if (value===null || ['string','boolean'].includes(typeof value)) return true;
   if (typeof value==='number') {
-    requireThat(Number.isFinite(value) && !Object.is(value,-0), 'non-portable JSON number');return;
+    requireThat(Number.isFinite(value) && !Object.is(value,-0), 'non-portable JSON number');return true;
   }
   requireThat(typeof value==='object' && !ancestors.has(value), 'non-JSON value or cycle');
+  if(portableGraphs.has(value))return true;
   const array=Array.isArray(value);
   requireThat(array || [Object.prototype,null].includes(Object.getPrototypeOf(value)), 'non-plain JSON object');
   requireThat(Object.getOwnPropertySymbols(value).length===0, 'symbol key');
   const keys=Object.getOwnPropertyNames(value).filter(k=>!(array && k==='length'));
   requireThat(!array || keys.length===value.length && keys.every((k,i)=>k===String(i)), 'sparse or decorated array');
-  ancestors.add(value);
+  ancestors.add(value);let immutable=Object.isFrozen(value);
   for (const key of keys) {
     const descriptor=Object.getOwnPropertyDescriptor(value,key);
     requireThat(descriptor.enumerable && 'value' in descriptor, 'non-JSON property');
-    portable(descriptor.value,ancestors);
+    const childImmutable=portableGraph(descriptor.value,ancestors);immutable=childImmutable&&immutable;
   }
   ancestors.delete(value);
+  if(immutable)portableGraphs.add(value);
+  return immutable;
 }

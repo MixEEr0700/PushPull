@@ -29,9 +29,9 @@ from measure_ui_response import UI_PROBE,LEGACY_SEED
 
 FUNCTIONS={
  'app.js':['persist','render','bindingFor'],
- 'indexeddb.js':['save','encode','decode','verifyRows','validateCatalog','catalogFor'],
+ 'indexeddb.js':['save','encode','decode','verifyRows','verifyPreparedRows','validateCatalog','catalogFor'],
  'storage.js':['validate'],
- 'model/legacy-model.mjs':['payload','createLegacyModel'],
+ 'model/legacy-model.mjs':['payload','createLegacyModel','createLegacyModelFromSource'],
  'model/backup-json.mjs':['parseJson'],
  'model/legacy-backup.mjs':['readLegacyBackup','validateV1','validateV2'],
  'model/backup.mjs':['createBackup','validatePayload','digest'],
@@ -71,9 +71,14 @@ def instrument(name,text,detail):
         body=text[start:end]
         for target,label in MARKERS:
             if label=='cas-compare' and 'sameStoredModel(storedModel' in body:target='        if(!sameStoredModel(storedModel || null,expectedModel))'
+            if label=='source-readback' and 'read(tx,!preparedSource)' in body:target='        const actual=await read(tx,!preparedSource);'
+            if label=='source-verify' and 'const decoded=preparedSource?' in body:target='        const decoded=preparedSource?'
+            if label=='root-verified-complete' and 'next={...next,verified:true' in body:target='        next={...next,verified:true'
             if body.count(target)!=1:raise ValueError('Measurement marker mismatch: '+label)
             indent=target[:len(target)-len(target.lstrip())]
             body=body.replace(target,indent+f"window.__writeMarks?.push({{name:'{label}',at:performance.now()}});\n"+target,1)
+        if '      const preparedSource=!!api' in body:
+            body=body.replace('      const preparedSource=!!api',"      window.__writeMarks?.push({name:'source-preparation',at:performance.now()});\n      const preparedSource=!!api",1)
         text=text[:start]+body+text[end:]
     for fn in FUNCTIONS.get(name,[]) if detail else (['persist','render'] if name=='app.js' else []):
         pattern=re.compile(r'(?P<async>async\s+)?function\s+'+fn+r'\(')
@@ -138,10 +143,9 @@ def run_profile(browser,url,args,index,report):
             page.evaluate(FILL,{'native':args.kind=='v2','weight':str(21+n)})
             page.wait_for_function("document.querySelector('[data-draft-status]')?.textContent.includes('Szkic zapisany lokalnie')",timeout=180000)
             dialogs.clear()
-            page.evaluate('window.__writeMarks=[];__ui.begin()')
             if args.cpu_profile:
                 cdp.send('Profiler.enable');cdp.send('Profiler.setSamplingInterval',{'interval':1000});cdp.send('Profiler.start')
-            page.evaluate(f"document.querySelector('{form} [type=submit]').click()")
+            page.evaluate(f"window.__writeMarks=[];__ui.begin();document.querySelector('{form} [type=submit]').click()")
             page.wait_for_function("!document.querySelector('#app').inert",timeout=180000,polling='raf')
             if page.locator(form).count():raise RuntimeError('Result not committed: '+repr(dialogs))
             sample=page.evaluate('__ui.end()')

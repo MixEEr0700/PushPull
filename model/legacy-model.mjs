@@ -3,11 +3,11 @@ import {project} from './journal.mjs';
 import {storedPlanModel} from './plan-import.mjs';
 import {createModel} from './training-model.mjs';
 import {createBackup,validateBackup,exportBackup,readLegacyBackup} from './backup.mjs';
-import {canonical,portable,requireThat as check} from './backup-json.mjs';
+import {prepareLegacyBackup,legacySource} from './legacy-backup.mjs';
+import {canonical,portable,freeze,requireThat as check} from './backup-json.mjs';
 export const MODEL_KEY='training-model-v1';
 const source=id=>({kind:'legacy',reference:id,recordedAt:null});
-function payload(raw,ownerId) {
-  const legacy=readLegacyBackup(raw);
+function payload(legacy,ownerId) {
   check(legacy.formatVersion===2,'migration requires the complete v2 backup');
   const data=legacy.data,exercises=Object.values(data.exercises).flat();
   return project(data,{
@@ -20,12 +20,16 @@ function payload(raw,ownerId) {
     sessionRecords:data.sessions.map(s=>({id:s.id,snapshotId:null,payloadVersion:1,data:s,
       legacyPlanLink:legacy.catalog.sessionVersions[s.id]})),
     resultRecords:data.entries.map(e=>({id:e.id,sessionId:e.sessionId,binding:'uninterpreted',payloadVersion:1,data:e})),
-    legacySources:[{id:'current-legacy',formatVersion:2,semantics:'legacy-unknown',raw}]
+    legacySources:[legacySource(legacy,'current-legacy')]
   });
 }
 /** Retain every legacy record/extension, with no inferred plan, role, side or kg. */
 export async function createLegacyModel(raw,{ownerId,createdAt}) {
-  return createBackup(payload(raw,ownerId),{createdAt,metadata:{bridgeVersion:1}});
+  return createBackup(freeze(payload(readLegacyBackup(raw),ownerId)),{createdAt,metadata:{bridgeVersion:1}});
+}
+/** Same v3 bytes/validation, without reparsing a writer's own JSON string. */
+export async function createLegacyModelFromSource(value,{ownerId,createdAt}) {
+  return createBackup(freeze(payload(prepareLegacyBackup(value),ownerId)),{createdAt,metadata:{bridgeVersion:1}});
 }
 /** Full validation plus equality to the committed source, not merely its counts. */
 export async function verifyLegacyModel(state,{data,catalog},revision) {
@@ -34,10 +38,10 @@ export async function verifyLegacyModel(state,{data,catalog},revision) {
   check(document.metadata.bridgeVersion===1,'unsupported model bridge');
   const raw=document.payload.legacySources[0]?.raw,legacy=readLegacyBackup(raw);
   check(canonical({data:legacy.data,catalog:legacy.catalog})===canonical({data,catalog}),'model differs from committed history');
-  check(canonical(document.payload)===canonical(payload(raw,document.payload.model?.ownerId)),'incomplete or unsupported legacy bridge model');
+  check(canonical(document.payload)===canonical(payload(legacy,document.payload.model?.ownerId)),'incomplete or unsupported legacy bridge model');
   return document;
 }
-export {exportBackup,readLegacyBackup,portable};
+export {exportBackup,readLegacyBackup,portable,freeze};
 /** Restore only this journal's lossless source-backed format; never flatten a
  * generic future v3 document into legacy data and silently discard its records. */
 export async function parseModelBackup(raw) {
