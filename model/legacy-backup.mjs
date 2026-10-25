@@ -56,7 +56,8 @@ function validateV2(x) {
   check(plans.size===Object.keys(x.data.exercises).length, 'legacy catalog missing plan');
   for (const v of c.planVersions) {
     check(record(v) && text(v.id) && v.id && !versions.has(v.id) && plans.has(v.planId) && ['recorded','legacy-current-only'].includes(v.provenance) && Array.isArray(v.exercises), 'legacy plan version');
-    const probe=structuredClone(x.data);
+    // validateV1 is read-only; only this map is replaced for archived plans.
+    const probe={...x.data,exercises:{...x.data.exercises},sessions:[],entries:[],changes:{},activeId:null};
     probe.exercises[v.planId]=v.exercises.map(e=>({...e,notes:''}));probe.sessions=[];probe.entries=[];probe.changes={};probe.activeId=null;
     validateV1(probe); versions.set(v.id,v);
   }

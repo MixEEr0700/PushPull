@@ -1,4 +1,4 @@
-import {createResultReference} from './training-model.mjs';
+import {createResultReferences} from './training-model.mjs';
 import {canonical,requireThat as check} from './backup-json.mjs';
 export function flatten(performance){return performance.rows.flatMap(row=>row.segments.map(s=>({...s,parentId:row.id,side:row.side})));}
 export function validatePerformance(performance,snapshot,entry){
@@ -6,10 +6,10 @@ export function validatePerformance(performance,snapshot,entry){
  const position=snapshot.model.positions.find(p=>p.id===entry.journalPositionId);
  check(position?.exerciseId===entry.exerciseId&&position.variantId===entry.journalVariantId,'performance position mismatch');
  check(canonical(performance.loadConvention)===canonical(position.loadConvention)||position.loadConvention.basis===null&&performance.loadConvention.unit===position.loadConvention.unit&&['per-implement','combined','machine-indication',null].includes(performance.loadConvention.basis),'load convention mismatch');
- const ids=new Set(),refs=[],bindings=new Set();
+ const ids=new Set(),specifications=[],bindings=new Set();
  for(const row of performance.rows){
   check(typeof row.id==='string'&&row.id&&!ids.has(row.id),'duplicate row ID');ids.add(row.id);
-  const ref=createResultReference(snapshot,{resultId:row.id,positionId:position.id,setId:row.setId,side:row.side,groupId:row.groupId,round:row.round});refs.push(ref);
+  specifications.push({resultId:row.id,positionId:position.id,setId:row.setId,side:row.side,groupId:row.groupId,round:row.round});
   if(position.sideMode==='required')check(row.side==='left'||row.side==='right','separate left/right required');
   const key=canonical([row.setId,row.side,row.groupId,row.round]);
   if(row.setId!==null){check(!bindings.has(key),'duplicate prescribed set/side');bindings.add(key);}
@@ -21,7 +21,7 @@ export function validatePerformance(performance,snapshot,entry){
  }
  check(canonical(entry.series)===canonical(flatten(performance)),'performance projection mismatch');
  check(entry.kg===entry.series[0].kg&&entry.reps===entry.series[0].reps,'summary projection mismatch');
- return refs;
+ return createResultReferences(snapshot,specifications);
 }
 export function newPerformance(ex,previous){
  const sides=ex.sideMode==='required'?['left','right']:[null],rows=[];

@@ -6,7 +6,8 @@ import {
   Side, createModel, validateModel, validateExerciseIdentity, validateExerciseVariant,
   validatePlanVersion, validatePlanPosition, validateSetPrescription, validateDropPrescription,
   validateGroupPrescription, validateLoadConvention, validateCoachInstruction, validateUserNote,
-  captureSessionSnapshot, validateSessionSnapshot, createResultReference, validateResultReference
+  captureSessionSnapshot, validateSessionSnapshot, createResultReference, validateResultReference,
+  createResultReferences, validateResultReferences
 } from '../model/training-model.mjs';
 
 const source = (kind='trainer',reference='DOCX:T2/R3/C1') => ({kind,reference,recordedAt:null});
@@ -30,6 +31,37 @@ function fixture() {
 }
 const capture = model => captureSessionSnapshot(model,{id:'snapshot',sessionId:'existing-session-id',planVersionId:'v1',unitId:'unit',startedAt:'2026-10-22T10:00:00.000Z'});
 const ref = (snapshot,fields={}) => createResultReference(snapshot,{resultId:'existing-entry-id',positionId:'chest-position',setId:'main-1',side:Side.LEFT,groupId:null,round:null,...fields});
+
+test('batched reference construction/validation matches single references and rejects every bad member',()=>{
+ const snapshot=capture(fixture()),specifications=Array.from({length:12},(_,i)=>({resultId:'result-'+i,positionId:'chest-position',setId:'main-1',side:Side.LEFT,groupId:null,round:null}));
+ const batch=createResultReferences(snapshot,specifications);
+ assert.deepEqual(batch,specifications.map(s=>createResultReference(snapshot,s)));
+ assert.equal(validateResultReferences(batch,snapshot),batch);
+ for(const at of [0,5,11]){
+  const bad=structuredClone(specifications);bad[at].side=Side.BILATERAL;
+  assert.throws(()=>createResultReferences(snapshot,bad));
+  const invalid=structuredClone(batch);invalid[at].variantId='another-variant';
+  assert.throws(()=>validateResultReferences(invalid,snapshot));
+ }
+ const mutable=structuredClone(snapshot);
+ validateResultReferences(batch,mutable);
+ mutable.model.sets[0].positionId='missing';
+ assert.throws(()=>validateResultReferences(batch,mutable),'a prior successful call must not cache validity');
+ assert.throws(()=>createResultReferences(mutable,specifications));
+});
+
+test('a reference batch performs one full snapshot validation, with no cross-call cache',async()=>{
+ const code=readFileSync('model/training-model.mjs','utf8').replace('export function validateSessionSnapshot(x) {','export function validateSessionSnapshot(x) { snapshotValidationCalls++;');
+ const measured=await import('data:text/javascript;base64,'+Buffer.from('export let snapshotValidationCalls=0;\n'+code).toString('base64'));
+ const snapshot=capture(fixture()),specifications=Array.from({length:128},(_,i)=>({resultId:'row-'+i,positionId:'chest-position',setId:'main-1',side:Side.LEFT,groupId:null,round:null}));
+ const before=measured.snapshotValidationCalls,batch=measured.createResultReferences(snapshot,specifications);
+ assert.equal(measured.snapshotValidationCalls-before,1);
+ measured.validateResultReferences(batch,snapshot);
+ assert.equal(measured.snapshotValidationCalls-before,2);
+ const changed=structuredClone(snapshot);changed.model.variants[0].exerciseId='missing';
+ assert.throws(()=>measured.validateResultReferences(batch,changed));
+ assert.equal(measured.snapshotValidationCalls-before,3);
+});
 
 test('each independent contract validates records; model preserves unknown JSON and caller data',()=>{
   const input=fixture();input.extension={future:[false,null,'Ł']};input.sets[0].extension={raw:'100,5'};

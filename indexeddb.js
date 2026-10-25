@@ -79,10 +79,11 @@ const PushPullDB = (() => {
     if (plans.size !== Object.keys(data.exercises).length) throw Error('Brak planu');
     for (const v of catalog.planVersions) {
       if (!v || typeof v.id !== 'string' || !v.id || ids.has(v.id) || !plans.has(v.planId) || !['recorded','legacy-current-only'].includes(v.provenance)) throw Error('Nieprawidłowa wersja planu');
-      const probe = clone(data);
+      // Validation is read-only. A separate exercises map allows replacing one
+      // plan without cloning the whole history/snapshots for each plan version.
+      const probe = {...data,exercises:{...data.exercises},sessions:[],entries:[],changes:{},activeId:null};
       probe.exercises[v.planId] = (v.exercises || []).map(ex=>({...ex,notes:''}));
       // Validate archived parameters independently of current sessions/entries.
-      probe.sessions=[];probe.entries=[];probe.changes={};probe.activeId=null;
       PushPullStorage.validate(probe);
       ids.add(v.id);
     }
@@ -141,13 +142,20 @@ const PushPullDB = (() => {
   }
   function decode(root, rows) {
     const order = values => [...values].sort((a,b)=>a.position-b.position);
+    // Preserve per-entry position ordering, but visit each stored set only once.
+    // verifyRows still detects orphan/mismatched rows through the full roundtrip.
+    const setsByEntry=new Map();
+    for(const row of rows.sets){
+      if(!setsByEntry.has(row.entryId))setsByEntry.set(row.entryId,[]);
+      setsByEntry.get(row.entryId).push(row);
+    }
     const data=clone(root.rest);
     data.exercises=Object.fromEntries(root.catalogOrder.plans.map(type=>[type,order(rows.exercises.filter(e=>e.planId===type)).map(e=>({...e.value,notes:rows.notes.find(n=>n.id===e.id)?.value}))]));
     data.sessions=order(rows.sessions).map(s=>clone(s.value));
     data.entries=order(rows.entries).map(e=>{
       const value=clone(e.value);
       if(e.seriesKind==='null')value.series=null;
-      else if(e.seriesKind==='array')value.series=order(rows.sets.filter(s=>s.entryId===e.id)).map(s=>clone(s.value));
+      else if(e.seriesKind==='array')value.series=order(setsByEntry.get(e.id)||[]).map(s=>clone(s.value));
       return value;
     });
     if(root.hasChanges)data.changes=Object.fromEntries(root.changeKeys.map(id=>[id,order(rows.changes.filter(c=>c.exerciseId===id)).map(c=>clone(c.value))]));
@@ -189,7 +197,7 @@ const PushPullDB = (() => {
         if(result.modelState)throw Error('Model bez źródłowej historii. Odzyskaj pełną kopię.');
         unverified=null;return null;
       }
-      root=result.root;unverified=clone(result);
+      root=result.root; // The complete recovery copy was already captured above.
       if(!result.root.verified || !result.root.migration?.complete)throw Error('Migracja nie została potwierdzona.');
       const value=verifyRows(result.root,result.rows);
       if(await digest(value)!==result.root.digest)throw Error('Weryfikacja integralności bazy nie powiodła się.');
