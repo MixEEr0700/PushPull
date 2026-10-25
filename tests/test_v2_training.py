@@ -27,6 +27,7 @@ class V2Training(BrowserHarness):
         self.page.locator('[data-tab=training]').click()
         expect(self.page.locator('.exercise-card .name').nth(3)).to_have_text('Dipy')
         self.page.locator('[data-act=finish]').click()
+        expect(self.page.locator('[data-act=start]')).to_be_visible()
 
     def open_result(self,type,id):
         self.page.locator('[data-type="'+type+'"]').click()

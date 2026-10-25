@@ -145,6 +145,7 @@ class BrowserRegression(BrowserHarness):
             self.start()
             self.assertEqual(self.state()['sessions'][-1]['type'], current)
             self.page.locator('[data-act=finish]').click()
+            expect(self.page.locator('[data-act=start]')).to_be_visible()
             self.assertEqual(self.state()['nextType'], next_type)
         self.page.locator('[data-type="PUSH B"]').click()
         self.start()
@@ -162,6 +163,7 @@ class BrowserRegression(BrowserHarness):
         self.assertEqual(len(self.state()['entries'][0]['series']), 2)
         self.page.locator('#notesForm textarea').fill('Łopatki stabilnie')
         self.page.locator('#notesForm button').click()
+        expect(self.page.locator('[data-training-pending]')).to_have_count(0)
         self.page.locator('[data-panel=stats]').click()
         expect(self.page.locator('.stat-tile.selected strong')).to_contain_text('640')
         for metric in ['weight','reps','pace','tonnage']:
@@ -179,6 +181,7 @@ class BrowserRegression(BrowserHarness):
         self.save()
         self.page.locator('#historicalDate [name=date]').fill('2026-10-20')
         self.page.locator('#historicalDate button').click()
+        expect(self.page.locator('[data-training-pending]')).to_have_count(0)
         saved=self.state()
         self.assertEqual(len(saved['entries']),1)
         self.assertEqual(saved['nextType'],'PULL A')
@@ -249,6 +252,7 @@ class BrowserRegression(BrowserHarness):
     def test_quota_failure_rolls_back_ui_and_memory(self):
         self.page.evaluate("() => {const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(v){if(this.name==='sessions')throw new DOMException('Pełna pamięć','QuotaExceededError');return add.call(this,v)}}")
         self.page.locator('[data-act=start]').click()
+        expect(self.page.locator('[data-training-pending]')).to_have_count(0)
         expect(self.page.locator('[data-act=start]')).to_be_visible()
         expect(self.page.locator('[data-act=finish]')).to_have_count(0)
         self.assertEqual(self.state()['sessions'],[])

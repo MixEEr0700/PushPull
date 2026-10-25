@@ -22,6 +22,8 @@ Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budowa�
 
 ## Dokumentacja
 
+- [Pierwsza reakcja i trwały zapis — Issue #75](docs/UI_RESPONSIVENESS_ISSUE_75.md): rozdzielone pomiary, bezpieczny stan oczekiwania i projekt dalszego usprawnienia.
+
 - [Responsywność Androida — Issue #73](docs/ANDROID_RESPONSIVENESS_ISSUE_73.md): pomiary na syntetycznej historii, ograniczenia i scenariusz weryfikacji telefonu.
 
 - [Dziennik — pierwsza część funkcjonalna](docs/FUNCTIONAL_JOURNAL_PART_1.md): świadome włączenie, sesje ze snapshotem, serie, kalendarz i pełne odtwarzanie v3; bez aktywacji nowego V2 i edytorów struktur specjalnych.
