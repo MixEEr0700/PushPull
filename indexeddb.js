@@ -9,6 +9,28 @@ const PushPullDB = (() => {
   const modelAPI = () => import('./model/legacy-model.mjs');
   const clone = value => structuredClone(value);
   const canonical = value => JSON.stringify(sort(value));
+  const omittedJSON = value => value===undefined || typeof value==='function' || typeof value==='symbol';
+  // Same canonical JSON equality for complete model CAS/readback, without two
+  // escaped copies of every raw archive. No digest-only shortcut or cache.
+  function sameStoredModel(a,b) {
+    if(a===b && (a===null || typeof a==='string' || typeof a==='number' || typeof a==='boolean'))return true;
+    if(a===null || b===null || typeof a!=='object' || typeof b!=='object')return canonical(a)===canonical(b);
+    const aa=Array.isArray(a),bb=Array.isArray(b);
+    if(aa!==bb)return false;
+    if(aa){
+      // Retain the old canonical handling of holes/non-JSON legacy values too.
+      for(let i=0;i<a.length;i++)if(omittedJSON(a[i]))return canonical(a)===canonical(b);
+      for(let i=0;i<b.length;i++)if(omittedJSON(b[i]))return canonical(a)===canonical(b);
+      if(a.length!==b.length)return false;
+      for(let i=0;i<a.length;i++)if(!sameStoredModel(a[i],b[i]))return false;
+      return true;
+    }
+    const ak=Object.keys(a).sort(),bk=Object.keys(b).sort();
+    if(ak.some(k=>omittedJSON(a[k])) || bk.some(k=>omittedJSON(b[k])))return canonical(a)===canonical(b);
+    if(ak.length!==bk.length)return false;
+    for(let i=0;i<ak.length;i++)if(ak[i]!==bk[i] || !sameStoredModel(a[ak[i]],b[bk[i]]))return false;
+    return true;
+  }
   function sort(value) {
     if (Array.isArray(value)) return value.map(sort);
     if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map(k => [k, sort(value[k])]));
@@ -251,7 +273,7 @@ const PushPullDB = (() => {
       await transaction(db,'readwrite',async tx=>{
         const stored=await request(tx.objectStore('meta').get('state'));
         const storedModel=await request(tx.objectStore('meta').get(MODEL_KEY));
-        if(canonical(storedModel || null)!==canonical(expectedModel))throw Error('Model zmienił się w innej karcie. Odśwież aplikację.');
+        if(!sameStoredModel(storedModel || null,expectedModel))throw Error('Model zmienił się w innej karcie. Odśwież aplikację.');
         if((stored?.revision || 0)!==expectedRevision)throw Error('Inna karta zapisała nowsze dane. Odśwież aplikację.');
         if(legacy()!==source)throw Error('Starsza wersja zmieniła dane w trakcie operacji.');
         for(const table of TABLES) {
@@ -267,7 +289,7 @@ const PushPullDB = (() => {
         if(legacy()!==source)throw Error('Dane źródłowe zmieniły się podczas weryfikacji.');
         if(nextModel){
           tx.objectStore('meta').put(nextModel);
-          if(canonical(await request(tx.objectStore('meta').get(MODEL_KEY)))!==canonical(nextModel))throw Error('Model nie przeszedł weryfikacji zapisu.');
+          if(!sameStoredModel(await request(tx.objectStore('meta').get(MODEL_KEY)),nextModel))throw Error('Model nie przeszedł weryfikacji zapisu.');
         }
         next.verified=true;next.migration={...next.migration,complete:true,completedAt:next.migration.completedAt || new Date().toISOString()};
         tx.objectStore('meta').put(next);
