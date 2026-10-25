@@ -156,9 +156,27 @@ class PWADeployment(unittest.TestCase):
         with (source/'app.js').open('a') as file:file.write('\n// Test release '+label+'\n')
         output=self.path/label;build(output,source);return output
     def wait_update(self):
-        self.page.evaluate('async()=>{window.__pwaRegistration=await navigator.serviceWorker.getRegistration();await window.__pwaRegistration.update()}')
+        self.page.evaluate("""async()=>{
+          const r=window.__pwaRegistration=await navigator.serviceWorker.getRegistration();
+          const events=window.__pwaUpdateEvents=[];
+          const observe=w=>{if(!w)return;const record=()=>events.push({state:w.state,at:performance.now()});record();w.addEventListener('statechange',record)};
+          r.addEventListener('updatefound',()=>observe(r.installing),{once:true});
+          observe(r.installing);await r.update();
+          // A pre-deployment update job may have supplied the old script to
+          // both callers. Drain that job before requesting this release.
+          // Never retry a failed installer: it has lifecycle events.
+          if(!r.installing&&!r.waiting&&events.length===0){
+            await new Promise(resolve=>setTimeout(resolve,0));await r.update();
+          }
+        }""")
         # Poll a synchronous property: a Promise itself is truthy to the polling API.
-        self.poll('window.__pwaRegistration.waiting?.state === "installed"')
+        # Preserve the assertion and budget; retain lifecycle evidence on failure.
+        try:self.poll('window.__pwaRegistration.waiting?.state === "installed"')
+        except AssertionError as error:
+            states=self.page.evaluate("""()=>{const r=window.__pwaRegistration;return {
+              active:r.active?.state,installing:r.installing?.state,waiting:r.waiting?.state,
+              events:window.__pwaUpdateEvents};}""")
+            self.fail(str(error)+'; worker lifecycle: '+json.dumps(states))
         expected='pushpull-shell-'+json.loads((self.controller['directory']/'release.json').read_text())['release']
         self.waiting_worker=next(w for w in self.context.service_workers if w.evaluate('CACHE')==expected)
     def reopen(self,timeout=5000):
@@ -317,6 +335,42 @@ class PWADeployment(unittest.TestCase):
         expect(self.page.locator('h1')).to_have_text('Trening')
         self.assertEqual(self.snapshot()['data'],FIXTURE)
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+
+    def test_update_after_release_switch_does_not_reuse_old_inflight_check(self):
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-main=kg]').fill('77');self.page.locator('[data-main=reps]').fill('9')
+        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.notification_state();old=self.controller['directory'];new=self.next_release('overlapping-check')
+        entered=threading.Event();release=threading.Event();self.addCleanup(release.set)
+        handler=self.server.RequestHandlerClass;get=handler.do_GET
+        def gated_get(request):
+            if request.path.split('?')[0]=='/sw.js' and request.directory==old and not entered.is_set():
+                entered.set()
+                if not release.wait(10):request.send_error(504);return
+            return get(request)
+        handler.do_GET=gated_get
+        self.page.evaluate("()=>{window.__oldUpdate=navigator.serviceWorker.getRegistration().then(r=>r.update())}")
+        self.assertTrue(entered.wait(3),'Old-version update must be in flight before the release switch')
+        self.controller['directory']=new
+        # Enqueue the explicit check before allowing the old script response.
+        # The browser coalesces it with that older update job. No timing sleep.
+        self.page.expose_function('__releaseOldCheck',release.set)
+        self.page.evaluate("""()=>{
+          const update=ServiceWorkerRegistration.prototype.update;
+          window.__updateObservations=[];
+          ServiceWorkerRegistration.prototype.update=function(...args){
+            const result=update.apply(this,args);
+            result.then(()=>__updateObservations.push({installing:!!this.installing,waiting:!!this.waiting}));
+            void window.__releaseOldCheck();return result;
+          };
+        }""")
+        self.wait_update()
+        observations=self.page.evaluate('__updateObservations')
+        self.assertEqual(observations[0],{'installing':False,'waiting':False})
+        self.assertEqual(self.notification_state(),before)
+        self.assertTrue(self.page.evaluate('!!navigator.serviceWorker.controller'))
+        self.reopen();self.assertEqual(self.notification_state(),before)
 
     def test_update_waits_for_all_tabs_and_preserves_unsaved_series_and_all_data(self):
         self.seed();self.page.goto(self.url);self.ready()
