@@ -199,3 +199,22 @@ Nie przypisujemy nieodtworzonego timeoutu automatycznie synchronizacji testu.
 Po dodaniu diagnostyki: test Issue #40 oraz aktualizacja z dwiema kartami
 **2/2 PASS**, 49,062 s. Zakres produkcyjnej poprawki i próbki benchmarków
 pozostają niezmienione; nie powtarzano zakończonych pomiarów.
+
+Następnie deterministycznie odtworzono ten sam typ timeoutu na małym profilu:
+serwer zatrzymuje odpowiedź starego `sw.js`, wdrożenie zmienia katalog, nowa
+kontrola `registration.update()` dołącza do starego joba; po zwolnieniu starej
+odpowiedzi oba wywołania legalnie kończą się bez instalatora (`events: []`,
+active activated, installing/waiting null). Dotychczasowy helper bezskutecznie
+czekał 10 s na installed. Kolejna odrębna kontrola widzi nową wersję.
+
+Dodano test `test_update_after_release_switch_does_not_reuse_old_inflight_check`:
+przed poprawką helpera FAIL (14,328 s), po poprawce PASS. Helper po no-op bez
+żadnych zdarzeń instalatora oddaje zadanie i wykonuje odrębną kontrolę nowego
+wdrożenia. Nie ponawia znanego błędu instalatora, nie akceptuje innego cache,
+nie zwiększa 10 s budżetu instalacji i nie pomija sprawdzenia danych/szkiców.
+Produkcja nadal używa niezmienionego mechanizmu SW.
+
+Po tej poprawce: nowy test nakładania, historyczny Issue #40 i aktualizacja
+z dwiema kartami **3/3 PASS**, 53,280 s. To dowód konkretnego wyścigu helpera,
+a nie dowód, że właśnie on wystąpił w pierwszym CI — tam nie było jeszcze
+śladu lifecycle. Pełny CI aktualnego head obejmuje już **136 testów Python**.
