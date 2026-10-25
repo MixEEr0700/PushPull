@@ -97,7 +97,11 @@ pomiarów cold/warm z #75.
 
 Czas od rzeczywistego zdarzenia submit do `complete` transakcji historii
 `meta/state`, z potwierdzonym `durability: strict`, a nie do zapisu szkicu
-ani samego pokazania oczekiwania. DOM/dwie klatki są tylko proxy odmalowania.
+ani samego pokazania oczekiwania. DOM/dwie klatki są tylko proxy odmalowania. Zegar startuje w osobnej
+krótkiej ewaluacji bezpośrednio przed programowym kliknięciem; obejmuje jedną
+rundę sterowania Playwright przed zdarzeniem. To przybliżenie z narzutem
+harnessu, nie bezpośredni pomiar dotyku. Obserwator Pixela startuje przy
+capture zdarzenia, ale nie został uruchomiony na telefonie właściciela.
 Mediana standardowa, p95 nearest-rank (23. z 24 próbek). Czas w ms:
 
 | Profil | Przed mediana/p95 | Po mediana/p95 |
@@ -179,3 +183,19 @@ To minimalne usprawnienie nadaje się do niezależnego przeglądu; nie zamyka P0
 Następny etap wymaga zatwierdzenia [konkretnego projektu](DURABLE_WRITE_P0_PROJECT.md)
 i weryfikacji na fizycznym Pixelu z reprezentatywną bazą. Nie wdrożono
 większej przebudowy tylko na podstawie korzystnego prototypu syntetycznego.
+
+
+Pierwszy pełny CI [40218325742](https://github.com/MixEEr0700/PushPull/actions/runs/40218325742)
+zakończył się 134/135 PASS: historyczny test aktualizacji PWA Issue #40
+nie doczekał `waiting.state === installed` w 10 s. To nastąpiło przed
+przywracaniem 16 MiB; pozostałe testy, w tym nowe CAS/readback, przeszły.
+Ten sam test uruchomiony osobno lokalnie przeszedł (46,423 s całej próby).
+Nie ustalono na tej podstawie przyczyny timeoutu CI. Dodano wyłącznie
+zapis stanów lifecycle do komunikatu błędu helpera testowego; nie zmieniono
+10 s budżetu, asercji installed, kontroli danych ani mechanizmu SW aplikacji.
+Kolejny pełny CI ma zweryfikować aktualny head; jego wynik jest w checks PR.
+Nie przypisujemy nieodtworzonego timeoutu automatycznie synchronizacji testu.
+
+Po dodaniu diagnostyki: test Issue #40 oraz aktualizacja z dwiema kartami
+**2/2 PASS**, 49,062 s. Zakres produkcyjnej poprawki i próbki benchmarków
+pozostają niezmienione; nie powtarzano zakończonych pomiarów.

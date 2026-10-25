@@ -156,9 +156,21 @@ class PWADeployment(unittest.TestCase):
         with (source/'app.js').open('a') as file:file.write('\n// Test release '+label+'\n')
         output=self.path/label;build(output,source);return output
     def wait_update(self):
-        self.page.evaluate('async()=>{window.__pwaRegistration=await navigator.serviceWorker.getRegistration();await window.__pwaRegistration.update()}')
+        self.page.evaluate("""async()=>{
+          const r=window.__pwaRegistration=await navigator.serviceWorker.getRegistration();
+          const events=window.__pwaUpdateEvents=[];
+          const observe=w=>{if(!w)return;const record=()=>events.push({state:w.state,at:performance.now()});record();w.addEventListener('statechange',record)};
+          r.addEventListener('updatefound',()=>observe(r.installing),{once:true});
+          observe(r.installing);await r.update();
+        }""")
         # Poll a synchronous property: a Promise itself is truthy to the polling API.
-        self.poll('window.__pwaRegistration.waiting?.state === "installed"')
+        # Preserve the assertion and budget; retain lifecycle evidence on failure.
+        try:self.poll('window.__pwaRegistration.waiting?.state === "installed"')
+        except AssertionError as error:
+            states=self.page.evaluate("""()=>{const r=window.__pwaRegistration;return {
+              active:r.active?.state,installing:r.installing?.state,waiting:r.waiting?.state,
+              events:window.__pwaUpdateEvents};}""")
+            self.fail(str(error)+'; worker lifecycle: '+json.dumps(states))
         expected='pushpull-shell-'+json.loads((self.controller['directory']/'release.json').read_text())['release']
         self.waiting_worker=next(w for w in self.context.service_workers if w.evaluate('CACHE')==expected)
     def reopen(self,timeout=5000):
