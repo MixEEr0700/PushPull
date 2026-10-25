@@ -32,6 +32,39 @@ let drive=null,driveInitError='',driveChoices=[];
 try{const {createGoogleDrive}=await import('./model/google-drive.mjs');drive=await (await import('./model/drive-sync.mjs')).openDriveBackup({database,transport:createGoogleDrive(),inspect:raw=>inspectForRestore(raw,null)});}catch(error){driveInitError=error.message;}
 function downloadRaw(content,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 const handlers=new Map();let actions=Promise.resolve();
+// Feedback is volatile UI state. The existing strict commit/CAS path below
+// remains the only authority for success. Block further edits while its mutable
+// working data is uncommitted; never queue a second submit from a detached form.
+let trainingWrite=null;
+function trainingWriteFeedback(e){
+ const target=e.target;if(!target.closest?.('#app'))return null;
+ const button=e.type==='click'?target.closest('[data-act=start],[data-act=finish]'):null;
+ const form=e.type==='submit'&&target.matches('.performanceForm,.seriesResultForm,#resultForm,.historicalResultForm,.editForm,.v2NoteForm,.changeForm,#notesForm,#historicalDate')?target:null;
+ if(!button&&!form)return null;
+ const control=button||e.submitter||form.querySelector('[type=submit],button:not([type])');
+ const root=document.getElementById('app'),notice=document.createElement('div');
+ notice.className='toast';notice.setAttribute('role','status');notice.setAttribute('data-training-pending','');
+ notice.textContent=button?.dataset.act==='start'?'Rozpoczynanie treningu… Trwa zapis lokalny.':button?.dataset.act==='finish'?'Kończenie treningu… Trwa zapis lokalny.':'Zapisywanie zmian… Poczekaj na potwierdzenie.';
+ const pending={root,notice,control,inert:root.inert,disabled:control?.disabled,text:control?.textContent};
+ document.querySelector('.toast')?.remove();document.body.append(notice);
+ if(control){control.disabled=true;control.textContent='Proszę czekać…';}
+ root.inert=true;root.setAttribute('aria-busy','true');return pending;
+}
+function feedbackFrame(){
+ if(document.hidden)return Promise.resolve();
+ return new Promise(resolve=>{
+  let first,second,task,done=false;
+  const finish=()=>{if(done)return;done=true;clearTimeout(timer);clearTimeout(task);cancelAnimationFrame(first);cancelAnimationFrame(second);resolve();};
+  // Hidden/suspended frames must not strand an accepted write indefinitely.
+  const timer=setTimeout(finish,150);
+  first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>{task=setTimeout(finish,0);});});
+ });
+}
+function clearTrainingWrite(pending){
+ pending.notice.remove();pending.root.inert=pending.inert;pending.root.removeAttribute('aria-busy');
+ if(pending.control?.isConnected){pending.control.disabled=pending.disabled;pending.control.textContent=pending.text;}
+ trainingWrite=null;
+}
 // Volatile code-update information only: never touches workout data or drafts.
 const pwaStatus={ready:false,error:'',release:''};let pwaRegistration=null;
 function paintPwa(){
@@ -81,8 +114,16 @@ function on(event,handler){
   handlers.set(event,[]);
   document.addEventListener(event,e=>{
    if(event==='submit')e.preventDefault();
+   if(trainingWrite&&e.target.closest?.('#app'))return;
    if(event==='input'){try{for(const callback of handlers.get(event))callback(e)}catch(error){render();alert('Operacja przerwana. '+error.message)}return;}
-   actions=actions.then(async()=>{try{for(const callback of handlers.get(event))await callback(e)}catch(error){render();alert('Operacja przerwana. '+error.message)}});
+   const pending=trainingWriteFeedback(e);if(pending)trainingWrite=pending;
+   actions=actions.then(async()=>{
+    try{
+     if(pending){await feedbackFrame();if(!e.target.isConnected)return;}
+     for(const callback of handlers.get(event))await callback(e);
+    }catch(error){render();alert('Operacja przerwana. '+error.message)}
+    finally{if(pending)clearTrainingWrite(pending);}
+   });
   });
  }
  handlers.get(event).push(handler);
@@ -110,7 +151,7 @@ async function persist(){try{await database.commit(data)}catch(error){data=datab
 function toast(msg){document.querySelector('.toast')?.remove();let e=document.createElement('div');e.className='toast';e.textContent=msg;document.body.append(e);clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.remove(),2400)}
 function session(){return data.sessions.find(s=>s.id===data.activeId)}
 function typeIndex(t){return TYPES.indexOf(t)}
-function entriesFor(id){return data.entries.filter(e=>e.exerciseId===id).sort((a,b)=>{let sa=data.sessions.find(s=>s.id===a.sessionId),sb=data.sessions.find(s=>s.id===b.sessionId);return (sb?.date||'').localeCompare(sa?.date||'')||(sb?.seq||0)-(sa?.seq||0)})}
+function entriesFor(id){const sessions=new Map(data.sessions.map(s=>[s.id,s]));return data.entries.filter(e=>e.exerciseId===id).sort((a,b)=>{let sa=sessions.get(a.sessionId),sb=sessions.get(b.sessionId);return (sb?.date||'').localeCompare(sa?.date||'')||(sb?.seq||0)-(sa?.seq||0)})}
 function sameContext(ex,e){return (ex.journalVariantId?e.journalVariantId===ex.journalVariantId:!e.journalVariantId)&&(!ex.imported||(ex.loadConvention.basis===null||e.performance?.loadConvention?.basis===ex.loadConvention.basis)&&e.performance?.loadConvention?.unit===ex.loadConvention.unit)}
 function lastFor(ex){return entriesFor(ex.id).find(e=>sameContext(ex,e)&&(!ex.planVersionId||journal.snapshotFor(data,e.sessionId)?.planVersionId===ex.planVersionId))}
 // Zwarta prezentacja ostatniego wyniku; różne serie są pokazywane oddzielnie.

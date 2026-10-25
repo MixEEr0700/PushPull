@@ -18,6 +18,7 @@ class JournalFlow(BrowserHarness):
     def enable(self):
         self.prepare();self.ready()
         self.page.locator('[data-act=finish]').click()
+        expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.before=self.state()
         self.settings()
         with self.page.expect_download():self.page.locator('[data-enable-journal]').click()

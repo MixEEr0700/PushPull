@@ -142,8 +142,8 @@ class PWADeployment(unittest.TestCase):
         while not page.evaluate(expression):
             if time.monotonic()>deadline:self.fail('Timed out: '+expression)
             time.sleep(0.02)
-    def ready(self):
-        expect(self.page.locator('[data-act=finish]')).to_be_visible()
+    def ready(self,timeout=5000):
+        expect(self.page.locator('[data-act=finish]')).to_be_visible(timeout=timeout)
         self.page.evaluate('navigator.serviceWorker.ready')
         self.poll('navigator.serviceWorker.controller !== null')
     def snapshot(self):
@@ -161,7 +161,7 @@ class PWADeployment(unittest.TestCase):
         self.poll('window.__pwaRegistration.waiting?.state === "installed"')
         expected='pushpull-shell-'+json.loads((self.controller['directory']/'release.json').read_text())['release']
         self.waiting_worker=next(w for w in self.context.service_workers if w.evaluate('CACHE')==expected)
-    def reopen(self):
+    def reopen(self,timeout=5000):
         waiting=getattr(self,'waiting_worker',None)
         if waiting:waiting.evaluate("self.__testActivated=false;self.addEventListener('activate',()=>{self.__testActivated=true})")
         self.page.close()
@@ -171,7 +171,7 @@ class PWADeployment(unittest.TestCase):
                 if time.monotonic()>deadline:self.fail('Waiting worker did not activate after the final old tab closed')
                 time.sleep(0.02)
             self.waiting_worker=None
-        self.page=self.context.new_page();self.page.on('dialog',self.accept_dialog);self.page.goto(self.url);self.ready()
+        self.page=self.context.new_page();self.page.on('dialog',self.accept_dialog);self.page.goto(self.url);self.ready(timeout=timeout)
 
     def notification_state(self,page=None):
         return (page or self.page).evaluate('''async()=>{const d=await PushPullDB.open(()=>{});try{return {backup:d.export(),drafts:await d.readDrafts(),drive:await d.readDriveState(),revision:d.revision,legacy:d.raw}}finally{d.close()}}''')
@@ -379,7 +379,12 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(value(),before);self.assertEqual(drafts(),before_drafts)
         confirm_restore(self.page);expect(self.page.locator('[data-restore-success]')).to_contain_text('Przywrócono')
         self.assertEqual(value(),expected);self.assertEqual(drafts(),before_drafts)
-        self.reopen();self.assertEqual(value(),expected);self.assertEqual(drafts(),before_drafts)
+        # This is an integrity test, not a 5 s startup performance assertion.
+        # The 16 MiB source + preserved preimage still need full validation.
+        # Use this large-file test's existing 90 s budget; report the latency.
+        reopened=time.monotonic();self.reopen(timeout=90000)
+        print('Issue40 restored 16 MiB fixture reopen ms:',round((time.monotonic()-reopened)*1000),flush=True)
+        self.assertEqual(value(),expected);self.assertEqual(drafts(),before_drafts)
         expect(self.page.locator('[data-draft-download]')).to_have_count(1)
 
     def test_issue34_return_continues_version_history_and_dated_gaps_after_pwa_update(self):
@@ -610,7 +615,8 @@ class PWADeployment(unittest.TestCase):
         expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: 15 × 105 kg','Seria 2: 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg'])
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.assertEqual(value()['trainingJournal']['nextUnitId'],'PUSH A') # Old PULL A must not advance this new V2 period.
-        self.page.locator('[data-act=start]').click();self.assertEqual(value()['sessions'][-1]['type'],'PUSH A')
+        self.page.locator('[data-act=start]').click();self.ready()
+        self.assertEqual(value()['sessions'][-1]['type'],'PUSH A')
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible();self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A')
         saved=value();self.page.locator('[data-tab=settings]').click()
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
@@ -885,6 +891,9 @@ class PWADeployment(unittest.TestCase):
         dismiss=lambda d:d.dismiss()
         self.page.remove_listener('dialog',self.accept_dialog);self.page.on('dialog',dismiss)
         pre_start=self.snapshot();self.page.locator('[data-act=start]').click()
+        # Keep the dismiss handler installed until the deferred operation has
+        # actually displayed and handled its confirmation dialog.
+        expect(self.page.locator('[data-training-pending]')).to_have_count(0)
         self.assertEqual(self.snapshot(),pre_start)
         self.page.remove_listener('dialog',dismiss);self.page.on('dialog',self.accept_dialog)
         self.page.locator('[data-act=start]').click();self.ready()
