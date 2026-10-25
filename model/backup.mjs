@@ -1,5 +1,5 @@
 /** Offline backup boundary. No storage, DOM, transport, migration or active-plan I/O. */
-import {validateModel, validateSessionSnapshot, validateResultReference} from './training-model.mjs';
+import {validateModel, validateSessionSnapshot, validateResultReferences} from './training-model.mjs';
 import {readLegacyBackup} from './legacy-backup.mjs';
 import {parseJson, portable, requireThat as check, record, identifier, canonical, freeze} from './backup-json.mjs';
 export {readLegacyBackup};
@@ -45,11 +45,14 @@ function validatePayload(p) {
     check(['snapshot','uninterpreted'].includes(r.binding),'result binding');
     check(r.binding==='snapshot' ? refs.has(r.id) : !refs.has(r.id),'result reference completeness');
   }
+  const snapshotReferences=new Map();
   for (const r of refs.values()) {
     const snapshot=snapshots.get(r.snapshotId),result=results.get(r.resultId);
     check(snapshot && result?.binding==='snapshot' && result.sessionId===snapshot.sessionId,'reference result relation');
-    validateResultReference(r,snapshot);
+    if(!snapshotReferences.has(snapshot))snapshotReferences.set(snapshot,[]);
+    snapshotReferences.get(snapshot).push(r);
   }
+  for(const [snapshot,references] of snapshotReferences)validateResultReferences(references,snapshot);
   // UserNote's session FK could not be checked by step A's model alone.
   for (const model of [p.model,...p.sessionSnapshots.map(s=>s.model)].filter(Boolean)) {
     for (const note of model.userNotes) check(note.sessionId===null || sessions.has(note.sessionId),'note session relation');

@@ -1,7 +1,7 @@
 /** Native journal adapter: observed legacy snapshots and explicitly activated V2.
  * Existing flat results and opaque legacy metadata retain their original meaning.
  */
-import {createModel,captureSessionSnapshot,validateModel,validateSessionSnapshot,createResultReference} from './training-model.mjs';
+import {createModel,captureSessionSnapshot,validateModel,validateSessionSnapshot,createResultReferences} from './training-model.mjs';
 import {views,PLAN_ID,groupMemberNumber} from './v2-plan.mjs';
 import {validatePerformance,flatten} from './performance.mjs';
 import {canonical,requireThat as check} from './backup-json.mjs';
@@ -119,10 +119,11 @@ export function project(data,base) {
     const metadata={...e};delete metadata.series;if(structuredSnapshot(snap))delete metadata.performance;
     check(!structuredSnapshot(snap)||e.performance,'V2 result requires structured performance');
     if(structuredSnapshot(snap)&&e.performance){const refs=validatePerformance(e.performance,snap,e);resultReferences.push(...refs);e.performance.rows.forEach((row,order)=>resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:2,data:{...row,order,loadConvention:e.performance.loadConvention,entryId:e.id,entryMetadata:metadata}}));continue;}
+    const references=createResultReferences(snap,e.series.map(row=>({resultId:row.id,positionId:e.journalPositionId,setId:row.setId,side:null,groupId:null,round:null})));
     e.series.forEach((row,order)=>{
       check(!Object.hasOwn(row,'segments') && !Object.hasOwn(row,'side') && !Object.hasOwn(row,'groupId'),'unsupported performance structure');
       check(typeof row.id==='string' && Object.hasOwn(row,'setId'),'series identity missing');
-      const reference=createResultReference(snap,{resultId:row.id,positionId:e.journalPositionId,setId:row.setId,side:null,groupId:null,round:null});
+      const reference=references[order];
       check(reference.exerciseId===e.exerciseId && reference.variantId===e.journalVariantId,'native variant mismatch');
       resultReferences.push(reference);resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:1,data:{...row,order,entryId:e.id,entryMetadata:metadata}});
     });

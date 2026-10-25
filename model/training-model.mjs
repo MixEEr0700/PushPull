@@ -266,14 +266,32 @@ export function validateSessionSnapshot(x) {
  */
 export function createResultReference(snapshot, {resultId,positionId,setId,side,groupId,round}) {
   validateSessionSnapshot(snapshot);
+  return resultReference(snapshot,{resultId,positionId,setId,side,groupId,round});
+}
+// A synchronous batch validates its snapshot once. No validation cache survives
+// the call, so mutable inputs must pass the full gate on every later operation.
+export function createResultReferences(snapshot, specifications) {
+  json(specifications);requireThat(Array.isArray(specifications),'reference specifications');
+  validateSessionSnapshot(snapshot);
+  return specifications.map(specification=>resultReference(snapshot,specification));
+}
+function resultReference(snapshot,{resultId,positionId,setId,side,groupId,round}) {
   const position=snapshot.model.positions.find(p=>p.id===positionId);
   requireThat(position, 'result position');
   const value={schemaVersion:SCHEMA_VERSION,ownerId:snapshot.model.ownerId,resultId,snapshotId:snapshot.id,sessionId:snapshot.sessionId,
     planVersionId:snapshot.planVersionId,positionId,exerciseId:position.exerciseId,variantId:position.variantId,setId,side,groupId,round};
-  validateResultReference(value,snapshot); return freeze(value);
+  resultReferenceValid(value,snapshot); return freeze(value);
 }
 export function validateResultReference(x,snapshot) {
-  json(x); validateSessionSnapshot(snapshot);
+  validateSessionSnapshot(snapshot);return resultReferenceValid(x,snapshot);
+}
+export function validateResultReferences(references,snapshot) {
+  json(references);requireThat(Array.isArray(references),'references');
+  validateSessionSnapshot(snapshot);
+  references.forEach(x=>resultReferenceValid(x,snapshot));return references;
+}
+function resultReferenceValid(x,snapshot) {
+  json(x);
   record(x,'schemaVersion ownerId resultId snapshotId sessionId planVersionId positionId exerciseId variantId setId side groupId round');
   requireThat(x.schemaVersion===SCHEMA_VERSION && x.ownerId===snapshot.model.ownerId && id(x.resultId) &&
     x.snapshotId===snapshot.id && x.sessionId===snapshot.sessionId && x.planVersionId===snapshot.planVersionId, 'result snapshot binding');
