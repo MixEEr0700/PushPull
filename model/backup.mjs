@@ -1,7 +1,7 @@
 /** Offline backup boundary. No storage, DOM, transport, migration or active-plan I/O. */
 import {validateModel, validateSessionSnapshot, validateResultReferences} from './training-model.mjs';
-import {readLegacyBackup} from './legacy-backup.mjs';
-import {parseJson, portable, requireThat as check, record, identifier, canonical, freeze} from './backup-json.mjs';
+import {readLegacyBackup,legacySourceVersion} from './legacy-backup.mjs';
+import {parseJson, portable, immutableJSON, requireThat as check, record, identifier, canonical, freeze} from './backup-json.mjs';
 export {readLegacyBackup};
 export const BACKUP_VERSION=3;
 const TABLES=['exercises','variants','planVersions','positions','sets','drops','groups','coachInstructions','userNotes'];
@@ -60,8 +60,7 @@ function validatePayload(p) {
   for (const l of p.legacySources) {
     fields(l,'id formatVersion semantics raw');
     check(l.semantics==='legacy-unknown','legacy semantics must remain explicit');
-    const source=readLegacyBackup(l.raw);
-    check(source.formatVersion===l.formatVersion,'legacy source version mismatch');
+    check(legacySourceVersion(l)===l.formatVersion,'legacy source version mismatch');
   }
   return p;
 }
@@ -93,7 +92,8 @@ export async function validateBackup(document) {
 }
 /** All arrays and metadata are supplied explicitly. No guessed IDs/timestamps/data. */
 export async function createBackup(payload,{createdAt,metadata}={}) {
-  portable(payload);portable(metadata);const p=structuredClone(payload);validatePayload(p);
+  const immutable=immutableJSON(payload);portable(metadata);
+  const p=immutable?payload:freeze(structuredClone(payload));validatePayload(p);
   const document={format:'pushpull-backup',version:BACKUP_VERSION,createdAt,metadata:structuredClone(metadata),payload:p,
     integrity:{algorithm:'SHA-256',counts:counts(p),digest:'0'.repeat(64)}};
   header(document);document.integrity.digest=await digest(document);

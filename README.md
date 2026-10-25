@@ -22,6 +22,8 @@ Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budowa�
 
 ## Dokumentacja
 
+- [Trwały zapis — etap B](docs/DURABLE_WRITE_STAGE_B.md): implementacja, natywne pomiary przed/po i [projekt zapisu przyrostowego](docs/INCREMENTAL_WRITE_P0_DESIGN.md).
+
 - [Pierwsza reakcja i trwały zapis — Issue #75](docs/UI_RESPONSIVENESS_ISSUE_75.md): rozdzielone pomiary, bezpieczny stan oczekiwania i projekt dalszego usprawnienia.
 
 - [Responsywność Androida — Issue #73](docs/ANDROID_RESPONSIVENESS_ISSUE_73.md): pomiary na syntetycznej historii, ograniczenia i scenariusz weryfikacji telefonu.

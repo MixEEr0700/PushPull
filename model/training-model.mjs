@@ -16,25 +16,29 @@ const nullable = (x, test) => x === null || test(x);
 const oneOf = (x, choices) => choices.includes(x);
 const timestamp = x => text(x) && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(x) &&
   Number.isFinite(Date.parse(x)) && new Date(x).toISOString() === x;
+const jsonGraphs=new WeakSet(),validatedModels=new WeakSet(),validatedSnapshots=new WeakSet();
 function requireThat(condition, message) { if (!condition) fail(message); }
 
 // JSON serialization must not silently lose values, sparse slots or extra array keys.
 function json(value, ancestors = new Set()) {
-  if (value === null || text(value) || typeof value === 'boolean') return;
-  if (typeof value === 'number') { requireThat(Number.isFinite(value), 'non-finite JSON number'); return; }
+  if (value === null || text(value) || typeof value === 'boolean') return true;
+  if (typeof value === 'number') { requireThat(Number.isFinite(value), 'non-finite JSON number'); return true; }
   requireThat(typeof value === 'object' && !ancestors.has(value), 'non-JSON value or cycle');
+  if(jsonGraphs.has(value))return true;
   const array = Array.isArray(value);
   requireThat(array || [Object.prototype, null].includes(Object.getPrototypeOf(value)), 'non-plain object');
   requireThat(Object.getOwnPropertySymbols(value).length === 0, 'symbol key');
   const keys = Object.getOwnPropertyNames(value).filter(k => !(array && k === 'length'));
   if (array) requireThat(keys.length === value.length && keys.every((k,i) => k === String(i)), 'sparse or decorated array');
-  ancestors.add(value);
+  ancestors.add(value);let immutable=Object.isFrozen(value);
   for (const key of keys) {
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
     requireThat(!['__proto__','prototype','constructor'].includes(key) && descriptor.enumerable && 'value' in descriptor, 'unsafe JSON property');
-    json(descriptor.value, ancestors);
+    const childImmutable=json(descriptor.value, ancestors);immutable=childImmutable&&immutable;
   }
   ancestors.delete(value);
+  if(immutable)jsonGraphs.add(value);
+  return immutable;
 }
 function record(value, fields) {
   requireThat(value !== null && typeof value === 'object' && !Array.isArray(value), 'expected record');
@@ -163,6 +167,7 @@ const TABLES = Object.freeze({
 });
 /** A model is scoped to one owner. This is a domain boundary, not browser authentication. */
 export function validateModel(model) {
+  if(validatedModels.has(model))return model;
   json(model); record(model, `schemaVersion ownerId ${Object.keys(TABLES).join(' ')}`);
   requireThat(model.schemaVersion === SCHEMA_VERSION && id(model.ownerId), 'model version or owner');
   const maps = {};
@@ -219,6 +224,7 @@ export function validateModel(model) {
     if (instruction.positionId!==null) requireThat(ref('positions',instruction.positionId).planVersionId===instruction.planVersionId, 'instruction version mismatch');
   }
   for (const note of model.userNotes) if (note.exerciseId!==null) ref('exercises',note.exerciseId);
+  if(jsonGraphs.has(model))validatedModels.add(model);
   return model;
 }
 /** Detach and deeply freeze a validated graph without mutating the caller's input. */
@@ -255,10 +261,12 @@ export function captureSessionSnapshot(model, {id:snapshotId, sessionId, planVer
   validateSessionSnapshot(snapshot); return freeze(structuredClone(snapshot));
 }
 export function validateSessionSnapshot(x) {
+  if(validatedSnapshots.has(x))return x;
   json(x); record(x,'schemaVersion id sessionId planVersionId unitId startedAt model');
   requireThat(x.schemaVersion===SCHEMA_VERSION && [x.id,x.sessionId,x.planVersionId,x.unitId].every(id) && timestamp(x.startedAt), 'session snapshot');
   validateModel(x.model);
   requireThat(x.model.planVersions.some(v=>v.id===x.planVersionId && v.units.some(u=>u.id===x.unitId)), 'snapshot version mismatch');
+  if(jsonGraphs.has(x))validatedSnapshots.add(x);
   return x;
 }
 /** A binding for a future result, not a conversion or reassignment of a legacy entry.
@@ -268,8 +276,8 @@ export function createResultReference(snapshot, {resultId,positionId,setId,side,
   validateSessionSnapshot(snapshot);
   return resultReference(snapshot,{resultId,positionId,setId,side,groupId,round});
 }
-// A synchronous batch validates its snapshot once. No validation cache survives
-// the call, so mutable inputs must pass the full gate on every later operation.
+// A synchronous batch visits its snapshot once. Mutable inputs always pass the
+// full gate again; only complete immutable graphs may reuse a proven result.
 export function createResultReferences(snapshot, specifications) {
   json(specifications);requireThat(Array.isArray(specifications),'reference specifications');
   validateSessionSnapshot(snapshot);

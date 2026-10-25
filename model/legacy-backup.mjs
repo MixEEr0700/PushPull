@@ -2,7 +2,8 @@
  * Preserve the complete original and exact input text. Do not migrate to the new
  * domain model, infer old plan snapshots, split notes or normalize performances.
  */
-import {parseJson, requireThat as check, record, canonical, freeze, portable} from './backup-json.mjs';
+import {parseJson, requireThat as check, record, canonical, freeze, portable, immutableJSON} from './backup-json.mjs';
+const verifiedViews=new WeakSet(),sourceVersions=new WeakMap();
 const TYPES=['PUSH A','PULL A','PUSH B','PULL B'];
 const text=x=>typeof x==='string';
 const id=x=>text(x) && /^[A-Za-z0-9_.-]+$/.test(x) && !Object.hasOwn(Object.prototype,x);
@@ -77,13 +78,31 @@ function validateV2(x) {
     }
   }
 }
-export function readLegacyBackup(raw) {
-  const original=parseJson(raw);portable(original);
+function legacyValue(original,raw) {
+  portable(original);
   check(original?.format!=='pushpull-backup' || [1,2].includes(original.version),
     'Nieobsługiwana wersja kopii. Użyj aplikacji obsługującej ten format.');
   if (original?.format==='pushpull-backup' && original.version===2) validateV2(original);
   else validateV1(original);
-  return freeze({formatVersion:original.version,semantics:'legacy-unknown',raw,original,
+  const view=freeze({formatVersion:original.version,semantics:'legacy-unknown',raw:raw??JSON.stringify(original),original,
     data:original.version===1?original:original.data,
     catalog:original.version===2?original.catalog:null});
+  verifiedViews.add(view);return view;
+}
+export function readLegacyBackup(raw) { return legacyValue(parseJson(raw),raw); }
+/** Structured writer boundary: validate and detach before any await. The text
+ * reader still scans untrusted files for duplicate keys/lossy decimal tokens. */
+export function prepareLegacyBackup(value) {
+  const own=immutableJSON(value)?value:freeze(structuredClone(value));
+  return legacyValue(own);
+}
+/** Only a view issued by one of the full boundaries can certify this raw text.
+ * The proof retains a version number, never a second parsed history/cache. */
+export function legacySource(view,id) {
+  check(verifiedViews.has(view),'expected verified legacy view');
+  const source=freeze({id,formatVersion:view.formatVersion,semantics:'legacy-unknown',raw:view.raw});
+  sourceVersions.set(source,view.formatVersion);return source;
+}
+export function legacySourceVersion(source) {
+  return sourceVersions.has(source)?sourceVersions.get(source):readLegacyBackup(source.raw).formatVersion;
 }

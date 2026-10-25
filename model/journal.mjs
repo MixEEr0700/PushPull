@@ -4,7 +4,7 @@
 import {createModel,captureSessionSnapshot,validateModel,validateSessionSnapshot,createResultReferences} from './training-model.mjs';
 import {views,PLAN_ID,groupMemberNumber} from './v2-plan.mjs';
 import {validatePerformance,flatten} from './performance.mjs';
-import {canonical,requireThat as check} from './backup-json.mjs';
+import {canonical,immutableJSON,requireThat as check} from './backup-json.mjs';
 const source=(reference,recordedAt=null)=>({kind:'legacy',reference,recordedAt});
 /** Additive source-plan revision, projected without changing any stored plan on load.
  * The opaque historical PULL-B-6 is retained; no kg/notes/technique are inferred.
@@ -128,7 +128,8 @@ export function project(data,base) {
       resultReferences.push(reference);resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:1,data:{...row,order,entryId:e.id,entryMetadata:metadata}});
     });
   }
-  return {...base,model,sessionSnapshots:structuredClone(j.sessionSnapshots),sessionRecords,resultRecords,resultReferences};
+  const sessionSnapshots=Object.isFrozen(j.sessionSnapshots)&&immutableJSON(j.sessionSnapshots)?j.sessionSnapshots:structuredClone(j.sessionSnapshots);
+  return {...base,model,sessionSnapshots,sessionRecords,resultRecords,resultReferences};
 }
 /** Preview only a context whose actual source parameters still match. */
 export function previewExercises(data,type) {
