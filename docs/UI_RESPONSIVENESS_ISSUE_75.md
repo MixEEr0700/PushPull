@@ -1,5 +1,13 @@
 # Issue #75 — reakcja interfejsu przed trwałym zapisem
 
+> Korekta metody w etapie B: dawny `durableMs` rejestrował późny listener
+> complete, który mógł wykonać się po kontynuacji Promise i publikacji pamięci.
+> Te historyczne wartości obejmują więc opóźnienie callbacku; nie należy
+> traktować ich jako odizolowanego natywnego complete ani łączyć z nową serią.
+> [Etap B](DURABLE_WRITE_STAGE_B.md) mierzy oncomplete przed resolve i zawiera
+> test wymuszający 60 ms pracy po zatwierdzeniu. Historyczne próbki zachowano.
+
+
 ## Zakres i stan początkowy
 
 Baza: `main` `1dd4aaf1407da2b32332996f054a6bd49fddf12d` (PR #74).

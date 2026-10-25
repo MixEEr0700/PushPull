@@ -1,5 +1,13 @@
 # P0 — koszt rzeczywiście zatwierdzonego zapisu wyniku
 
+> Korekta metody w etapie B: dawny `durableMs` rejestrował późny listener
+> complete, który mógł wykonać się po kontynuacji Promise i publikacji pamięci.
+> Te historyczne wartości obejmują więc opóźnienie callbacku; nie należy
+> traktować ich jako odizolowanego natywnego complete ani łączyć z nową serią.
+> [Etap B](DURABLE_WRITE_STAGE_B.md) mierzy oncomplete przed resolve i zawiera
+> test wymuszający 60 ms pracy po zatwierdzeniu. Historyczne próbki zachowano.
+
+
 ## Wynik i punkt wyjścia
 
 Praca na `main` `2504e5a503a5f0607986fbe29ac1df35aee87c4b`, po scaleniu
