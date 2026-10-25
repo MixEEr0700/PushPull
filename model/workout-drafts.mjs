@@ -53,6 +53,8 @@ export async function openDrafts(database){
   set onchange(fn){changed=fn;},
   get records(){return clone(records);},get error(){return storageError;},get readError(){return readError;},
   reload,
+  // Read active capture memory directly, never the merged recovery view.
+  readEvidence(){return [...active.values()].map(s=>({source:'editor-memory',record:clone(s.record),binding:clone(s.binding),durableToken:s.durableToken,parent:clone(s.parent)}));},
   reset(){active.clear();restored.clear();return reload();},
   compatible(record,binding){return record?.version===1&&typeof record.id==='string'&&record.key==='workout-draft:'+record.id&&typeof record.token==='string'&&Number.isSafeInteger(record.sequence)&&record.sequence>0&&same(record.context,binding.context)&&same(record.baseline,binding.baseline)&&editorValueValid(record.kind,record.value);},
   take(sessionId,exerciseId){const k=key(sessionId,exerciseId),value=restored.get(k);restored.delete(k);return value&&clone(value);},

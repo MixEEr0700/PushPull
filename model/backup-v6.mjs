@@ -101,3 +101,10 @@ export async function exportBackupV6(input,{limits={},signal}={}){
  check(canonical(stage.draftEvidence)===canonical(detached.evidence)&&canonical(stage.historyDocument)===canonical(history)&&canonical(stage.capture)===canonical(detached.capture),'v6: self verification');
  abort(signal);return {text,diagnostics:Object.freeze({formatVersion:6,fileBytes:utf8.encode(text).length,sources:detached.evidence.sources.length,quarantined:stage.classification.filter(x=>x.status==='quarantine').length,conflicts:stage.classification.filter(x=>x.status==='conflict').length,historyVersion:historyStage.formatVersion})};
 }
+
+/** Additive read-only API; no format/codec change. */
+export function inspectDraftEvidence(evidence,{limits={}}={}){
+ const l=policy(limits);portable(evidence);jsonSize(evidence,l.draftDecodedBytes);
+ stringSize(JSON.stringify(evidence),l.draftDecodedBytes);
+ return freeze({classification:evidenceValid(evidence,l)});
+}

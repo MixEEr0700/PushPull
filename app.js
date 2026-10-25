@@ -25,6 +25,9 @@ let overviewRevision=null,overviewCatalog=null;
 function planCatalog(){if(overviewRevision!==database.revision){overviewCatalog=database.export().catalog;overviewRevision=database.revision;}return overviewCatalog;}
 const sessionExercises=s=>journal.exercisesFor(data,s);
 const savedDrafts=await (await import('./model/workout-drafts.mjs')).openDrafts(database);
+const draftCollector=await import('./model/draft-collector.mjs');
+const draftObserver=draftCollector.openDraftObserver(()=>savedDrafts.readEvidence());
+let draftReport=null,draftCollectError='',draftCollecting=false,draftCollectController=null;
 let drive=null,driveInitError='',driveChoices=[];
 try{const {createGoogleDrive}=await import('./model/google-drive.mjs');drive=await (await import('./model/drive-sync.mjs')).openDriveBackup({database,transport:createGoogleDrive(),inspect:raw=>inspectForRestore(raw,null)});}catch(error){driveInitError=error.message;}
 function downloadRaw(content,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
@@ -223,6 +226,13 @@ on('change',e=>{
  }catch(error){if(sequence===v5Sequence)v5Error=error.name==='AbortError'?'Anulowano.':error.message;}
  finally{if(sequence===v5Sequence){v5Busy=false;v5Controller=null;render();document.querySelector('[data-v5-preview]')?.focus();}}})();
 });
+function draftCollectorPanel(){return `<div class="card stack"><button class="btn" data-collect-drafts ${draftCollecting?'disabled':''}>Sprawdź szkice do kopii (testowo)</button>${draftCollecting?'<p role="status" data-draft-collecting>Odczytywanie szkiców…</p><button class="btn" data-collect-cancel>Anuluj</button>':''}${draftCollectError?`<p role="alert" data-draft-collect-error>${esc(draftCollectError)}</p>`:''}${draftReport?`<p class="hint" data-draft-collect-report>Zaobserwowane źródła: ${draftReport.diagnostics.sources} · Konflikty: ${draftReport.diagnostics.conflicts} · Kwarantanna: ${draftReport.diagnostics.quarantined}<br>Odpowiadające inne karty: ${draftReport.coverage.respondingTabs}. Stan pozostałych kart jest nieznany. Nie potwierdzono kompletności urządzenia ani atomowości wielu pamięci. Nie zapisano ani nie pobrano kopii.</p>`:''}</div>`;}
+on('click',e=>{
+ if(e.target.closest('[data-collect-cancel]')){draftCollectController?.abort();return;}
+ if(!e.target.closest('[data-collect-drafts]')||draftCollecting)return;
+ const controller=new AbortController();draftCollectController=controller;draftCollecting=true;draftCollectError='';draftReport=null;render();
+ void draftCollector.collectDrafts({database,getMemory:()=>savedDrafts.readEvidence(),peers:draftObserver,signal:controller.signal}).then(result=>{draftReport={diagnostics:result.diagnostics,coverage:result.coverage};}).catch(error=>{draftCollectError=error.name==='AbortError'?'Anulowano.':'Nie odczytano stabilnego zestawu szkiców ('+(error.code||'source-error')+'). Niczego nie usunięto.';}).finally(()=>{draftCollecting=false;draftCollectController=null;render();});
+});
 let restoreCandidate=null,restoreError='',restoreBusy=false,restoreSequence=0,restoreSuccess='';
 const backupAPI=await import('./model/legacy-model.mjs');
 function restoreResult(){return restoreSuccess?`<p class="hint" role="status" data-restore-success>${esc(restoreSuccess)}</p>`:'';}
@@ -252,7 +262,7 @@ async function prepareRestore(raw,revision,sequence,date=null){
  restoreCandidate.summary.createdAt??=typeof date==='string'&&Number.isFinite(Date.parse(date))?date:null;
  restoreBusy=false;render();focusRestore();
 }
-function drivePanel(){return `<div class="card stack"><strong>Kopie zapasowe</strong><p class="hint">Trening i szkice zapisują się automatycznie na telefonie, także offline. Kopię zatwierdzonych danych na Drive zapisujesz ręcznie. Szkice pozostają lokalnie.</p><button class="btn primary" data-drive-action="upload" ${!drive?'disabled':''}>Zapisz kopię na Google Drive</button><button class="btn" data-drive-action="restore" ${!drive?'disabled':''}>Przywróć z Google Drive</button>${restoreChoicePanel()}${restorePanel()}${localV4Panel()}${v5PreviewPanel()}<button class="btn" data-act="export">Pobierz kopię JSON</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json"></label>${restoreResult()}<p class="hint" role="status" data-drive-status>${esc(driveStatusText())}</p>${drive?`<button class="btn" data-drive-action="connect" ${drive.config.connected?'hidden':''}>Połącz Google</button><details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</div>`;}
+function drivePanel(){return `<div class="card stack"><strong>Kopie zapasowe</strong><p class="hint">Trening i szkice zapisują się automatycznie na telefonie, także offline. Kopię zatwierdzonych danych na Drive zapisujesz ręcznie. Szkice pozostają lokalnie.</p><button class="btn primary" data-drive-action="upload" ${!drive?'disabled':''}>Zapisz kopię na Google Drive</button><button class="btn" data-drive-action="restore" ${!drive?'disabled':''}>Przywróć z Google Drive</button>${restoreChoicePanel()}${restorePanel()}${localV4Panel()}${v5PreviewPanel()}${draftCollectorPanel()}<button class="btn" data-act="export">Pobierz kopię JSON</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json"></label>${restoreResult()}<p class="hint" role="status" data-drive-status>${esc(driveStatusText())}</p>${drive?`<button class="btn" data-drive-action="connect" ${drive.config.connected?'hidden':''}>Połącz Google</button><details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</div>`;}
 function settings(){if(dataView==='plans')return planScreen();if(dataView==='weekly')return weeklyScreen();return `<div class="eyebrow">DANE</div><h1>Dane i kopia zapasowa</h1><div class="card stack"><button class="btn" data-view="plans">Plany treningowe</button><button class="btn" data-view="weekly">Statystyki ogólne</button></div>${drivePanel()}${!data.trainingJournal?'<details data-journal-advanced><summary class="btn">Opcje zaawansowane</summary><div class="stack"><p class="hint">Tylko starsza baza bez wersjonowania. Przed zmianą zostanie pobrana kopia JSON. Nie aktywuje V2 i nie przenosi historii.</p><button class="btn" data-enable-journal>Włącz zapis z wersją planu</button></div></details>':''}${backupControls()}${pwaInfo()}`}
 function importedPlanPanel(){
  const saved=data.trainingJournal?.importedPlans??[];
@@ -451,6 +461,6 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
 on('click',e=>{if(e.target.closest('[data-pwa-check]')){pwaStatus.error='';paintPwa();if(!navigator.onLine){pwaFailure();return;}void (pwaRegistration?pwaRegistration.update():registerPwa()).catch(pwaFailure);}});
 
 database.onchange=error=>{recoveryError=error;render()};
-window.addEventListener('pagehide',()=>{drive?.close();database.close()});
+window.addEventListener('pagehide',()=>{draftCollectController?.abort();draftObserver?.close();drive?.close();database.close()});
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
 })().catch(error=>{document.getElementById('app').textContent='Nie udało się otworzyć bazy. Nie wyczyszczono historii. '+error.message});
