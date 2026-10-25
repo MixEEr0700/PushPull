@@ -115,3 +115,28 @@ class V2Presentation(BrowserHarness):
         expect(self.page.locator('[data-current-plan]')).to_have_count(0)
         expect(self.page.locator('[data-plan-activate]')).to_be_visible()
         self.assertEqual(self.state()['trainingJournal']['activePlanVersionId'],PLAN['planVersion']['id'])
+
+    def test_activation_setup_waits_for_session_finish_with_slow_hash(self):
+        # A slow real history commit must finish before activate() returns.
+        # Only the test's SHA call is delayed; DB writes/CAS stay real.
+        self.context.add_init_script(r"""(() => {
+          const digest=crypto.subtle.digest.bind(crypto.subtle);
+          document.addEventListener('click',e=>{
+            if(e.target.closest?.('[data-act=finish]'))window.__finishDelayArmed=true;
+          },true);
+          crypto.subtle.digest=async(...args)=>{
+            if(window.__finishDelayArmed&&new TextDecoder().decode(args[1]).includes('"activeId":null')){
+              window.__finishDelayArmed=false;window.__finishHashDelayed=true;
+              await new Promise(resolve=>setTimeout(resolve,700));
+            }
+            return digest(...args);
+          };
+        })();""")
+        flows.V2Training.activate(self)
+        finished=self.state()
+        self.assertIsNone(finished['activeId'])
+        self.assertTrue(self.page.evaluate('window.__finishHashDelayed===true'))
+        expected=[{**s,**({'status':'done'} if s['id']==self.before['activeId'] else {})} for s in self.before['sessions']]
+        self.assertEqual(finished['sessions'],expected)
+        self.assertEqual(finished['entries'],self.before['entries'])
+        self.assertEqual(finished['changes'],self.before['changes'])
