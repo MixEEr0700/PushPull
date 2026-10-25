@@ -7,6 +7,7 @@ after the expected DOM state. CDP CPU throttling is NOT a physical Android test.
 import argparse
 from collections import defaultdict
 import functools
+import hashlib
 import http.server
 import io
 import json
@@ -122,7 +123,7 @@ def navigate(page, url):
     return page.evaluate(r"""end=>({ms:end,spans:__probe.spans,longTasks:__probe.long.length,maxTaskMs:Math.max(0,...__probe.long.map(x=>x.ms)),blockingMs:__probe.long.reduce((a,x)=>a+Math.max(0,x.ms-50),0),transactions:__probe.transactions,requests:__probe.requests})""", end)
 
 
-def measure(browser, url, count, native, archive_bytes, cpu, offline):
+def measure(browser, url, count, native, archive_bytes, cpu, offline, editor_repeats=0):
     # Each repetition starts a new browser context. Only synthetic DB is touched.
     context = browser.new_context(viewport={'width': 390, 'height': 844}, service_workers='allow' if offline else 'block')
     context.add_init_script(PROBE)
@@ -153,6 +154,9 @@ def measure(browser, url, count, native, archive_bytes, cpu, offline):
         phases['exercise'] = phase(page, "document.querySelector('[data-expand=\"PUSH-A-1\"]').click()", "document.querySelector('[data-panel=result]')")
         form = '.performanceForm' if native else '.seriesResultForm'
         phases['editor'] = phase(page, "document.querySelector('[data-panel=result]').click()", f"document.querySelector('{form}')")
+        for repeat in range(editor_repeats):
+            phases[f'editorClose-{repeat}'] = phase(page, "document.querySelector('[data-panel=result]').click()", f"!document.querySelector('{form}')")
+            phases[f'editorReopen-{repeat}'] = phase(page, "document.querySelector('[data-panel=result]').click()", f"document.querySelector('{form}')")
         kg = '[data-quick=kg]' if native else '[data-main=kg]'
         reps = '[data-quick=reps]' if native else '[data-main=reps]'
         phases['input'] = phase(page, f"""()=>{{for(const [selector,value] of [[{json.dumps(kg)},'21'],[{json.dumps(reps)},'9']]){{const el=document.querySelector(selector);if(!el)throw Error('missing input '+selector);el.value=value;el.dispatchEvent(new Event('input',{{bubbles:true}}))}}}}""", "document.querySelector('[data-draft-status]')?.textContent.includes('Szkic zapisany lokalnie')")
@@ -194,9 +198,10 @@ def main():
     parser.add_argument('--kinds', nargs='+', choices=['legacy','v2'], default=['legacy','v2'])
     parser.add_argument('--archive-mib', type=int, default=4)
     parser.add_argument('--offline', action='store_true')
+    parser.add_argument('--editor-repeats', type=int, default=0, help='Extra warm close/open pairs to investigate editor variance')
     parser.add_argument('--output', type=Path, required=True)
     args=parser.parse_args()
-    if args.runs<1:parser.error('--runs must be positive')
+    if args.runs<1 or args.editor_repeats<0:parser.error('--runs must be positive; --editor-repeats nonnegative')
     if args.cpu<1 or args.archive_mib<0 or any(n<0 for n in [*args.counts,*args.v2_counts]):
         parser.error('CPU rate must be >=1; archive size and counts must be nonnegative')
     with tempfile.TemporaryDirectory(prefix='pushpull-perf-') as temporary:
@@ -221,6 +226,7 @@ def main():
         server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Server,directory=str(directory/'site')))
         thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
         report={'ref':args.ref,'runs':args.runs,'cpuThrottle':args.cpu,'offline':args.offline,'viewport':[390,844],'platform':platform.platform(),'processor':platform.processor(),'scenarios':{}}
+        report['sourceRuntimeSha256']={name:hashlib.sha256((source/name).read_bytes()).hexdigest() for name in builder['ASSETS']}
         try:
             with sync_playwright() as pw:
                 browser=pw.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox'])
@@ -230,10 +236,10 @@ def main():
                         name=f'{kind}-{count}'
                         rows=[]
                         for run in range(args.runs):
-                            rows.append(measure(browser,f'http://127.0.0.1:{server.server_port}/',count,kind=='v2',args.archive_mib*1024*1024,args.cpu,args.offline))
+                            rows.append(measure(browser,f'http://127.0.0.1:{server.server_port}/',count,kind=='v2',args.archive_mib*1024*1024,args.cpu,args.offline,args.editor_repeats))
                             print(f'{name} {run+1}/{args.runs}',flush=True)
-                        report['scenarios'][name]={'summary':summarize(rows),'samples':rows}
-                        args.output.write_text(json.dumps(report,indent=2)+'\n')
+                            report['scenarios'][name]={'completedRuns':len(rows),'summary':summarize(rows),'samples':rows}
+                            args.output.write_text(json.dumps(report,indent=2)+'\n')
                 browser.close()
         finally:
             server.shutdown();server.server_close();thread.join()

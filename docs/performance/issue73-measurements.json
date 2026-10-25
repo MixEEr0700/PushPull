@@ -1,0 +1,5746 @@
+{
+  "format": "pushpull-responsiveness-measurements",
+  "version": 1,
+  "environment": {
+    "cpu": "Intel Xeon Platinum 8573C, 5 available logical CPUs",
+    "viewport": [
+      390,
+      844
+    ],
+    "runsPerScenario": 5,
+    "offline": true,
+    "timing": "event to expected DOM plus two animation frames",
+    "physicalAndroid": false
+  },
+  "variants": {
+    "pre72": {
+      "scenarios": {
+        "legacy-4": {
+          "cpuThrottle": 4,
+          "sizes": {
+            "sessions": 4,
+            "entries": 34,
+            "snapshots": 0,
+            "liveBytes": 11352,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 783.1,
+              "p95Ms": 901.8,
+              "maxTaskMs": 187,
+              "medianBlockingMs": 154,
+              "meanInclusiveSpansMs": {
+                "decode": 7.66,
+                "validateCatalog": 11.04,
+                "verifyRows": 86.02,
+                "load": 211.94,
+                "open": 334.02,
+                "entriesFor": 0.24,
+                "main": 6.5,
+                "innerHTML": 2.78,
+                "render": 10.94
+              }
+            },
+            "warm": {
+              "medianMs": 368.7,
+              "p95Ms": 419.1,
+              "maxTaskMs": 98,
+              "medianBlockingMs": 29,
+              "meanInclusiveSpansMs": {
+                "decode": 3.66,
+                "validateCatalog": 7.2,
+                "verifyRows": 22.46,
+                "load": 133.68,
+                "open": 186.84,
+                "entriesFor": 0.02,
+                "main": 1.14,
+                "innerHTML": 1.76,
+                "render": 3.74
+              }
+            },
+            "offline": {
+              "medianMs": 372.3,
+              "p95Ms": 386.1,
+              "maxTaskMs": 95,
+              "medianBlockingMs": 24,
+              "meanInclusiveSpansMs": {
+                "decode": 2.9,
+                "validateCatalog": 7.66,
+                "verifyRows": 22.3,
+                "load": 108.02,
+                "open": 172.24,
+                "entriesFor": 0.2,
+                "main": 1.08,
+                "innerHTML": 2.5,
+                "render": 3.84
+              }
+            },
+            "start": {
+              "medianMs": 208.9,
+              "p95Ms": 255.1,
+              "maxTaskMs": 66,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 25.38,
+                "decode": 3.84,
+                "verifyRows": 37.8,
+                "save": 118.04,
+                "persist": 124.92,
+                "entriesFor": 0.18,
+                "main": 2.66,
+                "innerHTML": 3.76,
+                "render": 7.02
+              }
+            },
+            "exercise": {
+              "medianMs": 72.7,
+              "p95Ms": 74.9,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.0,
+                "main": 0.9,
+                "innerHTML": 4.1,
+                "render": 5.26
+              }
+            },
+            "editor": {
+              "medianMs": 78.6,
+              "p95Ms": 84.2,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.12,
+                "main": 11.18,
+                "innerHTML": 4.1,
+                "render": 15.98
+              }
+            },
+            "input": {
+              "medianMs": 92.4,
+              "p95Ms": 93.8,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 1.9,
+                "bindingFor": 1.12,
+                "captureDraft": 6.06
+              }
+            },
+            "save": {
+              "medianMs": 162.8,
+              "p95Ms": 209.5,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.18,
+                "validateCatalog": 21.14,
+                "decode": 3.2,
+                "verifyRows": 29.38,
+                "save": 103.36,
+                "persist": 106.76,
+                "entriesFor": 0.74,
+                "main": 1.48,
+                "innerHTML": 3.64,
+                "render": 5.5
+              }
+            },
+            "navigation": {
+              "medianMs": 57.8,
+              "p95Ms": 68.7,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 3.0,
+                "render": 9.38
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 792.9,
+                "longTasks": 2,
+                "maxTaskMs": 173,
+                "blockingMs": 156,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 419.1,
+                "longTasks": 1,
+                "maxTaskMs": 98,
+                "blockingMs": 48,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 386.1,
+                "longTasks": 1,
+                "maxTaskMs": 95,
+                "blockingMs": 45,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 199.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 71.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 78.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 92,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 195.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 66.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 709.6,
+                "longTasks": 2,
+                "maxTaskMs": 169,
+                "blockingMs": 151,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 368.7,
+                "longTasks": 1,
+                "maxTaskMs": 75,
+                "blockingMs": 25,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 310.6,
+                "longTasks": 1,
+                "maxTaskMs": 73,
+                "blockingMs": 23,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 221.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 69.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 77.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 160.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 68.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 783.1,
+                "longTasks": 2,
+                "maxTaskMs": 151,
+                "blockingMs": 135,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 336.8,
+                "longTasks": 1,
+                "maxTaskMs": 79,
+                "blockingMs": 29,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 372.3,
+                "longTasks": 1,
+                "maxTaskMs": 80,
+                "blockingMs": 30,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 208.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 74.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 84.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 85,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 162.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 57.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 901.8,
+                "longTasks": 3,
+                "maxTaskMs": 187,
+                "blockingMs": 192,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 378.6,
+                "longTasks": 1,
+                "maxTaskMs": 91,
+                "blockingMs": 41,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 376.3,
+                "longTasks": 1,
+                "maxTaskMs": 67,
+                "blockingMs": 17,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 255.1,
+                "longTasks": 1,
+                "maxTaskMs": 66,
+                "blockingMs": 16,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 74.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 76.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 209.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 53.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 723.5,
+                "longTasks": 2,
+                "maxTaskMs": 166,
+                "blockingMs": 154,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 357.6,
+                "longTasks": 1,
+                "maxTaskMs": 73,
+                "blockingMs": 23,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 365,
+                "longTasks": 1,
+                "maxTaskMs": 74,
+                "blockingMs": 24,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 183.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 72.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 79.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 92.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 159.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 57.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        },
+        "legacy-400": {
+          "cpuThrottle": 4,
+          "sizes": {
+            "sessions": 400,
+            "entries": 3400,
+            "snapshots": 0,
+            "liveBytes": 617971,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 3504.4,
+              "p95Ms": 3839.1,
+              "maxTaskMs": 2981,
+              "medianBlockingMs": 2728,
+              "meanInclusiveSpansMs": {
+                "decode": 1590.0,
+                "validateCatalog": 195.2,
+                "verifyRows": 2293.84,
+                "load": 2884.48,
+                "open": 3009.94,
+                "entriesFor": 26.2,
+                "main": 35.54,
+                "innerHTML": 3.7,
+                "render": 42.16
+              }
+            },
+            "warm": {
+              "medianMs": 3573.2,
+              "p95Ms": 3938.5,
+              "maxTaskMs": 3396,
+              "medianBlockingMs": 2781,
+              "meanInclusiveSpansMs": {
+                "decode": 1945.9,
+                "validateCatalog": 165.5,
+                "verifyRows": 2574.88,
+                "load": 3168.82,
+                "open": 3225.08,
+                "entriesFor": 26.98,
+                "main": 28.62,
+                "innerHTML": 4.4,
+                "render": 34.56
+              }
+            },
+            "offline": {
+              "medianMs": 3395.8,
+              "p95Ms": 3702.3,
+              "maxTaskMs": 3190,
+              "medianBlockingMs": 2795,
+              "meanInclusiveSpansMs": {
+                "decode": 1997.9,
+                "validateCatalog": 147.14,
+                "verifyRows": 2566.98,
+                "load": 3092.8,
+                "open": 3149.88,
+                "entriesFor": 21.66,
+                "main": 23.92,
+                "innerHTML": 2.2,
+                "render": 26.8
+              }
+            },
+            "start": {
+              "medianMs": 5061.9,
+              "p95Ms": 5139.9,
+              "maxTaskMs": 3049,
+              "medianBlockingMs": 4240,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 750.86,
+                "decode": 1606.88,
+                "verifyRows": 2551.1,
+                "save": 4771.82,
+                "persist": 4825.46,
+                "entriesFor": 20.66,
+                "main": 24.62,
+                "innerHTML": 4.7,
+                "render": 30.12
+              }
+            },
+            "exercise": {
+              "medianMs": 91.4,
+              "p95Ms": 135.4,
+              "maxTaskMs": 62,
+              "medianBlockingMs": 3,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 16.04,
+                "main": 16.92,
+                "innerHTML": 4.16,
+                "render": 21.3
+              }
+            },
+            "editor": {
+              "medianMs": 109.3,
+              "p95Ms": 111.1,
+              "maxTaskMs": 78,
+              "medianBlockingMs": 13,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 24.28,
+                "main": 38.1,
+                "innerHTML": 4.88,
+                "render": 43.48
+              }
+            },
+            "input": {
+              "medianMs": 94.3,
+              "p95Ms": 108.8,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 1.7,
+                "bindingFor": 2.76,
+                "captureDraft": 9.18
+              }
+            },
+            "save": {
+              "medianMs": 4614.7,
+              "p95Ms": 5544.4,
+              "maxTaskMs": 2593,
+              "medianBlockingMs": 3897,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.98,
+                "validateCatalog": 693.06,
+                "decode": 1506.78,
+                "verifyRows": 2369.28,
+                "save": 4626.56,
+                "persist": 4676.54,
+                "entriesFor": 27.1,
+                "main": 28.5,
+                "innerHTML": 7.38,
+                "render": 36.44
+              }
+            },
+            "navigation": {
+              "medianMs": 96.9,
+              "p95Ms": 261.2,
+              "maxTaskMs": 106,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 9.76,
+                "render": 27.52
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 3504.4,
+                "longTasks": 3,
+                "maxTaskMs": 2727,
+                "blockingMs": 2728,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3930.5,
+                "longTasks": 2,
+                "maxTaskMs": 3396,
+                "blockingMs": 3374,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3702.3,
+                "longTasks": 2,
+                "maxTaskMs": 3190,
+                "blockingMs": 3162,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5095.1,
+                "longTasks": 5,
+                "maxTaskMs": 2694,
+                "blockingMs": 4362,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 85,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 93.7,
+                "longTasks": 1,
+                "maxTaskMs": 63,
+                "blockingMs": 13,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 5544.4,
+                "longTasks": 6,
+                "maxTaskMs": 2593,
+                "blockingMs": 4705,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 261.2,
+                "longTasks": 1,
+                "maxTaskMs": 106,
+                "blockingMs": 56,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3328.7,
+                "longTasks": 4,
+                "maxTaskMs": 2561,
+                "blockingMs": 2547,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3282.8,
+                "longTasks": 2,
+                "maxTaskMs": 2819,
+                "blockingMs": 2781,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3200.3,
+                "longTasks": 1,
+                "maxTaskMs": 2764,
+                "blockingMs": 2714,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5139.9,
+                "longTasks": 6,
+                "maxTaskMs": 3049,
+                "blockingMs": 4209,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 135.4,
+                "longTasks": 1,
+                "maxTaskMs": 53,
+                "blockingMs": 3,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 109.3,
+                "longTasks": 1,
+                "maxTaskMs": 62,
+                "blockingMs": 12,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 107.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 4496.4,
+                "longTasks": 6,
+                "maxTaskMs": 2518,
+                "blockingMs": 3796,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 56,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3327.3,
+                "longTasks": 3,
+                "maxTaskMs": 2571,
+                "blockingMs": 2566,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3573.2,
+                "longTasks": 2,
+                "maxTaskMs": 2820,
+                "blockingMs": 2776,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3480.2,
+                "longTasks": 2,
+                "maxTaskMs": 3000,
+                "blockingMs": 2958,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 4944.9,
+                "longTasks": 5,
+                "maxTaskMs": 2659,
+                "blockingMs": 4240,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 107.7,
+                "longTasks": 1,
+                "maxTaskMs": 62,
+                "blockingMs": 12,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 111.1,
+                "longTasks": 1,
+                "maxTaskMs": 78,
+                "blockingMs": 28,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 108.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 4614.7,
+                "longTasks": 6,
+                "maxTaskMs": 2510,
+                "blockingMs": 3897,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 92.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3839.1,
+                "longTasks": 4,
+                "maxTaskMs": 2981,
+                "blockingMs": 2996,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3009.3,
+                "longTasks": 2,
+                "maxTaskMs": 2527,
+                "blockingMs": 2499,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3319.8,
+                "longTasks": 2,
+                "maxTaskMs": 2816,
+                "blockingMs": 2772,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 4574.2,
+                "longTasks": 5,
+                "maxTaskMs": 2292,
+                "blockingMs": 3882,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 89.7,
+                "longTasks": 1,
+                "maxTaskMs": 52,
+                "blockingMs": 2,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 94.1,
+                "longTasks": 1,
+                "maxTaskMs": 56,
+                "blockingMs": 6,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 91.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 4515.1,
+                "longTasks": 5,
+                "maxTaskMs": 2301,
+                "blockingMs": 3836,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 100.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3760,
+                "longTasks": 7,
+                "maxTaskMs": 2743,
+                "blockingMs": 2800,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3938.5,
+                "longTasks": 5,
+                "maxTaskMs": 3019,
+                "blockingMs": 3251,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3395.8,
+                "longTasks": 2,
+                "maxTaskMs": 2839,
+                "blockingMs": 2795,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5061.9,
+                "longTasks": 5,
+                "maxTaskMs": 2493,
+                "blockingMs": 4271,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 91.4,
+                "longTasks": 1,
+                "maxTaskMs": 57,
+                "blockingMs": 7,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 109.3,
+                "longTasks": 1,
+                "maxTaskMs": 77,
+                "blockingMs": 27,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 94.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 5006.4,
+                "longTasks": 6,
+                "maxTaskMs": 2485,
+                "blockingMs": 4262,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 96.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        },
+        "v2-4": {
+          "cpuThrottle": 4,
+          "sizes": {
+            "sessions": 4,
+            "entries": 35,
+            "snapshots": 4,
+            "liveBytes": 552399,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 6216.6,
+              "p95Ms": 6602.7,
+              "maxTaskMs": 5217,
+              "medianBlockingMs": 5435,
+              "meanInclusiveSpansMs": {
+                "decode": 26.3,
+                "validateCatalog": 150.62,
+                "verifyRows": 270.9,
+                "load": 5650.14,
+                "open": 5757.48,
+                "entriesFor": 0.6,
+                "main": 20.3,
+                "innerHTML": 2.58,
+                "render": 24.78
+              }
+            },
+            "warm": {
+              "medianMs": 5491.8,
+              "p95Ms": 6048.2,
+              "maxTaskMs": 4917,
+              "medianBlockingMs": 4884,
+              "meanInclusiveSpansMs": {
+                "decode": 22.36,
+                "validateCatalog": 131.94,
+                "verifyRows": 197.98,
+                "load": 5174.46,
+                "open": 5254.76,
+                "entriesFor": 0.12,
+                "main": 7.22,
+                "innerHTML": 2.76,
+                "render": 10.74
+              }
+            },
+            "offline": {
+              "medianMs": 5265.8,
+              "p95Ms": 5815.5,
+              "maxTaskMs": 4794,
+              "medianBlockingMs": 4781,
+              "meanInclusiveSpansMs": {
+                "decode": 25.5,
+                "validateCatalog": 131.26,
+                "verifyRows": 198.06,
+                "load": 5057.52,
+                "open": 5113.0,
+                "entriesFor": 0.38,
+                "main": 7.24,
+                "innerHTML": 1.74,
+                "render": 10.18
+              }
+            },
+            "start": {
+              "medianMs": 5697.5,
+              "p95Ms": 6768.4,
+              "maxTaskMs": 4908,
+              "medianBlockingMs": 5100,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 503.1,
+                "decode": 26.54,
+                "verifyRows": 308.46,
+                "save": 5761.7,
+                "persist": 5786.4,
+                "entriesFor": 0.36,
+                "main": 6.42,
+                "innerHTML": 4.76,
+                "render": 11.7
+              }
+            },
+            "exercise": {
+              "medianMs": 85.8,
+              "p95Ms": 91.1,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.26,
+                "main": 3.8,
+                "innerHTML": 5.48,
+                "render": 9.8
+              }
+            },
+            "editor": {
+              "medianMs": 91.3,
+              "p95Ms": 95.2,
+              "maxTaskMs": 50,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.04,
+                "main": 16.18,
+                "innerHTML": 4.52,
+                "render": 20.98
+              }
+            },
+            "input": {
+              "medianMs": 93.8,
+              "p95Ms": 95.4,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 1.76,
+                "bindingFor": 2.02,
+                "captureDraft": 8.92
+              }
+            },
+            "save": {
+              "medianMs": 5894.8,
+              "p95Ms": 6415.6,
+              "maxTaskMs": 4219,
+              "medianBlockingMs": 5308,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.48,
+                "validateCatalog": 524.36,
+                "decode": 28.3,
+                "verifyRows": 361.02,
+                "save": 5767.04,
+                "persist": 5792.0,
+                "entriesFor": 1.26,
+                "main": 7.58,
+                "innerHTML": 6.0,
+                "render": 13.88
+              }
+            },
+            "navigation": {
+              "medianMs": 57.8,
+              "p95Ms": 69.2,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 2.78,
+                "render": 10.44
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 5928.4,
+                "longTasks": 5,
+                "maxTaskMs": 4555,
+                "blockingMs": 5163,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5491.8,
+                "longTasks": 3,
+                "maxTaskMs": 4519,
+                "blockingMs": 4966,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5265.8,
+                "longTasks": 4,
+                "maxTaskMs": 4359,
+                "blockingMs": 4781,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5641.3,
+                "longTasks": 7,
+                "maxTaskMs": 3917,
+                "blockingMs": 5063,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 73,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 91.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 95.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 5744,
+                "longTasks": 7,
+                "maxTaskMs": 3924,
+                "blockingMs": 5162,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 55.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 6150.5,
+                "longTasks": 5,
+                "maxTaskMs": 4659,
+                "blockingMs": 5326,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 6048.2,
+                "longTasks": 5,
+                "maxTaskMs": 4917,
+                "blockingMs": 5455,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5815.5,
+                "longTasks": 4,
+                "maxTaskMs": 4794,
+                "blockingMs": 5284,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5981.9,
+                "longTasks": 7,
+                "maxTaskMs": 4067,
+                "blockingMs": 5466,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 89.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 94.7,
+                "longTasks": 1,
+                "maxTaskMs": 50,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 6415.6,
+                "longTasks": 6,
+                "maxTaskMs": 4219,
+                "blockingMs": 5882,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 68.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 6602.7,
+                "longTasks": 5,
+                "maxTaskMs": 5217,
+                "blockingMs": 5787,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5422.8,
+                "longTasks": 5,
+                "maxTaskMs": 4300,
+                "blockingMs": 4786,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5556.7,
+                "longTasks": 4,
+                "maxTaskMs": 4542,
+                "blockingMs": 5047,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5697.5,
+                "longTasks": 7,
+                "maxTaskMs": 3940,
+                "blockingMs": 5100,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 91.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 95.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 5894.8,
+                "longTasks": 7,
+                "maxTaskMs": 4053,
+                "blockingMs": 5308,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 55.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 6216.6,
+                "longTasks": 5,
+                "maxTaskMs": 4839,
+                "blockingMs": 5435,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5377.4,
+                "longTasks": 4,
+                "maxTaskMs": 4359,
+                "blockingMs": 4806,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5095.1,
+                "longTasks": 4,
+                "maxTaskMs": 4111,
+                "blockingMs": 4594,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 6768.4,
+                "longTasks": 8,
+                "maxTaskMs": 4908,
+                "blockingMs": 6137,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 84,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 76.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 95.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 5712.5,
+                "longTasks": 6,
+                "maxTaskMs": 3826,
+                "blockingMs": 5142,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 69.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 6480.8,
+                "longTasks": 5,
+                "maxTaskMs": 4900,
+                "blockingMs": 5587,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5650.5,
+                "longTasks": 4,
+                "maxTaskMs": 4312,
+                "blockingMs": 4884,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5153.4,
+                "longTasks": 4,
+                "maxTaskMs": 4150,
+                "blockingMs": 4577,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5540.5,
+                "longTasks": 6,
+                "maxTaskMs": 4077,
+                "blockingMs": 5058,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 85.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 85.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 74.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 6030.6,
+                "longTasks": 6,
+                "maxTaskMs": 3875,
+                "blockingMs": 5481,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 57.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        },
+        "v2-40": {
+          "cpuThrottle": 1.0,
+          "sizes": {
+            "sessions": 40,
+            "entries": 350,
+            "snapshots": 40,
+            "liveBytes": 4580644,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 9516.4,
+              "p95Ms": 11594.8,
+              "maxTaskMs": 10348,
+              "medianBlockingMs": 9007,
+              "meanInclusiveSpansMs": {
+                "decode": 47.38,
+                "validateCatalog": 289.56,
+                "verifyRows": 423.74,
+                "load": 9622.56,
+                "open": 9645.68,
+                "entriesFor": 0.48,
+                "main": 6.68,
+                "innerHTML": 0.68,
+                "render": 7.8
+              }
+            },
+            "warm": {
+              "medianMs": 8958.4,
+              "p95Ms": 13828.1,
+              "maxTaskMs": 12181,
+              "medianBlockingMs": 8565,
+              "meanInclusiveSpansMs": {
+                "decode": 47.12,
+                "validateCatalog": 276.42,
+                "verifyRows": 397.96,
+                "load": 9699.96,
+                "open": 9715.06,
+                "entriesFor": 0.34,
+                "main": 3.52,
+                "innerHTML": 0.48,
+                "render": 4.16
+              }
+            },
+            "offline": {
+              "medianMs": 8935.2,
+              "p95Ms": 9470.4,
+              "maxTaskMs": 8485,
+              "medianBlockingMs": 8554,
+              "meanInclusiveSpansMs": {
+                "decode": 44.46,
+                "validateCatalog": 260.44,
+                "verifyRows": 375.54,
+                "load": 8727.02,
+                "open": 8739.26,
+                "entriesFor": 0.36,
+                "main": 3.36,
+                "innerHTML": 0.54,
+                "render": 4.06
+              }
+            },
+            "start": {
+              "medianMs": 9324.5,
+              "p95Ms": 11309.3,
+              "maxTaskMs": 8509,
+              "medianBlockingMs": 8752,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 867.24,
+                "decode": 44.62,
+                "verifyRows": 563.58,
+                "save": 9716.74,
+                "persist": 9754.14,
+                "entriesFor": 0.28,
+                "main": 4.14,
+                "innerHTML": 1.3,
+                "render": 5.66
+              }
+            },
+            "exercise": {
+              "medianMs": 46.7,
+              "p95Ms": 60.8,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.36,
+                "main": 2.72,
+                "innerHTML": 1.26,
+                "render": 4.02
+              }
+            },
+            "editor": {
+              "medianMs": 45.7,
+              "p95Ms": 59.6,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.32,
+                "main": 5.98,
+                "innerHTML": 1.26,
+                "render": 7.34
+              }
+            },
+            "input": {
+              "medianMs": 60.7,
+              "p95Ms": 62.6,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 0.5,
+                "bindingFor": 0.54,
+                "captureDraft": 2.12
+              }
+            },
+            "save": {
+              "medianMs": 9329.2,
+              "p95Ms": 9977.6,
+              "maxTaskMs": 7528,
+              "medianBlockingMs": 8715,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.26,
+                "validateCatalog": 882.42,
+                "decode": 47.7,
+                "verifyRows": 576.62,
+                "save": 9309.14,
+                "persist": 9350.32,
+                "entriesFor": 0.32,
+                "main": 3.6,
+                "innerHTML": 1.08,
+                "render": 4.72
+              }
+            },
+            "navigation": {
+              "medianMs": 39,
+              "p95Ms": 46.6,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 0.6,
+                "render": 2.44
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 8822.2,
+                "longTasks": 5,
+                "maxTaskMs": 7621,
+                "blockingMs": 8294,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 8707.2,
+                "longTasks": 4,
+                "maxTaskMs": 7704,
+                "blockingMs": 8327,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 8935.2,
+                "longTasks": 4,
+                "maxTaskMs": 7859,
+                "blockingMs": 8554,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 10161.6,
+                "longTasks": 6,
+                "maxTaskMs": 7996,
+                "blockingMs": 9579,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 57.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 46.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 61.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 9272.6,
+                "longTasks": 6,
+                "maxTaskMs": 6985,
+                "blockingMs": 8715,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 46.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 10795.6,
+                "longTasks": 5,
+                "maxTaskMs": 9241,
+                "blockingMs": 10219,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 13828.1,
+                "longTasks": 4,
+                "maxTaskMs": 12181,
+                "blockingMs": 13362,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 8499.5,
+                "longTasks": 4,
+                "maxTaskMs": 7492,
+                "blockingMs": 8092,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 9011.5,
+                "longTasks": 6,
+                "maxTaskMs": 6870,
+                "blockingMs": 8457,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 44.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 45.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 46,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 9185.2,
+                "longTasks": 6,
+                "maxTaskMs": 6986,
+                "blockingMs": 8585,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 39,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 11594.8,
+                "longTasks": 4,
+                "maxTaskMs": 10348,
+                "blockingMs": 11089,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 8725.2,
+                "longTasks": 4,
+                "maxTaskMs": 7716,
+                "blockingMs": 8339,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 9470.4,
+                "longTasks": 3,
+                "maxTaskMs": 8485,
+                "blockingMs": 9073,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 11309.3,
+                "longTasks": 7,
+                "maxTaskMs": 8509,
+                "blockingMs": 10552,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 60.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 59.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 60.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 9977.6,
+                "longTasks": 7,
+                "maxTaskMs": 7528,
+                "blockingMs": 9283,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 42.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 9516.4,
+                "longTasks": 4,
+                "maxTaskMs": 8214,
+                "blockingMs": 9007,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 9559.5,
+                "longTasks": 4,
+                "maxTaskMs": 8289,
+                "blockingMs": 9133,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 9149.1,
+                "longTasks": 4,
+                "maxTaskMs": 8114,
+                "blockingMs": 8758,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 9193.2,
+                "longTasks": 6,
+                "maxTaskMs": 6951,
+                "blockingMs": 8614,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 44.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 45.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 47.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 9361.9,
+                "longTasks": 7,
+                "maxTaskMs": 6964,
+                "blockingMs": 8713,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 29,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 9224.5,
+                "longTasks": 4,
+                "maxTaskMs": 8008,
+                "blockingMs": 8745,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 8958.4,
+                "longTasks": 4,
+                "maxTaskMs": 7936,
+                "blockingMs": 8565,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 8800.7,
+                "longTasks": 4,
+                "maxTaskMs": 7771,
+                "blockingMs": 8419,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 9324.5,
+                "longTasks": 6,
+                "maxTaskMs": 7132,
+                "blockingMs": 8752,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 46.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 45.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 62.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 9329.2,
+                "longTasks": 6,
+                "maxTaskMs": 7095,
+                "blockingMs": 8768,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 27.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        }
+      },
+      "ref": "4230ca3",
+      "browser": "154.0.8037.57",
+      "platform": "Linux-6.18.55-x86_64-with-glibc2.41"
+    },
+    "main": {
+      "scenarios": {
+        "legacy-4": {
+          "cpuThrottle": 4,
+          "sizes": {
+            "sessions": 4,
+            "entries": 34,
+            "snapshots": 0,
+            "liveBytes": 11352,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 805.4,
+              "p95Ms": 859,
+              "maxTaskMs": 169,
+              "medianBlockingMs": 151,
+              "meanInclusiveSpansMs": {
+                "decode": 6.86,
+                "validateCatalog": 9.2,
+                "verifyRows": 75.64,
+                "load": 216.12,
+                "open": 336.42,
+                "entriesFor": 0.44,
+                "main": 6.88,
+                "innerHTML": 3.78,
+                "render": 12.72
+              }
+            },
+            "warm": {
+              "medianMs": 394.8,
+              "p95Ms": 472.9,
+              "maxTaskMs": 90,
+              "medianBlockingMs": 33,
+              "meanInclusiveSpansMs": {
+                "decode": 3.9,
+                "validateCatalog": 7.2,
+                "verifyRows": 22.06,
+                "load": 148.2,
+                "open": 188.18,
+                "entriesFor": 0.08,
+                "main": 0.9,
+                "innerHTML": 1.36,
+                "render": 2.66
+              }
+            },
+            "offline": {
+              "medianMs": 339.8,
+              "p95Ms": 357,
+              "maxTaskMs": 80,
+              "medianBlockingMs": 26,
+              "meanInclusiveSpansMs": {
+                "decode": 3.9,
+                "validateCatalog": 6.48,
+                "verifyRows": 20.84,
+                "load": 110.14,
+                "open": 171.9,
+                "entriesFor": 0.18,
+                "main": 0.74,
+                "innerHTML": 2.24,
+                "render": 3.86
+              }
+            },
+            "start": {
+              "medianMs": 204.9,
+              "p95Ms": 221.8,
+              "maxTaskMs": 58,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 20.78,
+                "decode": 8.1,
+                "verifyRows": 34.92,
+                "save": 105.1,
+                "persist": 110.12,
+                "entriesFor": 0.04,
+                "main": 2.12,
+                "innerHTML": 4.96,
+                "render": 7.74
+              }
+            },
+            "exercise": {
+              "medianMs": 73.9,
+              "p95Ms": 90.7,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.0,
+                "main": 1.1,
+                "innerHTML": 4.38,
+                "render": 5.62
+              }
+            },
+            "editor": {
+              "medianMs": 78.3,
+              "p95Ms": 178.8,
+              "maxTaskMs": 130,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.0,
+                "main": 11.12,
+                "innerHTML": 4.76,
+                "render": 16.36
+              }
+            },
+            "input": {
+              "medianMs": 95.9,
+              "p95Ms": 109,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 1.78,
+                "bindingFor": 0.5,
+                "captureDraft": 5.98
+              }
+            },
+            "save": {
+              "medianMs": 178.6,
+              "p95Ms": 189.6,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.1,
+                "validateCatalog": 23.72,
+                "decode": 3.14,
+                "verifyRows": 31.58,
+                "save": 107.76,
+                "persist": 110.86,
+                "entriesFor": 0.84,
+                "main": 1.98,
+                "innerHTML": 3.64,
+                "render": 6.1
+              }
+            },
+            "navigation": {
+              "medianMs": 56.4,
+              "p95Ms": 69.7,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 2.98,
+                "render": 9.36
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 805.4,
+                "longTasks": 3,
+                "maxTaskMs": 150,
+                "blockingMs": 141,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 472.9,
+                "longTasks": 1,
+                "maxTaskMs": 83,
+                "blockingMs": 33,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 336.2,
+                "longTasks": 1,
+                "maxTaskMs": 73,
+                "blockingMs": 23,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 166.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 66.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 78.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 94,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 144.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 50.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 794.9,
+                "longTasks": 3,
+                "maxTaskMs": 159,
+                "blockingMs": 145,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 394.8,
+                "longTasks": 1,
+                "maxTaskMs": 84,
+                "blockingMs": 34,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 341.4,
+                "longTasks": 1,
+                "maxTaskMs": 74,
+                "blockingMs": 24,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 209.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 72.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 75.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 95.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 175.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 69.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 859,
+                "longTasks": 2,
+                "maxTaskMs": 160,
+                "blockingMs": 152,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 328.1,
+                "longTasks": 1,
+                "maxTaskMs": 70,
+                "blockingMs": 20,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 315.2,
+                "longTasks": 1,
+                "maxTaskMs": 80,
+                "blockingMs": 30,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 185.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 90.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 78,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 94.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 180.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 54,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 736.3,
+                "longTasks": 2,
+                "maxTaskMs": 169,
+                "blockingMs": 153,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 362.7,
+                "longTasks": 1,
+                "maxTaskMs": 82,
+                "blockingMs": 32,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 339.8,
+                "longTasks": 1,
+                "maxTaskMs": 79,
+                "blockingMs": 29,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 204.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 87.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 178.8,
+                "longTasks": 1,
+                "maxTaskMs": 130,
+                "blockingMs": 80,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 106.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 178.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 56.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 851.7,
+                "longTasks": 2,
+                "maxTaskMs": 167,
+                "blockingMs": 151,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 410.6,
+                "longTasks": 1,
+                "maxTaskMs": 90,
+                "blockingMs": 40,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 357,
+                "longTasks": 1,
+                "maxTaskMs": 76,
+                "blockingMs": 26,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 221.8,
+                "longTasks": 1,
+                "maxTaskMs": 58,
+                "blockingMs": 8,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 73.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 92.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 109,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 189.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 57.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        },
+        "legacy-400": {
+          "cpuThrottle": 4,
+          "sizes": {
+            "sessions": 400,
+            "entries": 3400,
+            "snapshots": 0,
+            "liveBytes": 617971,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 3290.9,
+              "p95Ms": 3676.7,
+              "maxTaskMs": 2860,
+              "medianBlockingMs": 2474,
+              "meanInclusiveSpansMs": {
+                "decode": 1444.64,
+                "validateCatalog": 184.62,
+                "verifyRows": 2137.22,
+                "load": 2726.98,
+                "open": 2832.86,
+                "entriesFor": 24.06,
+                "main": 32.36,
+                "innerHTML": 3.28,
+                "render": 38.72
+              }
+            },
+            "warm": {
+              "medianMs": 3382.6,
+              "p95Ms": 3655.9,
+              "maxTaskMs": 3187,
+              "medianBlockingMs": 2825,
+              "meanInclusiveSpansMs": {
+                "decode": 1859.88,
+                "validateCatalog": 159.78,
+                "verifyRows": 2479.84,
+                "load": 3005.52,
+                "open": 3073.82,
+                "entriesFor": 21.04,
+                "main": 22.5,
+                "innerHTML": 2.42,
+                "render": 26.26
+              }
+            },
+            "offline": {
+              "medianMs": 3175.7,
+              "p95Ms": 6610.7,
+              "maxTaskMs": 5707,
+              "medianBlockingMs": 2690,
+              "meanInclusiveSpansMs": {
+                "decode": 1846.36,
+                "validateCatalog": 330.34,
+                "verifyRows": 2964.34,
+                "load": 3532.02,
+                "open": 3587.08,
+                "entriesFor": 20.8,
+                "main": 22.38,
+                "innerHTML": 2.34,
+                "render": 26.04
+              }
+            },
+            "start": {
+              "medianMs": 5584.8,
+              "p95Ms": 8594.9,
+              "maxTaskMs": 4225,
+              "medianBlockingMs": 4856,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 931.98,
+                "decode": 1563.84,
+                "verifyRows": 2873.48,
+                "save": 6114.6,
+                "persist": 6166.02,
+                "entriesFor": 19.16,
+                "main": 24.92,
+                "innerHTML": 9.1,
+                "render": 34.74
+              }
+            },
+            "exercise": {
+              "medianMs": 186.5,
+              "p95Ms": 1237.6,
+              "maxTaskMs": 895,
+              "medianBlockingMs": 3,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 17.92,
+                "main": 20.06,
+                "innerHTML": 14.3,
+                "render": 34.9
+              }
+            },
+            "editor": {
+              "medianMs": 105.7,
+              "p95Ms": 121.2,
+              "maxTaskMs": 78,
+              "medianBlockingMs": 14,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 19.36,
+                "main": 34.66,
+                "innerHTML": 4.02,
+                "render": 39.16
+              }
+            },
+            "input": {
+              "medianMs": 93.9,
+              "p95Ms": 108.2,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 1.62,
+                "bindingFor": 2.56,
+                "captureDraft": 8.48
+              }
+            },
+            "save": {
+              "medianMs": 4993.3,
+              "p95Ms": 5607.3,
+              "maxTaskMs": 2888,
+              "medianBlockingMs": 4261,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 1.14,
+                "validateCatalog": 710.7,
+                "decode": 1487.98,
+                "verifyRows": 2487.36,
+                "save": 4772.22,
+                "persist": 4821.12,
+                "entriesFor": 46.6,
+                "main": 48.84,
+                "innerHTML": 5.22,
+                "render": 55.02
+              }
+            },
+            "navigation": {
+              "medianMs": 69.1,
+              "p95Ms": 314.3,
+              "maxTaskMs": 72,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 4.5,
+                "render": 19.42
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 3676.7,
+                "longTasks": 3,
+                "maxTaskMs": 2860,
+                "blockingMs": 2854,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3655.9,
+                "longTasks": 1,
+                "maxTaskMs": 3187,
+                "blockingMs": 3137,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3175.7,
+                "longTasks": 2,
+                "maxTaskMs": 2744,
+                "blockingMs": 2699,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 4657.5,
+                "longTasks": 6,
+                "maxTaskMs": 2358,
+                "blockingMs": 3952,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 186.5,
+                "longTasks": 1,
+                "maxTaskMs": 53,
+                "blockingMs": 3,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 105.3,
+                "longTasks": 1,
+                "maxTaskMs": 64,
+                "blockingMs": 14,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 4477.1,
+                "longTasks": 4,
+                "maxTaskMs": 2280,
+                "blockingMs": 3766,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 57.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3277.7,
+                "longTasks": 3,
+                "maxTaskMs": 2477,
+                "blockingMs": 2474,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3517.6,
+                "longTasks": 2,
+                "maxTaskMs": 2948,
+                "blockingMs": 2915,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3186.4,
+                "longTasks": 1,
+                "maxTaskMs": 2740,
+                "blockingMs": 2690,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 8083.1,
+                "longTasks": 9,
+                "maxTaskMs": 4225,
+                "blockingMs": 6706,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 1237.6,
+                "longTasks": 1,
+                "maxTaskMs": 895,
+                "blockingMs": 845,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 111.9,
+                "longTasks": 1,
+                "maxTaskMs": 64,
+                "blockingMs": 14,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 108.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 5425.8,
+                "longTasks": 7,
+                "maxTaskMs": 2783,
+                "blockingMs": 4476,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 100.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3105.1,
+                "longTasks": 4,
+                "maxTaskMs": 2207,
+                "blockingMs": 2224,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 2911.5,
+                "longTasks": 2,
+                "maxTaskMs": 2419,
+                "blockingMs": 2386,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3139,
+                "longTasks": 1,
+                "maxTaskMs": 2687,
+                "blockingMs": 2637,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 4622.3,
+                "longTasks": 5,
+                "maxTaskMs": 2425,
+                "blockingMs": 3931,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 187,
+                "longTasks": 1,
+                "maxTaskMs": 53,
+                "blockingMs": 3,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 82.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 4347.2,
+                "longTasks": 4,
+                "maxTaskMs": 2252,
+                "blockingMs": 3669,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 69.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3496.2,
+                "longTasks": 4,
+                "maxTaskMs": 2626,
+                "blockingMs": 2652,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3185.2,
+                "longTasks": 2,
+                "maxTaskMs": 2677,
+                "blockingMs": 2644,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3104,
+                "longTasks": 2,
+                "maxTaskMs": 2643,
+                "blockingMs": 2609,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5584.8,
+                "longTasks": 5,
+                "maxTaskMs": 3029,
+                "blockingMs": 4856,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 90.1,
+                "longTasks": 1,
+                "maxTaskMs": 51,
+                "blockingMs": 1,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 105.7,
+                "longTasks": 1,
+                "maxTaskMs": 62,
+                "blockingMs": 12,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 95.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 5607.3,
+                "longTasks": 6,
+                "maxTaskMs": 2888,
+                "blockingMs": 4790,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 314.3,
+                "longTasks": 1,
+                "maxTaskMs": 72,
+                "blockingMs": 22,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3290.9,
+                "longTasks": 3,
+                "maxTaskMs": 2453,
+                "blockingMs": 2448,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3382.6,
+                "longTasks": 2,
+                "maxTaskMs": 2852,
+                "blockingMs": 2825,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 6610.7,
+                "longTasks": 2,
+                "maxTaskMs": 5707,
+                "blockingMs": 5834,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 8594.9,
+                "longTasks": 8,
+                "maxTaskMs": 2809,
+                "blockingMs": 7372,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 153,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 121.2,
+                "longTasks": 1,
+                "maxTaskMs": 78,
+                "blockingMs": 28,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 92.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 4993.3,
+                "longTasks": 6,
+                "maxTaskMs": 2705,
+                "blockingMs": 4261,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 57.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        },
+        "v2-4": {
+          "cpuThrottle": 4,
+          "sizes": {
+            "sessions": 4,
+            "entries": 35,
+            "snapshots": 4,
+            "liveBytes": 552399,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 6646.9,
+              "p95Ms": 9680.8,
+              "maxTaskMs": 8129,
+              "medianBlockingMs": 5693,
+              "meanInclusiveSpansMs": {
+                "decode": 31.7,
+                "validateCatalog": 164.64,
+                "verifyRows": 302.52,
+                "load": 6405.84,
+                "open": 6503.92,
+                "entriesFor": 0.34,
+                "main": 23.34,
+                "innerHTML": 3.66,
+                "render": 28.8
+              }
+            },
+            "warm": {
+              "medianMs": 5582,
+              "p95Ms": 5993.5,
+              "maxTaskMs": 4925,
+              "medianBlockingMs": 5037,
+              "meanInclusiveSpansMs": {
+                "decode": 24.7,
+                "validateCatalog": 126.86,
+                "verifyRows": 192.36,
+                "load": 5241.56,
+                "open": 5295.56,
+                "entriesFor": 0.58,
+                "main": 8.44,
+                "innerHTML": 3.26,
+                "render": 12.82
+              }
+            },
+            "offline": {
+              "medianMs": 5579.5,
+              "p95Ms": 9710.7,
+              "maxTaskMs": 8614,
+              "medianBlockingMs": 5053,
+              "meanInclusiveSpansMs": {
+                "decode": 23.0,
+                "validateCatalog": 142.1,
+                "verifyRows": 206.44,
+                "load": 6135.48,
+                "open": 6173.26,
+                "entriesFor": 0.02,
+                "main": 6.52,
+                "innerHTML": 2.46,
+                "render": 9.82
+              }
+            },
+            "start": {
+              "medianMs": 5842.1,
+              "p95Ms": 6820.4,
+              "maxTaskMs": 4767,
+              "medianBlockingMs": 5265,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 503.58,
+                "decode": 27.94,
+                "verifyRows": 334.9,
+                "save": 5923.4,
+                "persist": 5949.04,
+                "entriesFor": 0.2,
+                "main": 6.94,
+                "innerHTML": 5.52,
+                "render": 12.92
+              }
+            },
+            "exercise": {
+              "medianMs": 88.7,
+              "p95Ms": 116.7,
+              "maxTaskMs": 57,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.04,
+                "main": 4.58,
+                "innerHTML": 6.36,
+                "render": 11.28
+              }
+            },
+            "editor": {
+              "medianMs": 89.2,
+              "p95Ms": 108.2,
+              "maxTaskMs": 62,
+              "medianBlockingMs": 2,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.36,
+                "main": 18.52,
+                "innerHTML": 5.52,
+                "render": 24.44
+              }
+            },
+            "input": {
+              "medianMs": 94.5,
+              "p95Ms": 115,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 2.28,
+                "bindingFor": 3.4,
+                "captureDraft": 9.46
+              }
+            },
+            "save": {
+              "medianMs": 6144,
+              "p95Ms": 7445.7,
+              "maxTaskMs": 4220,
+              "medianBlockingMs": 5564,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.58,
+                "validateCatalog": 517.9,
+                "decode": 26.4,
+                "verifyRows": 378.18,
+                "save": 5948.8,
+                "persist": 5975.82,
+                "entriesFor": 0.8,
+                "main": 19.92,
+                "innerHTML": 13.88,
+                "render": 34.08
+              }
+            },
+            "navigation": {
+              "medianMs": 59.5,
+              "p95Ms": 130,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 3.58,
+                "render": 15.06
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 6646.9,
+                "longTasks": 6,
+                "maxTaskMs": 4984,
+                "blockingMs": 5693,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5935.8,
+                "longTasks": 4,
+                "maxTaskMs": 4695,
+                "blockingMs": 5346,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5045.5,
+                "longTasks": 4,
+                "maxTaskMs": 4124,
+                "blockingMs": 4556,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5282.1,
+                "longTasks": 6,
+                "maxTaskMs": 3608,
+                "blockingMs": 4673,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 91,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 89.2,
+                "longTasks": 1,
+                "maxTaskMs": 52,
+                "blockingMs": 2,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 92.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 5577.3,
+                "longTasks": 6,
+                "maxTaskMs": 3795,
+                "blockingMs": 5070,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 57.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 5894.4,
+                "longTasks": 5,
+                "maxTaskMs": 4340,
+                "blockingMs": 5009,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5259.3,
+                "longTasks": 3,
+                "maxTaskMs": 4287,
+                "blockingMs": 4694,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5459.8,
+                "longTasks": 4,
+                "maxTaskMs": 4492,
+                "blockingMs": 4975,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5786.2,
+                "longTasks": 7,
+                "maxTaskMs": 4110,
+                "blockingMs": 5228,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 70.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 76.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 5582.3,
+                "longTasks": 6,
+                "maxTaskMs": 3826,
+                "blockingMs": 5006,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 53,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 5932.2,
+                "longTasks": 5,
+                "maxTaskMs": 4471,
+                "blockingMs": 5096,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5436.4,
+                "longTasks": 4,
+                "maxTaskMs": 4371,
+                "blockingMs": 4807,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 9710.7,
+                "longTasks": 4,
+                "maxTaskMs": 8614,
+                "blockingMs": 9091,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 6695.9,
+                "longTasks": 7,
+                "maxTaskMs": 4767,
+                "blockingMs": 6153,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 88.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 105.6,
+                "longTasks": 1,
+                "maxTaskMs": 62,
+                "blockingMs": 12,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 94.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 6144,
+                "longTasks": 6,
+                "maxTaskMs": 4220,
+                "blockingMs": 5564,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 59.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 7086.9,
+                "longTasks": 5,
+                "maxTaskMs": 5525,
+                "blockingMs": 6279,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5582,
+                "longTasks": 3,
+                "maxTaskMs": 4522,
+                "blockingMs": 5037,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 6494,
+                "longTasks": 4,
+                "maxTaskMs": 5358,
+                "blockingMs": 5968,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 6820.4,
+                "longTasks": 7,
+                "maxTaskMs": 4581,
+                "blockingMs": 6255,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 72,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 108.2,
+                "longTasks": 1,
+                "maxTaskMs": 57,
+                "blockingMs": 7,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 94.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 6230.3,
+                "longTasks": 7,
+                "maxTaskMs": 4197,
+                "blockingMs": 5618,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 71.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 9680.8,
+                "longTasks": 5,
+                "maxTaskMs": 8129,
+                "blockingMs": 8809,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5993.5,
+                "longTasks": 4,
+                "maxTaskMs": 4925,
+                "blockingMs": 5413,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5579.5,
+                "longTasks": 4,
+                "maxTaskMs": 4521,
+                "blockingMs": 5053,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 5842.1,
+                "longTasks": 7,
+                "maxTaskMs": 4091,
+                "blockingMs": 5265,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 116.7,
+                "longTasks": 1,
+                "maxTaskMs": 57,
+                "blockingMs": 7,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 83.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 115,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 7445.7,
+                "longTasks": 8,
+                "maxTaskMs": 3994,
+                "blockingMs": 6805,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 130,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        },
+        "v2-40": {
+          "cpuThrottle": 1.0,
+          "sizes": {
+            "sessions": 40,
+            "entries": 350,
+            "snapshots": 40,
+            "liveBytes": 4580644,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 9783.8,
+              "p95Ms": 15666,
+              "maxTaskMs": 14306,
+              "medianBlockingMs": 9261,
+              "meanInclusiveSpansMs": {
+                "decode": 51.4,
+                "validateCatalog": 332.88,
+                "verifyRows": 474.9,
+                "load": 10409.54,
+                "open": 10433.08,
+                "entriesFor": 0.52,
+                "main": 7.82,
+                "innerHTML": 1.24,
+                "render": 9.86
+              }
+            },
+            "warm": {
+              "medianMs": 9252.8,
+              "p95Ms": 10354,
+              "maxTaskMs": 9182,
+              "medianBlockingMs": 8726,
+              "meanInclusiveSpansMs": {
+                "decode": 46.28,
+                "validateCatalog": 300.8,
+                "verifyRows": 424.0,
+                "load": 9193.12,
+                "open": 9211.42,
+                "entriesFor": 0.36,
+                "main": 3.58,
+                "innerHTML": 0.64,
+                "render": 4.44
+              }
+            },
+            "offline": {
+              "medianMs": 9048.1,
+              "p95Ms": 10549.3,
+              "maxTaskMs": 9482,
+              "medianBlockingMs": 8630,
+              "meanInclusiveSpansMs": {
+                "decode": 46.34,
+                "validateCatalog": 283.64,
+                "verifyRows": 402.94,
+                "load": 9015.66,
+                "open": 9029.06,
+                "entriesFor": 0.26,
+                "main": 3.52,
+                "innerHTML": 0.54,
+                "render": 4.16
+              }
+            },
+            "start": {
+              "medianMs": 9597,
+              "p95Ms": 10585.5,
+              "maxTaskMs": 7670,
+              "medianBlockingMs": 9051,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 901.54,
+                "decode": 52.54,
+                "verifyRows": 616.54,
+                "save": 9814.62,
+                "persist": 9851.62,
+                "entriesFor": 0.34,
+                "main": 4.0,
+                "innerHTML": 1.06,
+                "render": 5.24
+              }
+            },
+            "exercise": {
+              "medianMs": 43.9,
+              "p95Ms": 207.4,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.18,
+                "main": 2.56,
+                "innerHTML": 1.38,
+                "render": 4.04
+              }
+            },
+            "editor": {
+              "medianMs": 46.1,
+              "p95Ms": 47.2,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.22,
+                "main": 5.92,
+                "innerHTML": 1.12,
+                "render": 7.12
+              }
+            },
+            "input": {
+              "medianMs": 62.7,
+              "p95Ms": 64.7,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 0.42,
+                "bindingFor": 0.68,
+                "captureDraft": 2.18
+              }
+            },
+            "save": {
+              "medianMs": 9513.1,
+              "p95Ms": 11258.7,
+              "maxTaskMs": 8705,
+              "medianBlockingMs": 8899,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.18,
+                "validateCatalog": 959.08,
+                "decode": 48.7,
+                "verifyRows": 653.3,
+                "save": 10005.62,
+                "persist": 10045.9,
+                "entriesFor": 0.48,
+                "main": 4.04,
+                "innerHTML": 1.22,
+                "render": 5.36
+              }
+            },
+            "navigation": {
+              "medianMs": 32.1,
+              "p95Ms": 44.4,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 0.64,
+                "render": 2.48
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 10673.7,
+                "longTasks": 5,
+                "maxTaskMs": 8695,
+                "blockingMs": 10124,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 9252.8,
+                "longTasks": 5,
+                "maxTaskMs": 7877,
+                "blockingMs": 8726,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 8680.9,
+                "longTasks": 4,
+                "maxTaskMs": 7665,
+                "blockingMs": 8287,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 9461.8,
+                "longTasks": 7,
+                "maxTaskMs": 7249,
+                "blockingMs": 8886,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 44.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 45.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 61.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 9463.5,
+                "longTasks": 7,
+                "maxTaskMs": 7223,
+                "blockingMs": 8859,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 43.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 8585.9,
+                "longTasks": 5,
+                "maxTaskMs": 7335,
+                "blockingMs": 8063,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 8854.6,
+                "longTasks": 4,
+                "maxTaskMs": 7924,
+                "blockingMs": 8497,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 8899.1,
+                "longTasks": 4,
+                "maxTaskMs": 7800,
+                "blockingMs": 8529,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 9597,
+                "longTasks": 6,
+                "maxTaskMs": 7387,
+                "blockingMs": 9051,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 41.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 46.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 49.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 9158.9,
+                "longTasks": 6,
+                "maxTaskMs": 7001,
+                "blockingMs": 8585,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 28.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 15666,
+                "longTasks": 4,
+                "maxTaskMs": 14306,
+                "blockingMs": 15132,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 10225.3,
+                "longTasks": 4,
+                "maxTaskMs": 8910,
+                "blockingMs": 9804,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 9068.1,
+                "longTasks": 4,
+                "maxTaskMs": 7948,
+                "blockingMs": 8630,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 9424.6,
+                "longTasks": 6,
+                "maxTaskMs": 7121,
+                "blockingMs": 8847,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 43.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 47.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 62.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 9513.1,
+                "longTasks": 7,
+                "maxTaskMs": 7191,
+                "blockingMs": 8899,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 44.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 9057.6,
+                "longTasks": 5,
+                "maxTaskMs": 7828,
+                "blockingMs": 8505,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 8730.5,
+                "longTasks": 4,
+                "maxTaskMs": 7640,
+                "blockingMs": 8291,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 9048.1,
+                "longTasks": 4,
+                "maxTaskMs": 7994,
+                "blockingMs": 8659,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 10585.5,
+                "longTasks": 7,
+                "maxTaskMs": 7574,
+                "blockingMs": 9990,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 207.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 46.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 62.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 11258.7,
+                "longTasks": 8,
+                "maxTaskMs": 8705,
+                "blockingMs": 10633,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 32.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 9783.8,
+                "longTasks": 4,
+                "maxTaskMs": 8493,
+                "blockingMs": 9261,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 10354,
+                "longTasks": 4,
+                "maxTaskMs": 9182,
+                "blockingMs": 9957,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 10549.3,
+                "longTasks": 4,
+                "maxTaskMs": 9482,
+                "blockingMs": 10159,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 10408.1,
+                "longTasks": 8,
+                "maxTaskMs": 7670,
+                "blockingMs": 9663,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 43.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 46,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 64.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 11210,
+                "longTasks": 8,
+                "maxTaskMs": 7743,
+                "blockingMs": 10512,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 29.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        }
+      },
+      "ref": "556655f",
+      "browser": "154.0.8037.57",
+      "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+      "runtimeSHA256": {
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+        "app.js": "aed0b84227a9f3f10c5d973003b8cf73655d2b75f7648de7e55971a54f0e60c0",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "indexeddb.js": "5d0c819c3e6e03eb98d3917f0bfa88326b8544ea881c999ab17b247b934667d3",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/local-backup-v4.mjs": "4f7b0f09f7ee50f9fe820a5cc4b78f0591a57645a28c432360ae0e7dde92ea88",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/training-model.mjs": "3a831b06e1f043749486d5beee3ab44b28896926537eb802f6f28ccb2df7aedc",
+        "model/backup.mjs": "25301d24e258b44ae9432d8ac1bd9921de2463193a4700b9a3762e419c83d83f",
+        "model/backup-json.mjs": "4d695cc3b1f48278b25a6f44a9ff691f048da01d38ff6c1241a2107dd862f982",
+        "model/legacy-backup.mjs": "2279ee3a50675c314837e00ee1e5428dcf9a42f9de5c33aa5bab39f11b5cad30",
+        "model/legacy-model.mjs": "0eb3c925947b6fb496be7fc095b3a8712ed8603522c5c42c2f5f1d37805a6c63",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+        "model/performance.mjs": "5db16dcfab395a4f0d890b043adb3e9a05af908bdc0419f6dd65563f242af594",
+        "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+        "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+        "model/journal.mjs": "5b9297de0afbacb0f1a68eda8bd88504102c792b629b8c4336508c280a10013f",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+      }
+    },
+    "after": {
+      "scenarios": {
+        "legacy-4": {
+          "cpuThrottle": 4,
+          "sizes": {
+            "sessions": 4,
+            "entries": 34,
+            "snapshots": 0,
+            "liveBytes": 11352,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 870.9,
+              "p95Ms": 950.7,
+              "maxTaskMs": 166,
+              "medianBlockingMs": 154,
+              "meanInclusiveSpansMs": {
+                "decode": 6.64,
+                "validateCatalog": 5.34,
+                "verifyRows": 82.74,
+                "load": 202.42,
+                "open": 328.62,
+                "entriesFor": 0.18,
+                "main": 6.72,
+                "innerHTML": 3.08,
+                "render": 12.64
+              }
+            },
+            "warm": {
+              "medianMs": 364.6,
+              "p95Ms": 569,
+              "maxTaskMs": 73,
+              "medianBlockingMs": 4,
+              "meanInclusiveSpansMs": {
+                "decode": 3.04,
+                "validateCatalog": 4.34,
+                "verifyRows": 18.38,
+                "load": 171.94,
+                "open": 200.0,
+                "entriesFor": 0.04,
+                "main": 1.34,
+                "innerHTML": 2.54,
+                "render": 4.5
+              }
+            },
+            "offline": {
+              "medianMs": 358,
+              "p95Ms": 411.7,
+              "maxTaskMs": 74,
+              "medianBlockingMs": 2,
+              "meanInclusiveSpansMs": {
+                "decode": 5.9,
+                "validateCatalog": 3.84,
+                "verifyRows": 20.38,
+                "load": 117.88,
+                "open": 174.3,
+                "entriesFor": 0.0,
+                "main": 0.82,
+                "innerHTML": 2.5,
+                "render": 4.36
+              }
+            },
+            "start": {
+              "medianMs": 193.3,
+              "p95Ms": 240.3,
+              "maxTaskMs": 65,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 12.48,
+                "decode": 5.16,
+                "verifyRows": 36.28,
+                "save": 113.08,
+                "persist": 118.32,
+                "entriesFor": 0.44,
+                "main": 2.66,
+                "innerHTML": 3.62,
+                "render": 7.46
+              }
+            },
+            "exercise": {
+              "medianMs": 75,
+              "p95Ms": 96.6,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.08,
+                "main": 0.98,
+                "innerHTML": 4.86,
+                "render": 5.94
+              }
+            },
+            "editor": {
+              "medianMs": 90.7,
+              "p95Ms": 103.5,
+              "maxTaskMs": 52,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.22,
+                "main": 12.84,
+                "innerHTML": 5.0,
+                "render": 18.44
+              }
+            },
+            "input": {
+              "medianMs": 94.7,
+              "p95Ms": 108.4,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 2.16,
+                "bindingFor": 0.98,
+                "captureDraft": 6.16
+              }
+            },
+            "save": {
+              "medianMs": 207.8,
+              "p95Ms": 243.7,
+              "maxTaskMs": 54,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.0,
+                "validateCatalog": 9.88,
+                "decode": 4.56,
+                "verifyRows": 29.24,
+                "save": 116.02,
+                "persist": 119.92,
+                "entriesFor": 0.5,
+                "main": 1.84,
+                "innerHTML": 9.04,
+                "render": 11.6
+              }
+            },
+            "navigation": {
+              "medianMs": 65.8,
+              "p95Ms": 83.2,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 3.16,
+                "render": 13.3
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 950.7,
+                "longTasks": 3,
+                "maxTaskMs": 127,
+                "blockingMs": 144,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 333.8,
+                "longTasks": 1,
+                "maxTaskMs": 54,
+                "blockingMs": 4,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 358,
+                "longTasks": 1,
+                "maxTaskMs": 52,
+                "blockingMs": 2,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 192.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 96.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 75.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 91.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 158.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 81,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 765.4,
+                "longTasks": 2,
+                "maxTaskMs": 160,
+                "blockingMs": 146,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 569,
+                "longTasks": 2,
+                "maxTaskMs": 73,
+                "blockingMs": 36,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 385.4,
+                "longTasks": 1,
+                "maxTaskMs": 74,
+                "blockingMs": 24,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 240.3,
+                "longTasks": 1,
+                "maxTaskMs": 65,
+                "blockingMs": 15,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 91.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 103.5,
+                "longTasks": 1,
+                "maxTaskMs": 52,
+                "blockingMs": 2,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 108.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 240.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 65.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 870.9,
+                "longTasks": 2,
+                "maxTaskMs": 134,
+                "blockingMs": 154,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 417.6,
+                "longTasks": 1,
+                "maxTaskMs": 54,
+                "blockingMs": 4,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 411.7,
+                "longTasks": 2,
+                "maxTaskMs": 61,
+                "blockingMs": 12,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 224.4,
+                "longTasks": 1,
+                "maxTaskMs": 57,
+                "blockingMs": 7,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 73.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 91.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 243.7,
+                "longTasks": 1,
+                "maxTaskMs": 54,
+                "blockingMs": 4,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 83.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 814.9,
+                "longTasks": 3,
+                "maxTaskMs": 145,
+                "blockingMs": 159,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 364.6,
+                "longTasks": 1,
+                "maxTaskMs": 60,
+                "blockingMs": 10,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 303.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 175.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 75,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 83.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 94.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 207.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 55.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 872.3,
+                "longTasks": 2,
+                "maxTaskMs": 166,
+                "blockingMs": 161,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 327.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 327.8,
+                "longTasks": 1,
+                "maxTaskMs": 51,
+                "blockingMs": 1,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 193.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 71.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 90.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 95.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 157.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 55.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        },
+        "legacy-400": {
+          "cpuThrottle": 4,
+          "sizes": {
+            "sessions": 400,
+            "entries": 3400,
+            "snapshots": 0,
+            "liveBytes": 617971,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 1960.9,
+              "p95Ms": 2184.5,
+              "maxTaskMs": 1244,
+              "medianBlockingMs": 1136,
+              "meanInclusiveSpansMs": {
+                "decode": 211.1,
+                "validateCatalog": 9.14,
+                "verifyRows": 784.26,
+                "load": 1280.6,
+                "open": 1407.6,
+                "entriesFor": 27.1,
+                "main": 37.32,
+                "innerHTML": 4.04,
+                "render": 43.7
+              }
+            },
+            "warm": {
+              "medianMs": 1518.5,
+              "p95Ms": 3574.1,
+              "maxTaskMs": 2892,
+              "medianBlockingMs": 883,
+              "meanInclusiveSpansMs": {
+                "decode": 214.12,
+                "validateCatalog": 7.22,
+                "verifyRows": 1047.4,
+                "load": 1543.1,
+                "open": 1624.78,
+                "entriesFor": 20.2,
+                "main": 22.48,
+                "innerHTML": 2.24,
+                "render": 25.28
+              }
+            },
+            "offline": {
+              "medianMs": 1411.8,
+              "p95Ms": 5820.9,
+              "maxTaskMs": 4670,
+              "medianBlockingMs": 829,
+              "meanInclusiveSpansMs": {
+                "decode": 362.78,
+                "validateCatalog": 7.56,
+                "verifyRows": 1250.32,
+                "load": 1872.72,
+                "open": 1937.98,
+                "entriesFor": 22.46,
+                "main": 24.4,
+                "innerHTML": 4.14,
+                "render": 29.1
+              }
+            },
+            "start": {
+              "medianMs": 3143.3,
+              "p95Ms": 3604.7,
+              "maxTaskMs": 1221,
+              "medianBlockingMs": 2368,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 10.66,
+                "decode": 147.18,
+                "verifyRows": 880.36,
+                "save": 2915.32,
+                "persist": 2982.58,
+                "entriesFor": 16.24,
+                "main": 21.44,
+                "innerHTML": 3.8,
+                "render": 25.64
+              }
+            },
+            "exercise": {
+              "medianMs": 163,
+              "p95Ms": 347.1,
+              "maxTaskMs": 186,
+              "medianBlockingMs": 23,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 23.12,
+                "main": 24.5,
+                "innerHTML": 6.06,
+                "render": 31.32
+              }
+            },
+            "editor": {
+              "medianMs": 119.9,
+              "p95Ms": 163.9,
+              "maxTaskMs": 80,
+              "medianBlockingMs": 27,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 23.34,
+                "main": 38.9,
+                "innerHTML": 7.02,
+                "render": 46.24
+              }
+            },
+            "input": {
+              "medianMs": 94.3,
+              "p95Ms": 113.9,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 1.84,
+                "bindingFor": 2.92,
+                "captureDraft": 9.68
+              }
+            },
+            "save": {
+              "medianMs": 2896.6,
+              "p95Ms": 3331.3,
+              "maxTaskMs": 1191,
+              "medianBlockingMs": 2207,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 1.12,
+                "validateCatalog": 8.52,
+                "decode": 153.9,
+                "verifyRows": 745.86,
+                "save": 2842.6,
+                "persist": 2899.86,
+                "entriesFor": 22.66,
+                "main": 25.74,
+                "innerHTML": 4.46,
+                "render": 31.02
+              }
+            },
+            "navigation": {
+              "medianMs": 71.9,
+              "p95Ms": 101,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 2.64,
+                "render": 13.72
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 2067.6,
+                "longTasks": 6,
+                "maxTaskMs": 1106,
+                "blockingMs": 1190,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 1518.5,
+                "longTasks": 1,
+                "maxTaskMs": 933,
+                "blockingMs": 883,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 1328.8,
+                "longTasks": 2,
+                "maxTaskMs": 848,
+                "blockingMs": 809,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3604.7,
+                "longTasks": 6,
+                "maxTaskMs": 1107,
+                "blockingMs": 2798,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 163,
+                "longTasks": 1,
+                "maxTaskMs": 107,
+                "blockingMs": 57,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 122.8,
+                "longTasks": 1,
+                "maxTaskMs": 77,
+                "blockingMs": 27,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 3252.9,
+                "longTasks": 6,
+                "maxTaskMs": 1191,
+                "blockingMs": 2473,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 101,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 1849.2,
+                "longTasks": 5,
+                "maxTaskMs": 986,
+                "blockingMs": 1051,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 1456,
+                "longTasks": 2,
+                "maxTaskMs": 929,
+                "blockingMs": 880,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 1411.8,
+                "longTasks": 2,
+                "maxTaskMs": 839,
+                "blockingMs": 799,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3249,
+                "longTasks": 5,
+                "maxTaskMs": 1221,
+                "blockingMs": 2490,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 125,
+                "longTasks": 1,
+                "maxTaskMs": 58,
+                "blockingMs": 8,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 94.3,
+                "longTasks": 1,
+                "maxTaskMs": 60,
+                "blockingMs": 10,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 94.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 2896.6,
+                "longTasks": 6,
+                "maxTaskMs": 1144,
+                "blockingMs": 2207,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 71.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 1755.6,
+                "longTasks": 4,
+                "maxTaskMs": 933,
+                "blockingMs": 970,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 1534.1,
+                "longTasks": 2,
+                "maxTaskMs": 976,
+                "blockingMs": 958,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 1384.2,
+                "longTasks": 1,
+                "maxTaskMs": 879,
+                "blockingMs": 829,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3143.3,
+                "longTasks": 5,
+                "maxTaskMs": 1013,
+                "blockingMs": 2368,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 206.2,
+                "longTasks": 1,
+                "maxTaskMs": 73,
+                "blockingMs": 23,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 119.9,
+                "longTasks": 1,
+                "maxTaskMs": 77,
+                "blockingMs": 27,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 113.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 3331.3,
+                "longTasks": 6,
+                "maxTaskMs": 1182,
+                "blockingMs": 2526,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 68.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 2184.5,
+                "longTasks": 5,
+                "maxTaskMs": 1244,
+                "blockingMs": 1319,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3574.1,
+                "longTasks": 1,
+                "maxTaskMs": 2892,
+                "blockingMs": 2842,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5820.9,
+                "longTasks": 3,
+                "maxTaskMs": 4670,
+                "blockingMs": 4684,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3081.8,
+                "longTasks": 5,
+                "maxTaskMs": 1030,
+                "blockingMs": 2105,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 347.1,
+                "longTasks": 1,
+                "maxTaskMs": 186,
+                "blockingMs": 136,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 105.2,
+                "longTasks": 1,
+                "maxTaskMs": 64,
+                "blockingMs": 14,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 97.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 2791.3,
+                "longTasks": 5,
+                "maxTaskMs": 959,
+                "blockingMs": 2091,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 56.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 1960.9,
+                "longTasks": 4,
+                "maxTaskMs": 1085,
+                "blockingMs": 1136,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 1468.4,
+                "longTasks": 3,
+                "maxTaskMs": 886,
+                "blockingMs": 864,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 1768.6,
+                "longTasks": 3,
+                "maxTaskMs": 1106,
+                "blockingMs": 1133,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 2704.9,
+                "longTasks": 6,
+                "maxTaskMs": 866,
+                "blockingMs": 1916,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 103.2,
+                "longTasks": 1,
+                "maxTaskMs": 61,
+                "blockingMs": 11,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 163.9,
+                "longTasks": 1,
+                "maxTaskMs": 80,
+                "blockingMs": 30,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 84,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 2791,
+                "longTasks": 5,
+                "maxTaskMs": 902,
+                "blockingMs": 2044,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 86.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        },
+        "v2-4": {
+          "cpuThrottle": 4,
+          "sizes": {
+            "sessions": 4,
+            "entries": 35,
+            "snapshots": 4,
+            "liveBytes": 552399,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 3368.7,
+              "p95Ms": 4082.5,
+              "maxTaskMs": 2672,
+              "medianBlockingMs": 2589,
+              "meanInclusiveSpansMs": {
+                "decode": 32.28,
+                "validateCatalog": 31.02,
+                "verifyRows": 161.28,
+                "load": 2899.56,
+                "open": 3013.62,
+                "entriesFor": 0.24,
+                "main": 23.78,
+                "innerHTML": 3.7,
+                "render": 30.06
+              }
+            },
+            "warm": {
+              "medianMs": 3085.1,
+              "p95Ms": 3139.9,
+              "maxTaskMs": 2330,
+              "medianBlockingMs": 2571,
+              "meanInclusiveSpansMs": {
+                "decode": 29.32,
+                "validateCatalog": 27.48,
+                "verifyRows": 108.04,
+                "load": 2700.48,
+                "open": 2738.1,
+                "entriesFor": 0.34,
+                "main": 7.82,
+                "innerHTML": 2.82,
+                "render": 11.46
+              }
+            },
+            "offline": {
+              "medianMs": 3390.6,
+              "p95Ms": 4205.4,
+              "maxTaskMs": 3240,
+              "medianBlockingMs": 2817,
+              "meanInclusiveSpansMs": {
+                "decode": 26.6,
+                "validateCatalog": 22.98,
+                "verifyRows": 127.2,
+                "load": 2947.2,
+                "open": 2971.28,
+                "entriesFor": 0.28,
+                "main": 9.92,
+                "innerHTML": 3.26,
+                "render": 14.56
+              }
+            },
+            "start": {
+              "medianMs": 3018.7,
+              "p95Ms": 4713.6,
+              "maxTaskMs": 2355,
+              "medianBlockingMs": 2488,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 76.36,
+                "decode": 29.28,
+                "verifyRows": 126.96,
+                "save": 3176.86,
+                "persist": 3202.44,
+                "entriesFor": 0.26,
+                "main": 8.6,
+                "innerHTML": 5.0,
+                "render": 14.26
+              }
+            },
+            "exercise": {
+              "medianMs": 114.2,
+              "p95Ms": 457.9,
+              "maxTaskMs": 311,
+              "medianBlockingMs": 7,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.04,
+                "main": 10.52,
+                "innerHTML": 14.44,
+                "render": 25.3
+              }
+            },
+            "editor": {
+              "medianMs": 137.8,
+              "p95Ms": 373.1,
+              "maxTaskMs": 254,
+              "medianBlockingMs": 10,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.02,
+                "main": 39.16,
+                "innerHTML": 15.04,
+                "render": 56.68
+              }
+            },
+            "input": {
+              "medianMs": 91.1,
+              "p95Ms": 145.6,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 1.9,
+                "bindingFor": 2.18,
+                "captureDraft": 8.26
+              }
+            },
+            "save": {
+              "medianMs": 3193.7,
+              "p95Ms": 4102.7,
+              "maxTaskMs": 2508,
+              "medianBlockingMs": 2659,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.96,
+                "validateCatalog": 75.18,
+                "decode": 28.82,
+                "verifyRows": 126.26,
+                "save": 3088.98,
+                "persist": 3117.46,
+                "entriesFor": 0.5,
+                "main": 7.68,
+                "innerHTML": 6.12,
+                "render": 14.18
+              }
+            },
+            "navigation": {
+              "medianMs": 56.7,
+              "p95Ms": 81.7,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 3.58,
+                "render": 10.84
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 3368.7,
+                "longTasks": 5,
+                "maxTaskMs": 2263,
+                "blockingMs": 2589,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 2901.8,
+                "longTasks": 3,
+                "maxTaskMs": 2148,
+                "blockingMs": 2394,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 2977.8,
+                "longTasks": 3,
+                "maxTaskMs": 1975,
+                "blockingMs": 2379,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 2853.1,
+                "longTasks": 6,
+                "maxTaskMs": 1551,
+                "blockingMs": 2321,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 73.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 94.6,
+                "longTasks": 1,
+                "maxTaskMs": 56,
+                "blockingMs": 6,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 91.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 2678.3,
+                "longTasks": 6,
+                "maxTaskMs": 1421,
+                "blockingMs": 2158,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 56.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3273.8,
+                "longTasks": 5,
+                "maxTaskMs": 2061,
+                "blockingMs": 2413,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3138.7,
+                "longTasks": 4,
+                "maxTaskMs": 2261,
+                "blockingMs": 2571,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 4205.4,
+                "longTasks": 4,
+                "maxTaskMs": 3240,
+                "blockingMs": 3667,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3281.4,
+                "longTasks": 7,
+                "maxTaskMs": 1698,
+                "blockingMs": 2671,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 457.9,
+                "longTasks": 1,
+                "maxTaskMs": 311,
+                "blockingMs": 261,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 373.1,
+                "longTasks": 1,
+                "maxTaskMs": 254,
+                "blockingMs": 204,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 145.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 2731.5,
+                "longTasks": 6,
+                "maxTaskMs": 1433,
+                "blockingMs": 2228,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 55.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3324,
+                "longTasks": 5,
+                "maxTaskMs": 2086,
+                "blockingMs": 2428,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3085.1,
+                "longTasks": 4,
+                "maxTaskMs": 2262,
+                "blockingMs": 2573,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 2572.3,
+                "longTasks": 3,
+                "maxTaskMs": 1918,
+                "blockingMs": 2090,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3018.7,
+                "longTasks": 8,
+                "maxTaskMs": 1466,
+                "blockingMs": 2400,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 192.9,
+                "longTasks": 1,
+                "maxTaskMs": 83,
+                "blockingMs": 33,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 174.5,
+                "longTasks": 1,
+                "maxTaskMs": 121,
+                "blockingMs": 71,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 86.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 3193.7,
+                "longTasks": 6,
+                "maxTaskMs": 1632,
+                "blockingMs": 2659,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 55.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3815.9,
+                "longTasks": 5,
+                "maxTaskMs": 2425,
+                "blockingMs": 2946,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3139.9,
+                "longTasks": 3,
+                "maxTaskMs": 2330,
+                "blockingMs": 2596,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3390.6,
+                "longTasks": 4,
+                "maxTaskMs": 2543,
+                "blockingMs": 2817,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 2991.1,
+                "longTasks": 7,
+                "maxTaskMs": 1536,
+                "blockingMs": 2488,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 95.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 107.8,
+                "longTasks": 1,
+                "maxTaskMs": 58,
+                "blockingMs": 8,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 93.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 3476.5,
+                "longTasks": 8,
+                "maxTaskMs": 1390,
+                "blockingMs": 2785,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 81.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 4082.5,
+                "longTasks": 5,
+                "maxTaskMs": 2672,
+                "blockingMs": 3146,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 2927.2,
+                "longTasks": 4,
+                "maxTaskMs": 2150,
+                "blockingMs": 2422,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3694.6,
+                "longTasks": 4,
+                "maxTaskMs": 2594,
+                "blockingMs": 3047,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 4713.6,
+                "longTasks": 8,
+                "maxTaskMs": 2355,
+                "blockingMs": 3929,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 114.2,
+                "longTasks": 1,
+                "maxTaskMs": 57,
+                "blockingMs": 7,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 137.8,
+                "longTasks": 1,
+                "maxTaskMs": 60,
+                "blockingMs": 10,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 83.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 4102.7,
+                "longTasks": 5,
+                "maxTaskMs": 2508,
+                "blockingMs": 3526,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 57.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        },
+        "v2-40": {
+          "cpuThrottle": 1.0,
+          "sizes": {
+            "sessions": 40,
+            "entries": 350,
+            "snapshots": 40,
+            "liveBytes": 4580644,
+            "archiveBytes": 4194304
+          },
+          "summary": {
+            "cold": {
+              "medianMs": 3603.9,
+              "p95Ms": 4022.1,
+              "maxTaskMs": 2767,
+              "medianBlockingMs": 3028,
+              "meanInclusiveSpansMs": {
+                "decode": 59.9,
+                "validateCatalog": 42.56,
+                "verifyRows": 231.0,
+                "load": 3190.68,
+                "open": 3229.86,
+                "entriesFor": 0.5,
+                "main": 7.58,
+                "innerHTML": 0.7,
+                "render": 8.82
+              }
+            },
+            "warm": {
+              "medianMs": 3304.3,
+              "p95Ms": 5930.2,
+              "maxTaskMs": 4660,
+              "medianBlockingMs": 2853,
+              "meanInclusiveSpansMs": {
+                "decode": 44.72,
+                "validateCatalog": 41.36,
+                "verifyRows": 172.34,
+                "load": 3378.24,
+                "open": 3393.72,
+                "entriesFor": 0.48,
+                "main": 3.58,
+                "innerHTML": 0.54,
+                "render": 4.32
+              }
+            },
+            "offline": {
+              "medianMs": 3150.2,
+              "p95Ms": 5492.3,
+              "maxTaskMs": 4257,
+              "medianBlockingMs": 2783,
+              "meanInclusiveSpansMs": {
+                "decode": 53.34,
+                "validateCatalog": 39.78,
+                "verifyRows": 267.84,
+                "load": 3333.72,
+                "open": 3344.78,
+                "entriesFor": 0.26,
+                "main": 3.8,
+                "innerHTML": 0.52,
+                "render": 4.5
+              }
+            },
+            "start": {
+              "medianMs": 3193.4,
+              "p95Ms": 3578.5,
+              "maxTaskMs": 1962,
+              "medianBlockingMs": 2650,
+              "meanInclusiveSpansMs": {
+                "validateCatalog": 101.78,
+                "decode": 42.62,
+                "verifyRows": 192.8,
+                "save": 3192.12,
+                "persist": 3235.84,
+                "entriesFor": 0.34,
+                "main": 3.92,
+                "innerHTML": 1.04,
+                "render": 5.12
+              }
+            },
+            "exercise": {
+              "medianMs": 43.6,
+              "p95Ms": 65.7,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.18,
+                "main": 2.94,
+                "innerHTML": 1.28,
+                "render": 4.26
+              }
+            },
+            "editor": {
+              "medianMs": 46.5,
+              "p95Ms": 63.9,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "entriesFor": 0.38,
+                "main": 5.86,
+                "innerHTML": 1.34,
+                "render": 7.34
+              }
+            },
+            "input": {
+              "medianMs": 62.7,
+              "p95Ms": 62.9,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 0.52,
+                "bindingFor": 0.5,
+                "captureDraft": 1.94
+              }
+            },
+            "save": {
+              "medianMs": 3280.9,
+              "p95Ms": 4163.9,
+              "maxTaskMs": 2119,
+              "medianBlockingMs": 2684,
+              "meanInclusiveSpansMs": {
+                "bindingFor": 0.14,
+                "validateCatalog": 101.86,
+                "decode": 45.38,
+                "verifyRows": 179.72,
+                "save": 3312.52,
+                "persist": 3356.32,
+                "entriesFor": 0.32,
+                "main": 4.0,
+                "innerHTML": 1.04,
+                "render": 5.12
+              }
+            },
+            "navigation": {
+              "medianMs": 40,
+              "p95Ms": 42.6,
+              "maxTaskMs": 0,
+              "medianBlockingMs": 0,
+              "meanInclusiveSpansMs": {
+                "innerHTML": 0.64,
+                "render": 2.42
+              }
+            }
+          },
+          "samples": [
+            {
+              "cold": {
+                "ms": 3603.9,
+                "longTasks": 4,
+                "maxTaskMs": 2767,
+                "blockingMs": 3092,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3332.7,
+                "longTasks": 4,
+                "maxTaskMs": 2521,
+                "blockingMs": 2914,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 2862.9,
+                "longTasks": 3,
+                "maxTaskMs": 2248,
+                "blockingMs": 2495,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3144.8,
+                "longTasks": 6,
+                "maxTaskMs": 1676,
+                "blockingMs": 2569,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 43.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 46.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 62.8,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 3396.4,
+                "longTasks": 6,
+                "maxTaskMs": 1806,
+                "blockingMs": 2771,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 40,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3606.4,
+                "longTasks": 5,
+                "maxTaskMs": 2614,
+                "blockingMs": 3028,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3304.3,
+                "longTasks": 4,
+                "maxTaskMs": 2513,
+                "blockingMs": 2853,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3195.2,
+                "longTasks": 3,
+                "maxTaskMs": 2487,
+                "blockingMs": 2812,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3377.2,
+                "longTasks": 6,
+                "maxTaskMs": 1816,
+                "blockingMs": 2809,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 45.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 44.5,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 46.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 3280.9,
+                "longTasks": 6,
+                "maxTaskMs": 1770,
+                "blockingMs": 2684,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 42.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3355.4,
+                "longTasks": 4,
+                "maxTaskMs": 2438,
+                "blockingMs": 2819,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3092.3,
+                "longTasks": 4,
+                "maxTaskMs": 2404,
+                "blockingMs": 2705,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3150.2,
+                "longTasks": 3,
+                "maxTaskMs": 2461,
+                "blockingMs": 2783,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3193.4,
+                "longTasks": 8,
+                "maxTaskMs": 1696,
+                "blockingMs": 2650,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 65.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 54.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 62.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 3203.2,
+                "longTasks": 7,
+                "maxTaskMs": 1718,
+                "blockingMs": 2629,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 28.2,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 3186.8,
+                "longTasks": 4,
+                "maxTaskMs": 2228,
+                "blockingMs": 2636,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 5930.2,
+                "longTasks": 4,
+                "maxTaskMs": 4660,
+                "blockingMs": 5470,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 5492.3,
+                "longTasks": 3,
+                "maxTaskMs": 4257,
+                "blockingMs": 5118,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3578.5,
+                "longTasks": 7,
+                "maxTaskMs": 1962,
+                "blockingMs": 2927,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 42.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 63.9,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 62.7,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 4163.9,
+                "longTasks": 7,
+                "maxTaskMs": 2119,
+                "blockingMs": 3152,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 42.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            },
+            {
+              "cold": {
+                "ms": 4022.1,
+                "longTasks": 5,
+                "maxTaskMs": 2364,
+                "blockingMs": 3341,
+                "idbTransactions": 3
+              },
+              "warm": {
+                "ms": 3068.4,
+                "longTasks": 3,
+                "maxTaskMs": 2364,
+                "blockingMs": 2656,
+                "idbTransactions": 3
+              },
+              "offline": {
+                "ms": 3117.7,
+                "longTasks": 3,
+                "maxTaskMs": 2437,
+                "blockingMs": 2731,
+                "idbTransactions": 3
+              },
+              "start": {
+                "ms": 3112.1,
+                "longTasks": 6,
+                "maxTaskMs": 1653,
+                "blockingMs": 2551,
+                "idbTransactions": 1
+              },
+              "exercise": {
+                "ms": 43.6,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "editor": {
+                "ms": 44.1,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              },
+              "input": {
+                "ms": 47.3,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 2
+              },
+              "save": {
+                "ms": 3012.4,
+                "longTasks": 6,
+                "maxTaskMs": 1585,
+                "blockingMs": 2385,
+                "idbTransactions": 2
+              },
+              "navigation": {
+                "ms": 28.4,
+                "longTasks": 0,
+                "maxTaskMs": 0,
+                "blockingMs": 0,
+                "idbTransactions": 0
+              }
+            }
+          ]
+        }
+      },
+      "ref": "working",
+      "browser": "154.0.8037.57",
+      "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+      "runtimeSHA256": {
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+        "app.js": "aed0b84227a9f3f10c5d973003b8cf73655d2b75f7648de7e55971a54f0e60c0",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "indexeddb.js": "ea12f35def4f5a83b2a9f80b307eda909dac9b778f454a5cf7051e493ed26d23",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/local-backup-v4.mjs": "4f7b0f09f7ee50f9fe820a5cc4b78f0591a57645a28c432360ae0e7dde92ea88",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/training-model.mjs": "5990caa8079899aca53919e398614029b332bd495b2d7a34b7c532412191ea14",
+        "model/backup.mjs": "0e7b706fffaf5767222c0843664e9d418005fda3376d6efca1ef8bec5f181655",
+        "model/backup-json.mjs": "4d695cc3b1f48278b25a6f44a9ff691f048da01d38ff6c1241a2107dd862f982",
+        "model/legacy-backup.mjs": "09125ed720375663637050116e01fbb02e7453f787d726b16226b7de4bda42de",
+        "model/legacy-model.mjs": "0eb3c925947b6fb496be7fc095b3a8712ed8603522c5c42c2f5f1d37805a6c63",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+        "model/performance.mjs": "527512863b5f89f0dc701db34e217d9afb6c49ab718f96bd78ba78a7d5cf51f0",
+        "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+        "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+        "model/journal.mjs": "d94fc4a2dd57c1d34a27d433de7fda97f046c3ef4b36607749c37c2456ec4a51",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+      }
+    }
+  }
+}

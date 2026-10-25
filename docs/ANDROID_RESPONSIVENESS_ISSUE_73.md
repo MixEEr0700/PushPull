@@ -14,7 +14,10 @@ z produkcyjnego Drive. Instrumentacja istnieje tylko w tymczasowym artefakcie;
 jego SW otrzymuje poprawnie przeliczone hashe.
 
 Chromium 154, Linux x86_64, Intel Xeon Platinum 8573C, 5 dostępnych CPU,
-viewport 390×844, CDP CPU ×4. To nie jest emulacja sprzętu Android ani pomiar
+viewport 390×844. Seria legacy 4/400 i V2 4: CDP CPU ×4. Uzupełniająca
+seria dużego V2 (40 snapshotów): CPU ×1, osobno dla każdego porównywanego
+commitu. Nie porównujemy bezpośrednio czasów scenariuszy o różnych ustawieniach
+CPU. To nie jest emulacja sprzętu Android ani pomiar
 fizycznego telefonu, wolnego flash, termiki czy ograniczeń pamięci telefonu.
 
 Zarejestrowano pięć niezależnych powtórzeń każdego scenariusza. Mediana i p95
@@ -46,9 +49,11 @@ zapisano czas setterów innerHTML, transakcji/getAll, długie zadania i sumę
 Odtworzenie (zależności jak dla testów Chromium):
 
 ```sh
-python scripts/measure_responsiveness.py --ref 4230ca3 --runs 5 --offline --v2-counts 4 40 --output /tmp/pre72.json
-python scripts/measure_responsiveness.py --ref 556655f --runs 5 --offline --v2-counts 4 40 --output /tmp/main.json
-python scripts/measure_responsiveness.py --ref working --runs 5 --offline --v2-counts 4 40 --output /tmp/after.json
+python scripts/measure_responsiveness.py --ref 4230ca3 --runs 5 --offline --v2-counts 4 --output /tmp/pre72.json
+python scripts/measure_responsiveness.py --ref 556655f --runs 5 --offline --v2-counts 4 --output /tmp/main.json
+python scripts/measure_responsiveness.py --ref working --runs 5 --offline --v2-counts 4 --output /tmp/after.json
+# Osobna seria uzupełniająca; powtórzyć dla obu commitów i working:
+python scripts/measure_responsiveness.py --ref 556655f --runs 5 --offline --cpu 1 --kinds v2 --v2-counts 40 --output /tmp/main-large-v2.json
 ```
 
 ## Potwierdzone mechanizmy
@@ -82,6 +87,65 @@ Bez zmiany schematu/version IndexedDB, migracji, czyszczenia lub przycinania
 historii/archiwów. Bez zmiany wyglądu Matrix i edytorów, rotacji, autosave,
 tokenów, wznowienia szkiców, zapisu historii, formatów kopii i Drive.
 Bez nowego etapu v6, przywracania v4/v6 lub Issue #61.
+
+## Wynik pomiarów
+
+[Pełne tabele median/p95 i długich zadań](performance/issue73-tables.md),
+[próbki liczbowe i hashe źródeł](performance/issue73-measurements.json).
+
+Aktualny main → PR, mediana:
+
+| Scenariusz | Nowy dokument | Start treningu | Zapis wyniku |
+|---|---:|---:|---:|
+| legacy, 400 sesji, CPU ×4 | 3291 → 1961 ms | 5585 → 3143 ms | 4993 → 2897 ms |
+| V2, 4 snapshoty, CPU ×4 | 6647 → 3369 ms | 5842 → 3019 ms | 6144 → 3194 ms |
+| V2, 40 snapshotów, CPU ×1 | 9784 → 3604 ms | 9597 → 3193 ms | 9513 → 3281 ms |
+
+W tych scenariuszach potwierdzono mniej pracy podczas uruchamiania i commitu.
+Całkowite czasy pozostają wielosekundowe: nadal wykonujemy pełną projekcję,
+odczyt i walidację historii/modelu, canonical/hash i zapis wszystkich tabel.
+Nie zmieniamy tego protokołu zapisu ani jego zabezpieczeń w tym PR.
+
+Problem występuje już przed PR #72; nie potwierdzono, że kolektor jest jego
+główną przyczyną. Jego pełny odczyt nie uruchamia się automatycznie przy starcie,
+otwarciu wyniku ani input. Startowy `openDrafts/readDrafts` nadal czyta meta
+(także model); w próbce V2 4+4 MiB zajmował około 37 ms. Zachowano ten odczyt:
+nie był dominującym kosztem wobec wielosekundowej walidacji. Nie usuwamy kolektora
+ani źródeł szkiców w ramach domniemanej optymalizacji.
+
+Nie wykazano ogólnej poprawy edycji. W podstawowej serii V2 ×4 otwarcie wyniku
+ma medianę 89 → 138 ms i p95 108 → 373 ms; nie pomijamy tych próbek. Dodatkowe
+powtórzenia (`--editor-repeats 10`, naprzemienne profile main/PR, oddzielnie od
+pełnej regresji CPU) oddzielają powtarzane otwieranie formularza od ciężkiego
+commitu; ich wyniki podano w PR. Nie uznajemy samej identyczności app.js/style.css
+za dowód braku regresji czasowej. Małe legacy także nie ma spójnej poprawy
+wszystkich faz (np. zapis 179 → 208 ms). Pełne dane pozostają jawne.
+
+To pomiary syntetyczne, n=5, w jednym środowisku chmurowym. Nie dowodzą czasu
+interakcji fizycznego Androida, szczytowego RSS ani stałego czasu dla dowolnej
+liczby sesji. Archiwum jest syntetycznym raw ASCII 4 MiB; inne rozkłady znaków,
+zagnieżdżenia kopii i znacznie większe dane wymagają osobnej weryfikacji.
+
+## Regresja i dowody bezpieczeństwa
+
+Nowe testy Node sprawdzają dokładny roundtrip kolejności, brak/null serii,
+Unicode i nieznane pola, odrzucenie osieroconych/zamienionych relacji, liniową
+liczbę odwiedzin rekordów serii, brak klonowania odrzucanej historii oraz jedną
+pełną walidację snapshotu dla 128 referencji. Kolejne wywołanie po zmianie
+snapshotu nadal musi odmówić; błędny dowolny element batcha nie przechodzi.
+
+Nowy scenariusz Chromium używa 64 sesji, dużego raw Unicode i rzeczywistego
+szkicu: start, nieukończony zapis `31,5`, reload, świadome wznowienie, commit i
+ponowne otwarcie. Porównuje całą wcześniejszą historię, metadane ćwiczeń,
+archiwa i oryginalny localStorage, a nie tylko liczniki.
+
+Pełna istniejąca regresja obejmuje rotację, legacy/V2, korekty, pary L/P,
+archiwa i kopie v1–v6, CAS/wiele kart, błędy zapisu, szkice, kolektor,
+limity pamięci, PWA offline oraz aktualizację bez utraty danych.
+Rzeczywiste końcowe liczby testów i statusy Actions podano w PR. Status
+pierwszego pełnego CI potwierdzono przez API GitHuba; pobranie archiwum logów
+z dodatkowego hosta Actions zwróciło HTTP 403. Lokalne logi są weryfikowane
+osobno; blokada pobrania logów nie jest błędem testów.
 
 ## Weryfikacja na fizycznym Androidzie
 
