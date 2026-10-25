@@ -166,10 +166,14 @@ przywracanie szkiców po restarcie/crashu, historię/plany/wyniki, backupy
 oraz istniejące odtwarzanie, offline i aktualizacje wcześniejszych PWA.
 Nie zastąpiono jej samymi benchmarkami ani testami nowych helperów.
 
-**GitHub Actions: nie uruchomiono; brak wyniku PASS dla tej zmiany.**
-GitHub odrzucił poświadczenie środowiska podczas końcowej weryfikacji:
-`gh auth status`: nieważny GH_TOKEN, API HTTP 401, `git fetch` nie uzyskał
-autoryzacji. Nie publikowano tokenów ani nie zmieniano konfiguracji CI.
+**GitHub Actions:** do PR skierowano pełny istniejący workflow regresji na
+standardowym `ubuntu-latest`, bez zmian zakresu i płatnych runnerów.
+Końcowy status przebiegu należy sprawdzić w checks PR; lokalne PASS nie
+zastępują wyniku CI. Wynik i link do przebiegu są raportowane w opisie PR.
+
+Przejściowo poświadczenie środowiska było odrzucane (HTTP 401); dostęp wrócił
+przed publikacją gałęzi. Ponowny fetch potwierdził aktualny main `2504e5a`.
+Nie publikowano tokenów ani nie zmieniano konfiguracji CI.
 
 To minimalne usprawnienie nadaje się do niezależnego przeglądu; nie zamyka P0.
 Następny etap wymaga zatwierdzenia [konkretnego projektu](DURABLE_WRITE_P0_PROJECT.md)

@@ -1,4 +1,4 @@
-# Przygotowana treść PR (jeszcze nieopublikowany)
+# Przygotowana treść PR
 
 Tytuł: `perf: compare complete models without serializing raw archives`
 
@@ -11,6 +11,6 @@ Zapis pojedynczego wyniku ponownie serializował kompletne modele z archiwami ra
 - Dodano izolowany benchmark, dowody pomiarowe i opcjonalny obserwator DevTools poza assetami aplikacji, bez zbierania rekordów ani inicjowania zapisów.
 - Raport: `docs/DURABLE_WRITE_P0_REPORT.md`; osobny projekt dalszej architektury i ryzyka: `docs/DURABLE_WRITE_P0_PROJECT.md`. Większej przebudowy nie wdrożono; wymaga osobnego zatwierdzenia.
 
-Weryfikacja lokalna: Node 185/185 PASS; Chromium/PWA 135/135 PASS (CAS, quota/abort, wiele kart, podwójne kliknięcia, restart szkiców, backupy, aktualizacje); kontrola SW i build produkcyjny PASS. CI bez zmian; brak płatnych runnerów. GitHub Actions jeszcze nie uruchomiono: poświadczenie środowiska wygasło (HTTP 401). Wymagany pełny PASS po publikacji przed scaleniem. Nie scalać automatycznie.
+Weryfikacja lokalna: Node 185/185 PASS; Chromium/PWA 135/135 PASS (CAS, quota/abort, wiele kart, podwójne kliknięcia, restart szkiców, backupy, aktualizacje); kontrola SW i build produkcyjny PASS. CI bez zmian; brak płatnych runnerów. Pełny GitHub Actions zostaje uruchomiony przez ten PR; wynik i link do przebiegu zostaną uzupełnione po jego zakończeniu. Wymagany PASS przed scaleniem. Nie scalać automatycznie.
 
 Refs #75, #73.
