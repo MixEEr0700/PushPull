@@ -145,14 +145,15 @@ python scripts/measure_stage_b.py --before 4a74d1d --after working --cases v2-em
   backupy i odtwarzanie, instalację/offline/aktualizacje PWA.
 - `build_release.py --check`: PASS; produkcyjny build `dist/stage-b-final`:
   PASS, release `9fa85bdb76b987281bef5932`, bez deploymentu.
-- `git diff --check`: PASS. GitHub Actions **nie uruchomiono/nie zweryfikowano**
-  w tej sesji z powodu blokady API opisanej poniżej; lokalne PASS nie zastępuje CI.
+- `git diff --check`: PASS. Pełny GitHub Actions uruchamiany przez PR #81;
+  końcowy status i link do przebiegu w checks/opisie PR. Lokalne PASS nie zastępuje CI.
 
-API GitHuba w działającym środowisku jest blokowane polityką sieci (Forbidden,
-`api.github.com` poza allowlistą); Git fetch/push działa. Zapisano odrębny
-projekt dodania wyłącznie tej domeny, wymagający zapisania/publikacji w UI
-środowiska. Nie zmieniano workflow, poświadczeń ani ustawień płatnych usług.
-GitHub Actions nie należy uznawać za wykonane bez rzeczywistego wyniku.
+Przejściowe próby API zwracały Forbidden. Przed końcem pracy GitHub przyjął
+utworzenie PR #81, co potwierdziło bieżący dostęp; Git fetch/push również działa.
+Nie ustalono dokładnej przyczyny zmiany odpowiedzi API. Przygotowany odrębny
+projekt dodania `api.github.com` pozostał do przeglądu w ustawieniach środowiska;
+zapisanie projektu samo nie stosuje konfiguracji. Nie zmieniano workflow,
+poświadczeń ani ustawień płatnych usług. Wynik CI wymaga rzeczywistego PASS.
 
 Jeśli duża historia pozostaje wyraźnie ponad 1 s, następny krok to
 [odrębny projekt zapisu przyrostowego](INCREMENTAL_WRITE_P0_DESIGN.md),

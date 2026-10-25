@@ -1,6 +1,6 @@
 # Opis PR etapu B
 
-Base: `perf-durable-result-write` (#79); head: `perf-stage-b-prepared-model`.
+PR #81. Base: `perf-durable-result-write` (#79); head: `perf-stage-b-prepared-model`.
 
 Zapis pojedynczego wyniku ponownie budował i sprawdzał kompletny source-backed model oraz dekodował pełny odczyt kontrolny. Etap B przygotowuje odłączony, zwalidowany kandydat raz, współdzieli tylko udowodnione niezmienne grafy i porównuje wszystkie odczytane rekordy z zamrożonym wynikiem kodowania. Pozostają pełny CAS poprzedniego modelu/revision, SHA, readback nowego modelu i sukces dopiero po strict complete.
 
@@ -23,7 +23,7 @@ Dla 40 sesji budowa modelu spada średnio 5344 -> 2081 ms, kontrola źródła 94
 - Prywatne WeakSet/WeakMap nie przyjmują publicznego tokenu skipValidation i nie cache'ują validity po ID/revision. Mutowalne grafy i płytki freeze przechodzą pełną walidację ponownie. Dowód źródła zachowuje tylko wersję, nie drugi parsed raw.
 - Nowe testy: dokładne bajty/SHA wobec writera #79 i odczyt starym readerem; mutacja po await, nieznane pola, Unicode/duży raw, fałszywe dowody, retencja pod heap 128 MiB; atomowe odrzucenie uszkodzonego root/wiersza przy tych samych licznikach/SHA.
 - Lokalne pełne testy: **Node 192/192 PASS**, **Chromium/PWA 140/140 PASS**, kontrola SW i build produkcyjny PASS. Asercje integralności nie zostały osłabione.
-- GitHub Actions: oczekuje na uruchomienie/zweryfikowanie; API środowiska obecnie blokowane polityką sieci (Forbidden). Nie traktować lokalnych PASS jako CI PASS. Workflow bez zmian; bez płatnych larger runners.
+- Pełny GitHub Actions uruchomiony przez PR #81; status i link zostaną uzupełnione po zakończeniu. Przejściowe Forbidden ustąpiło przed utworzeniem PR. Nie traktować lokalnych PASS jako CI PASS. Workflow bez zmian; standardowy ubuntu-latest, bez płatnych larger runners.
 
 Raport: `docs/DURABLE_WRITE_STAGE_B.md`; dowody i tabele: `docs/performance/stage-b-measurements.json`, `stage-b-tables.md`.
 
