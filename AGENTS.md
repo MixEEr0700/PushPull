@@ -27,3 +27,18 @@ Zachowaj sesje, wyniki serii, notatki, statystyki i historię zmian techniki. St
 - Zgodność interfejsu z zatwierdzonym wzorcem na telefonie.
 
 Po każdym zadaniu podaj: co zmieniono, co zachowano, rzeczywiście wykonane testy i wyniki, ograniczenia. Nie deklaruj gotowości na podstawie samej implementacji. Dopasuj narzędzia, build i CI do otrzymanego kodu; nie zgaduj stosu technologicznego.
+
+### GitHub Actions: oszczędność zasobów i bezpieczeństwo CI
+
+- Nie uruchamiaj zbędnych przebiegów GitHub Actions.
+- Nie konfiguruj zdublowanych wyzwalaczy push i pull_request dla tej samej zmiany.
+- Każdy PR musi przejść wymagane kontrole przed scaleniem.
+- Nowe commity PR powinny anulować wcześniejsze nieaktualne przebiegi tego samego PR.
+- Przebiegi różnych PR oraz gałęzi main muszą być od siebie niezależne.
+- Nie powtarzaj pełnej regresji bez uzasadnienia.
+- Nie uruchamiaj ponownie zakończonych sukcesem testów bez konkretnej potrzeby.
+- Podczas pracy wykonuj adekwatne testy lokalne, jeśli pozwala na to środowisko.
+- Przed zmianą workflow sprawdź wpływ na wymagane status checks, bezpieczeństwo danych i zużycie minut.
+- Nie ograniczaj zakresu testów integralności danych, backupów ani przywracania w celu oszczędzania minut.
+- Nie zmieniaj Billing, limitów ani budżetów bez jednoznacznej zgody właściciela.
+- Traktuj powyższe zasady jako trwałe wymagania dla kolejnych prac.
