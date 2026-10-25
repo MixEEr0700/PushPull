@@ -1,12 +1,11 @@
 """Storage/read invariants for the P0 optimizations; isolated synthetic origins."""
 from playwright.sync_api import expect
 from test_browser import BrowserHarness
-from test_indexeddb import IndexedDBMigration
+import test_indexeddb as legacy
 
 
 class ResponsivenessSafety(BrowserHarness):
-    prepare=IndexedDBMigration.prepare
-    records=IndexedDBMigration.records
+    records=legacy.IndexedDBMigration.records
 
     def test_large_history_roundtrip_start_edit_and_reopen_preserve_archives_and_other_records(self):
         expect(self.page.locator('[data-act=start]')).to_be_visible()
