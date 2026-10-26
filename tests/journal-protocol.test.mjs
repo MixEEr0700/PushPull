@@ -102,6 +102,10 @@ test('UTF-8 wire validation rejects surrogate replacement collisions and bounds 
  assert.deepEqual(new TextEncoder().encode(row.json),new TextEncoder().encode(bad.json));
  await assert.rejects(readObject(bad),/UTF-8/);
  await assert.rejects(objectRecord('Ł😀'.repeat(100),{objectBytes:100}),/size/);
+ for(const value of ['x'.repeat(80),'Ł'.repeat(40),'😀'.repeat(20)]){
+  const row=await objectRecord(value,{objectBytes:100});assert.deepEqual(row,await objectRecord(value));assert.equal(await readObject(row,{objectBytes:100}),value);
+ }
+ await assert.rejects(objectRecord('Ł'.repeat(60),{objectBytes:100}),/size/);
  const valid=await objectRecord('\ud800');assert.equal(await readObject(valid),'\ud800');
 });
 test('legacy optional journal values retain their exact old-reader meaning',async()=>{

@@ -163,10 +163,16 @@ def statistics(profiles):
             if values:out[group][key]={'n':len(values),'median':median(values),'p95':values[math.ceil(.95*len(values))-1],'max':values[-1]}
     return out
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',default='4647511');p.add_argument('--after',default='working');p.add_argument('--profiles',type=int,default=3);p.add_argument('--writes',type=int,default=8);p.add_argument('--cpu',type=float,default=4);p.add_argument('--cases',nargs='+',choices=[c[0] for c in CASES]);p.add_argument('--output',type=Path,required=True);p.add_argument('--artifacts',type=Path,required=True);args=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',default='4647511');p.add_argument('--after',default='working');p.add_argument('--profiles',type=int,default=3);p.add_argument('--writes',type=int,default=8);p.add_argument('--cpu',type=float,default=4);p.add_argument('--cases',nargs='+',choices=[c[0] for c in CASES]);p.add_argument('--output',type=Path,required=True);p.add_argument('--artifacts',type=Path,required=True);p.add_argument('--smoke',action='store_true');args=p.parse_args()
     if args.output.exists():p.error('Refusing to overwrite measurements; use a new output')
     args.artifacts.mkdir(parents=True,exist_ok=True)
     report={'syntheticOnly':True,'method':'Exact shared v1 fixture per case; initial actual conversion, process-cold and warm offline starts; actual Matrix submit -> native strict oncomplete before Promise publication. Three independent paired profiles; first four new results, next four corrections. CPU throttle is not Android emulation. Memory is sampled JS heap high-water plus post-GC retained, not an absolute process peak.','before':args.before,'after':args.after,'cpuThrottle':args.cpu,'profiles':args.profiles,'writes':args.writes,'platform':platform.platform(),'cases':{}}
+    report['purpose']='harness smoke only; may run under concurrent test load; not performance evidence' if args.smoke else 'serial performance evidence'
+    report['chromium']=subprocess.check_output([shutil.which('chromium'),'--version'],text=True).strip()
+    report['beforeCommit']=subprocess.check_output(['git','rev-parse',args.before],cwd=ROOT,text=True).strip()
+    report['afterCommit']=subprocess.check_output(['git','rev-parse','HEAD' if args.after=='working' else args.after],cwd=ROOT,text=True).strip()
+    report['cpuModel']=next((line.split(':',1)[1].strip() for line in Path('/proc/cpuinfo').read_text().splitlines() if line.startswith('model name')),'unknown')
+    report['cgroupLimits']={name:Path('/sys/fs/cgroup/'+path).read_text().strip() for name,path in [('cpu','cpu.max'),('memory','memory.max')] if Path('/sys/fs/cgroup/'+path).exists()}
     servers=[]
     try:
         for side,ref in [('before',args.before),('after',args.after)]:
@@ -174,7 +180,11 @@ def main():
         with sync_playwright() as pw:
             for label,count,mib,shape in CASES:
                 if args.cases and label not in args.cases:continue
-                print('FIXTURE '+label,flush=True);seed,sizes=fixture(pw,report['beforeURL'],count,mib,shape)
+                print('FIXTURE '+label,flush=True)
+                try:seed,sizes=fixture(pw,report['beforeURL'],count,mib,shape)
+                except Exception as error:
+                    report['cases'][label]={'setupError':str(error),'requested':{'sessions':count,'archiveMiB':mib,'shape':shape}}
+                    args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(report,indent=2)+'\n');raise
                 (args.artifacts/(label+'-fixture.json')).write_text(json.dumps(seed,ensure_ascii=True));case=report['cases'][label]={'sizes':sizes,'fixtureSourceHash':seed['sourceHash'],'fixtureSourceBytes':seed['sourceBytes'],'before':[],'after':[]}
                 for i in range(args.profiles):
                     for side in (['before','after'] if i%2==0 else ['after','before']):
