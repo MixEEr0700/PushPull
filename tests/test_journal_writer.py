@@ -49,6 +49,35 @@ class JournalWriter(BrowserHarness):
         }""")
         self.assertEqual(result,{'ownerId':'original-owner','enabled':True,'journal':False})
 
+    def test_retained_record_and_byte_limits_refuse_before_transaction_and_leave_restart_readable(self):
+        self.prepare_writer()
+        result=self.page.evaluate("""async()=>{
+         const {api,codec,db}=__v2,bundle=await api.readRecords(db);await api.openWriter(db,{bundle});
+         const budget=codec.protocolBudget(bundle),before=JSON.stringify(bundle);let rejected=0,writes=0;
+         for(const limits of [{records:budget.records},{totalBytes:budget.bytes}]){
+          const limited=await api.openWriter(db,{bundle,limits}),transaction=db.transaction.bind(db);
+          db.transaction=(...args)=>{if(args[1]==='readwrite')writes++;return transaction(...args)};
+          try{await limited.saveResult(__command())}catch(e){if(/protocol (total size|record count)/.test(e.message))rejected++;else throw e}finally{db.transaction=transaction}
+         }
+         const stored=await api.readRecords(db),reopened=await api.openWriter(db);return {rejected,writes,unchanged:JSON.stringify(stored)===before,readable:JSON.stringify(reopened.source)===JSON.stringify(__v2.writer.source)};
+        }""")
+        self.assertEqual(result,{'rejected':2,'writes':0,'unchanged':True,'readable':True})
+
+    def test_missing_or_resealed_checkpoint_cannot_pass_with_the_same_root(self):
+        self.prepare_writer()
+        result=self.page.evaluate("""async()=>{
+         const {api,db,writer}=__v2,before=await api.readRecords(db),checkpoint=before.records.journalCheckpoints[0];let rejected=0;
+         await api.transact(db,['journalCheckpoints'],'readwrite',tx=>tx.objectStore('journalCheckpoints').delete(checkpoint.id));
+         try{await api.openWriter(db)}catch{rejected++}
+         const changed={...structuredClone(checkpoint),unknown:'metadata changed with source and evidence SHA intact'};
+         await api.transact(db,['journalCheckpoints'],'readwrite',tx=>tx.objectStore('journalCheckpoints').put(changed));
+         try{await writer.audit()}catch{rejected++}
+         const unchangedRoot=JSON.stringify((await api.readRecords(db)).state)===JSON.stringify(before.state);
+         await api.transact(db,['journalCheckpoints'],'readwrite',tx=>tx.objectStore('journalCheckpoints').put(checkpoint));
+         return {rejected,unchangedRoot,recovered:JSON.stringify(await writer.audit())===JSON.stringify(writer.source)};
+        }""")
+        self.assertEqual(result,{'rejected':2,'unchangedRoot':True,'recovered':True})
+
     def test_native_correction_strict_complete_restart_unknown_fields_and_unchanged_v1_checkpoint(self):
         self.prepare_writer()
         result=self.page.evaluate(r"""async()=>{

@@ -125,7 +125,7 @@ class V2Presentation(BrowserHarness):
             if(e.target.closest?.('[data-act=finish]'))window.__finishDelayArmed=true;
           },true);
           crypto.subtle.digest=async(...args)=>{
-            if(window.__finishDelayArmed&&new TextDecoder().decode(args[1]).includes('"activeId":null')){
+            if(window.__finishDelayArmed){
               window.__finishDelayArmed=false;window.__finishHashDelayed=true;
               await new Promise(resolve=>setTimeout(resolve,700));
             }

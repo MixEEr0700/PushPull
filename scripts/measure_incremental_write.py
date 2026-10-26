@@ -39,7 +39,7 @@ def instrument_v2(text):
     start=text.index(' async function saveResult(');end=text.index(' return {context,saveResult,',start)
     body=text[start:end]
     markers=[('  portable(command);','detach-validate'),('   guard();const before=state,','context'),
-      ('   const object=await objectRecord(e),','entry-hash'),('   const tree=await editIndex(','index-prepare'),
+      ('   const object=await objectRecord(e','entry-hash'),('   const tree=await editIndex(','index-prepare'),
       ("   await transact(db,[...STORES,'meta'],'readwrite',async tx=>{",'transaction-open'),
       ("    guard();check(same(await request(tx.objectStore('journalState')",'cas'),
       ("    await addImmutable(tx,'journalObjects',[object]);",'write-objects'),

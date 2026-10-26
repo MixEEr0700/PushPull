@@ -17,7 +17,7 @@ class PixelWriteProbe(BrowserHarness):
         self.assertEqual(self.records(),before)
         self.assertEqual(self.page.evaluate('PushPullWriteProbe.samples()'),[])
         self.page.evaluate(legacy.PAUSE)
-        self.page.evaluate('window.__holdPut=IDBObjectStore.prototype.put')
+        self.page.evaluate('()=>{window.__holdPut=IDBObjectStore.prototype.put}')
         self.page.locator('.seriesResultForm [type=submit]').click()
         self.page.wait_for_function('window.__held===true')
         self.assertEqual(self.page.evaluate('PushPullWriteProbe.samples()'),[])

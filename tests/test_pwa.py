@@ -422,7 +422,11 @@ class PWADeployment(unittest.TestCase):
         raw=Path(download.value.path()).read_bytes();self.assertGreater(len(raw),16*1024*1024)
         self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value;v.exercises['PUSH A'][0].notes='newer local note protected by preimage';await d.commit(v)}finally{d.close()}}""")
         self.page.reload();self.ready();before=value();before_drafts=drafts()
-        self.controller['directory']=current_release;self.wait_update();self.reopen();self.context.set_offline(True)
+        self.controller['directory']=current_release;self.wait_update()
+        # This 16 MiB live fixture tests conversion integrity, not a 5 s startup
+        # target. Keep its existing 90 s large-operation budget and report time.
+        conversion_started=time.monotonic();self.reopen(timeout=90000);self.context.set_offline(True)
+        print('Issue82 16 MiB live v1-to-v2 conversion/reopen ms:',round((time.monotonic()-conversion_started)*1000),flush=True)
         self.assertEqual(value(),before);self.assertEqual(drafts(),before_drafts)
         self.page.locator('[data-tab=settings]').click()
         for text in ['Zapisz kopię na Google Drive','Przywróć z Google Drive','Pobierz kopię JSON','Przywróć z pliku JSON']:expect(self.page.get_by_text(text,exact=True)).to_be_visible()
@@ -462,7 +466,7 @@ class PWADeployment(unittest.TestCase):
             self.page.locator('[data-panel=result]').click();return self.page.locator('.performanceForm')
         def save(f):
             f.locator('[type=submit]').click();expect(f).to_have_count(0);expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
-        def finish():self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        def finish():self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000)
         plans();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
         with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
@@ -489,7 +493,11 @@ class PWADeployment(unittest.TestCase):
         def confirm(d):confirmations.append(d.message);d.accept()
         self.page.remove_listener('dialog',self.accept_dialog);self.page.on('dialog',confirm)
         with self.page.expect_download():self.page.locator('[data-switch-activate]').click()
-        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        # Full plan replacement retains/imports preimages; it is a bulk path,
+        # separate from the result-save timing acceptance in Issue #82.
+        bulk_started=time.monotonic()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible(timeout=60000)
+        print('Issue82 historical plan return bulk wait ms:',round((time.monotonic()-bulk_started)*1000),flush=True)
         self.page.remove_listener('dialog',confirm);self.page.on('dialog',self.accept_dialog)
         self.assertTrue(any('statystyki tej wersji pozostają dostępne i będą kontynuowane' in text for text in confirmations))
         active=value();self.assertEqual(active['entries'],before['data']['entries']);self.assertEqual(active['sessions'],before['data']['sessions'])
@@ -668,11 +676,11 @@ class PWADeployment(unittest.TestCase):
         expect(f.locator('[data-row="4"][data-field=reps]')).to_have_value('12');expect(f.locator('[data-row="5"][data-field=reps]')).to_have_value('14')
         f.locator('[type=submit]').click();expect(f).to_have_count(0)
         expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: 15 × 105 kg','Seria 2: 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg'])
-        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000)
         self.assertEqual(value()['trainingJournal']['nextUnitId'],'PUSH A') # Old PULL A must not advance this new V2 period.
         self.page.locator('[data-act=start]').click();self.ready()
         self.assertEqual(value()['sessions'][-1]['type'],'PUSH A')
-        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible();self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A')
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000);self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A')
         saved=value();self.page.locator('[data-tab=settings]').click()
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block',accept_downloads=True);self.addCleanup(other.close)

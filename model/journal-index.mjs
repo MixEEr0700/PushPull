@@ -1,10 +1,23 @@
 /** Persistent, content-addressed AVL index. Crypto is never run in an IDB tx. */
 import {freeze,portable,requireThat as check} from './backup-json.mjs';
 export const checkAbort=signal=>{if(signal?.aborted)throw signal.reason??new DOMException('Aborted','AbortError');};
-export async function sha(value){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),b=>b.toString(16).padStart(2,'0')).join('');}
+export function encodedJSON(text,maxBytes=Number.MAX_SAFE_INTEGER){
+ check(typeof text==='string'&&text.length<=maxBytes,'protocol JSON size');
+ let wellFormed=true;
+ if(text.isWellFormed)wellFormed=text.isWellFormed();
+ else for(let i=0;i<text.length;i++){const c=text.charCodeAt(i);if(c>=0xd800&&c<=0xdbff){const next=text.charCodeAt(++i);if(!(next>=0xdc00&&next<=0xdfff)){wellFormed=false;break}}else if(c>=0xdc00&&c<=0xdfff){wellFormed=false;break}}
+ // JSON.stringify escapes lone surrogates. Unescaped wire surrogates would
+ // collapse onto U+FFFD under TextEncoder and defeat exact-byte addressing.
+ check(wellFormed,'protocol UTF-8 JSON text');
+ const encoder=new TextEncoder();if(text.length*3<=maxBytes)return encoder.encode(text);
+ const buffer=new Uint8Array(maxBytes),{read,written}=encoder.encodeInto(text,buffer);check(read===text.length,'protocol JSON size');return buffer.subarray(0,written);
+}
+export async function shaBytes(bytes){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');}
+export const sha=value=>shaBytes(encodedJSON(value));
 export const hashJSON=value=>sha(JSON.stringify(value));
 export const indexKey=(store,id)=>JSON.stringify([store,id]);
 export async function verifyNode(node){
+ portable(node);node=freeze({...node}); // Capture before awaiting SHA; caller-owned nodes can change.
  check(node&&Object.keys(node).join(',')==='id,key,value,left,right,height','index shape');
  check(typeof node.key==='string'&&/^[a-f0-9]{64}$/.test(node.value)&&[node.left,node.right].every(v=>v===null||/^[a-f0-9]{64}$/.test(v))&&Number.isSafeInteger(node.height)&&node.height>0,'index fields');
  const {id,...body}=node;check(id===await hashJSON(body),'index SHA-256');return freeze(node);
