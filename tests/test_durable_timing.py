@@ -8,6 +8,7 @@ from measure_ui_response import UI_PROBE
 
 
 class DurableTiming(BrowserHarness):
+    legacy_backend = True
     def test_native_complete_clock_excludes_work_resumed_before_later_listeners(self):
         expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.page.evaluate(UI_PROBE)
@@ -16,7 +17,7 @@ class DurableTiming(BrowserHarness):
         self.assertEqual(code.count(target),1)
         code=code.replace(target,"      const until=performance.now()+60;while(performance.now()<until){};\n"+target)
         result=self.page.evaluate('async()=>{'+code+"""
-          const db=await PushPullDB.open(()=>{throw Error('missing fixture')});
+          const db=await (PushPullDB.openV1??PushPullDB.open)(()=>{throw Error('missing fixture')});
           try{
             window.__writeMarks=[];__ui.begin();await db.commit(db.value);
             await new Promise(resolve=>setTimeout(resolve,0));

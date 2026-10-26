@@ -64,10 +64,11 @@ async function readback(tx,store,rows){for(const row of rows)check(same(await re
  * It is checked again inside the conversion tx, including unknown meta/drafts.
  * A stale preparation never restores the checkpoint over a later v1 write. */
 export async function prepareConversion(source,evidence,{ownerId,signal}={}){
- portable(evidence);const captured=freeze(structuredClone(evidence)),original=freeze(structuredClone(source));
+ portable(evidence);portable(source);const captured=freeze(structuredClone(evidence)),original=freeze(structuredClone(source));
  const verified=await PushPullDB.verifyEvidence(captured);
  check(canonical(verified)===canonical(original),'conversion v1 source binding');
- ownerId??=captured.meta.find(r=>r.key==='training-model-v1')?.document.payload.model.ownerId;
+ const previousOwner=captured.meta.find(r=>r.key==='training-model-v1')?.document.payload.model.ownerId;
+ check(ownerId===undefined||previousOwner===undefined||ownerId===previousOwner,'conversion owner');ownerId??=previousOwner;
  const revision=captured.meta.find(r=>r.key==='state')?.revision;check(Number.isSafeInteger(revision),'v1 revision');
  const bundle=await createProtocol(original,{revision,ownerId,modelEnabled:!!original.data.trainingJournal||captured.meta.some(r=>r.key==='training-model-v1'),legacyRaw:captured.meta.find(r=>r.key==='state').legacyRaw,signal}),roundtrip=await materialize(bundle,{signal});
  check(same(roundtrip,original),'conversion full source oracle');
@@ -94,10 +95,45 @@ export async function activateConversion(db,token,{signal,guard=()=>{}}={}){
 export async function convertV1(db,source,evidence,options={}){return activateConversion(db,await prepareConversion(source,evidence,options),options);}
 async function auditBundle(bundle,options={}){
  for(const checkpoint of bundle.records.journalCheckpoints){
+  if(checkpoint.protocol!==1)continue;
   const original=await PushPullDB.verifyEvidence(checkpoint.evidence);
   check(checkpoint.sourceHash===await sha(canonical(original)),'checkpoint source SHA-256');
  }
  return materialize(bundle,options);
+}
+/** Deliberately slower full operation for start/finish, plans and explicit
+ * import/restore. A confirmed restore can quarantine a corrupt representation
+ * as exact opaque evidence; normal operations never purge immutable records. */
+export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0}={}){
+ portable(input);const source=freeze(structuredClone(input)),before=await readRecords(db,{signal});
+ check(same(before.state??null,expectedState??null),'bulk root CAS');
+ if(!recovery)await auditBundle(before,{signal});
+ if(recovery)portable(before.records); // Never lose non-JSON corruption in an opaque JSON preimage.
+ const previousRevision=Number.isSafeInteger(before.state?.revision)?before.state.revision:revision;
+ const bundle=await createProtocol(source,{epoch:recovery?crypto.randomUUID():before.state.epoch,revision:previousRevision+1,ownerId,modelEnabled,legacyRaw,signal});
+ check(same(await materialize(bundle,{signal}),source),'bulk full source oracle');
+ const checkpoint=recovery?{id:'recovery:'+crypto.randomUUID(),protocol:2,raw:JSON.stringify(before.records)}:null;
+ if(checkpoint)checkpoint.sha256=await sha(checkpoint.raw);
+ await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
+  guard();await equalRows(tx,before.records);
+  if(recovery){
+   // Explicit restore only, with the complete raw preimage kept in this same
+   // transaction. Corrupt hash-addressed records cannot stay in the active set.
+   for(const store of STORES)tx.objectStore(store).clear();
+   tx.objectStore('journalCheckpoints').add(checkpoint);await readback(tx,'journalCheckpoints',[checkpoint]);
+  }else for(const store of ROW_STORES)tx.objectStore(store).clear();
+  await addImmutable(tx,'journalObjects',bundle.records.journalObjects);await addImmutable(tx,'journalIndex',bundle.records.journalIndex);
+  for(const store of ROW_STORES)for(const row of bundle.records[store])tx.objectStore(store).add(row);
+  for(const store of ROW_STORES){
+   const actual=await request(tx.objectStore(store).getAll()),expected=bundle.records[store];
+   check(actual.length===expected.length,'bulk row count');await readback(tx,store,expected);
+  }
+  await readback(tx,'journalObjects',bundle.records.journalObjects);await readback(tx,'journalIndex',bundle.records.journalIndex);
+  tx.objectStore('journalState').put(bundle.state);await readback(tx,'journalState',[bundle.state]);
+  const marker={key:MARKER,protocol:2,status:'active',epoch:bundle.state.epoch};tx.objectStore('meta').put(marker);check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'bulk marker readback');guard();
+ },{signal});
+ const stored=await readRecords(db,{signal});check(same(stored.state,bundle.state),'bulk restart revision');
+ check(same(await auditBundle(stored,{signal}),source),'bulk restart source');return openWriter(db,{bundle:stored,signal,guard});
 }
 export async function openWriter(db,{bundle,signal,guard=()=>{}}={}){
  let saved=bundle??await readRecords(db,{signal}),source=await auditBundle(saved,{signal}),state=saved.state,busy=false;

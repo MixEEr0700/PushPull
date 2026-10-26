@@ -31,6 +31,9 @@ export async function createLegacyModel(raw,{ownerId,createdAt}) {
 export async function createLegacyModelFromSource(value,{ownerId,createdAt}) {
   return createBackup(freeze(payload(prepareLegacyBackup(value),ownerId)),{createdAt,metadata:{bridgeVersion:1}});
 }
+/** Synchronous compatibility view, only on explicit model inspection. Normal
+ * result writes use a small ack and never request this complete projection. */
+export function legacyPayload(value,ownerId){return freeze(payload(prepareLegacyBackup(value),ownerId));}
 /** Full validation plus equality to the committed source, not merely its counts. */
 export async function verifyLegacyModel(state,{data,catalog},revision) {
   check(state?.key===MODEL_KEY && state.revision===revision,'model/source revision mismatch; use the current application');

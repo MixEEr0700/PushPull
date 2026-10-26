@@ -26,6 +26,7 @@ from serve_test import ReleaseHandler, make_server, verify_release
 # Historical app bytes stay at their original ref. The current release builder
 # also precaches the newly introduced, unused-by-old-app v4 support modules.
 V4_ASSETS={'model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs'}
+V4_ASSETS.update({'model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'})
 def historical_asset(ref,name):
     if name in V4_ASSETS:return (ROOT/name).read_bytes()
     return subprocess.check_output(['git','show',ref+':'+name],cwd=ROOT)
@@ -1214,3 +1215,40 @@ class PWADeployment(unittest.TestCase):
         self.page.reload();self.ready()
         self.assertEqual(self.snapshot(),before)
         self.assertTrue(self.page.evaluate('(name)=>caches.open(name).then(c=>c.match(new URL("app.js",location.href).href)).then(Boolean)',name))
+
+    def test_protocol_v1_to_v2_update_retains_native_draft_and_old_writer_fails_closed(self):
+        ref='46475114841895ad063a8eaea5054b10ef2b2094'
+        source=self.path/'pre-incremental-source'
+        for name in ASSETS:
+            target=source/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(historical_asset(ref,name))
+        template=source/'scripts/service-worker.template.js';template.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/'scripts/service-worker.template.js',template)
+        old=self.path/'pre-incremental';build(old,source);self.controller['directory']=old
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.evaluate("""async()=>{
+         const db=await PushPullDB.open(()=>{});try{
+          await db.prepareModel({backupText:JSON.stringify(db.export()),ownerId:'pwa-protocol-owner'});
+          const data=db.value,journal=await import('./model/journal.mjs'),v2=await import('./model/v2-plan.mjs');
+          data.sessions.forEach(s=>s.status='done');data.activeId=null;data.trainingJournal=journal.initialize('pwa-protocol-owner');v2.activate(data,'2026-10-25T00:00:00.000Z');
+          const session={id:'pwa-native-session',seq:100,type:'PUSH A',date:'2026-10-25',status:'active'};data.sessions.push(session);data.activeId=session.id;await journal.startSession(data,session,'2026-10-25T00:00:00.000Z');await db.commit(data);
+         }finally{db.close()}
+        }""")
+        self.page.reload();self.ready();self.page.locator('[data-expand="PUSH-A-3"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-quick=kg]').fill('23,')
+        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.notification_state();self.assertTrue(before['drafts'])
+        new=self.next_release('protocol-v2');self.controller['directory']=new;self.wait_update()
+        self.assertEqual(self.notification_state(),before)
+        self.reopen(timeout=20000);self.assertEqual(self.notification_state(),before)
+        expect(self.page.locator('[data-draft-resume]')).to_be_visible()
+        old_code=subprocess.check_output(['git','show',ref+':indexeddb.js'],cwd=ROOT,text=True)
+        result=self.page.evaluate("""async code=>{
+         const old=new Function(code+';return PushPullDB')(),db=await old.open(()=>{throw Error('must not initialize')});try{return {error:db.error?.name,value:db.value}}finally{db.close()}
+        }""",old_code)
+        self.assertEqual(result,{'error':'VersionError','value':None});self.assertEqual(self.notification_state(),before)
+        self.context.set_offline(True);self.page.locator('[data-draft-resume]').click()
+        expect(self.page.locator('[data-quick=kg]')).to_have_value('23,')
+        self.page.locator('[data-quick=kg]').fill('23.5');self.page.locator('[data-quick=reps]').fill('8')
+        self.page.locator('.performanceForm [type=submit]').click();expect(self.page.locator('.performanceForm')).to_have_count(0)
+        after=self.notification_state();self.assertEqual(after['backup']['data']['sessions'],before['backup']['data']['sessions']);self.assertEqual(after['backup']['data']['trainingJournal']['sessionSnapshots'],before['backup']['data']['trainingJournal']['sessionSnapshots'])
+        self.assertEqual(after['backup']['data']['entries'][:-1],before['backup']['data']['entries']);self.assertEqual(after['drafts'],[])
+        self.page.reload();self.ready();self.assertEqual(self.notification_state(),after)

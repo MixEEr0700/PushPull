@@ -83,8 +83,12 @@ export async function materialize(bundle,{signal,limits:requestedLimits}={}){
  }
  check(JSON.stringify(records.journalState)==='['+JSON.stringify(state)+']','active state mismatch');
  for(const checkpoint of records.journalCheckpoints){
-  check(checkpoint.protocol===1&&Number.isSafeInteger(checkpoint.revision)&&checkpoint.evidence?.meta?.find(r=>r.key==='state')?.revision===checkpoint.revision,'checkpoint version');
-  check(checkpoint.evidenceHash===await hashJSON(checkpoint.evidence),'checkpoint SHA-256');
+  if(checkpoint.protocol===1){
+   check(Number.isSafeInteger(checkpoint.revision)&&checkpoint.evidence?.meta?.find(r=>r.key==='state')?.revision===checkpoint.revision,'checkpoint version');
+   check(checkpoint.evidenceHash===await hashJSON(checkpoint.evidence),'checkpoint SHA-256');
+  }else{
+   check(checkpoint.protocol===2&&typeof checkpoint.raw==='string'&&checkpoint.sha256===await sha(checkpoint.raw),'recovery checkpoint SHA-256');
+  }
  }
  const objects=new Map();
  for(const row of records.journalObjects){checkAbort(signal);total+=row.bytes;check(total<=limits.totalBytes,'protocol total size');objects.set(row.id,await readObject(row,limits));}

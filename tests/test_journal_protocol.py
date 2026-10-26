@@ -16,4 +16,4 @@ class JournalProtocol(BrowserHarness):
             return {identical:JSON.stringify(source)===before,liveUnchanged:JSON.stringify(live.export())===before&&live.revision===revision,version:PushPullDB.VERSION};
           }finally{live.close()}
         }""")
-        self.assertEqual(result,{'identical':True,'liveUnchanged':True,'version':1})
+        self.assertEqual(result,{'identical':True,'liveUnchanged':True,'version':2})

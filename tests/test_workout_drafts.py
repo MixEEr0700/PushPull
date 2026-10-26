@@ -113,7 +113,7 @@ class WorkoutDrafts(BrowserHarness):
     def test_failed_approved_save_keeps_draft_and_retry_has_no_duplicates(self):
         self.activate();form=self.open_result('PUSH A','PUSH-A-3');self.fill_rows(form,'80','8');self.persisted(form)
         draft=self.drafts()[0];before=self.state()
-        self.page.evaluate("""()=>{window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='meta'&&v.key==='training-model-v1')throw new DOMException('Draft result quota','QuotaExceededError');return window.__put.call(this,v)}}""")
+        self.page.evaluate("""()=>{window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='journalState'&&v.id==='active')throw new DOMException('Draft result quota','QuotaExceededError');return window.__put.call(this,v)}}""")
         with self.page.expect_event('dialog'):form.locator('[type=submit]').click()
         self.assertEqual(self.state(),before);self.assertEqual(self.drafts(),[draft])
         expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_have_count(0)
