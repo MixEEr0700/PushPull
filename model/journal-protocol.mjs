@@ -19,16 +19,16 @@ export async function readObject(row,limits=LIMITS){
  check(row.id===await sha(row.json),'object SHA-256');const value=parseJson(row.json);portable(value);return freeze(value);
 }
 export function validateState(state){
- check(state&&Object.keys(state).join(',')==='id,protocol,epoch,revision,root,counts,ownerId','state shape');
+ check(state&&Object.keys(state).join(',')==='id,protocol,epoch,revision,root,counts,ownerId,modelEnabled,legacyRef','state shape');
  check(state.id==='active'&&state.protocol===PROTOCOL&&typeof state.epoch==='string'&&state.epoch.length>0&&Number.isSafeInteger(state.revision)&&state.revision>=0&&/^[a-f0-9]{64}$/.test(state.root)&&typeof state.ownerId==='string'&&state.ownerId.length>0,'protocol state');
- check(Object.keys(state.counts).join(',')===ROW_STORES.join(',')&&Object.values(state.counts).every(n=>Number.isSafeInteger(n)&&n>=0),'state counts');return state;
+ check(Object.keys(state.counts).join(',')===ROW_STORES.join(',')&&Object.values(state.counts).every(n=>Number.isSafeInteger(n)&&n>=0)&&typeof state.modelEnabled==='boolean'&&/^[a-f0-9]{64}$/.test(state.legacyRef),'state counts/capability');return state;
 }
 export async function validateSource(source,ownerId,createdAt='2026-10-25T00:00:00.000Z'){
  check(source?.format==='pushpull-backup'&&source.version===2,'protocol source version');
  // Existing validators include the complete native snapshot/performance graph.
  return createLegacyModelFromSource(source,{ownerId,createdAt});
 }
-export async function createProtocol(input,{epoch=crypto.randomUUID(),revision=0,ownerId=input?.data?.trainingJournal?.model?.ownerId??'local-journal',signal,limits:requestedLimits}={}){
+export async function createProtocol(input,{epoch=crypto.randomUUID(),revision=0,ownerId=input?.data?.trainingJournal?.model?.ownerId??'local-journal',modelEnabled=!!input?.data?.trainingJournal,legacyRaw=null,signal,limits:requestedLimits}={}){
  checkAbort(signal);portable(input);
  const source=immutableJSON(input)?input:freeze(structuredClone(input)),limits=limitsFor(requestedLimits);
  await validateSource(source,ownerId);checkAbort(signal);
@@ -65,11 +65,13 @@ export async function createProtocol(input,{epoch=crypto.randomUUID(),revision=0
   }
   records.journalMetadata.push(freeze({id,version:1,fields}));return {kind:'metadata',id};
  }
- await metadata('source',source);records.journalObjects=[...objects.values()];
+ check(legacyRaw===null||typeof legacyRaw==='string','legacy anchor');
+ await metadata('source',source);const legacyRef=await ref(legacyRaw);records.journalObjects=[...objects.values()];
  const leaves=[];for(const store of ROW_STORES)for(const row of records[store])leaves.push([indexKey(store,row.id),await hashJSON(row)]);
  check(leaves.length<=limits.records,'protocol record count');
  const tree=await buildIndex(leaves,{signal});records.journalIndex=[...tree.nodes.values()];
- const state=freeze(validateState({id:'active',protocol:PROTOCOL,epoch,revision,root:tree.root,counts:Object.fromEntries(ROW_STORES.map(s=>[s,records[s].length])),ownerId}));
+ check(typeof modelEnabled==='boolean'&&(!source.data.trainingJournal||modelEnabled),'model capability');
+ const state=freeze(validateState({id:'active',protocol:PROTOCOL,epoch,revision,root:tree.root,counts:Object.fromEntries(ROW_STORES.map(s=>[s,records[s].length])),ownerId,modelEnabled,legacyRef}));
  records.journalState=[state];check(Object.values(records).reduce((n,rows)=>n+rows.length,0)<=limits.records,'protocol record count');return freeze({state,records});
 }
 export async function materialize(bundle,{signal,limits:requestedLimits}={}){
@@ -80,8 +82,13 @@ export async function materialize(bundle,{signal,limits:requestedLimits}={}){
   maps[store]=new Map();for(const row of records[store]){check(typeof row?.id==='string'&&!maps[store].has(row.id),'duplicate record');maps[store].set(row.id,row);}
  }
  check(JSON.stringify(records.journalState)==='['+JSON.stringify(state)+']','active state mismatch');
+ for(const checkpoint of records.journalCheckpoints){
+  check(checkpoint.protocol===1&&Number.isSafeInteger(checkpoint.revision)&&checkpoint.evidence?.meta?.find(r=>r.key==='state')?.revision===checkpoint.revision,'checkpoint version');
+  check(checkpoint.evidenceHash===await hashJSON(checkpoint.evidence),'checkpoint SHA-256');
+ }
  const objects=new Map();
  for(const row of records.journalObjects){checkAbort(signal);total+=row.bytes;check(total<=limits.totalBytes,'protocol total size');objects.set(row.id,await readObject(row,limits));}
+ check(objects.has(state.legacyRef)&&(objects.get(state.legacyRef)===null||typeof objects.get(state.legacyRef)==='string'),'legacy anchor reference');
  for(const store of ROW_STORES){
   check(records[store].length===state.counts[store],'record count '+store);
   for(const row of records[store]){portable(row);check(Number.isSafeInteger(row.version)&&row.version>0,'record version');leaves.push([indexKey(store,row.id),await hashJSON(row)]);}
