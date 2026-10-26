@@ -67,6 +67,7 @@ export async function prepareConversion(source,evidence,{ownerId,signal}={}){
  portable(evidence);const captured=freeze(structuredClone(evidence)),original=freeze(structuredClone(source));
  const verified=await PushPullDB.verifyEvidence(captured);
  check(canonical(verified)===canonical(original),'conversion v1 source binding');
+ ownerId??=captured.meta.find(r=>r.key==='training-model-v1')?.document.payload.model.ownerId;
  const revision=captured.meta.find(r=>r.key==='state')?.revision;check(Number.isSafeInteger(revision),'v1 revision');
  const bundle=await createProtocol(original,{revision,ownerId,modelEnabled:!!original.data.trainingJournal||captured.meta.some(r=>r.key==='training-model-v1'),legacyRaw:captured.meta.find(r=>r.key==='state').legacyRaw,signal}),roundtrip=await materialize(bundle,{signal});
  check(same(roundtrip,original),'conversion full source oracle');

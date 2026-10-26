@@ -37,6 +37,17 @@ class JournalWriter(BrowserHarness):
         self.page.wait_for_selector('[data-act=start]')
         return self.page.evaluate(SETUP,{'native':native,'convert':convert})
 
+    def test_plain_bridge_conversion_retains_original_owner_without_native_journal(self):
+        self.prepare_writer(native=False,convert=False)
+        result=self.page.evaluate("""async()=>{
+         const {api,db,source,evidence}=__v2,{createLegacyModelFromSource}=await import('./model/legacy-model.mjs'),captured=structuredClone(evidence);
+         const document=await createLegacyModelFromSource(source,{ownerId:'original-owner',createdAt:'2026-10-25T00:00:00.000Z'});
+         const row={key:'training-model-v1',revision:captured.meta.find(r=>r.key==='state').revision,document};captured.meta.push(row);
+         await api.transact(db,['meta'],'readwrite',tx=>tx.objectStore('meta').add(row));
+         const writer=await api.convertV1(db,source,captured);return {ownerId:writer.state.ownerId,enabled:writer.state.modelEnabled,journal:!!writer.source.data.trainingJournal};
+        }""")
+        self.assertEqual(result,{'ownerId':'original-owner','enabled':True,'journal':False})
+
     def test_native_correction_strict_complete_restart_unknown_fields_and_unchanged_v1_checkpoint(self):
         self.prepare_writer()
         result=self.page.evaluate(r"""async()=>{
