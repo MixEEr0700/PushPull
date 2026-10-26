@@ -4,6 +4,7 @@ from pathlib import Path
 from playwright.sync_api import expect
 from test_browser import BrowserHarness,ROOT,confirm_restore
 from test_indexeddb import PAUSE
+from test_indexeddb import RAW,FIXTURE
 import test_v2_training as v2
 
 class IncrementalMatrix(BrowserHarness):
@@ -12,6 +13,18 @@ class IncrementalMatrix(BrowserHarness):
     ready=v2.V2Training.ready
     open_result=v2.V2Training.open_result
     fill_rows=v2.V2Training.fill_rows
+
+    def test_two_first_open_clients_read_current_protocol_after_one_upgrades_during_the_other_preparation(self):
+        self.page.goto(self.url+'tests/')
+        self.page.evaluate("""async raw=>{await new Promise((ok,no)=>{const r=indexedDB.deleteDatabase('pushpull');r.onsuccess=ok;r.onerror=()=>no(r.error)});localStorage.clear();localStorage.setItem('pushpull_skeleton_v1',raw)}""",RAW)
+        first=self.context.new_page();first.on('dialog',self.dialog)
+        first.add_init_script("""(()=>{const digest=crypto.subtle.digest.bind(crypto.subtle);let held=false;crypto.subtle.digest=async(...args)=>{if(!held){held=true;window.__heldDigest=true;await new Promise(resolve=>window.__releaseDigest=resolve)}return digest(...args)}})()""")
+        first.goto(self.url);first.wait_for_function('window.__heldDigest===true')
+        second=self.context.new_page();second.on('dialog',self.dialog);second.goto(self.url)
+        expect(second.locator('[data-act=finish]')).to_be_visible()
+        first.evaluate('window.__releaseDigest()');expect(first.locator('[data-act=finish]')).to_be_visible()
+        self.assertEqual(first.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}'),FIXTURE)
+        self.assertEqual(second.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}'),FIXTURE)
 
     def expose_handle(self):
         code=(ROOT/'app.js').read_text().replace('const database=await PushPullDB.open(fresh);','const database=await PushPullDB.open(fresh);window.__appDB=database;').replace('let data=database.value||fresh();','let data=database.value||fresh();window.__peek=()=>data;')

@@ -20,7 +20,7 @@ function editable(data){
  journal.sessionSnapshots=trainingJournal.sessionSnapshots.slice();result.trainingJournal=journal;return result;
 }
 export async function openDatabase(v1,fresh){
- let db,writer,source=null,unverified=null,error=null,stale=false,closed=false,notify=()=>{},anchor=null,pendingRevision=0;
+ let db,writer,source=null,unverified=null,error=null,stale=false,closed=false,notify=()=>{},anchor=null,pendingRevision=0,recoveryCopies=[];
  const channel=typeof BroadcastChannel==='undefined'?null:new BroadcastChannel('pushpull-indexeddb');
  const raw=()=>localStorage.getItem(PushPullStorage.KEY);
  const block=message=>{stale=true;error=Error(message);notify(error)};
@@ -31,18 +31,35 @@ export async function openDatabase(v1,fresh){
  const versionChanged=()=>{closed=true;block('Zmieniono wersję bazy. Zachowaj szkice i zamknij inne karty. Nie wyzerowano danych.')};
  const announce=()=>channel?.postMessage({revision:writer.state.revision,epoch:writer.state.epoch});
  function publish(next){writer=next;source=writer.source;anchor=writer.legacyRaw;error=null;stale=false;localStorage.setItem(OWNER,v1.NAME+':2');}
+ async function activateLatest(prepared){
+  for(let attempt=0;attempt<3;attempt++){
+   try{return await activateConversion(db,prepared,{guard})}
+   catch(failure){
+    if(!/conversion already active|conversion CAS/.test(failure.message))throw failure;
+    const bundle=await readRecords(db);if(bundle.state)return openWriter(db,{bundle,guard});
+    const evidence=await legacyEvidence(db),latest=await v1.verifyEvidence(evidence);
+    anchor=evidence.meta.find(r=>r.key==='state').legacyRaw;guard();prepared=await prepareConversion(latest,evidence);
+   }
+  }
+  throw Error('Inna karta aktualizuje bazę. Zachowaj szkice i uruchom ponownie.');
+ }
  try{
   db=await probe(v1.NAME);
   if(!db||db.version===1){
    const legacy=await v1.openV1(fresh);
-   if(legacy.error){db?.close();channel?.close();return legacy;}
+   if(legacy.error){
+    // Another new tab can finish upgrade while this v1 handle is loading or
+    // preparing its initial save. Reopen the actual v2 state, never its old copy.
+    const latest=await probe(v1.NAME),upgraded=latest?.version===2;latest?.close();
+    db?.close();channel?.close();if(upgraded){legacy.close();return openDatabase(v1,fresh)}return legacy;
+   }
    try{
     source=freeze(legacy.export());anchor=raw();pendingRevision=legacy.revision;
     if(!db)db=await probe(v1.NAME);
     const evidence=await legacyEvidence(db);unverified={format:'pushpull-idb-recovery',version:1,evidence};
     const prepared=await prepareConversion(source,evidence,{ownerId:evidence.meta.find(r=>r.key==='training-model-v1')?.document.payload.model.ownerId});
     guard();legacy.close();db.close();db=await connectV2(v1.NAME,{onVersionChange:versionChanged});
-    publish(await activateConversion(db,prepared,{guard}));
+    publish(await activateLatest(prepared));
    }finally{legacy.close();}
   }else{
    db.onversionchange=()=>{versionChanged();db.close()};
@@ -53,7 +70,7 @@ export async function openDatabase(v1,fresh){
     // Pending conversion reads current v1 stores, never replays an earlier
     // checkpoint or enables the v1 writer against database version 2.
     const evidence=await legacyEvidence(db);source=freeze(await v1.verifyEvidence(evidence));anchor=evidence.meta.find(r=>r.key==='state').legacyRaw;pendingRevision=evidence.meta.find(r=>r.key==='state').revision;
-    guard();const prepared=await prepareConversion(source,evidence);publish(await activateConversion(db,prepared,{guard}));
+    guard();const prepared=await prepareConversion(source,evidence);publish(await activateLatest(prepared));
    }
   }
   unverified=null;guard();
@@ -90,8 +107,14 @@ export async function openDatabase(v1,fresh){
   additions(archives,incoming);
   const candidate={format:'pushpull-backup',version:2,data:own,catalog,archives},ownerId=modelOwnerId??own.trainingJournal?.model.ownerId??writer?.state.ownerId??'local-journal';
   const operationGuard=()=>{if(closed)throw Error('Połączenie zamknięte.');if(raw()!==legacy)throw Error('Starsza wersja zmieniła dane w trakcie operacji.');if(!importing&&stale)throw error;};
-  const next=await replaceSource(db,candidate,{expectedState:expected,ownerId,modelEnabled:modelEnabled??(!!own.trainingJournal||writer?.state.modelEnabled||modelOwnerId!==null),legacyRaw:legacy,recovery:importing&&!writer,revision:pendingRevision,guard:operationGuard});
-  publish(next);unverified=null;announce();
+  try{
+   const next=await replaceSource(db,candidate,{expectedState:expected,ownerId,modelEnabled:modelEnabled??(!!own.trainingJournal||writer?.state.modelEnabled||modelOwnerId!==null),legacyRaw:legacy,recovery:importing&&!writer,revision:pendingRevision,guard:operationGuard});
+   publish(next);unverified=null;recoveryCopies=[];announce();
+  }catch(failure){
+   if(failure.code==='post-complete-readback'){recoveryCopies=archives;block(failure.message);}
+   else if(/CAS/.test(failure.message)){block('Dane zmieniły się w innej karcie. Otwórz podgląd ponownie.');throw error;}
+   throw failure;
+  }
  }
  return {
   get error(){return error},get value(){return source&&editable(source.data)},get catalog(){return source&&clone(source.catalog)},
@@ -116,9 +139,9 @@ export async function openDatabase(v1,fresh){
   },
   async exportModelBackup(){const value=await auditExport();if(!writer.state.modelEnabled)throw Error('Model nie został przygotowany.');return exportBackup(await createLegacyModelFromSource(value,{ownerId:writer.state.ownerId,createdAt:new Date().toISOString()}));},
   async importModelBackup(text,options={}){const parsed=await parseModelBackup(text);return commit(parsed.data,{...options,importing:true,importedCatalog:parsed.catalog,importedArchives:parsed.archives??[],modelOwnerId:parsed.document.payload.model.ownerId});},
-  backups(){return source?.archives.map(a=>a.id)??[]},
-  backupLabel(id){const item=source?.archives.find(a=>a.id===id);return ({migration:'Przed migracją','before-import':'Przed przywróceniem / importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item?.kind]??'Kopia')+' · '+new Date(item?.createdAt).toLocaleString('pl-PL')},
-  async readBackup(id){const item=source?.archives.find(a=>a.id===id);if(!item)throw Error('Brak kopii');return item.raw},
+  backups(){return [...new Set([...(source?.archives??[]),...recoveryCopies].map(a=>a.id))]},
+  backupLabel(id){const item=[...(source?.archives??[]),...recoveryCopies].find(a=>a.id===id);return ({migration:'Przed migracją','before-import':'Przed przywróceniem / importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item?.kind]??'Kopia')+' · '+new Date(item?.createdAt).toLocaleString('pl-PL')},
+  async readBackup(id){const item=[...(source?.archives??[]),...recoveryCopies].find(a=>a.id===id);if(!item)throw Error('Brak kopii');return item.raw},
   async readDriveState(){requireDB();return transact(db,['meta'],'readonly',tx=>request(tx.objectStore('meta').get('drive-sync-v1')))},
   async writeDriveState(value,expectedToken){
    requireDB();const next={...clone(value),key:'drive-sync-v1',token:crypto.randomUUID()};

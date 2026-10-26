@@ -1,8 +1,9 @@
-"""Stage A uses a separate named database; the production writer stays v1."""
+"""The isolated codec never changes the current application's source database."""
 from test_browser import BrowserHarness
 
 class JournalProtocol(BrowserHarness):
     def test_lossless_protocol_persists_and_reopens_in_isolated_idb_without_touching_live_database(self):
+        self.page.wait_for_selector('[data-act=start]')
         result=self.page.evaluate("""async()=>{
           const {createProtocol,materialize,STORES}=await import('./model/journal-protocol.mjs');
           const live=await PushPullDB.open(()=>{throw Error('missing live database')});

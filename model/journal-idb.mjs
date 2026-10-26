@@ -132,8 +132,10 @@ export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled
   tx.objectStore('journalState').put(bundle.state);await readback(tx,'journalState',[bundle.state]);
   const marker={key:MARKER,protocol:2,status:'active',epoch:bundle.state.epoch};tx.objectStore('meta').put(marker);check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'bulk marker readback');guard();
  },{signal});
- const stored=await readRecords(db,{signal});check(same(stored.state,bundle.state),'bulk restart revision');
- check(same(await auditBundle(stored,{signal}),source),'bulk restart source');return openWriter(db,{bundle:stored,signal,guard});
+ try{
+  const stored=await readRecords(db,{signal});check(same(stored.state,bundle.state),'bulk restart revision');
+  check(same(await auditBundle(stored,{signal}),source),'bulk restart source');return await openWriter(db,{bundle:stored,signal,guard});
+ }catch(failure){throw Object.assign(Error('Nie potwierdzono odczytu po zapisie. Kopia sprzed operacji została zachowana. Odśwież aplikację. '+failure.message),{code:'post-complete-readback'});}
 }
 export async function openWriter(db,{bundle,signal,guard=()=>{}}={}){
  let saved=bundle??await readRecords(db,{signal}),source=await auditBundle(saved,{signal}),state=saved.state,busy=false;

@@ -1246,7 +1246,9 @@ class PWADeployment(unittest.TestCase):
         }""",old_code)
         self.assertEqual(result,{'error':'VersionError','value':None});self.assertEqual(self.notification_state(),before)
         self.context.set_offline(True);self.page.locator('[data-draft-resume]').click()
-        expect(self.page.locator('[data-quick=kg]')).to_have_value('23,')
+        # Quick-fill controls are commands and have always rendered empty after
+        # restart. The unfinished values belong to the actual segment fields.
+        expect(self.page.locator('[data-row="0"][data-segment="0"][data-field=kg]')).to_have_value('23,')
         self.page.locator('[data-quick=kg]').fill('23.5');self.page.locator('[data-quick=reps]').fill('8')
         self.page.locator('.performanceForm [type=submit]').click();expect(self.page.locator('.performanceForm')).to_have_count(0)
         after=self.notification_state();self.assertEqual(after['backup']['data']['sessions'],before['backup']['data']['sessions']);self.assertEqual(after['backup']['data']['trainingJournal']['sessionSnapshots'],before['backup']['data']['trainingJournal']['sessionSnapshots'])

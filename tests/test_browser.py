@@ -283,7 +283,7 @@ class BrowserRegression(BrowserHarness):
         self.page.locator('[data-main=kg]').fill('120')
         original=self.raw()
         self.settings()
-        self.page.evaluate("() => {const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(v){if(this.name==='backups')throw new DOMException('Pełna pamięć','QuotaExceededError');return add.call(this,v)}}")
+        self.page.evaluate("() => {const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(v){if(this.name==='journalArchives')throw new DOMException('Pełna pamięć','QuotaExceededError');return add.call(this,v)}}")
         self.import_data(original)
         self.assertEqual(self.state(),json.loads(original))
         self.assertIn('Operacja przerwana',self.alerts[0])
