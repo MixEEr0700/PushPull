@@ -77,11 +77,11 @@ def artifact(ref,directory):
         if name=='model/journal-idb.mjs':data=instrument_v2(data.decode()).encode()
         target=staging/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(data)
     template=staging/'scripts/service-worker.template.js';template.parent.mkdir();shutil.copyfile(source/'scripts/service-worker.template.js',template)
-    builder['build'](directory/'site',staging)
+    release=builder['build'](directory/'site',staging)
     handler=type('AllowlistedBenchmark',(Server,),{'allowed':set(builder['FILES'])})
     server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(handler,directory=str(directory/'site')))
     thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
-    return server,thread,hashes
+    return server,thread,hashes,release
 
 CAPTURE=r"""async()=>{
  const db=await new Promise((ok,no)=>{const r=indexedDB.open('pushpull',1);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
@@ -181,7 +181,7 @@ def main():
     servers=[]
     try:
         for side,ref in [('before',args.before),('after',args.after)]:
-            directory=args.artifacts/side;directory.mkdir();server,thread,hashes=artifact(ref,directory);servers.append((server,thread));report[side+'RuntimeSha256']=hashes;report[side+'URL']='http://127.0.0.1:'+str(server.server_port)+'/'
+            directory=args.artifacts/side;directory.mkdir();server,thread,hashes,release=artifact(ref,directory);servers.append((server,thread));report[side+'RuntimeSha256']=hashes;report[side+'InstrumentedRelease']=release;report[side+'URL']='http://127.0.0.1:'+str(server.server_port)+'/'
         with sync_playwright() as pw:
             for label,count,mib,shape in CASES:
                 if args.cases and label not in args.cases:continue
