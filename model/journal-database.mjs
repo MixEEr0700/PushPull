@@ -154,7 +154,7 @@ export async function openDatabase(v1,fresh,{training=false}={}){
   get error(){return error},get value(){return source&&editable(source.data)},get catalog(){return source&&clone(source.catalog)},
   get archivesDeferred(){return deferred},ensureFull,
   get raw(){try{return raw()}catch{return anchor}},get revision(){return revision()},
-  get model(){return writer?.state.modelEnabled&&source?clone(legacyPayload(source,writer.state.ownerId)):null},
+  get model(){if(deferred)throw Error('Pełny model wymaga odczytu i audytu archiwów.');return writer?.state.modelEnabled&&source?clone(legacyPayload(source,writer.state.ownerId)):null},
   set onchange(fn){notify=fn},
   export:snapshot,auditExport,recovery(){return unverified?clone(unverified):source?snapshot():null},
   async recoveryEvidence(){requireDB();return db.version===1?{format:'pushpull-idb-recovery',version:1,evidence:await legacyEvidence(db)}:{format:'pushpull-idb-recovery',version:2,...await readRecords(db)}},

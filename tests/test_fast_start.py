@@ -18,15 +18,16 @@ class FastStart(BrowserHarness):
     def test_startup_avoids_raw_checkpoint_and_retained_objects_and_full_export_still_audits(self):
         self.prepare()
         result=self.page.evaluate("""async()=>{
-         const reads=structuredClone(__reads),deferred=__fastDB.archivesDeferred;let refused=false;
+         const reads=structuredClone(__reads),deferred=__fastDB.archivesDeferred;let refused=false,modelRefused=false;
          try{__fastDB.export()}catch{refused=true}
+         try{void __fastDB.model}catch{modelRefused=true}
          const api=await import('./model/journal-idb.mjs'),db=await api.connectV2('pushpull'),before=await api.readRecords(db);
          const archive=before.records.journalArchives.find(r=>r.id==='large-raw');
          const untouched=!reads.some(r=>r.name==='journalCheckpoints'||r.name==='journalObjects'&&(r.op==='getAll'||r.ids.includes(archive.ref)));
          const actual=await __fastDB.auditExport();await __fastDB.ensureFull();
-         const same=api.same(actual,__fastDB.export()),after=await api.readRecords(db);db.close();return {deferred,refused,untouched,same,unchanged:api.same(before,after),raw:actual.archives.find(r=>r.id==='large-raw').raw.length};
+         const same=api.same(actual,__fastDB.export()),after=await api.readRecords(db);db.close();return {deferred,refused,modelRefused,untouched,same,unchanged:api.same(before,after),raw:actual.archives.find(r=>r.id==='large-raw').raw.length};
         }""")
-        self.assertTrue(all(result[k] for k in ['deferred','refused','untouched','same','unchanged']),result)
+        self.assertTrue(all(result[k] for k in ['deferred','refused','modelRefused','untouched','same','unchanged']),result)
         self.assertGreater(result['raw'],1000000)
 
     def test_live_session_finish_preserves_every_archive_checkpoint_and_retained_object(self):
