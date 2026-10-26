@@ -97,6 +97,16 @@ INJECT=r"""async fixture=>{
  await new Promise((ok,no)=>{const tx=db.transaction(Object.keys(fixture.rows),'readwrite',{durability:'strict'});for(const [name,rows] of Object.entries(fixture.rows))for(const row of rows)tx.objectStore(name).add(row);tx.oncomplete=ok;tx.onabort=()=>no(tx.error)});db.close();
  for(const [k,v] of Object.entries(fixture.local))localStorage.setItem(k,v);
 }"""
+def inject_fixture(page,seed):
+    # Transport only: one native database transaction still receives the exact
+    # complete fixture. Chunk CDP messages, never the application's data format.
+    text=json.dumps(seed,ensure_ascii=True,separators=(',',':'))
+    page.evaluate('window.__fixtureParts=[]')
+    try:
+        for offset in range(0,len(text),1048576):page.evaluate('part=>__fixtureParts.push(part)',text[offset:offset+1048576])
+        page.evaluate('()=>('+INJECT+')(JSON.parse(__fixtureParts.join("")))')
+    finally:page.evaluate('window.__fixtureParts=null')
+
 SOURCE_HASH=r"""async()=>{const db=await PushPullDB.open(()=>{throw Error('missing fixture')});try{if(db.error)throw db.error;return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(db.export())))),b=>b.toString(16).padStart(2,'0')).join('')}finally{db.close()}}"""
 def ready(page):page.wait_for_selector('[data-act=start]',timeout=600000)
 def fixture(pw,url,count,mib,shape,version=1):
@@ -119,7 +129,7 @@ def startup_diagnostics(page):
 def one_profile(pw,url,profile,seed,cpu,writes):
     # Exact v1 database bytes and localStorage, including raw archives, are shared
     # between paired variants. Initial conversion is recorded, outside save clock.
-    context=launch(pw,profile);page=context.new_page();page.goto(url+'benchmark.html');page.evaluate(INJECT,seed);page.close()
+    context=launch(pw,profile);page=context.new_page();page.goto(url+'benchmark.html');inject_fixture(page,seed);page.close()
     page,cdp,dialogs,errors=prepare_page(context,url,cpu)
     initial=page.evaluate('performance.now()');initial_diagnostics=startup_diagnostics(page);page.evaluate('navigator.serviceWorker.ready');page.wait_for_function('navigator.serviceWorker.controller!==null',timeout=60000)
     if page.evaluate(SOURCE_HASH)!=seed['sourceHash']:raise ValueError('Exact fixture source differs after load/conversion')
@@ -128,8 +138,14 @@ def one_profile(pw,url,profile,seed,cpu,writes):
     try:
         page,cdp,dialogs,errors=prepare_page(context,url,cpu);cold=page.evaluate('performance.now()');cold_diagnostics=startup_diagnostics(page)
         page.reload(timeout=600000);ready(page);warm=page.evaluate('performance.now()');warm_diagnostics=startup_diagnostics(page)
-        page.evaluate("document.querySelector('[data-act=start]').click()")
+        page.evaluate(r"""()=>{
+         window.__startComplete=[];window.__startTransaction=IDBDatabase.prototype.transaction;
+         IDBDatabase.prototype.transaction=function(...args){const tx=__startTransaction.apply(this,args);if(tx.mode==='readwrite'&&[...tx.objectStoreNames].includes('journalState'))tx.addEventListener('complete',event=>__startComplete.push({at:performance.now(),eventTimeStamp:event.timeStamp,durability:tx.durability}));return tx};
+         __ui.begin();document.querySelector('[data-act=start]').click();
+        }""")
         page.wait_for_function("document.querySelector('[data-act=finish]')&&!document.querySelector('#app').inert",timeout=600000)
+        session_start=page.evaluate('__ui.end()')
+        session_start['nativeComplete']=page.evaluate("()=>{IDBDatabase.prototype.transaction=__startTransaction;return __startComplete.map(m=>({...m,clickToStrictCompleteMs:m.at-__ui.sample.start,nativeEventMs:m.eventTimeStamp-__ui.sample.start}))}")
         proof=page.evaluate(PROOF);exercises=page.locator('[data-expand]').evaluate_all('bs=>bs.map(b=>b.dataset.expand)').__getitem__(slice(0,4))
         cdp.send('HeapProfiler.collectGarbage');retained_before=cdp.send('Runtime.getHeapUsage');samples=[]
         for n in range(writes):
@@ -155,7 +171,7 @@ def one_profile(pw,url,profile,seed,cpu,writes):
         if page.evaluate(PROOF)!=proof:raise ValueError('Original history/snapshots/archive changed')
         if errors:raise ValueError(errors)
         cdp.send('HeapProfiler.collectGarbage');retained_after=cdp.send('Runtime.getHeapUsage')
-        result={'initialReadyMs':initial,'processColdReadyMs':cold,'warmReadyMs':warm,'startupDiagnostics':{'initial':initial_diagnostics,'processCold':cold_diagnostics,'warm':warm_diagnostics},'preserved':True,'proof':proof,'retainedBefore':retained_before,'retainedAfter':retained_after,'samples':samples}
+        result={'sessionStart':session_start,'initialReadyMs':initial,'processColdReadyMs':cold,'warmReadyMs':warm,'startupDiagnostics':{'initial':initial_diagnostics,'processCold':cold_diagnostics,'warm':warm_diagnostics},'preserved':True,'proof':proof,'retainedBefore':retained_before,'retainedAfter':retained_after,'samples':samples}
         profile.with_suffix('.measurements.json').write_text(json.dumps({'completed':True,**result},indent=2)+'\n');return result
     finally:context.close()
 

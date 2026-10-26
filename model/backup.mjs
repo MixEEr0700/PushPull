@@ -20,7 +20,7 @@ function index(rows,key,label) {
   return map;
 }
 const payloadVersion=x=>x===null || Number.isSafeInteger(x) && x>0;
-function validatePayload(p) {
+export function validatePayload(p) {
   fields(p,'model '+RECORDS.join(' '));portable(p);
   if (p.model!==null) validateModel(p.model);
   const snapshots=index(p.sessionSnapshots,'id','snapshots'),sessions=index(p.sessionRecords,'id','sessions');

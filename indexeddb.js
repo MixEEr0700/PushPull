@@ -469,6 +469,6 @@ const PushPullDB = (() => {
     return {format:'pushpull-backup',version:2,...value,archives:clone(validateArchives(evidence.backups))};
   }
   const api={openV1:open,catalogFor,validateCatalog,validateArchives,parseBackup,verifyEvidence,async parseModelBackup(text){return (await modelAPI()).parseModelBackup(text)},NAME,VERSION:2,TABLES};
-  api.open=async fresh=>(await import('./model/journal-database.mjs')).openDatabase(api,fresh);
+  api.open=async (fresh,options)=>(await import('./model/journal-database.mjs')).openDatabase(api,fresh,options);
   return api;
 })();
