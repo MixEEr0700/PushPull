@@ -22,6 +22,8 @@ Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budowa�
 
 ## Dokumentacja
 
+- [Zapis przyrostowy IndexedDB v2 — Issue #82](docs/INCREMENTAL_WRITE_STAGE_C.md): integracja z Matrix, aktualizacja z checkpointem, rzeczywisty strict complete oraz syntetyczne pomiary przed/po. Osobne etapy [A](docs/INCREMENTAL_WRITE_STAGE_A.md) i [B](docs/INCREMENTAL_WRITE_STAGE_B.md); odbiór na fizycznym Androidzie pozostaje osobny.
+
 - [Trwały zapis — etap B](docs/DURABLE_WRITE_STAGE_B.md): implementacja, natywne pomiary przed/po i [projekt zapisu przyrostowego](docs/INCREMENTAL_WRITE_P0_DESIGN.md).
 
 - [Pierwsza reakcja i trwały zapis — Issue #75](docs/UI_RESPONSIVENESS_ISSUE_75.md): rozdzielone pomiary, bezpieczny stan oczekiwania i projekt dalszego usprawnienia.

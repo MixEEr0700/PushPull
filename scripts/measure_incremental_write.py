@@ -92,20 +92,21 @@ CAPTURE=r"""async()=>{
  }finally{handle.close()}
 }"""
 INJECT=r"""async fixture=>{
- const request=indexedDB.open('pushpull',1);request.onupgradeneeded=()=>{for(const name of Object.keys(fixture.rows))request.result.createObjectStore(name,{keyPath:name==='meta'?'key':'id'})};
+ const request=indexedDB.open('pushpull',fixture.databaseVersion??1);request.onupgradeneeded=()=>{for(const name of Object.keys(fixture.rows))request.result.createObjectStore(name,{keyPath:name==='meta'?'key':'id'})};
  const db=await new Promise((ok,no)=>{request.onsuccess=()=>ok(request.result);request.onerror=()=>no(request.error)});
  await new Promise((ok,no)=>{const tx=db.transaction(Object.keys(fixture.rows),'readwrite',{durability:'strict'});for(const [name,rows] of Object.entries(fixture.rows))for(const row of rows)tx.objectStore(name).add(row);tx.oncomplete=ok;tx.onabort=()=>no(tx.error)});db.close();
  for(const [k,v] of Object.entries(fixture.local))localStorage.setItem(k,v);
 }"""
 SOURCE_HASH=r"""async()=>{const db=await PushPullDB.open(()=>{throw Error('missing fixture')});try{if(db.error)throw db.error;return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(db.export())))),b=>b.toString(16).padStart(2,'0')).join('')}finally{db.close()}}"""
 def ready(page):page.wait_for_selector('[data-act=start]',timeout=600000)
-def fixture(pw,url,count,mib,shape):
+def fixture(pw,url,count,mib,shape,version=1):
     browser=pw.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox']);context=browser.new_context();page=context.new_page()
     try:
         page.goto(url);ready(page)
         page.evaluate(r"""({bytes,shape})=>{const part=shape==='escaped'?'Ł😀\\\"\n':shape==='unicode'?'Ł😀':'x',size=new TextEncoder().encode(part).length;window.__archive=part.repeat(Math.floor(bytes/size))+'x'.repeat(bytes%size)}""",{'bytes':mib*1024*1024,'shape':shape})
         sizes=page.evaluate(SEED.replace("raw:'x'.repeat(archiveBytes)",'raw:window.__archive'),{'count':count,'native':True,'archiveBytes':mib*1024*1024})
-        return page.evaluate(CAPTURE),sizes
+        seed=page.evaluate(CAPTURE.replace("indexedDB.open('pushpull',1)","indexedDB.open('pushpull',"+str(version)+")"));seed['databaseVersion']=version
+        return seed,sizes
     finally:context.close();browser.close()
 
 def launch(pw,profile):return pw.chromium.launch_persistent_context(str(profile),executable_path=shutil.which('chromium'),args=['--no-sandbox','--enable-precise-memory-info'],viewport={'width':390,'height':844},service_workers='allow')
@@ -167,12 +168,14 @@ def statistics(profiles):
             if values:out[group][key]={'n':len(values),'median':median(values),'p95':values[math.ceil(.95*len(values))-1],'max':values[-1]}
     return out
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',default='4647511');p.add_argument('--after',default='working');p.add_argument('--profiles',type=int,default=3);p.add_argument('--writes',type=int,default=8);p.add_argument('--cpu',type=float,default=4);p.add_argument('--cases',nargs='+',choices=[c[0] for c in CASES]);p.add_argument('--output',type=Path,required=True);p.add_argument('--artifacts',type=Path,required=True);p.add_argument('--smoke',action='store_true');args=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',default='4647511');p.add_argument('--after',default='working');p.add_argument('--profiles',type=int,default=3);p.add_argument('--writes',type=int,default=8);p.add_argument('--cpu',type=float,default=4);p.add_argument('--cases',nargs='+',choices=[c[0] for c in CASES]);p.add_argument('--output',type=Path,required=True);p.add_argument('--artifacts',type=Path,required=True);p.add_argument('--smoke',action='store_true');p.add_argument('--v2-only',action='store_true',help='Separate v2 growth stress; no before/after comparison or v1 conversion evidence');args=p.parse_args()
     if args.output.exists():p.error('Refusing to overwrite measurements; use a new output')
     if args.profiles<1 or args.writes<1 or args.cpu<1:p.error('profiles/writes/cpu must be >= 1')
     args.artifacts.mkdir(parents=True,exist_ok=True)
     report={'syntheticOnly':True,'method':'Exact shared v1 fixture per case; initial actual conversion, process-cold and warm offline starts; actual Matrix submit -> native strict oncomplete before Promise publication. Three independent paired profiles; first four new results, next four corrections. CPU throttle is not Android emulation. Memory is sampled JS heap high-water plus post-GC retained, not an absolute process peak.','before':args.before,'after':args.after,'cpuThrottle':args.cpu,'profiles':args.profiles,'writes':args.writes,'platform':platform.platform(),'cases':{}}
     report['purpose']='harness smoke only; may run under concurrent test load; not performance evidence' if args.smoke else 'serial performance evidence'
+    report['comparisonMode']='v2-only growth stress; initial fixture already uses v2, not a v1 conversion or before/after comparison' if args.v2_only else 'paired exact v1 fixture'
+    if args.v2_only:report['method']='Three independent v2 profiles, identical full v2 records/localStorage; offline new results and corrections. Initial/process-cold/warm starts and native strict complete. No v1 conversion or before/after comparison. Sampled JS heap and forced GC before/after the write series; not Android emulation.'
     report['chromium']=subprocess.check_output([shutil.which('chromium'),'--version'],text=True).strip()
     report['beforeCommit']=subprocess.check_output(['git','rev-parse',args.before],cwd=ROOT,text=True).strip()
     report['afterCommit']=subprocess.check_output(['git','rev-parse','HEAD' if args.after=='working' else args.after],cwd=ROOT,text=True).strip()
@@ -186,19 +189,19 @@ def main():
             for label,count,mib,shape in CASES:
                 if args.cases and label not in args.cases:continue
                 print('FIXTURE '+label,flush=True)
-                try:seed,sizes=fixture(pw,report['beforeURL'],count,mib,shape)
+                try:seed,sizes=fixture(pw,report['afterURL'] if args.v2_only else report['beforeURL'],count,mib,shape,2 if args.v2_only else 1)
                 except Exception as error:
                     report['cases'][label]={'setupError':str(error),'requested':{'sessions':count,'archiveMiB':mib,'shape':shape}}
                     args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(report,indent=2)+'\n');raise
                 (args.artifacts/(label+'-fixture.json')).write_text(json.dumps(seed,ensure_ascii=True));case=report['cases'][label]={'sizes':sizes,'fixtureSourceHash':seed['sourceHash'],'fixtureSourceBytes':seed['sourceBytes'],'before':[],'after':[]}
                 for i in range(args.profiles):
-                    for side in (['before','after'] if i%2==0 else ['after','before']):
+                    for side in (['after'] if args.v2_only else ['before','after'] if i%2==0 else ['after','before']):
                         print(f'BEGIN {label} {side} {i+1}/{args.profiles}',flush=True)
                         try:case[side].append(one_profile(pw,report[side+'URL'],args.artifacts/f'{label}-{side}-{i}',seed,args.cpu,args.writes))
                         except Exception as error:case.setdefault('errors',[]).append({'side':side,'profile':i,'error':str(error)});raise
                         finally:
                             case['statistics']={side:statistics(case[side]) for side in ['before','after'] if case[side]};args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(report,indent=2)+'\n')
-                print('COMPLETE '+label+' '+json.dumps({side:case['statistics'][side]['all']['clickToStrictCompleteMs'] for side in ['before','after']}),flush=True)
+                print('COMPLETE '+label+' '+json.dumps({side:case['statistics'][side]['all']['clickToStrictCompleteMs'] for side in ['before','after'] if side in case['statistics']}),flush=True)
     finally:
         for server,thread in servers:server.shutdown();server.server_close();thread.join()
 if __name__=='__main__':main()
