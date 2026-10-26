@@ -26,6 +26,14 @@ class IncrementalMatrix(BrowserHarness):
         self.assertEqual(first.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}'),FIXTURE)
         self.assertEqual(second.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}'),FIXTURE)
 
+    def test_missing_active_root_never_silently_replays_the_older_v1_checkpoint(self):
+        self.start();self.result('42','7');self.save();before=self.state()
+        self.page.goto(self.url+'tests/')
+        self.page.evaluate("""async()=>{const api=await import('../model/journal-idb.mjs'),db=await api.connectV2('pushpull');try{await api.transact(db,['journalState'],'readwrite',tx=>tx.objectStore('journalState').delete('active'))}finally{db.close()}}""")
+        self.page.goto(self.url);expect(self.page.locator('[role=alert]')).to_contain_text('Niekompletna baza v2')
+        result=self.page.evaluate("""async()=>{const api=await import('./model/journal-idb.mjs'),db=await api.connectV2('pushpull'),handle=await PushPullDB.open(()=>{});try{const stored=await api.readRecords(db);return {replayed:!!stored.state,value:handle.value,results:stored.records.journalResults.length,dump:handle.recovery().version}}finally{db.close();handle.close()}}""")
+        self.assertEqual(result,{'replayed':False,'value':None,'results':len(before['entries']),'dump':2})
+
     def expose_handle(self):
         code=(ROOT/'app.js').read_text().replace('const database=await PushPullDB.open(fresh);','const database=await PushPullDB.open(fresh);window.__appDB=database;').replace('let data=database.value||fresh();','let data=database.value||fresh();window.__peek=()=>data;')
         self.page.route('**/app.js',lambda route:route.fulfill(body=code,content_type='text/javascript'))

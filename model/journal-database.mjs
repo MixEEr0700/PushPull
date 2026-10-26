@@ -69,6 +69,8 @@ export async function openDatabase(v1,fresh){
    }else{
     // Pending conversion reads current v1 stores, never replays an earlier
     // checkpoint or enables the v1 writer against database version 2.
+    const marker=await transact(db,['meta'],'readonly',tx=>request(tx.objectStore('meta').get(MARKER)));
+    if(!same(marker,{key:MARKER,protocol:2,status:'pending'})||Object.values(bundle.records).some(rows=>rows.length))throw Error('Niekompletna baza v2. Zachowaj kopię do odzyskania; nie odtworzono starszej historii v1.');
     const evidence=await legacyEvidence(db);source=freeze(await v1.verifyEvidence(evidence));anchor=evidence.meta.find(r=>r.key==='state').legacyRaw;pendingRevision=evidence.meta.find(r=>r.key==='state').revision;
     guard();const prepared=await prepareConversion(source,evidence);publish(await activateLatest(prepared));
    }
