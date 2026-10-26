@@ -78,6 +78,19 @@ class JournalWriter(BrowserHarness):
         }""")
         self.assertEqual(result,{'rejected':2,'unchangedRoot':True,'recovered':True})
 
+    def test_orphan_v2_records_or_formerly_active_marker_never_replay_v1(self):
+        self.prepare_writer(native=False,convert=False)
+        result=self.page.evaluate("""async()=>{
+         const {api,codec,db,source,evidence}=__v2,row=await codec.objectRecord({value:'unreferenced data must survive'});let rejected=0;
+         await api.transact(db,['journalObjects'],'readwrite',tx=>tx.objectStore('journalObjects').add(row));
+         const before=JSON.stringify(await api.readRecords(db));try{await api.convertV1(db,source,evidence)}catch(e){if(e.message.includes('stores not empty'))rejected++}
+         const kept=JSON.stringify(await api.readRecords(db))===before;
+         await api.transact(db,['journalObjects','meta'],'readwrite',tx=>{tx.objectStore('journalObjects').delete(row.id);tx.objectStore('meta').put({key:api.MARKER,protocol:2,status:'active',epoch:'lost-root'})});
+         try{await api.convertV1(db,source,evidence)}catch(e){if(e.message.includes('pending marker'))rejected++}
+         return {rejected,kept,notReplayed:!(await api.readRecords(db)).state};
+        }""")
+        self.assertEqual(result,{'rejected':2,'kept':True,'notReplayed':True})
+
     def test_native_correction_strict_complete_restart_unknown_fields_and_unchanged_v1_checkpoint(self):
         self.prepare_writer()
         result=self.page.evaluate(r"""async()=>{

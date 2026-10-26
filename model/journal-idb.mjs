@@ -84,6 +84,8 @@ export async function activateConversion(db,token,{signal,guard=()=>{}}={}){
  check(conversions.has(token),'prepared conversion token');const {original,captured,bundle,checkpoint}=conversions.get(token);
  await transact(db,[...LEGACY_STORES,...STORES],'readwrite',async tx=>{
   guard();check(!await request(tx.objectStore('journalState').get('active')),'conversion already active');
+  check(same(await request(tx.objectStore('meta').get(MARKER)),{key:MARKER,protocol:2,status:'pending'}),'conversion pending marker');
+  for(const store of STORES)check(await request(tx.objectStore(store).count())===0,'conversion stores not empty');
   await equalRows(tx,captured);
   for(const store of STORES.filter(s=>!['journalState','journalCheckpoints'].includes(s)))for(const row of bundle.records[store])tx.objectStore(store).add(row);
   tx.objectStore('journalCheckpoints').add(checkpoint);
