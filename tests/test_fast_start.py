@@ -118,3 +118,20 @@ class FastStart(BrowserHarness):
         expect(self.page.locator('#app')).to_contain_text('Nie udało się otworzyć bazy')
         self.assertEqual(self.page.locator('[data-act=start],[data-act=finish]').count(),0)
         self.assertFalse(self.errors,self.errors)
+
+    def test_pending_conversion_recovery_download_contains_legacy_and_native_stores_atomically(self):
+        context=self.new_context();page=context.new_page();page.goto(self.url+'tests/')
+        page.add_script_tag(url=self.url+'storage.js');page.add_script_tag(url=self.url+'indexeddb.js')
+        result=page.evaluate("""async()=>{
+         const old=await(await fetch('./fixtures/v1.json')).json();localStorage.setItem(PushPullStorage.KEY,JSON.stringify(old));
+         const legacy=await PushPullDB.openV1(()=>old);if(legacy.error)throw legacy.error;
+         await legacy.prepareModel({backupText:JSON.stringify(legacy.export()),ownerId:'recovery-test'});legacy.close();
+         const api=await import('../model/journal-idb.mjs'),one=await api.request(indexedDB.open('pushpull',1)),evidence=await api.legacyEvidence(one);one.close();
+         const pending=await api.connectV2('pushpull');pending.close();
+         const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(...args){if(this.name==='journalObjects')throw new DOMException('synthetic conversion quota','QuotaExceededError');return add.apply(this,args)};
+         let handle;try{handle=await PushPullDB.open(()=>{throw Error('no reset')})}finally{IDBObjectStore.prototype.add=add}
+         try{const dump=await handle.recoveryEvidence();
+          return {blocked:!!handle.error,version:dump.version,pending:dump.state===null,nativeEmpty:dump.records.journalSessions.length===0,legacy:!!dump.records.sessions&&api.same(dump.records.sessions,evidence.sessions),models:dump.records.meta?.some(r=>r.key==='training-model-v1')??false,archives:!!dump.records.backups&&api.same(dump.records.backups,evidence.backups)};
+         }finally{handle.close()}
+        }""")
+        self.assertEqual(result,{'blocked':True,'version':2,'pending':True,'nativeEmpty':True,'legacy':True,'models':True,'archives':True})

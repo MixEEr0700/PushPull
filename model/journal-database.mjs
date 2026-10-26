@@ -157,7 +157,14 @@ export async function openDatabase(v1,fresh,{training=false}={}){
   get model(){if(deferred)throw Error('Pełny model wymaga odczytu i audytu archiwów.');return writer?.state.modelEnabled&&source?clone(legacyPayload(source,writer.state.ownerId)):null},
   set onchange(fn){notify=fn},
   export:snapshot,auditExport,recovery(){return unverified?clone(unverified):source?snapshot():null},
-  async recoveryEvidence(){requireDB();return db.version===1?{format:'pushpull-idb-recovery',version:1,evidence:await legacyEvidence(db)}:{format:'pushpull-idb-recovery',version:2,...await readRecords(db)}},
+  async recoveryEvidence(){
+   requireDB();const stores=[...db.objectStoreNames];
+   // A pending v2 conversion still owns the original v1 tables. A diagnostic
+   // download must retain both representations, drafts and unknown metadata,
+   // in one native snapshot, even if the v2 stores are empty or corrupt.
+   const records=await transact(db,stores,'readonly',async tx=>Object.fromEntries(await Promise.all(stores.map(async store=>[store,await request(tx.objectStore(store).getAll())]))));
+   return db.version===1?{format:'pushpull-idb-recovery',version:1,evidence:records}:{format:'pushpull-idb-recovery',version:2,state:records.journalState?.find(r=>r.id==='active')??null,records};
+  },
   async saveResult(command){
    if(error)throw error;guard();
    try{const archives=!deferred&&source.archives,ack=await writer.saveResult(command);source=archives?Object.freeze({...writer.source,archives}):writer.source;announce();return ack}

@@ -142,11 +142,13 @@ każdy pomiar wyniku, natywne znaczniki i hashe oracle.
 
 Pomiar implementacji: `c580d694a43dc9de5299b16ceb46a5cd8439df0d`,
 produkcyjny artifact tej wersji `814bfedc899b4ba9a65347b9`.
-Końcowy przegląd dodał jeszcze odmowę gettera `model` dla niepełnego widoku;
-nie zmienił mierzonej ścieżki startu/zapisu. Test wyniku wymusza rzucanie
+Końcowy przegląd dodał odmowę gettera `model` dla niepełnego widoku
+oraz atomowy dump wszystkich stores w ścieżce odzyskiwania, także tabel v1
+w stanie pending v2. Żadna z tych zmian nie dotyczy mierzonej ścieżki
+normalnego startu/zapisu. Test wyniku wymusza rzucanie
 wyjątku przy dostępie do `model`, `value` i `export`, a więc potwierdza,
 że ścieżka wyniku ich nie wykonuje. Końcowy artifact z tą blokadą:
-`cfc33ac3175de58c17c850b0`. Nie publikowano żadnego artifactu na telefon.
+`0399ce3be8754f3635ba52cf`. Nie publikowano żadnego artifactu na telefon.
 
 Pomiary należy uruchamiać szeregowo, bez regresji w tle. Fixtures są
 syntetycznymi plikami utworzonymi wcześniej przez
@@ -163,7 +165,10 @@ Node: **204 PASS**. Lokalny pełny Chromium/PWA: 172 przypadki, 171 PASS
 oraz 1 timeout oczekiwania na controller SW podczas zmieniania plików
 wydania. Po zamrożeniu plików ten przypadek przeszedł wraz z 14 innymi
 przypadkami celowanymi. Dodatkowy nowy test błędu preloadu: PASS.
-W ten sposób zweryfikowano 173 różne scenariusze; nie ukryto timeoutu
+Nowy test wymuszonego quota w pending v2 wykazał pominięcie tabel v1 w
+pobieranej diagnostyce; poprawka odczytu wszystkich stores w jednej
+transakcji przeszła wraz z testem uszkodzonego live i odtwarzania preimage.
+W ten sposób zweryfikowano 174 różne scenariusze; nie ukryto timeoutu
 pierwszego przebiegu. Końcowa blokada gettera ma osobną kontrolę celowaną.
 Pełny wymagany wynik GitHub Actions dla końcowego HEAD jest w checks PR.
 
