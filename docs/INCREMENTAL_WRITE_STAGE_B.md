@@ -53,3 +53,32 @@ kontrola hashy produkcyjnego builda PASS. Logi powtórzone po wznowieniu, poniew
 poprzedni /tmp nie przetrwał przerwania. Przypadki testowe obejmują również
 zamknięcie strony w aktywnej transakcji, blokującego starego klienta i quota
 w versionchange. Pełna regresja uruchamiana jest w GitHub Actions tego PR.
+
+## Utwardzenie przed integracją C
+
+Finalny root jest SHA-256 całego małego stanu (epoch, revision, indexRoot,
+liczniki, owner, capability, legacyRef i checkpointRefs). Indeks AVL pozostaje
+osobnym indexRoot. CheckpointRefs wiążą kompletny zbiór checkpointów z root;
+reader odrzuca brak, zmianę nieznanych metadanych lub ponowne zahashowanie
+checkpointu bez aktualizacji root. Zwykły wynik nie czyta checkpointu.
+
+Limity obejmują również zachowane wersje i checkpointy. Po pełnym odczycie
+writer ma prywatny licznik bajtów/rekordów i odrzuca przekroczenie przed
+transakcją; nie zapisuje rewizji, której późniejszy reader nie może odczytać.
+Konwersja sprawdza komplet z checkpointem przed aktywacją. Bez podnoszenia limitów.
+
+Reader odłącza mutowalne wejście przed await SHA, odrzuca niejednoznaczny
+UTF-8 wire JSON, a wartości lone-surrogate zachowuje poprzez JSON.stringify.
+Bufor UTF-8 jest ograniczony i służy także do SHA. Prywatne dowody walidacji
+można ponownie użyć tylko dla całego głęboko niezmiennego bundle o tej samej
+tożsamości; niższe limity i anulowanie nadal obowiązują. Nie ma skipValidation.
+
+Dodatkowe scenariusze: zmiana wejścia podczas SHA, podmiana checkpointu przy
+niezmienionym root, brak checkpointu, limity zachowanych wersji przed
+transakcją oraz próba przeniesienia dowodu na kopię z tymi samymi hashami.
+
+Końcowe lokalne sprawdzenia utwardzenia: Node 202/202 PASS; 14 scenariuszy
+Chromium PASS oraz dodatkowy test orphan/active-marker PASS. Konwersja wymaga
+markera pending i pustych stores v2. Brak aktywnego root w bazie używanej
+wcześniej jako v2 nigdy nie powoduje automatycznego odtworzenia starego v1.
+Aktualny pełny wynik CI jest w checks PR #84.
