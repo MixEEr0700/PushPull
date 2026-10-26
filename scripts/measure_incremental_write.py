@@ -110,21 +110,23 @@ def fixture(pw,url,count,mib,shape):
 
 def launch(pw,profile):return pw.chromium.launch_persistent_context(str(profile),executable_path=shutil.which('chromium'),args=['--no-sandbox','--enable-precise-memory-info'],viewport={'width':390,'height':844},service_workers='allow')
 def prepare_page(context,url,cpu):
-    context.add_init_script(UI_PROBE);page=context.new_page();dialogs=[];errors=[];page.on('dialog',lambda d:(dialogs.append(d.message),d.accept()));page.on('pageerror',lambda e:errors.append(str(e)))
+    context.add_init_script(UI_PROBE+"\nwindow.__startupHeap=[];window.__startupTimer=setInterval(()=>__startupHeap.push(performance.memory.usedJSHeapSize),10);");page=context.new_page();dialogs=[];errors=[];page.on('dialog',lambda d:(dialogs.append(d.message),d.accept()));page.on('pageerror',lambda e:errors.append(str(e)))
     cdp=context.new_cdp_session(page);cdp.send('Emulation.setCPUThrottlingRate',{'rate':cpu});page.goto(url,timeout=600000);ready(page)
     return page,cdp,dialogs,errors
+def startup_diagnostics(page):
+    return page.evaluate("()=>{clearInterval(__startupTimer);return {sampledHeapHighWaterBytes:Math.max(0,...__startupHeap,performance.memory.usedJSHeapSize),longTasks:__probe.long.length,maxTaskMs:Math.max(0,...__probe.long.map(t=>t.ms))}}")
 def one_profile(pw,url,profile,seed,cpu,writes):
     # Exact v1 database bytes and localStorage, including raw archives, are shared
     # between paired variants. Initial conversion is recorded, outside save clock.
     context=launch(pw,profile);page=context.new_page();page.goto(url+'benchmark.html');page.evaluate(INJECT,seed);page.close()
     page,cdp,dialogs,errors=prepare_page(context,url,cpu)
-    initial=page.evaluate('performance.now()');page.evaluate('navigator.serviceWorker.ready');page.wait_for_function('navigator.serviceWorker.controller!==null',timeout=60000)
+    initial=page.evaluate('performance.now()');initial_diagnostics=startup_diagnostics(page);page.evaluate('navigator.serviceWorker.ready');page.wait_for_function('navigator.serviceWorker.controller!==null',timeout=60000)
     if page.evaluate(SOURCE_HASH)!=seed['sourceHash']:raise ValueError('Exact fixture source differs after load/conversion')
     context.close() # Stop browser process, retain this synthetic profile only.
     context=launch(pw,profile);context.set_offline(True)
     try:
-        page,cdp,dialogs,errors=prepare_page(context,url,cpu);cold=page.evaluate('performance.now()')
-        page.reload(timeout=600000);ready(page);warm=page.evaluate('performance.now()')
+        page,cdp,dialogs,errors=prepare_page(context,url,cpu);cold=page.evaluate('performance.now()');cold_diagnostics=startup_diagnostics(page)
+        page.reload(timeout=600000);ready(page);warm=page.evaluate('performance.now()');warm_diagnostics=startup_diagnostics(page)
         page.evaluate("document.querySelector('[data-act=start]').click()")
         page.wait_for_function("document.querySelector('[data-act=finish]')&&!document.querySelector('#app').inert",timeout=600000)
         proof=page.evaluate(PROOF);exercises=page.locator('[data-expand]').evaluate_all('bs=>bs.map(b=>b.dataset.expand)').__getitem__(slice(0,4))
@@ -148,10 +150,12 @@ def one_profile(pw,url,profile,seed,cpu,writes):
                 if a['name']=='strict-complete':continue
                 sample['stageMs'][a['name']]=b['at']-a['at']
             samples.append(sample);print(f'  write {n+1}/{writes} {sample["kind"]} native={sample["clickToStrictCompleteMs"]:.1f}ms UI={sample["fullMs"]:.1f}ms',flush=True)
+            profile.with_suffix('.measurements.json').write_text(json.dumps({'completed':False,'fixtureSourceHash':seed['sourceHash'],'samples':samples},indent=2)+'\n')
         if page.evaluate(PROOF)!=proof:raise ValueError('Original history/snapshots/archive changed')
         if errors:raise ValueError(errors)
         cdp.send('HeapProfiler.collectGarbage');retained_after=cdp.send('Runtime.getHeapUsage')
-        return {'initialReadyMs':initial,'processColdReadyMs':cold,'warmReadyMs':warm,'preserved':True,'proof':proof,'retainedBefore':retained_before,'retainedAfter':retained_after,'samples':samples}
+        result={'initialReadyMs':initial,'processColdReadyMs':cold,'warmReadyMs':warm,'startupDiagnostics':{'initial':initial_diagnostics,'processCold':cold_diagnostics,'warm':warm_diagnostics},'preserved':True,'proof':proof,'retainedBefore':retained_before,'retainedAfter':retained_after,'samples':samples}
+        profile.with_suffix('.measurements.json').write_text(json.dumps({'completed':True,**result},indent=2)+'\n');return result
     finally:context.close()
 
 def statistics(profiles):
@@ -165,6 +169,7 @@ def statistics(profiles):
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',default='4647511');p.add_argument('--after',default='working');p.add_argument('--profiles',type=int,default=3);p.add_argument('--writes',type=int,default=8);p.add_argument('--cpu',type=float,default=4);p.add_argument('--cases',nargs='+',choices=[c[0] for c in CASES]);p.add_argument('--output',type=Path,required=True);p.add_argument('--artifacts',type=Path,required=True);p.add_argument('--smoke',action='store_true');args=p.parse_args()
     if args.output.exists():p.error('Refusing to overwrite measurements; use a new output')
+    if args.profiles<1 or args.writes<1 or args.cpu<1:p.error('profiles/writes/cpu must be >= 1')
     args.artifacts.mkdir(parents=True,exist_ok=True)
     report={'syntheticOnly':True,'method':'Exact shared v1 fixture per case; initial actual conversion, process-cold and warm offline starts; actual Matrix submit -> native strict oncomplete before Promise publication. Three independent paired profiles; first four new results, next four corrections. CPU throttle is not Android emulation. Memory is sampled JS heap high-water plus post-GC retained, not an absolute process peak.','before':args.before,'after':args.after,'cpuThrottle':args.cpu,'profiles':args.profiles,'writes':args.writes,'platform':platform.platform(),'cases':{}}
     report['purpose']='harness smoke only; may run under concurrent test load; not performance evidence' if args.smoke else 'serial performance evidence'
