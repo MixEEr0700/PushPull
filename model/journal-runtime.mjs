@@ -24,12 +24,13 @@ async function addRows(tx,store,rows){
 }
 const marker=state=>({key:MARKER,protocol:2,status:'active',epoch:state.epoch});
 /** Capture per-key reads with a root CAS on completion. Hashing never holds a tx. */
-export async function reader(db,state,{signal}={}){
+export async function reader(db,state,{signal,cache=null}={}){
  validateState(state);validateAllocation(state.allocation);check(state.runtime?.version===1,'runtime index required');
  const {root,...body}=state;check(root===await hashJSON(body),'state SHA-256');
  const maps=Object.fromEntries(STORES.map(s=>[s,new Map()])),values=new Map(),pending=new Map();
  async function get(store,id){
   checkAbort(signal);if(maps[store].has(id))return maps[store].get(id);
+  if(cache?.[store]?.has(id)){const row=cache[store].get(id);maps[store].set(id,row);return row;}
   const key=indexKey(store,id);
   // Concurrent paths often share the same node/model. One owned native read,
   // one immutable proof; every use still participates in the strict tx CAS.
@@ -170,11 +171,13 @@ export async function openIndexedWriter(db,{token,guard=()=>{},signal,completeSo
    },{signal});
    // Publish only after the native strict transaction's complete event.
    state=next;source=result.source;info=result.info??info;ages=result.ages??ages;
-   r=await reader(db,state);
-   for(const {store,row} of changed)knownRows[store].set(row.id,row);
-   // Seed only proven committed rows/objects/nodes, plus previous verified input.
-   for(const {store,row} of changed)r.maps[store].set(row.id,row);
-   for(const [id,row] of objects)r.maps.journalObjects.set(id,row);for(const [id,row] of nodes)r.maps.journalIndex.set(id,row);
+   // Bounded witness cache: only this command's dependencies and final delta,
+   // not all earlier revisions. Reused immutable proofs still undergo exact
+   // native readback/CAS in every subsequent strict transaction.
+   const cache=Object.fromEntries(STORES.map(store=>[store,new Map(r.maps[store])]));
+   for(const {store,row} of changed){knownRows[store].set(row.id,row);cache[store].set(row.id,row);}
+   for(const [id,row] of objects)cache.journalObjects.set(id,row);for(const [id,row] of nodes)cache.journalIndex.set(id,row);
+   r=await reader(db,state,{cache});
    return freeze({...result.ack,epoch:state.epoch,revision:state.revision});
   }finally{busy=false}
  }

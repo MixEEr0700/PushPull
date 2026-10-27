@@ -101,3 +101,17 @@ class RuntimeIndex(BrowserHarness):
          }finally{db.close()}
         }""")
         self.assertTrue(all(result.values()),result)
+
+    def test_reused_immutable_snapshot_proof_still_checks_native_bytes_in_every_strict_cas(self):
+        self.prepare()
+        result=self.page.evaluate("""async()=>{
+         const a=await import('./model/journal-idb.mjs'),p=await import('./model/performance.mjs'),db=await a.connectV2('pushpull'),entry=structuredClone(__fastDB.value.entries.find(e=>e.performance));
+         entry.performance.rows[0].segments[0].kg='46';entry.series=p.flatten(entry.performance);entry.kg=entry.series[0].kg;
+         await __fastDB.saveResult({entry,sessionId:entry.sessionId,exerciseId:entry.exerciseId,...__fastDB.resultContext(entry.sessionId,entry.exerciseId)});
+         const b=await a.readRecords(db),snapshot=b.records.journalSnapshots.find(s=>s.id===entry.journalSnapshotId),id=snapshot.fields.find(([key])=>key==='model')[1],object=b.records.journalObjects.find(r=>r.id===id);
+         await a.transact(db,['journalObjects'],'readwrite',tx=>tx.objectStore('journalObjects').put({...object,json:object.json+' '}));const before=await a.readRecords(db),value=__fastDB.value;
+         entry.performance.rows[0].segments[0].kg='47';entry.series=p.flatten(entry.performance);entry.kg=entry.series[0].kg;
+         let rejected=false;try{await __fastDB.saveResult({entry,sessionId:entry.sessionId,exerciseId:entry.exerciseId,...__fastDB.resultContext(entry.sessionId,entry.exerciseId)})}catch(e){rejected=/CAS|object/.test(e.message)}
+         const unchanged=a.same(before,await a.readRecords(db)),memory=a.same(value,__fastDB.value);db.close();return {rejected,unchanged,memory};
+        }""")
+        self.assertTrue(all(result.values()),result)

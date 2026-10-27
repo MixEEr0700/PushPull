@@ -28,6 +28,7 @@ export const LIMITS=Object.freeze({objectBytes:128*1024*1024,totalBytes:512*1024
 const verifiedBundles=new WeakMap();
 const trainingBundles=new WeakMap();
 const checkpointDigests=new WeakMap();
+const verifiedObjects=new WeakMap();
 async function checkpointDigest(checkpoint,maxBytes=LIMITS.totalBytes){
  checkpoint=protocolInput(checkpoint);
  if(!checkpointDigests.has(checkpoint)){
@@ -47,10 +48,13 @@ export async function objectRecord(value,limits=LIMITS){
  return freeze({id:await shaBytes(bytes),json,bytes:bytes.length});
 }
 export async function readObject(row,limits=LIMITS){
- portable(row);row=freeze({...row}); // Primitive JSON text/ID/length are detached before SHA awaits.
+ portable(row);
+ const proven=verifiedObjects.get(row);
+ if(verifiedObjects.has(row)){check(row.bytes<=limits.objectBytes,'object size');return proven;}
+ row=Object.isFrozen(row)?row:freeze({...row}); // Detach mutable rows before SHA awaits.
  check(row&&Object.keys(row).join(',')==='id,json,bytes'&&typeof row.json==='string','object shape');
  check(Number.isSafeInteger(row.bytes)&&row.bytes<=limits.objectBytes,'object size');const bytes=encodedJSON(row.json,limits.objectBytes);check(row.bytes===bytes.length,'object size');
- check(row.id===await shaBytes(bytes),'object SHA-256');const value=parseJson(row.json);portable(value);return freeze(value);
+ check(row.id===await shaBytes(bytes),'object SHA-256');const value=parseJson(row.json);portable(value);const owned=freeze(value);verifiedObjects.set(row,owned);return owned;
 }
 export function validateState(state){
  if(state?.runtime)check(Object.keys(state.runtime).join(',')==='version,indexRoot,sourceRoot'&&state.runtime.version===1&&state.runtime.sourceRoot===state.indexRoot&&/^[a-f0-9]{64}$/.test(state.runtime.indexRoot),'runtime index version/root');
