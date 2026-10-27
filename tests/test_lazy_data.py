@@ -31,6 +31,7 @@ class LazyData(BrowserHarness):
         self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
         self.page.locator('[data-tab=settings]').click();expect(self.page.locator('h1')).to_have_text('Dane i kopia zapasowa')
         downloads=[];self.page.on('download',lambda d:downloads.append(d))
+        self.advanced_data()
         for selector in ('[data-act=export]','[data-export-v4]','[data-export-v5]','[data-drive-action=upload]','[data-load-backups]'):
             self.page.locator(selector).click();expect(self.page.locator('[data-full-audit]')).to_have_count(0,timeout=60000)
         self.assertFalse(downloads)
@@ -50,7 +51,7 @@ class LazyData(BrowserHarness):
 
     def test_explicit_backup_listing_and_export_preserve_complete_source(self):
         self.prepare();self.page.locator('[data-tab=settings]').click()
-        self.page.locator('[data-load-backups]').click();expect(self.page.locator('[data-backup-export]')).to_be_visible(timeout=60000)
+        self.advanced_data();self.page.locator('[data-load-backups]').click();expect(self.page.locator('[data-backup-export]')).to_be_visible(timeout=60000)
         self.assertFalse(self.page.evaluate('__fastDB.archivesDeferred'))
         with self.page.expect_download() as item:self.page.locator('[data-act=export]').click()
         import json
@@ -83,7 +84,7 @@ class LazyData(BrowserHarness):
         mock=test_drive_sync.MockGoogle();mock.install(self.context)
         self.prepare();self.page.locator('[data-tab=settings]').click()
         self.page.evaluate("""()=>{const original=__fastDB.writeDriveState;let first=true;__fastDB.writeDriveState=async(...args)=>{if(first){first=false;await new Promise(r=>window.__releaseConfig=r)}return original(...args)}}""")
-        self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
+        self.advanced_data();self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
         self.page.locator('#driveConfig button').click();self.page.wait_for_function('!!window.__releaseConfig')
         self.page.locator('[data-drive-action=connect]').click()

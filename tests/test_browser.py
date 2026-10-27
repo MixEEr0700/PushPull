@@ -60,6 +60,7 @@ class QuietServer(http.server.SimpleHTTPRequestHandler):
 
 class BrowserHarness(unittest.TestCase):
     legacy_backend = False
+    mock_clock = True
     @classmethod
     def setUpClass(cls):
         handler=QuietServer
@@ -99,7 +100,8 @@ class BrowserHarness(unittest.TestCase):
         self.page.on('dialog', self.dialog)
         self.errors = []
         self.page.on('pageerror', lambda error: self.errors.append(str(error)))
-        self.page.clock.install(time=datetime.datetime(2026, 10, 21, 10, 0, tzinfo=datetime.timezone.utc))
+        if self.mock_clock:
+            self.page.clock.install(time=datetime.datetime(2026, 10, 21, 10, 0, tzinfo=datetime.timezone.utc))
         self.page.goto(self.url)
 
     def tearDown(self):
@@ -154,6 +156,13 @@ class BrowserHarness(unittest.TestCase):
         self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':content.encode()})
         self.page.wait_for_function("document.querySelector('[data-restore-preview],[data-restore-error]')",timeout=60000)
         if self.page.locator('[data-restore-confirm]').count():confirm_restore(self.page)
+
+    def advanced_data(self,page=None):
+        p=page or self.page
+        drawer=p.locator('[data-backup-advanced]')
+        if drawer.count() and not drawer.evaluate('(e)=>e.open'):
+            drawer.locator(':scope > summary').click()
+        if drawer.count():expect(drawer).to_have_attribute('open','')
 
     def settings(self):
         self.page.locator('[data-tab=settings]').click()
@@ -241,7 +250,7 @@ class BrowserRegression(BrowserHarness):
         self.settings()
         expect(self.page.locator('#backupKey option')).to_have_count(1)
         with self.page.expect_download() as backup:
-            self.page.locator('[data-backup-export]').click()
+            self.advanced_data();self.page.locator('[data-backup-export]').click()
         backup_raw=Path(backup.value.path()).read_text()
         self.assertEqual(json.loads(backup_raw)['data'],json.loads(original))
         self.import_data(backup_raw)

@@ -14,7 +14,8 @@ class JournalFlow(BrowserHarness):
     def settings(self):
         self.page.locator('[data-tab=settings]').click()
         expect(self.page.locator('h1')).to_have_text('Dane i kopia zapasowa')
-        if self.page.locator('[data-enable-journal]').count():self.page.locator('details').filter(has=self.page.locator('[data-enable-journal]')).locator('summary').click()
+        self.advanced_data()
+        if self.page.locator('[data-enable-journal]').count():self.page.locator('[data-journal-advanced] > summary').click()
 
     def enable(self):
         self.prepare();self.ready()
@@ -48,6 +49,7 @@ class JournalFlow(BrowserHarness):
         from test_plan_import import PlanImport
         self.prepare();self.ready();before=self.state();records=self.records()
         self.page.locator('[data-tab=settings]').click()
+        self.advanced_data()
         section=self.page.locator('[data-journal-advanced]');button=section.locator('[data-enable-journal]')
         expect(section.locator('summary')).to_have_text('Opcje zaawansowane')
         expect(section).not_to_have_attribute('open','');expect(button).to_be_hidden()

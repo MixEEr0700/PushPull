@@ -24,7 +24,7 @@ class BackupV5Preview(BrowserHarness):
         before=self.records()
         text=self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const source=d.export();source.archives.push({id:'c1-large',kind:'opaque',createdAt:'2026-10-24T00:00:00.000Z',raw:'x'.repeat(4*1024*1024)+'\\ud800'});return (await(await import('./model/backup-v5.mjs')).exportBackupV5(source,{createdAt:'2026-10-24T00:00:00.000Z'})).text}finally{d.close()}}""")
         self.page.evaluate('navigator.serviceWorker.ready');self.page.wait_for_function('navigator.serviceWorker.controller!==null')
-        self.context.set_offline(True);self.page.reload();self.page.locator('[data-tab=settings]').click()
+        self.context.set_offline(True);self.page.reload();self.page.locator('[data-tab=settings]').click();self.advanced_data()
         self.page.locator('[data-preview-v5]').set_input_files({'name':'v5.json','mimeType':'application/json','buffer':text.encode()})
         expect(self.page.locator('[data-v5-preview]')).to_contain_text('Szkice nie są zawarte',timeout=120000)
         expect(self.page.locator('[data-v5-trial]')).to_contain_text('pełna zgodność')
@@ -55,3 +55,17 @@ class BackupV5Preview(BrowserHarness):
             report=page.evaluate("async()=>preview.previewBackupV5(new Blob([copy]))")
             self.assertTrue(report['trialEqual']);self.assertGreater(report['archives'],0)
         finally:context.close();browser.close()
+
+    def test_advanced_open_and_file_selection_in_one_turn_keep_preview_and_cancel_visible(self):
+        expect(self.page.locator('[data-act=start]')).to_be_visible()
+        raw=self.page.evaluate("""async()=>{const h=await PushPullDB.open(()=>{});try{return (await(await import('./model/backup-v5.mjs')).exportBackupV5(h.export(),{createdAt:'2026-10-24T00:00:00.000Z'})).text}finally{h.close()}}""")
+        before=self.records();self.page.locator('[data-tab=settings]').click()
+        # details.toggle is queued. A File selection may render before it runs.
+        # Reproduce that ordering in one task instead of adding timing sleeps.
+        self.page.evaluate("""raw=>{const drawer=document.querySelector('[data-backup-advanced]');drawer.open=true;const input=drawer.querySelector('[data-preview-v5]'),transfer=new DataTransfer();transfer.items.add(new File([raw],'v5.json',{type:'application/json'}));input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}))}""",raw)
+        expect(self.page.locator('[data-backup-advanced]')).to_have_attribute('open','')
+        expect(self.page.locator('[data-v5-preview]')).to_be_visible(timeout=120000)
+        expect(self.page.locator('[data-v5-cancel]')).to_be_visible()
+        self.page.locator('[data-v5-cancel]').click()
+        expect(self.page.locator('[data-v5-preview]')).to_have_count(0)
+        self.assertEqual(self.records(),before)
