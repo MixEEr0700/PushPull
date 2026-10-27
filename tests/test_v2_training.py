@@ -67,8 +67,9 @@ class V2Training(BrowserHarness):
         expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: 6 × 100 kg','Seria 2: 6 × 100 kg','Seria 3 · back-off: 10 × 70 kg'])
         saved=self.state();sid=saved['activeId'];entry=saved['entries'][-1]
         self.assertEqual(len(entry['performance']['rows']),3)
+        self.page.locator('[data-personal-note] > summary').click()
         self.page.locator('.v2NoteForm textarea').fill('Moja technika, nie instrukcja trenera')
-        self.page.locator('.v2NoteForm button').click()
+        self.page.locator('.v2NoteForm [type=submit]').click()
         expect(self.page.get_by_text('Notatka zapisana',exact=True)).to_be_visible()
         self.page.reload();self.ready()
         self.page.locator('[data-act=finish]').click()

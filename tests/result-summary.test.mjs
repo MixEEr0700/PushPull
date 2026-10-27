@@ -4,7 +4,7 @@ import {summary,editor,state,forget} from '../model/performance-editor.mjs';
 import {buildPlan,views,PLAN_ID} from '../model/v2-plan.mjs';
 import {newPerformance,flatten} from '../model/performance.mjs';
 const ex=views(buildPlan('summary-test'),PLAN_ID,'PULL B',{}).find(e=>e.id==='PULL-B-1');
-const text=html=>html.replace(/<[^>]*>/g,'\n').split('\n').filter(Boolean);
+const text=html=>{const rows=html.split('<span class="last-series-row">').slice(1);return rows.length?rows.map(r=>r.replace(/<[^>]*>/g,'')):[html.replace(/<[^>]*>/g,'')];};
 function result(exercise=ex){const performance=newPerformance(exercise);for(const r of performance.rows)for(const s of r.segments){s.kg='105';s.reps='15';}return {performance};}
 const lines=(e,targets=ex.targets,asSets=false)=>text(summary(e,targets,asSets));
 

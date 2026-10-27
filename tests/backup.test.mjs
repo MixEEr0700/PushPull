@@ -165,10 +165,12 @@ test('complete empty model is valid; incomplete export cannot masquerade as an e
 });
 
 test('backup modules remain inert before explicit migration and do not access storage, DOM or network',async()=>{
-  const paths=['index.html','style.css','manifest.webmanifest','icon.svg'];
+  const css=readFileSync('style.css'); // Issue43 explicitly authorizes the new visual contract.
+  const paths=['index.html','manifest.webmanifest','icon.svg'];
   for (const path of paths) assert.deepEqual(readFileSync(path),execFileSync('git',['show',`063c02b5272ebb4066d498f82faf34e7353b588c:${path}`]));
   const script=`for(const k of ['indexedDB','localStorage','document','fetch'])Object.defineProperty(globalThis,k,{get(){throw Error(k+' access');}});const b=await import('./model/backup.mjs');const p={model:null,sessionSnapshots:[],resultReferences:[],sessionRecords:[],resultRecords:[],legacySources:[]};const d=await b.createBackup(p,${JSON.stringify(options)});await b.restoreBackup(await b.previewBackup(await b.exportBackup(d)));`;
   execFileSync(process.execPath,['--input-type=module','-e',script]);
+  assert.deepEqual(readFileSync('style.css'),css);
 });
 
 
