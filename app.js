@@ -147,7 +147,7 @@ function on(event,handler){
    actions=actions.then(async()=>{
     try{
      if(pending){await feedbackFrame();if(!e.target.isConnected)return;}
-     const fullOperation=event==='click'&&e.target.closest('[data-act="export"],[data-export-v4],[data-export-v5],[data-plan-save],[data-plan-activate],[data-switch-activate],[data-enable-journal],[data-backup-export],[data-load-backups],[data-drive-action="upload"],[data-drive-action="restore"],[data-drive-action="preview"],[data-restore-confirm]')||event==='change'&&e.target.matches('#importFile');
+     const fullOperation=event==='click'&&e.target.closest('[data-act="export"],[data-export-v4],[data-export-v5],[data-plan-save],[data-backup-export],[data-load-backups],[data-drive-action="upload"],[data-drive-action="restore"],[data-drive-action="preview"],[data-restore-confirm]')||event==='change'&&e.target.matches('#importFile');
      if(fullOperation&&!recoveryError&&database.archivesDeferred&&!await requireFullData())return;
      const needsHistory=event==='submit'&&!e.target.matches('.performanceForm,.seriesResultForm,#resultForm,.historicalResultForm,.editForm')||event==='click'&&e.target.closest('[data-tab=calendar],[data-panel=history],[data-panel=stats],[data-view="weekly"],[data-view="plans"]')||event==='change'&&e.target.matches('[data-preview-v4]');
      if(needsHistory&&database.historyDeferred){await database.ensureHistory();data=database.value;}
@@ -370,6 +370,7 @@ on('click',async e=>{
   const target=overview.plans(data,planCatalog()).find(p=>p.id===id);if(!target?.canActivate)return;
   const first=target.version.units.slice().sort((a,b)=>a.order-b.order)[0];
   if(!confirm('Aktywować „'+target.label+'” dla przyszłych treningów? Rozpoczniesz nowy okres używania i wrócisz do pierwszej jednostki „'+first.name+'”. Poprzednie wyniki i statystyki tej wersji pozostają dostępne i będą kontynuowane. Pobierzemy i zachowamy pełną kopię. Rozpoczęta sesja zachowa swój plan, szkice i snapshot; historia i wyniki pozostaną bez zmian.'))return;
+  if(database.archivesDeferred&&!await requireFullData())return;
   let next;
   if(id===v2.PLAN_ID&&target.status==='available'){
    if(!data.trainingJournal){const raw=JSON.stringify(database.export(),null,2),ownerId=database.model?.model.ownerId||uid();downloadRaw(raw,'pushpull-przed-zmiana-planu.json');await database.prepareModel({backupText:raw,ownerId});next=structuredClone(data);next.trainingJournal=journal.initialize(ownerId);}
@@ -448,7 +449,7 @@ on('click',async e=>{
  }catch(error){restoreError=error.message;throw error;}finally{restoreBusy=false;render();}
 });
 // Explicit cloud operations never hold the workout event queue or local writes.
-on('submit',e=>{if(e.target.id==='driveConfig'&&drive){void drive.configure(e.target.elements.clientId.value).then(()=>{driveChoices=[];if(tab==='settings')render();}).catch(error=>drive.report(error));}});
+on('submit',async e=>{if(e.target.id==='driveConfig'&&drive){try{await drive.configure(e.target.elements.clientId.value);driveChoices=[];if(tab==='settings')render();}catch(error){drive.report(error)}}});
 on('click',e=>{const button=e.target.closest('[data-drive-action]');if(!button||!drive)return;
  const action=button.dataset.driveAction,selected=$('#driveCopy')?.value;
  if(action==='restore'||action==='preview'){v5Sequence++;v5Controller?.abort();v5Preview=null;v5Error='';v5Busy=false;}
@@ -472,6 +473,7 @@ on('click',e=>{const button=e.target.closest('[data-drive-action]');if(!button||
 on('click',async e=>{
  if(e.target.closest('[data-enable-journal]')){
   if(!confirm('Włączyć zapis z wersją planu dla przyszłych sesji? Zachowamy i pobierzemy kopię. Bieżący plan i stare treningi pozostaną bez zmian. To nie aktywuje nowego V2.'))return;
+  if(database.archivesDeferred&&!await requireFullData())return;
   const backupText=JSON.stringify(database.export(),null,2);downloadRaw(backupText,'pushpull-przed-nowym-zapisem.json');
   const ownerId=database.model?.model.ownerId||uid();await database.prepareModel({backupText,ownerId});
   journalAPI=await import('./model/journal.mjs');data.trainingJournal=journalAPI.initialize(ownerId);await persist();render();toast('Nowy zapis włączony');

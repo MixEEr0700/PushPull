@@ -68,3 +68,26 @@ class LazyData(BrowserHarness):
         expect(self.page.locator('#importFile')).to_have_value('')
         expect(self.page.locator('[data-restore-preview]')).to_have_count(0)
         self.assertFalse(self.alerts,self.alerts)
+
+    def test_declining_plan_activation_never_starts_archive_audit(self):
+        self.prepare();self.plans('v2-owner-2026-10-22')
+        self.page.evaluate("""()=>{window.__auditCalls=0;const original=__fastDB.ensureFull;__fastDB.ensureFull=()=>{__auditCalls++;return original()}}""")
+        self.confirm=False
+        with self.page.expect_event('dialog') as prompt:self.page.locator('[data-plan-activate]').click()
+        self.assertEqual(prompt.value.type,'confirm')
+        self.assertEqual(self.page.evaluate('__auditCalls'),0)
+        self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred'))
+
+    def test_connect_waits_for_durable_configuration_in_the_event_queue(self):
+        import test_drive_sync
+        mock=test_drive_sync.MockGoogle();mock.install(self.context)
+        self.prepare();self.page.locator('[data-tab=settings]').click()
+        self.page.evaluate("""()=>{const original=__fastDB.writeDriveState;let first=true;__fastDB.writeDriveState=async(...args)=>{if(first){first=false;await new Promise(r=>window.__releaseConfig=r)}return original(...args)}}""")
+        self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
+        self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
+        self.page.locator('#driveConfig button').click();self.page.wait_for_function('!!window.__releaseConfig')
+        self.page.locator('[data-drive-action=connect]').click()
+        self.assertFalse(self.page.evaluate('!!window.__requestedScope'))
+        self.page.evaluate('__releaseConfig()')
+        expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
+        self.assertFalse(self.alerts,self.alerts)

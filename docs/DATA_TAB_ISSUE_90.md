@@ -87,3 +87,24 @@ Po pomiarach poprawiono wyłącznie zakończenie anulowanej operacji: render
 resetuje wybór pliku, aby ponowne wskazanie tego samego pliku działało.
 Odtworzono błąd testem i dodano regresję. Zmiana nie dotyczy zmierzonych
 ścieżek zwykłego wejścia i nieanulowanego eksportu.
+
+## Poprawki wykryte w pełnym CI
+
+Pierwsze CI `40502697531` przeszło Node/build, lecz ujawniło błędy sekwencji
+UI. Audyt przed pytaniem o aktywację planu opóźniał samo potwierdzenie;
+kontrolowany scenariusz CPU ×4 potwierdził dwa komunikaty dla dwóch kliknięć:
+„Plan aktywny…” i zaraz potem „Ten plan jest aktywny”. Audyt przeniesiono
+za zgodę, również dla starszego włączenia wersjonowania. Odmowa nie czyta
+archiwów. Nie osłabiono asercji istniejących testów.
+
+Konfiguracja Google była zapisywana w tle, więc kliknięcie „Połącz” mogło
+wyprzedzić jej trwały zapis. Handler oczekuje teraz lokalnego zapisu
+konfiguracji przed kolejną akcją. Transport i format Drive pozostają
+niezmienione, operacje sieciowe nadal są osobnymi zadaniami.
+
+Dwie nowe regresje odtworzyły FAIL na wcześniejszym `d798194`: audyt mimo
+odmowy oraz uruchomienie OAuth przed zakończeniem konfiguracji. Poprawkę
+sprawdzono lokalnie, w tym trzy poprzednio nieudane scenariusze na CPU ×4:
+**3/3 PASS** (87,498 s). Nowych testów jest łącznie siedem. Pełny CI nowego
+SHA podano w PR. Te poprawki nie zmieniają zmierzonej ścieżki wejścia Dane
+ani zwykłego eksportu; zachowano manifest dokładnego artefaktu pomiarowego.
