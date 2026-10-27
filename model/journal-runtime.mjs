@@ -2,7 +2,7 @@
 import {freeze,portable,requireThat as check} from './backup-json.mjs';
 import {STORES,ROW_STORES,protocolInput,trainingProof,protocolBudget,materialize,objectRecord,readObject,sealState,validateState,validateAllocation,limitsFor} from './journal-protocol.mjs';
 import {hashJSON,indexKey,editIndex,checkAbort} from './journal-index.mjs';
-import {runtimeKey,lookupIndex,buildRuntime,descriptor,contextSummary,resultIds,runtimeInfo} from './journal-runtime-index.mjs';
+import {runtimeKey,lookupIndex,buildRuntime,descriptor,contextSummary,resultIds,runtimeInfo,sessionHeader} from './journal-runtime-index.mjs';
 import {transact,request,same,MARKER,readRecords} from './journal-idb.mjs';
 import * as journal from './journal.mjs';
 import {validateSessionSnapshot} from './training-model.mjs';
@@ -118,9 +118,9 @@ export async function openIndexedWriter(db,{token,guard=()=>{},signal,completeSo
     check(!await transact(db,[store],'readonly',tx=>request(tx.objectStore(store).get(id)),{signal}),'new record collision');
     const row={id,version:1,position:before.counts[store],...(store==='journalSnapshots'?{fields:await Promise.all(Object.entries(value).map(async([k,v])=>[k,await ref(v)]))}:{ref:await ref(value)})};check(Number.isSafeInteger(row.version),'record version limit');changed.push({store,row});return row;
    }
-   async function metadata(id,value){const old=await r.row('journalMetadata',id),fields=[];
-    for(const [key,slot] of old.fields)fields.push([key,slot.kind==='object'&&value[key]!==await r.object(slot.ref)?{kind:'object',ref:await ref(value[key])}:slot]);
-    const row=freeze({...old,version:old.version+1,fields});changed.push({store:'journalMetadata',row});
+   async function metadata(id,value){const old=await r.row('journalMetadata',id),fields=[],slots=new Map(old.fields);
+    for(const [key,item] of Object.entries(value)){const slot=slots.get(key);fields.push([key,!slot||slot.kind==='object'&&item!==await r.object(slot.ref)?{kind:'object',ref:await ref(item)}:slot]);}
+    const row=freeze({...old,version:old.version+1,fields});check(Number.isSafeInteger(row.version),'metadata version limit');changed.push({store:'journalMetadata',row});
    }
    async function index(parts,value){runtimeChanges.set(runtimeKey(...parts),value===undefined?null:await ref(value));}
    const result=await prepare({ref,collection,putNew,metadata,index,before});checkAbort(signal);
@@ -200,7 +200,7 @@ export async function openIndexedWriter(db,{token,guard=()=>{},signal,completeSo
    await collection('journalSessions',s);await metadata('data',d);if(d.trainingJournal)await metadata('journal',d.trainingJournal);
    const sessionEntries=await r.runtime('session',s.id),exerciseIds=new Set();for(const id of sessionEntries){const entry=await r.collection('journalResults',id);exerciseIds.add(entry.exerciseId)}
    const nextAges=new Map(ages);
-   for(const id of exerciseIds){const history=await r.runtime('history',id);check(history,'runtime history');const next=history.map(ds=>ds.session.id===s.id?{...ds,session:s}:ds),summary=contextSummary(next);await index(['history',id],next);await index(['context',id],summary);for(const [k,v] of summary.ages)nextAges.set(k,v)}
+   for(const id of exerciseIds){const history=await r.runtime('history',id);check(history,'runtime history');const next=history.map(ds=>ds.session.id===s.id?{...ds,session:sessionHeader(s)}:ds),summary=contextSummary(next);await index(['history',id],next);await index(['context',id],summary);for(const [k,v] of summary.ages)nextAges.set(k,v)}
    const nextInfo={...info,lastDone:info.lastDone&&d.sessions.find(v=>v.id===info.lastDone)?.seq>s.seq?info.lastDone:s.id};await index(['info'],nextInfo);
    return {source:freeze({...source,data:d}),info:nextInfo,ages:nextAges,ack:{session:s}};
   },options);

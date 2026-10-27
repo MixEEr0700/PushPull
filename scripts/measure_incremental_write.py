@@ -188,10 +188,18 @@ def one_profile(pw,url,profile,seed,cpu,writes):
                 sample['stageMs'][a['name']]=b['at']-a['at']
             samples.append(sample);print(f'  write {n+1}/{writes} {sample["kind"]} native={sample["clickToStrictCompleteMs"]:.1f}ms UI={sample["fullMs"]:.1f}ms',flush=True)
             profile.with_suffix('.measurements.json').write_text(json.dumps({'completed':False,'fixtureSourceHash':seed['sourceHash'],'samples':samples},indent=2)+'\n')
+        page.evaluate(r"""()=>{
+         window.__finishComplete=[];window.__finishTransaction=IDBDatabase.prototype.transaction;
+         IDBDatabase.prototype.transaction=function(...args){const tx=__finishTransaction.apply(this,args);if(tx.mode==='readwrite'&&[...tx.objectStoreNames].includes('journalState'))tx.addEventListener('complete',event=>__finishComplete.push({at:performance.now(),eventTimeStamp:event.timeStamp,durability:tx.durability}));return tx};
+         __ui.begin();document.querySelector('[data-act=finish]').click();
+        }""")
+        page.wait_for_function("document.querySelector('[data-act=start]')&&!document.querySelector('#app').inert",timeout=600000)
+        session_finish=page.evaluate('__ui.end()')
+        session_finish['nativeComplete']=page.evaluate("()=>{IDBDatabase.prototype.transaction=__finishTransaction;return __finishComplete.map(m=>({...m,clickToStrictCompleteMs:m.at-__ui.sample.start,nativeEventMs:m.eventTimeStamp-__ui.sample.start}))}")
         if page.evaluate(PROOF)!=proof:raise ValueError('Original history/snapshots/archive changed')
         if errors:raise ValueError(errors)
         cdp.send('HeapProfiler.collectGarbage');retained_after=cdp.send('Runtime.getHeapUsage')
-        result={'sessionStart':session_start,'initialReadyMs':initial,'processColdReadyMs':cold,'warmReadyMs':warm,'startupDiagnostics':{'initial':initial_diagnostics,'processCold':cold_diagnostics,'warm':warm_diagnostics},'preserved':True,'proof':proof,'retainedBefore':retained_before,'retainedAfter':retained_after,'samples':samples}
+        result={'sessionStart':session_start,'sessionFinish':session_finish,'initialReadyMs':initial,'processColdReadyMs':cold,'warmReadyMs':warm,'startupDiagnostics':{'initial':initial_diagnostics,'processCold':cold_diagnostics,'warm':warm_diagnostics},'preserved':True,'proof':proof,'retainedBefore':retained_before,'retainedAfter':retained_after,'samples':samples}
         profile.with_suffix('.measurements.json').write_text(json.dumps({'completed':True,**result},indent=2)+'\n');return result
     finally:context.close()
 

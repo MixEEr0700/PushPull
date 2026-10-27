@@ -10,10 +10,11 @@ export function resultIds(data,entry){
  const snapshot=data.trainingJournal.sessionSnapshots.find(s=>s.sessionId===entry.sessionId);
  return projectEntry({id:entry.id,sessionId:entry.sessionId,binding:'uninterpreted',payloadVersion:1,data:entry},snapshot).resultRecords.map(r=>r.id);
 }
+export const sessionHeader=s=>({id:s.id,date:s.date,seq:s.seq,status:s.status});
 export function descriptor(data,entry){
  const session=data.sessions.find(s=>s.id===entry.sessionId),snapshot=data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===entry.sessionId);
  check(session,'context session');
- return {id:entry.id,exerciseId:entry.exerciseId,variant:entry.journalVariantId??null,session,snapshotId:snapshot?.id??null,
+ return {id:entry.id,exerciseId:entry.exerciseId,variant:entry.journalVariantId??null,session:sessionHeader(session),snapshotId:snapshot?.id??null,
   selector:[entry.journalVariantId??null,snapshot?.planVersionId??null,entry.performance?.loadConvention?.unit??null,entry.performance?.loadConvention?.basis??null],measurement:comparison(data,entry)};
 }
 const order=(a,b)=>b.session.date.localeCompare(a.session.date)||b.session.seq-a.session.seq;
