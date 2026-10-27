@@ -49,7 +49,7 @@ class BackupV5Preview(BrowserHarness):
         browser=self.pw.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox','--js-flags=--max-old-space-size=128'])
         context=browser.new_context(viewport={'width':390,'height':844})
         try:
-            page=context.new_page();page.goto(self.url)
+            page=context.new_page();page.goto(self.url);expect(page.locator('[data-act=start]')).to_be_visible()
             page.evaluate("""async()=>{window.preview=await import('./model/backup-v5-preview.mjs');const d=await PushPullDB.open(()=>{});try{const source=d.export();source.archives.push({id:'synthetic',kind:'recovery',createdAt:'2026-10-24T00:00:00.000Z',raw:'x'.repeat(4*1024*1024)});window.copy=(await(await import('./model/backup-v5.mjs')).exportBackupV5(source,{createdAt:'2026-10-24T00:00:00.000Z'})).text}finally{d.close()}}""")
             context.set_offline(True)
             report=page.evaluate("async()=>preview.previewBackupV5(new Blob([copy]))")

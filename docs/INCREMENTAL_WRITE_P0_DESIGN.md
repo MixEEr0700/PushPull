@@ -1,7 +1,12 @@
 # Issue #75 — projekt zapisu przyrostowego po etapie B
 
-Status: **projekt do osobnego zatwierdzenia; nie zaimplementowano**.
-Etap B zachowuje obecny protokół i format bazy. Historia/plany właściciela są
+Status: **zatwierdzony do implementacji w Issue #82 (25.10.2026)**.
+Realizacja do osobnego przeglądu, bez automatycznego scalania: [A / PR #83](INCREMENTAL_WRITE_STAGE_A.md),
+[B / PR #84](INCREMENTAL_WRITE_STAGE_B.md), [C / integracja Matrix](INCREMENTAL_WRITE_STAGE_C.md).
+Poniższy projekt pozostaje zapisem uzasadnienia i granic zatwierdzonej zmiany;
+raporty etapów opisują implementację, weryfikację i ograniczenia.
+
+Poprzedni etap B (PR #81) zachowuje obecny protokół i format bazy. Historia/plany właściciela są
 testowe; projekt zakłada możliwość istotnej zmiany architektury. Nadal nie
 przewiduje automatycznego usuwania danych ani przebudowy interfejsu Matrix.
 

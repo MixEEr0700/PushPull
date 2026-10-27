@@ -33,6 +33,7 @@ SETUP=r"""async ({native=true,convert=true}={})=>{
 }"""
 
 class JournalWriter(BrowserHarness):
+    legacy_backend = True
     def prepare_writer(self,native=True,convert=True):
         self.page.wait_for_selector('[data-act=start]')
         return self.page.evaluate(SETUP,{'native':native,'convert':convert})

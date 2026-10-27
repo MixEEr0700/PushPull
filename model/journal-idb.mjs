@@ -1,6 +1,6 @@
 /** Issue #82 B. Explicit v2 connection, conversion and isolated strict writer. */
 import {freeze,portable,canonical,requireThat as check} from './backup-json.mjs';
-import {STORES,createProtocol,materialize,sealState,objectRecord,protocolInput,protocolBudget,limitsFor} from './journal-protocol.mjs';
+import {STORES,ROW_STORES,createProtocol,materialize,sealState,objectRecord,protocolInput,protocolBudget,limitsFor} from './journal-protocol.mjs';
 import {hashJSON,sha,indexKey,editIndex,checkAbort} from './journal-index.mjs';
 import {prepareLegacyBackup} from './legacy-backup.mjs';
 import {validateSessionSnapshot} from './training-model.mjs';
@@ -108,6 +108,45 @@ async function auditBundle(input,options={}){
   check(checkpoint.sourceHash===await sha(canonical(original)),'checkpoint source SHA-256');
  }
  const source=await materialize(bundle,options);auditedBundles.add(bundle);return source;
+}
+/** Deliberately slower full operation for start/finish, plans and explicit
+ * import/restore. A confirmed restore can quarantine a corrupt representation
+ * as exact opaque evidence; normal operations never purge immutable records. */
+export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0}={}){
+ portable(input);const source=freeze(structuredClone(input)),before=await readRecords(db,{signal});
+ check(same(before.state??null,expectedState??null),'bulk root CAS');
+ if(!recovery)await auditBundle(before,{signal});
+ if(recovery)portable(before.records); // Never lose non-JSON corruption in an opaque JSON preimage.
+ const previousRevision=Number.isSafeInteger(before.state?.revision)?before.state.revision:revision;
+ const checkpoint=recovery?{id:'recovery:'+crypto.randomUUID(),protocol:2,raw:JSON.stringify(before.records)}:null;
+ if(checkpoint)checkpoint.sha256=await sha(checkpoint.raw);
+ const bundle=await createProtocol(source,{epoch:recovery?crypto.randomUUID():before.state.epoch,revision:previousRevision+1,ownerId,modelEnabled,legacyRaw,checkpoints:recovery?[checkpoint]:before.records.journalCheckpoints,signal});
+ const anticipated={...bundle.records};
+ for(const store of ['journalObjects','journalIndex'])anticipated[store]=[...new Map([...(recovery?[]:before.records[store]),...bundle.records[store]].map(r=>[r.id,r])).values()];
+ anticipated.journalCheckpoints=recovery?[checkpoint]:before.records.journalCheckpoints;
+ check(same(await materialize({state:bundle.state,records:anticipated},{signal}),source),'bulk retained capacity/source oracle');
+ await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
+  guard();await equalRows(tx,before.records);
+  if(recovery){
+   // Explicit restore only, with the complete raw preimage kept in this same
+   // transaction. Corrupt hash-addressed records cannot stay in the active set.
+   for(const store of STORES)tx.objectStore(store).clear();
+   tx.objectStore('journalCheckpoints').add(checkpoint);await readback(tx,'journalCheckpoints',[checkpoint]);
+  }else for(const store of ROW_STORES)tx.objectStore(store).clear();
+  await addImmutable(tx,'journalObjects',bundle.records.journalObjects);await addImmutable(tx,'journalIndex',bundle.records.journalIndex);
+  for(const store of ROW_STORES)for(const row of bundle.records[store])tx.objectStore(store).add(row);
+  for(const store of ROW_STORES){
+   const actual=await request(tx.objectStore(store).getAll()),expected=bundle.records[store];
+   check(actual.length===expected.length,'bulk row count');await readback(tx,store,expected);
+  }
+  await readback(tx,'journalObjects',bundle.records.journalObjects);await readback(tx,'journalIndex',bundle.records.journalIndex);
+  tx.objectStore('journalState').put(bundle.state);await readback(tx,'journalState',[bundle.state]);
+  const marker={key:MARKER,protocol:2,status:'active',epoch:bundle.state.epoch};tx.objectStore('meta').put(marker);check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'bulk marker readback');guard();
+ },{signal});
+ try{
+  const stored=await readRecords(db,{signal});check(same(stored.state,bundle.state),'bulk restart revision');
+  check(same(await auditBundle(stored,{signal}),source),'bulk restart source');return await openWriter(db,{bundle:stored,signal,guard});
+ }catch(failure){throw Object.assign(Error('Nie potwierdzono odczytu po zapisie. Kopia sprzed operacji została zachowana. Odśwież aplikację. '+failure.message),{code:'post-complete-readback'});}
 }
 export async function openWriter(db,{bundle,signal,guard=()=>{},limits:requestedLimits}={}){
  const limits=limitsFor(requestedLimits);

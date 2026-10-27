@@ -17,6 +17,7 @@ class PixelWriteProbe(BrowserHarness):
         self.assertEqual(self.records(),before)
         self.assertEqual(self.page.evaluate('PushPullWriteProbe.samples()'),[])
         self.page.evaluate(legacy.PAUSE)
+        self.page.evaluate('()=>{window.__holdPut=IDBObjectStore.prototype.put}')
         self.page.locator('.seriesResultForm [type=submit]').click()
         self.page.wait_for_function('window.__held===true')
         self.assertEqual(self.page.evaluate('PushPullWriteProbe.samples()'),[])
@@ -27,10 +28,10 @@ class PixelWriteProbe(BrowserHarness):
         sample=samples[0];self.assertEqual(sample['status'],'complete');self.assertEqual(sample['durability'],'strict')
         self.assertGreaterEqual(sample['clickToStrictCompleteMs'],sample['transactionMs'])
         self.assertGreaterEqual(sample['uiReadyMs'],sample['clickToStrictCompleteMs'])
-        self.assertEqual(sample['statePuts'],2)
+        self.assertEqual(sample['statePuts'],1)
         self.assertEqual(set(sample)-{'kind','trigger','status','durability'}, {'preTransactionMs','transactionMs','clickToStrictCompleteMs','uiReadyMs','statePuts','modelGetMs','nativeSha'})
         self.assertTrue(sample['nativeSha']);self.assertTrue(all(set(s)=={'ms','inputBytes'} for s in sample['nativeSha']))
-        self.assertTrue(self.page.evaluate("()=>{PushPullWriteProbe.stop();const methods=[IDBDatabase.prototype.transaction,IDBObjectStore.prototype.put,IDBObjectStore.prototype.add,IDBObjectStore.prototype.get,crypto.subtle.digest];return methods[0]===__originalProbeMethods[0]&&methods[1]===__originalProbeMethods[1]&&methods[3]===__originalProbeMethods[3]&&methods[4]===__originalProbeMethods[4]&&window.PushPullWriteProbe===undefined}"))
+        self.assertTrue(self.page.evaluate("()=>{PushPullWriteProbe.stop();const methods=[IDBDatabase.prototype.transaction,IDBObjectStore.prototype.put,IDBObjectStore.prototype.add,IDBObjectStore.prototype.get,crypto.subtle.digest];return methods[0]===__originalProbeMethods[0]&&methods[1]===__holdPut&&methods[3]===__originalProbeMethods[3]&&methods[4]===__originalProbeMethods[4]&&window.PushPullWriteProbe===undefined}"))
         # PAUSE itself wraps add after installing the observer. stop() must leave
         # that later wrapper in place instead of overwriting another observer.
         self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()

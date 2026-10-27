@@ -29,7 +29,7 @@ UI_PROBE = PROBE + r"""(() => {
  const put=IDBObjectStore.prototype.put;
  IDBObjectStore.prototype.put=function(value,...args){
   const result=put.call(this,value,...args);
-  if(this.name==='meta'&&value?.key==='state'){
+  if(this.name==='meta'&&value?.key==='state'||this.name==='journalState'&&value?.id==='active'){
    const tx=this.transaction;
    tx.addEventListener('complete',()=>u.commits.push({at:performance.now(),durability:tx.durability}));
   }

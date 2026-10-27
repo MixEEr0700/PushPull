@@ -26,6 +26,7 @@ from serve_test import ReleaseHandler, make_server, verify_release
 # Historical app bytes stay at their original ref. The current release builder
 # also precaches the newly introduced, unused-by-old-app v4 support modules.
 V4_ASSETS={'model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs'}
+V4_ASSETS.update({'model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'})
 def historical_asset(ref,name):
     if name in V4_ASSETS:return (ROOT/name).read_bytes()
     return subprocess.check_output(['git','show',ref+':'+name],cwd=ROOT)
@@ -421,7 +422,11 @@ class PWADeployment(unittest.TestCase):
         raw=Path(download.value.path()).read_bytes();self.assertGreater(len(raw),16*1024*1024)
         self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value;v.exercises['PUSH A'][0].notes='newer local note protected by preimage';await d.commit(v)}finally{d.close()}}""")
         self.page.reload();self.ready();before=value();before_drafts=drafts()
-        self.controller['directory']=current_release;self.wait_update();self.reopen();self.context.set_offline(True)
+        self.controller['directory']=current_release;self.wait_update()
+        # This 16 MiB live fixture tests conversion integrity, not a 5 s startup
+        # target. Keep its existing 90 s large-operation budget and report time.
+        conversion_started=time.monotonic();self.reopen(timeout=90000);self.context.set_offline(True)
+        print('Issue82 16 MiB live v1-to-v2 conversion/reopen ms:',round((time.monotonic()-conversion_started)*1000),flush=True)
         self.assertEqual(value(),before);self.assertEqual(drafts(),before_drafts)
         self.page.locator('[data-tab=settings]').click()
         for text in ['Zapisz kopię na Google Drive','Przywróć z Google Drive','Pobierz kopię JSON','Przywróć z pliku JSON']:expect(self.page.get_by_text(text,exact=True)).to_be_visible()
@@ -461,7 +466,7 @@ class PWADeployment(unittest.TestCase):
             self.page.locator('[data-panel=result]').click();return self.page.locator('.performanceForm')
         def save(f):
             f.locator('[type=submit]').click();expect(f).to_have_count(0);expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
-        def finish():self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        def finish():self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000)
         plans();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
         with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
@@ -488,7 +493,11 @@ class PWADeployment(unittest.TestCase):
         def confirm(d):confirmations.append(d.message);d.accept()
         self.page.remove_listener('dialog',self.accept_dialog);self.page.on('dialog',confirm)
         with self.page.expect_download():self.page.locator('[data-switch-activate]').click()
-        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        # Full plan replacement retains/imports preimages; it is a bulk path,
+        # separate from the result-save timing acceptance in Issue #82.
+        bulk_started=time.monotonic()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible(timeout=60000)
+        print('Issue82 historical plan return bulk wait ms:',round((time.monotonic()-bulk_started)*1000),flush=True)
         self.page.remove_listener('dialog',confirm);self.page.on('dialog',self.accept_dialog)
         self.assertTrue(any('statystyki tej wersji pozostają dostępne i będą kontynuowane' in text for text in confirmations))
         active=value();self.assertEqual(active['entries'],before['data']['entries']);self.assertEqual(active['sessions'],before['data']['sessions'])
@@ -667,11 +676,11 @@ class PWADeployment(unittest.TestCase):
         expect(f.locator('[data-row="4"][data-field=reps]')).to_have_value('12');expect(f.locator('[data-row="5"][data-field=reps]')).to_have_value('14')
         f.locator('[type=submit]').click();expect(f).to_have_count(0)
         expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: 15 × 105 kg','Seria 2: 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg'])
-        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000)
         self.assertEqual(value()['trainingJournal']['nextUnitId'],'PUSH A') # Old PULL A must not advance this new V2 period.
         self.page.locator('[data-act=start]').click();self.ready()
         self.assertEqual(value()['sessions'][-1]['type'],'PUSH A')
-        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible();self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A')
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000);self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A')
         saved=value();self.page.locator('[data-tab=settings]').click()
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block',accept_downloads=True);self.addCleanup(other.close)
@@ -1214,3 +1223,42 @@ class PWADeployment(unittest.TestCase):
         self.page.reload();self.ready()
         self.assertEqual(self.snapshot(),before)
         self.assertTrue(self.page.evaluate('(name)=>caches.open(name).then(c=>c.match(new URL("app.js",location.href).href)).then(Boolean)',name))
+
+    def test_protocol_v1_to_v2_update_retains_native_draft_and_old_writer_fails_closed(self):
+        ref='46475114841895ad063a8eaea5054b10ef2b2094'
+        source=self.path/'pre-incremental-source'
+        for name in ASSETS:
+            target=source/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(historical_asset(ref,name))
+        template=source/'scripts/service-worker.template.js';template.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/'scripts/service-worker.template.js',template)
+        old=self.path/'pre-incremental';build(old,source);self.controller['directory']=old
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.evaluate("""async()=>{
+         const db=await PushPullDB.open(()=>{});try{
+          await db.prepareModel({backupText:JSON.stringify(db.export()),ownerId:'pwa-protocol-owner'});
+          const data=db.value,journal=await import('./model/journal.mjs'),v2=await import('./model/v2-plan.mjs');
+          data.sessions.forEach(s=>s.status='done');data.activeId=null;data.trainingJournal=journal.initialize('pwa-protocol-owner');v2.activate(data,'2026-10-25T00:00:00.000Z');
+          const session={id:'pwa-native-session',seq:100,type:'PUSH A',date:'2026-10-25',status:'active'};data.sessions.push(session);data.activeId=session.id;await journal.startSession(data,session,'2026-10-25T00:00:00.000Z');await db.commit(data);
+         }finally{db.close()}
+        }""")
+        self.page.reload();self.ready();self.page.locator('[data-expand="PUSH-A-3"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-quick=kg]').fill('23,')
+        expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        before=self.notification_state();self.assertTrue(before['drafts'])
+        new=self.next_release('protocol-v2');self.controller['directory']=new;self.wait_update()
+        self.assertEqual(self.notification_state(),before)
+        self.reopen(timeout=20000);self.assertEqual(self.notification_state(),before)
+        expect(self.page.locator('[data-draft-resume]')).to_be_visible()
+        old_code=subprocess.check_output(['git','show',ref+':indexeddb.js'],cwd=ROOT,text=True)
+        result=self.page.evaluate("""async code=>{
+         const old=new Function(code+';return PushPullDB')(),db=await old.open(()=>{throw Error('must not initialize')});try{return {error:db.error?.name,value:db.value}}finally{db.close()}
+        }""",old_code)
+        self.assertEqual(result,{'error':'VersionError','value':None});self.assertEqual(self.notification_state(),before)
+        self.context.set_offline(True);self.page.locator('[data-draft-resume]').click()
+        # Quick-fill controls are commands and have always rendered empty after
+        # restart. The unfinished values belong to the actual segment fields.
+        expect(self.page.locator('[data-row="0"][data-segment="0"][data-field=kg]')).to_have_value('23,')
+        self.page.locator('[data-quick=kg]').fill('23.5');self.page.locator('[data-quick=reps]').fill('8')
+        self.page.locator('.performanceForm [type=submit]').click();expect(self.page.locator('.performanceForm')).to_have_count(0)
+        after=self.notification_state();self.assertEqual(after['backup']['data']['sessions'],before['backup']['data']['sessions']);self.assertEqual(after['backup']['data']['trainingJournal']['sessionSnapshots'],before['backup']['data']['trainingJournal']['sessionSnapshots'])
+        self.assertEqual(after['backup']['data']['entries'][:-1],before['backup']['data']['entries']);self.assertEqual(after['drafts'],[])
+        self.page.reload();self.ready();self.assertEqual(self.notification_state(),after)

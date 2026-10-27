@@ -46,11 +46,12 @@
    if(args[0]?.key==='state'){context.history=true;context.row.statePuts++;}
    if(args[0]?.key==='training-model-v1')context.row.modelWriteMs=now()-context.row.t0;
   }
+  if(context&&this.name==='journalState'&&args[0]?.id==='active'){context.history=true;context.row.statePuts++;}
   return Reflect.apply(original.put,this,args);
  }
  function wrappedAdd(...args){
   const context=contexts.get(this.transaction);
-  if(context&&this.name==='sessions')context.history=true;
+  if(context&&['sessions','journalSessions'].includes(this.name))context.history=true;
   return Reflect.apply(original.add,this,args);
  }
  function wrappedGet(...args){

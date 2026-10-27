@@ -10,7 +10,13 @@ export function encodedJSON(text,maxBytes=Number.MAX_SAFE_INTEGER){
  // collapse onto U+FFFD under TextEncoder and defeat exact-byte addressing.
  check(wellFormed,'protocol UTF-8 JSON text');
  const encoder=new TextEncoder();if(text.length*3<=maxBytes)return encoder.encode(text);
- const buffer=new Uint8Array(maxBytes),{read,written}=encoder.encodeInto(text,buffer);check(read===text.length,'protocol JSON size');return buffer.subarray(0,written);
+ // Only near the cap, count exactly before allocating. Reserving the whole
+ // 512 MiB budget for a mostly ASCII checkpoint would waste hundreds of MiB.
+ let size=0;for(let i=0;i<text.length;i++){
+  const c=text.charCodeAt(i);if(c<0x80)size++;else if(c<0x800)size+=2;else if(c>=0xd800&&c<=0xdbff){size+=4;i++;}else size+=3;
+  check(size<=maxBytes,'protocol JSON size');
+ }
+ return encoder.encode(text);
 }
 export async function shaBytes(bytes){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');}
 export const sha=value=>shaBytes(encodedJSON(value));

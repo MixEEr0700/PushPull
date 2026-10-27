@@ -3,7 +3,7 @@ import {exportBackupV4} from './backup-v4-export.mjs';
 import {decodeBackup,V4_LIMITS} from './backup-v4.mjs';
 import {backupSummary} from './legacy-model.mjs';
 export async function exportLocalV4(database,options){
- const revision=database.revision,snapshot=database.export();
+ const revision=database.revision,snapshot=database.auditExport?await database.auditExport():database.export();
  // A pre-journal bridge can carry model metadata outside the v2 snapshot.
  const input=!snapshot.data.trainingJournal&&database.model?await database.exportModelBackup():snapshot;
  const result=await exportBackupV4(input,options);
@@ -19,7 +19,7 @@ export async function previewLocalV4(file,{signal}={}){
 }
 /** Opt-in v5 export; existing v4 and restore paths remain separate. */
 export async function exportLocalV5(database,options){
- const revision=database.revision,snapshot=database.export();
+ const revision=database.revision,snapshot=database.auditExport?await database.auditExport():database.export();
  if(!snapshot.data.trainingJournal&&database.model)throw Error('v5: starszy model bridge wymaga osobnego adaptera. Nie pominięto danych; zachowaj dotychczasową kopię v3/v4.');
  const {exportBackupV5}=await import('./backup-v5.mjs');
  const result=await exportBackupV5(snapshot,options);

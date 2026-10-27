@@ -24,18 +24,19 @@ def confirm_restore(page):
 
 class QuietServer(http.server.SimpleHTTPRequestHandler):
     upgrade_latest = False
+    runtime_ref = None
 
     def do_GET(self):
         prefix = '/upgrade/' if self.path.startswith('/upgrade/') else '/legacy/' if self.path.startswith('/legacy/') else None
         if prefix:
             asset=self.path[len(prefix):].split('?')[0] or 'index.html'
-            allowed={'index.html','app.js','storage.js','indexeddb.js','style.css','sw.js','manifest.webmanifest','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs','model/training-model.mjs','model/backup.mjs','model/backup-json.mjs','model/legacy-backup.mjs','model/legacy-model.mjs','model/v2-plan-data.mjs','model/v2-plan.mjs','model/performance.mjs','model/performance-editor.mjs','model/workout-drafts.mjs','model/journal.mjs','model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'}
+            allowed={'index.html','app.js','storage.js','indexeddb.js','style.css','sw.js','manifest.webmanifest','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs','model/training-model.mjs','model/backup.mjs','model/backup-json.mjs','model/legacy-backup.mjs','model/legacy-model.mjs','model/v2-plan-data.mjs','model/v2-plan.mjs','model/performance.mjs','model/performance-editor.mjs','model/workout-drafts.mjs','model/journal.mjs','model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'}
             if asset not in allowed:
                 self.send_error(404);return
             try:
                 if prefix=='/legacy/' or not type(self).upgrade_latest:
                     body=subprocess.check_output(['git','show','99902a22c820d228b2e6cd3cf0fb49371b1bf3ce:'+asset],cwd=ROOT,stderr=subprocess.DEVNULL)
-                else: body=(ROOT/asset).read_bytes()
+                else: body=subprocess.check_output(['git','show',self.runtime_ref+':'+asset],cwd=ROOT,stderr=subprocess.DEVNULL) if self.runtime_ref else (ROOT/asset).read_bytes()
             except (subprocess.CalledProcessError,FileNotFoundError):
                 self.send_error(404);return
             self.send_response(200)
@@ -43,15 +44,31 @@ class QuietServer(http.server.SimpleHTTPRequestHandler):
             self.send_header('Cache-Control','no-store')
             self.send_header('Content-Length',str(len(body)))
             self.end_headers();self.wfile.write(body);return
+        # Tests of the retained v1 schema/writer run the exact pre-integration
+        # release, including its hash-matched worker. Functional suites default
+        # to the current v2 application; assertions are never disabled.
+        asset=self.path.split('?')[0].lstrip('/') or 'index.html'
+        if self.runtime_ref and asset in self.legacy_assets:
+            body=subprocess.check_output(['git','show',self.runtime_ref+':'+asset],cwd=ROOT)
+            self.send_response(200);self.send_header('Content-Type',self.guess_type(asset));self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body);return
         super().do_GET()
 
     def log_message(self, *args):
         pass
 
 class BrowserHarness(unittest.TestCase):
+    legacy_backend = False
     @classmethod
     def setUpClass(cls):
-        cls.server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(QuietServer, directory=str(ROOT)))
+        handler=QuietServer
+        if cls.legacy_backend:
+            import runpy
+            ref='6002889'
+            assets=runpy.run_path(str(ROOT/'scripts/build_release.py'))['ASSETS']
+            # The v2 modules are isolated test modules, unused by that release.
+            assets={*assets,'sw.js'}-{'model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'}
+            handler=type('V1CompatibilityServer',(QuietServer,),{'runtime_ref':ref,'legacy_assets':assets})
+        cls.server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(handler, directory=str(ROOT)))
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.thread.start()
         cls.url = f'http://127.0.0.1:{cls.server.server_port}/'
@@ -250,7 +267,7 @@ class BrowserRegression(BrowserHarness):
             self.assertIn(bad,backups)
 
     def test_quota_failure_rolls_back_ui_and_memory(self):
-        self.page.evaluate("() => {const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(v){if(this.name==='sessions')throw new DOMException('Pełna pamięć','QuotaExceededError');return add.call(this,v)}}")
+        self.page.evaluate("() => {const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(v){if(this.name==='journalSessions')throw new DOMException('Pełna pamięć','QuotaExceededError');return add.call(this,v)}}")
         self.page.locator('[data-act=start]').click()
         expect(self.page.locator('[data-training-pending]')).to_have_count(0)
         expect(self.page.locator('[data-act=start]')).to_be_visible()
@@ -266,7 +283,7 @@ class BrowserRegression(BrowserHarness):
         self.page.locator('[data-main=kg]').fill('120')
         original=self.raw()
         self.settings()
-        self.page.evaluate("() => {const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(v){if(this.name==='backups')throw new DOMException('Pełna pamięć','QuotaExceededError');return add.call(this,v)}}")
+        self.page.evaluate("() => {const add=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(v){if(this.name==='journalArchives')throw new DOMException('Pełna pamięć','QuotaExceededError');return add.call(this,v)}}")
         self.import_data(original)
         self.assertEqual(self.state(),json.loads(original))
         self.assertIn('Operacja przerwana',self.alerts[0])

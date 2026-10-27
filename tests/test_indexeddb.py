@@ -14,20 +14,21 @@ RAW='  '+json.dumps(FIXTURE,ensure_ascii=False)+'\n'
 # Keep a real transaction alive until explicitly released or the page is closed.
 # Requests still execute, but transaction.oncomplete cannot occur during the loop.
 PAUSE="""() => {
- const add=IDBObjectStore.prototype.add;
- IDBObjectStore.prototype.add=function(value){
-   const result=add.call(this,value);
-   if(this.name==='sessions' && !window.__held){
+ for(const method of ['add','put']){const original=IDBObjectStore.prototype[method];
+ IDBObjectStore.prototype[method]=function(value,...args){
+   const result=original.call(this,value,...args);
+   if(['sessions','journalSessions','journalResults','journalState'].includes(this.name) && !window.__held){
      window.__held=true;window.__hold=true;window.__transaction=this.transaction;
      const store=this.transaction.objectStore('meta');
      function keep(){if(window.__hold){const r=store.get('pause');r.onsuccess=keep}}
      keep();
    }
    return result;
- };
+ };}
 }"""
 
 class IndexedDBMigration(BrowserHarness):
+    legacy_backend = True
     def prepare(self, raw=RAW, script=None, backups=None):
         self.page.goto(self.url+'tests/')
         self.page.evaluate("""async raw=>{await new Promise((resolve,reject)=>{const r=indexedDB.deleteDatabase('pushpull');r.onsuccess=resolve;r.onerror=()=>reject(r.error)});localStorage.clear();if(raw!==null)localStorage.setItem('pushpull_skeleton_v1',raw)}""",raw)

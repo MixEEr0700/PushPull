@@ -6,6 +6,7 @@ import test_v2_training as v2
 
 
 class ModelComparison(BrowserHarness):
+    legacy_backend = True
     activate=v2.V2Training.activate
     prepare=legacy.IndexedDBMigration.prepare
     ready=legacy.IndexedDBMigration.ready

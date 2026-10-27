@@ -61,7 +61,7 @@ class JournalFlow(BrowserHarness):
         with self.page.expect_download() as download:button.click()
         expect(self.page.get_by_text('Nowy zapis włączony',exact=True)).to_be_visible()
         backup=json.loads(Path(download.value.path()).read_text());self.assertEqual(backup['data'],before)
-        self.assertGreater(len(self.records()['backups']),len(records['backups']))
+        self.assertGreater(len(self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.export().archives}finally{d.close()}}')),len(records['backups']))
         initialized=self.state();self.assertEqual(initialized['sessions'],before['sessions']);self.assertEqual(initialized['entries'],before['entries'])
         self.assertEqual(initialized['trainingJournal']['sessionSnapshots'],[])
         self.assertFalse(initialized['trainingJournal'].get('activePlanVersionId'))
@@ -140,7 +140,7 @@ class JournalFlow(BrowserHarness):
         self.page.locator('[data-panel=result]').click()
         self.page.locator('[data-main=kg]').fill('100')
         self.page.locator('[data-main=reps]').fill('8')
-        self.page.evaluate("""() => {window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='meta' && v.key==='training-model-v1')throw new DOMException('Journal quota','QuotaExceededError');return window.__put.call(this,v)}}""")
+        self.page.evaluate("""() => {window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='journalState' && v.id==='active')throw new DOMException('Journal quota','QuotaExceededError');return window.__put.call(this,v)}}""")
         with self.page.expect_event('dialog'):
             self.page.locator('.seriesResultForm [type=submit]').click()
         self.assertEqual(self.state(),before)
@@ -172,7 +172,7 @@ class JournalFlow(BrowserHarness):
 
     def test_interrupted_optin_keeps_legacy_usable_and_can_be_retried(self):
         self.prepare();self.ready();self.settings()
-        self.page.evaluate("""() => {window.__alert=window.alert;window.alert=text=>{window.__optinError=text};window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='meta' && v.key==='training-model-v1')throw new DOMException('Optin quota','QuotaExceededError');return window.__put.call(this,v)}}""")
+        self.page.evaluate("""() => {window.__alert=window.alert;window.alert=text=>{window.__optinError=text};window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='journalState' && v.id==='active')throw new DOMException('Optin quota','QuotaExceededError');return window.__put.call(this,v)}}""")
         with self.page.expect_download():self.page.locator('[data-enable-journal]').click()
         self.page.wait_for_function('window.__optinError?.includes("Optin quota")')
         self.assertNotIn('trainingJournal',self.state())

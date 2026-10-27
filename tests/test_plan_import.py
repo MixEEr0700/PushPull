@@ -102,7 +102,7 @@ class PlanImport(BrowserHarness):
         self.page.locator('#planFile').set_input_files({'name':'bad.json','mimeType':'application/json','buffer':json.dumps(bad).encode()})
         expect(self.page.locator('[data-plan-error]')).to_be_visible();self.assertEqual(self.records(),before)
         self.preview()
-        self.page.evaluate("""()=>{window.__put=IDBObjectStore.prototype.put;window.__add=IDBObjectStore.prototype.add;for(const key of ['put','add']){const original=IDBObjectStore.prototype[key];IDBObjectStore.prototype[key]=function(v){if(this.name==='exercises'&&v.id==='TEST-1')this.transaction.abort();return original.call(this,v)}}}""")
+        self.page.evaluate("""()=>{window.__put=IDBObjectStore.prototype.put;window.__add=IDBObjectStore.prototype.add;for(const key of ['put','add']){const original=IDBObjectStore.prototype[key];IDBObjectStore.prototype[key]=function(v){if(this.name==='journalObjects'&&v.json?.includes('"TEST-1"'))this.transaction.abort();return original.call(this,v)}}}""")
         self.page.locator('[data-plan-save]').click();expect(self.page.locator('[data-plan-save]')).to_be_visible()
         self.assertEqual(self.state()['sessions'],legacy.FIXTURE['sessions']);self.assertNotIn('trainingJournal',self.state())
         self.page.evaluate('()=>{IDBObjectStore.prototype.put=window.__put;IDBObjectStore.prototype.add=window.__add}')

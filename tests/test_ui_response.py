@@ -78,7 +78,7 @@ class TrainingResponse(BrowserHarness):
 
     def test_quota_failure_removes_pending_feedback_and_does_not_claim_success(self):
         self.ready();before=self.state()
-        self.page.evaluate("""()=>{const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v,...args){if(this.name==='meta'&&v.key==='state')throw new DOMException('Synthetic quota','QuotaExceededError');return put.call(this,v,...args)}}""")
+        self.page.evaluate("""()=>{const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v,...args){if(this.name==='journalState'&&v.id==='active')throw new DOMException('Synthetic quota','QuotaExceededError');return put.call(this,v,...args)}}""")
         self.page.locator('[data-act=start]').click()
         expect(self.page.locator('[data-training-pending]')).to_have_count(0)
         expect(self.page.locator('[data-act=start]')).to_be_enabled()

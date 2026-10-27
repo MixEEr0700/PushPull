@@ -171,7 +171,7 @@ class V2Training(BrowserHarness):
         self.assertEqual(self.state(),before)
         expect(form.locator('[data-rich-details]')).to_be_visible()
         self.fill_rows(form)
-        self.page.evaluate("""()=>{window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='meta'&&v.key==='training-model-v1')throw new DOMException('V2 quota','QuotaExceededError');return window.__put.call(this,v)}}""")
+        self.page.evaluate("""()=>{window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='journalState'&&v.id==='active')throw new DOMException('V2 quota','QuotaExceededError');return window.__put.call(this,v)}}""")
         with self.page.expect_event('dialog'):form.locator('[type=submit]').click()
         self.assertEqual(self.state(),before)
         expect(form.locator('[data-row="0"][data-segment="0"][data-field=kg]')).to_have_value('20')

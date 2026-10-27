@@ -21,6 +21,7 @@ HOLD="""() => {
 }"""
 
 class ModelMigration(BrowserHarness):
+    legacy_backend = True
     prepare=legacy_tests.IndexedDBMigration.prepare
     ready=legacy_tests.IndexedDBMigration.ready
     records=legacy_tests.IndexedDBMigration.records
