@@ -51,3 +51,5 @@ Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budowa�
 - [Raport etapu 4](docs/STAGE_4_TEST_REPORT.md), [przekazanie](docs/CODEX_HANDOFF.md), [zasady pracy](AGENTS.md).
 
 Zachowany [poprzedni README](docs/README_BEFORE_STAGE_4.md) dokumentuje stan sprzed importu źródeł; nie opisuje aktualnych możliwości aplikacji.
+
+Etap E (Issue #88), indeksy kontekstów i przyrostowe komendy sesji: [kontrakt, bezpieczeństwo i odbiór Pixel 9](docs/FAST_START_STAGE_E_ISSUE_88.md). Zależność: niescalony PR #87, bez zmiany Matrix i formatów kopii.

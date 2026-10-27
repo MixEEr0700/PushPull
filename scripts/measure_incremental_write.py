@@ -55,6 +55,25 @@ def instrument_v2(text):
     body=body.replace('   maps.journalObjects.set(object.id,object);',"   if(window.__slowPublish){const until=performance.now()+60;while(performance.now()<until){}}\n   maps.journalObjects.set(object.id,object);",1)
     return text[:start]+body+text[end:]
 
+def instrument_runtime(text):
+    markers=[('  portable(command);const cmd=protocolInput(command);','detach-validate'),
+      ('   const primary=await editIndex(', 'index-prepare'),
+      ("   await transact(db,[...STORES,'meta'],'readwrite',async tx=>{",'transaction-open'),
+      ("    guard();check(same(await request(tx.objectStore('journalState')",'cas'),
+      ("    for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])for(const row of rows.values()){",'write-objects'),
+      ("    for(const {store,row} of changed){if(row.version===1)tx.objectStore(store).add(row);else tx.objectStore(store).put(row);}",'write-result-root'),
+      ("    for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])for(const row of rows.values())check(",'readback'),
+      ('   state=next;source=result.source;', 'publication')]
+    # Command entry marker occurs on all three command functions.
+    for target,label in markers:
+        if target not in text:raise ValueError('runtime stage marker changed: '+label)
+        indent=target[:len(target)-len(target.lstrip())]
+        injected=indent+f"window.__writeMarks?.push({{name:'{label}',at:performance.now()}});\n"
+        if label=='cas':injected+=indent+'window.__saveTx=tx;\n'
+        if label=='publication':injected+="   if(window.__slowPublish){const until=performance.now()+60;while(performance.now()<until){}}\n"
+        text=text.replace(target,injected+target)
+    return text
+
 class Server(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.split('?')[0]=='/benchmark.html':
@@ -75,6 +94,7 @@ def artifact(ref,directory):
         data=(source/name).read_bytes();hashes[name]=hashlib.sha256(data).hexdigest()
         if name=='indexeddb.js' and 'model/journal-idb.mjs' not in builder['ASSETS']:data=old_instrument(name,data.decode(),False).encode()
         if name=='model/journal-idb.mjs':data=instrument_v2(data.decode()).encode()
+        if name=='model/journal-runtime.mjs':data=instrument_runtime(data.decode()).encode()
         target=staging/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(data)
     template=staging/'scripts/service-worker.template.js';template.parent.mkdir();shutil.copyfile(source/'scripts/service-worker.template.js',template)
     release=builder['build'](directory/'site',staging)

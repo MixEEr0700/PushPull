@@ -57,8 +57,13 @@ export async function editIndex(root,read,changes,{signal}={}){
   return node(key,value,left,right);
  }
  async function insert(id,key,value){
-  const old=await get(id);if(!old)return node(key,value,null,null);
-  if(key===old.key)return node(key,value,old.left,old.right);
+  const old=await get(id);if(!old)return value===null?null:node(key,value,null,null);
+  if(key===old.key){
+   if(value!==null)return node(key,value,old.left,old.right);
+   if(!old.left)return old.right;if(!old.right)return old.left;
+   let successor=await get(old.right);while(successor.left)successor=await get(successor.left);
+   return balance(successor.key,successor.value,old.left,await insert(old.right,successor.key,null));
+  }
   return key<old.key?balance(old.key,old.value,await insert(old.left,key,value),old.right):balance(old.key,old.value,old.left,await insert(old.right,key,value));
  }
  for(const [key,value] of changes){checkAbort(signal);root=await insert(root,key,value);}

@@ -35,7 +35,7 @@ export function newPerformance(ex,previous){
 
 // Read-only card annotation. Unknown legacy contexts are not inferred from names,
 // today's plan, technique markers or a flattened summary of a structured result.
-function comparison(data,entry){
+export function comparison(data,entry){
  const snap=data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===entry.sessionId);
  if(!snap||snap.id!==entry.journalSnapshotId)return null;
  const p=snap.model.positions.find(p=>p.id===entry.journalPositionId),variant=snap.model.variants.find(v=>v.id===entry.journalVariantId);

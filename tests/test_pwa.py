@@ -26,7 +26,7 @@ from serve_test import ReleaseHandler, make_server, verify_release
 # Historical app bytes stay at their original ref. The current release builder
 # also precaches the newly introduced, unused-by-old-app v4 support modules.
 V4_ASSETS={'model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs'}
-V4_ASSETS.update({'model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'})
+V4_ASSETS.update({'model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'})
 def historical_asset(ref,name):
     if name in V4_ASSETS:return (ROOT/name).read_bytes()
     return subprocess.check_output(['git','show',ref+':'+name],cwd=ROOT)
