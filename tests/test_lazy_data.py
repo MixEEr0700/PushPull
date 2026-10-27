@@ -1,0 +1,103 @@
+"""Issue90: navigation is read-only, explicit operations retain full audit."""
+from test_browser import BrowserHarness
+import test_fast_start
+from playwright.sync_api import expect
+
+class LazyData(BrowserHarness):
+    prepare=test_fast_start.FastStart.prepare
+
+    def test_navigation_offline_sizes_and_weekly_history(self):
+        self.prepare();self.context.set_offline(True)
+        self.page.evaluate('window.__reads=[]')
+        for width in (360,390,412):
+            self.page.set_viewport_size({'width':width,'height':844})
+            self.page.locator('[data-tab=settings]').click()
+            expect(self.page.locator('h1')).to_have_text('Dane i kopia zapasowa')
+            self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred&&__fastDB.historyDeferred'))
+            self.assertEqual(self.page.evaluate('__reads.length'),0)
+            self.page.locator('[data-tab=training]').click()
+        for view,title in (('plans','Plany treningowe'),('weekly','Statystyki ogólne')):
+            self.context.set_offline(False)  # Instrumented app route is not a hash-matched SW artifact.
+            self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
+            self.context.set_offline(True)
+            self.page.locator('[data-tab=settings]').click()
+            self.page.locator('[data-view='+view+']').click()
+            expect(self.page.locator('h1')).to_have_text(title)
+            self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred&&!__fastDB.historyDeferred'))
+
+    def test_corrupt_archive_refuses_all_exports_and_drive_without_navigation_failure(self):
+        self.prepare()
+        self.page.evaluate("""async()=>{const a=await import('./model/journal-idb.mjs'),db=await a.connectV2('pushpull');try{await a.transact(db,['journalArchives','journalObjects'],'readwrite',async tx=>{const arc=await a.request(tx.objectStore('journalArchives').get('large-raw')),o=await a.request(tx.objectStore('journalObjects').get(arc.ref));tx.objectStore('journalObjects').put({...o,json:o.json+' '})})}finally{db.close()}}""")
+        self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
+        self.page.locator('[data-tab=settings]').click();expect(self.page.locator('h1')).to_have_text('Dane i kopia zapasowa')
+        downloads=[];self.page.on('download',lambda d:downloads.append(d))
+        for selector in ('[data-act=export]','[data-export-v4]','[data-export-v5]','[data-drive-action=upload]','[data-load-backups]'):
+            self.page.locator(selector).click();expect(self.page.locator('[data-full-audit]')).to_have_count(0,timeout=60000)
+        self.assertFalse(downloads)
+        self.assertGreaterEqual(len(self.alerts),5,self.alerts)
+        self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred'))
+
+    def test_cancel_before_operation_no_download_and_navigation_remains_available(self):
+        self.prepare()
+        self.page.evaluate("""()=>{const original=__fastDB.ensureFull;__fastDB.ensureFull=async()=>{await new Promise(r=>window.__releaseAudit=r);return original()}}""")
+        self.page.locator('[data-tab=settings]').click();downloads=[];self.page.on('download',lambda d:downloads.append(d))
+        self.page.locator('[data-act=export]').click();expect(self.page.locator('[data-full-audit]')).to_be_visible()
+        self.page.wait_for_function('!!window.__releaseAudit')
+        self.page.locator('[data-full-audit-cancel]').click();self.page.locator('[data-tab=training]').click()
+        expect(self.page.locator('[data-act=finish]')).to_be_visible()
+        self.page.evaluate('__releaseAudit()');expect(self.page.locator('[data-full-audit]')).to_have_count(0,timeout=60000)
+        self.assertFalse(downloads);self.assertFalse(self.alerts,self.alerts)
+
+    def test_explicit_backup_listing_and_export_preserve_complete_source(self):
+        self.prepare();self.page.locator('[data-tab=settings]').click()
+        self.page.locator('[data-load-backups]').click();expect(self.page.locator('[data-backup-export]')).to_be_visible(timeout=60000)
+        self.assertFalse(self.page.evaluate('__fastDB.archivesDeferred'))
+        with self.page.expect_download() as item:self.page.locator('[data-act=export]').click()
+        import json
+        from pathlib import Path
+        raw=Path(item.value.path()).read_text();self.assertIn('large-raw',raw)
+        self.assertFalse(self.alerts,self.alerts)
+
+    def test_cancelled_file_selection_can_be_selected_again(self):
+        self.prepare();self.page.locator('[data-tab=settings]').click()
+        self.page.evaluate("""()=>{const original=__fastDB.ensureFull;__fastDB.ensureFull=async()=>{await new Promise(r=>window.__releaseAudit=r);return original()}}""")
+        self.page.locator('#importFile').set_input_files({'name':'cancelled.json','mimeType':'application/json','buffer':b'{}'})
+        self.page.wait_for_function('!!window.__releaseAudit')
+        self.page.locator('[data-full-audit-cancel]').click();self.page.evaluate('__releaseAudit()')
+        expect(self.page.locator('[data-full-audit]')).to_have_count(0,timeout=60000)
+        expect(self.page.locator('#importFile')).to_have_value('')
+        expect(self.page.locator('[data-restore-preview]')).to_have_count(0)
+        self.assertFalse(self.alerts,self.alerts)
+
+    def test_declining_plan_activation_never_starts_archive_audit(self):
+        self.prepare();self.plans('v2-owner-2026-10-22')
+        self.page.evaluate("""()=>{window.__auditCalls=0;const original=__fastDB.ensureFull;__fastDB.ensureFull=()=>{__auditCalls++;return original()}}""")
+        self.confirm=False
+        with self.page.expect_event('dialog') as prompt:self.page.locator('[data-plan-activate]').click()
+        self.assertEqual(prompt.value.type,'confirm')
+        self.assertEqual(self.page.evaluate('__auditCalls'),0)
+        self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred'))
+
+    def test_connect_waits_for_durable_configuration_in_the_event_queue(self):
+        import test_drive_sync
+        mock=test_drive_sync.MockGoogle();mock.install(self.context)
+        self.prepare();self.page.locator('[data-tab=settings]').click()
+        self.page.evaluate("""()=>{const original=__fastDB.writeDriveState;let first=true;__fastDB.writeDriveState=async(...args)=>{if(first){first=false;await new Promise(r=>window.__releaseConfig=r)}return original(...args)}}""")
+        self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
+        self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
+        self.page.locator('#driveConfig button').click();self.page.wait_for_function('!!window.__releaseConfig')
+        self.page.locator('[data-drive-action=connect]').click()
+        self.assertFalse(self.page.evaluate('!!window.__requestedScope'))
+        self.page.evaluate('__releaseConfig()')
+        expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
+        self.assertFalse(self.alerts,self.alerts)
+
+    def test_previous_activation_success_cannot_confirm_a_pending_activation(self):
+        self.prepare();self.plans('v2-owner-2026-10-22')
+        self.page.evaluate("""()=>{const old=document.createElement('div');old.className='toast';old.textContent='Plan aktywny dla przyszłych treningów';document.body.append(old);const original=__fastDB.ensureFull;__fastDB.ensureFull=async()=>{await new Promise(r=>window.__releaseActivation=r);return original()}}""")
+        self.page.locator('[data-plan-activate]').click();self.page.wait_for_function('!!window.__releaseActivation')
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_have_count(0)
+        self.assertNotEqual(self.state()['trainingJournal']['activePlanVersionId'],'v2-owner-2026-10-22')
+        self.page.evaluate('__releaseActivation()')
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible(timeout=60000)
+        self.assertEqual(self.state()['trainingJournal']['activePlanVersionId'],'v2-owner-2026-10-22')

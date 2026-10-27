@@ -1,0 +1,4213 @@
+{
+  "syntheticOnly": true,
+  "cpuThrottle": 4,
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "repeats": 3,
+  "cases": {
+    "empty": {
+      "fixtureSHA256": "363927c3f524ddaf39b7affd77528570365abb247c051c24655ca91c48673f5a",
+      "before": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 543.4000000003725,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1046.4000000003725,
+                "ms": 34.90000000037253
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 1139.699999999255,
+                "ms": 95.10000000149012
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 1139.199999999255,
+                "ms": 177.5
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 1091.800000000745,
+                "ms": 225.89999999850988
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1411.4000000003725,
+                "ms": 40.40000000037253
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1410.5999999996275,
+                "ms": 41.20000000111759
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1455.199999999255,
+                "ms": 2
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1340.4000000003725,
+                "ms": 116.90000000037253
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 1091.699999999255,
+                "ms": 365.6000000014901
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 1462.800000000745,
+                "ms": 0.599999999627471
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 1463.4000000003725,
+                "ms": 51
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 1459.800000000745,
+                "ms": 54.59999999962747
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 1459.800000000745,
+                "ms": 54.59999999962747
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 1082.199999999255,
+                "ms": 432.2000000011176
+              },
+              {
+                "name": "app.js:render",
+                "start": 1523.5999999996275,
+                "ms": 12.200000001117587
+              }
+            ],
+            "requests": 32,
+            "heap": 11491381
+          },
+          "export": {
+            "ms": 277.09999999962747,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1605.800000000745,
+                "ms": 24.899999998509884
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1698,
+                "ms": 39
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1698,
+                "ms": 39
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1737.800000000745,
+                "ms": 0.8999999985098839
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1630.699999999255,
+                "ms": 108.10000000149012
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 1760.4000000003725,
+                "ms": 24.59999999962747
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 1745,
+                "ms": 40
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 1785.0999999996275,
+                "ms": 59.30000000074506
+              },
+              {
+                "name": "app.js:render",
+                "start": 1860.199999999255,
+                "ms": 6.300000000745058
+              }
+            ],
+            "fileBytes": 308171,
+            "sha256": "8bf4e53eacc348c5c10e7e24aa3a8151b6db344b6281aadb7fcc18e53bb7cfd2"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 563.4000000003725,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 726.0999999996275,
+                "ms": 32.09999999962747
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 826.1999999992549,
+                "ms": 93
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 825,
+                "ms": 184.59999999962747
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 769.4000000003725,
+                "ms": 240.2999999988824
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1106,
+                "ms": 40.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1105.9000000003725,
+                "ms": 40.59999999962747
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1149.7999999988824,
+                "ms": 1
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1033.699999999255,
+                "ms": 118.09999999962747
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 769.2999999988824,
+                "ms": 382.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 1156,
+                "ms": 0
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 1156,
+                "ms": 49
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 1154.2999999988824,
+                "ms": 50.70000000111759
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 1153.7999999988824,
+                "ms": 51.30000000074506
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 759,
+                "ms": 446.09999999962747
+              },
+              {
+                "name": "app.js:render",
+                "start": 1215.7999999988824,
+                "ms": 12
+              }
+            ],
+            "requests": 32,
+            "heap": 12214459
+          },
+          "export": {
+            "ms": 297.5,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1340.0999999996275,
+                "ms": 22.699999999254942
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1429.7999999988824,
+                "ms": 42.100000001490116
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1429.7999999988824,
+                "ms": 42.100000001490116
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1472.7999999988824,
+                "ms": 1.200000001117587
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1362.7999999988824,
+                "ms": 111.5
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 1503,
+                "ms": 27.5
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 1487.199999999255,
+                "ms": 43.30000000074506
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 1530.7999999988824,
+                "ms": 62.90000000037253
+              },
+              {
+                "name": "app.js:render",
+                "start": 1613.5,
+                "ms": 5.900000000372529
+              }
+            ],
+            "fileBytes": 308171,
+            "sha256": "f81d407423ee48dfe022a166606982eda9633a724bcb2ef3ea2acea56f59b57f"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 639.5,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1458.800000000745,
+                "ms": 39.59999999962747
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 1567.800000000745,
+                "ms": 115.40000000037253
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 1567,
+                "ms": 204.90000000037253
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 1509.300000000745,
+                "ms": 262.7999999988824
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1870.7000000011176,
+                "ms": 51
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1870.2000000011176,
+                "ms": 51.5
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1924,
+                "ms": 0.40000000037252903
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1800.9000000003725,
+                "ms": 123.5
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 1509.300000000745,
+                "ms": 415.09999999962747
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 1925.5,
+                "ms": 0.2000000011175871
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 1925.7000000011176,
+                "ms": 79.39999999850988
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 1925,
+                "ms": 80.09999999962747
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 1925,
+                "ms": 80.09999999962747
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 1499.4000000003725,
+                "ms": 505.69999999925494
+              },
+              {
+                "name": "app.js:render",
+                "start": 2014.5999999996275,
+                "ms": 9.5
+              }
+            ],
+            "requests": 32,
+            "heap": 10144524
+          },
+          "export": {
+            "ms": 301.90000000037253,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 2110.2000000011176,
+                "ms": 27
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 2219.5,
+                "ms": 42.30000000074506
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 2219.5,
+                "ms": 42.30000000074506
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 2263.2000000011176,
+                "ms": 0.09999999962747097
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 2137.2000000011176,
+                "ms": 127
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 2285.5,
+                "ms": 29.700000001117587
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 2269.800000000745,
+                "ms": 45.40000000037253
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 2315.2000000011176,
+                "ms": 56.79999999888241
+              },
+              {
+                "name": "app.js:render",
+                "start": 2388.5999999996275,
+                "ms": 6.300000000745058
+              }
+            ],
+            "fileBytes": 308171,
+            "sha256": "dab37ffead044044bfb80f85c6263ef89a3898f31396ca5f7929da87ba9dbb9d"
+          }
+        }
+      ],
+      "after": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 50.69999999925494,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1123.3999999985099,
+                "ms": 6.600000001490116
+              }
+            ],
+            "requests": 0,
+            "heap": 5716145
+          },
+          "export": {
+            "ms": 989.5,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1217.5999999977648,
+                "ms": 31.199999999254942
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 1314.2999999970198,
+                "ms": 148.5
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 1314.2999999970198,
+                "ms": 239.5
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 1259.3999999985099,
+                "ms": 295.1000000014901
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1693.199999999255,
+                "ms": 37.599999997764826
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1693.0999999977648,
+                "ms": 37.80000000074506
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1732.7999999970198,
+                "ms": 1.300000000745058
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1586.5999999977648,
+                "ms": 147.5
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 1259.199999999255,
+                "ms": 474.8999999985099
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 1738.699999999255,
+                "ms": 0.19999999925494194
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 1738.8999999985099,
+                "ms": 38.899999998509884
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 1737.199999999255,
+                "ms": 40.599999997764826
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 1736.8999999985099,
+                "ms": 40.899999998509884
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 1249.7999999970198,
+                "ms": 528
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1784.5999999977648,
+                "ms": 35.600000001490116
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1909.0999999977648,
+                "ms": 78.80000000074506
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1909.0999999977648,
+                "ms": 78.80000000074506
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1990,
+                "ms": 0.09999999776482582
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1820.199999999255,
+                "ms": 169.89999999850988
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 2016.7999999970198,
+                "ms": 40.900000002235174
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 1995.5999999977648,
+                "ms": 62.100000001490116
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 2058.2999999970198,
+                "ms": 65
+              },
+              {
+                "name": "app.js:render",
+                "start": 2146.89999999851,
+                "ms": 9.800000000745058
+              }
+            ],
+            "fileBytes": 308171,
+            "sha256": "cf848fffd43b3aa9010cfdf0b7a821d97dc61bc7640354afa8a5e8cecb42e44e"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 58.5,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 911.1000000014901,
+                "ms": 6.199999999254942
+              }
+            ],
+            "requests": 0,
+            "heap": 5663556
+          },
+          "export": {
+            "ms": 1291.8999999985099,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1042,
+                "ms": 38.19999999925494
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 1155.699999999255,
+                "ms": 116
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 1154.8999999985099,
+                "ms": 229.70000000298023
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 1092.6000000014901,
+                "ms": 292.29999999701977
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1757.300000000745,
+                "ms": 59.399999998509884
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1756.6000000014901,
+                "ms": 60.099999997764826
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1819.3999999985099,
+                "ms": 1
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1600.5,
+                "ms": 220
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 1092.1000000014901,
+                "ms": 728.3999999985099
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 1831.6000000014901,
+                "ms": 0.3999999985098839
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 1832,
+                "ms": 86.19999999925494
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 1829.1000000014901,
+                "ms": 89.09999999776483
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 1829.1000000014901,
+                "ms": 89.19999999925494
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 1081.300000000745,
+                "ms": 837
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1926,
+                "ms": 30.800000000745058
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 2045.300000000745,
+                "ms": 49.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 2045.300000000745,
+                "ms": 49.5
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 2096.10000000149,
+                "ms": 0.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1956.800000000745,
+                "ms": 139.89999999850988
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 2121.5,
+                "ms": 31.300000000745058
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 2105.699999999255,
+                "ms": 47.100000001490116
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 2152.800000000745,
+                "ms": 102.69999999925494
+              },
+              {
+                "name": "app.js:render",
+                "start": 2276,
+                "ms": 8.699999999254942
+              }
+            ],
+            "fileBytes": 308171,
+            "sha256": "d354a42fde76ee45ea7370cc6a7ba440b2ca3b77d5ab18c709444b19abedd69b"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 42.30000000074506,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 749.3000000007451,
+                "ms": 6
+              }
+            ],
+            "requests": 0,
+            "heap": 5734036
+          },
+          "export": {
+            "ms": 907.6000000014901,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 866.3999999985099,
+                "ms": 31.300000000745058
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 971.6999999992549,
+                "ms": 128.30000000074506
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 970.6999999992549,
+                "ms": 213.90000000223517
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 912.5,
+                "ms": 272.19999999925494
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1287.199999999255,
+                "ms": 47.100000001490116
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1287.199999999255,
+                "ms": 47.100000001490116
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1336.3999999985099,
+                "ms": 2.100000001490116
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1217.699999999255,
+                "ms": 120.90000000223517
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 912.3000000007451,
+                "ms": 426.30000000074506
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 1343.6000000014901,
+                "ms": 0.09999999776482582
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 1343.699999999255,
+                "ms": 39.900000002235174
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 1341.300000000745,
+                "ms": 42.30000000074506
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 1341.199999999255,
+                "ms": 42.5
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 899.1000000014901,
+                "ms": 484.5999999977648
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1391.3999999985099,
+                "ms": 26.800000000745058
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 1491.800000000745,
+                "ms": 64
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 1491.800000000745,
+                "ms": 64
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 1557.8999999985099,
+                "ms": 0
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 1418.199999999255,
+                "ms": 139.80000000074506
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 1576.199999999255,
+                "ms": 44.69999999925494
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 1560.199999999255,
+                "ms": 60.69999999925494
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 1621,
+                "ms": 67.5
+              },
+              {
+                "name": "app.js:render",
+                "start": 1710.800000000745,
+                "ms": 9.599999997764826
+              }
+            ],
+            "fileBytes": 308171,
+            "sha256": "6e10120afbbcddff20a65027908361e1ebdd3036cf99dd6b19bdbb8623bfbc9e"
+          }
+        }
+      ]
+    },
+    "history40-raw4": {
+      "fixtureSHA256": "04397db19db0ef0ed66571126f6533d5bb6e3a53ef55181235c9a3a713f4fef2",
+      "before": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 14273.60000000149,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1421,
+                "ms": 986.5
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 3511.800000000745,
+                "ms": 3304.9000000003725
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 3511.7000000011176,
+                "ms": 6448.5999999996275
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2666.7000000011176,
+                "ms": 7321.799999998882
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 14591.10000000149,
+                "ms": 220.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 14591,
+                "ms": 220.60000000149012
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 14819.800000000745,
+                "ms": 285.09999999962747
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 11211.5,
+                "ms": 3894.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2666.2000000011176,
+                "ms": 12439.599999999627
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 15112.900000000373,
+                "ms": 0.2000000011175871
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 15113.10000000149,
+                "ms": 485.3999999985099
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 15110.900000000373,
+                "ms": 487.59999999962747
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 15110.900000000373,
+                "ms": 488.80000000074506
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2408.800000000745,
+                "ms": 13190.900000000373
+              },
+              {
+                "name": "app.js:render",
+                "start": 15629.300000000745,
+                "ms": 12.699999999254942
+              }
+            ],
+            "requests": 277,
+            "heap": 203064668
+          },
+          "export": {
+            "ms": 9812.400000000373,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 15716.800000000745,
+                "ms": 651.5999999996275
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 19731.700000001118,
+                "ms": 237.09999999962747
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 19731.700000001118,
+                "ms": 237.09999999962747
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 19971.400000000373,
+                "ms": 212.30000000074506
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 16368.900000000373,
+                "ms": 3815.2000000011176
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 20590.700000001118,
+                "ms": 1362.5999999996275
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 20194,
+                "ms": 1759.300000000745
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 21954.200000001118,
+                "ms": 2743.199999999255
+              },
+              {
+                "name": "app.js:render",
+                "start": 25508.10000000149,
+                "ms": 9.199999999254942
+              }
+            ],
+            "fileBytes": 18216939,
+            "sha256": "b31fa6ca2cdc5c325926017ecc9f1bd6eab97ad81c1d6c3cfb3f3d913a297521"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 14108.400000000373,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1729,
+                "ms": 980.4000000003725
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 4366.300000000745,
+                "ms": 3165.5
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 4366.0999999996275,
+                "ms": 5864
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 3047.5,
+                "ms": 7206.5
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 14534.400000000373,
+                "ms": 230.69999999925494
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 14533.700000001118,
+                "ms": 231.5
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 14779.599999999627,
+                "ms": 235.40000000037253
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 11754.900000000373,
+                "ms": 3260.199999999255
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 3046.7000000011176,
+                "ms": 11968.39999999851
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 15022.700000001118,
+                "ms": 0.8999999985098839
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 15023.599999999627,
+                "ms": 688.8000000007451
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 15020.900000000373,
+                "ms": 691.5999999996275
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 15020,
+                "ms": 693.9000000003725
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2711.5,
+                "ms": 13002.400000000373
+              },
+              {
+                "name": "app.js:render",
+                "start": 15739.900000000373,
+                "ms": 15.5
+              }
+            ],
+            "requests": 277,
+            "heap": 210600887
+          },
+          "export": {
+            "ms": 10185.700000001118,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 15950.200000001118,
+                "ms": 1181.699999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 20717.700000001118,
+                "ms": 498.2999999988824
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 20717.700000001118,
+                "ms": 498.2999999988824
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 21239,
+                "ms": 199.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 17131.900000000373,
+                "ms": 4306.5999999996275
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 21714.800000000745,
+                "ms": 1030.0999999996275
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 21454.300000000745,
+                "ms": 1290.5999999996275
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 22745,
+                "ms": 2486.800000000745
+              },
+              {
+                "name": "app.js:render",
+                "start": 26096.099999999627,
+                "ms": 7.700000001117587
+              }
+            ],
+            "fileBytes": 18216939,
+            "sha256": "c9d7de6a1d33a49c2b35285a77b54e98a090f4d6517c50cdaabf9ed0784caf58"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 15857.599999999627,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1161.5,
+                "ms": 888.5999999996275
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 3655.300000000745,
+                "ms": 3376.199999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 3654.5999999996275,
+                "ms": 6615.200000001118
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2569.9000000003725,
+                "ms": 7733.799999998882
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 15846,
+                "ms": 251.40000000037253
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 15845.900000000373,
+                "ms": 251.5
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 16104.400000000373,
+                "ms": 257.90000000037253
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 11768.099999999627,
+                "ms": 4594.9000000003725
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2569.0999999996275,
+                "ms": 13793.900000000373
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 16371.5,
+                "ms": 0.40000000037252903
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 16371.900000000373,
+                "ms": 542.1999999992549
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 16368.699999999255,
+                "ms": 545.4000000003725
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 16368.699999999255,
+                "ms": 545.6000000014901
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2052.199999999255,
+                "ms": 14862.10000000149
+              },
+              {
+                "name": "app.js:render",
+                "start": 16945.300000000745,
+                "ms": 15
+              }
+            ],
+            "requests": 277,
+            "heap": 210474915
+          },
+          "export": {
+            "ms": 9414.300000000745,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 17039.099999999627,
+                "ms": 745.9000000003725
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 21129.599999999627,
+                "ms": 402.59999999962747
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 21129.599999999627,
+                "ms": 402.59999999962747
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 21548.400000000373,
+                "ms": 188.90000000037253
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 17785.300000000745,
+                "ms": 3952.0999999996275
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 22021.5,
+                "ms": 1038.0999999996275
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 21745.300000000745,
+                "ms": 1314.7999999988824
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 23060.5,
+                "ms": 2423.199999999255
+              },
+              {
+                "name": "app.js:render",
+                "start": 26405.300000000745,
+                "ms": 1.799999998882413
+              }
+            ],
+            "fileBytes": 18216939,
+            "sha256": "5ca0da3a4ee12eb70e30c321842c97ee2fe961c4bad9290678e62096f0def3e6"
+          }
+        }
+      ],
+      "after": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 44.69999999925494,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1666.699999999255,
+                "ms": 6.599999997764826
+              }
+            ],
+            "requests": 0,
+            "heap": 8298074
+          },
+          "export": {
+            "ms": 22789.5,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1759.199999999255,
+                "ms": 794.3999999985099
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 3777.099999997765,
+                "ms": 3150.699999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 3776.39999999851,
+                "ms": 5952.60000000149
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2800,
+                "ms": 6949.199999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 13958.699999999255,
+                "ms": 213.59999999776483
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 13958.199999999255,
+                "ms": 214.09999999776483
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 14184,
+                "ms": 232.39999999850988
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 11110.89999999851,
+                "ms": 3305.60000000149
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2800,
+                "ms": 11616.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 14422.199999999255,
+                "ms": 1.0999999977648258
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 14423.29999999702,
+                "ms": 420.4000000022352
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 14420.099999997765,
+                "ms": 423.6000000014901
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 14420,
+                "ms": 424.8999999985099
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2561.5,
+                "ms": 12283.39999999851
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 14871.89999999851,
+                "ms": 772.6999999992549
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 19306.29999999702,
+                "ms": 423.70000000298023
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 19306.29999999702,
+                "ms": 424.30000000074506
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 19746.89999999851,
+                "ms": 193.60000000149012
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 15644.79999999702,
+                "ms": 4296.20000000298
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 20225.699999999255,
+                "ms": 1030.699999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 19947.79999999702,
+                "ms": 1308.6000000014901
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 21257.39999999851,
+                "ms": 2388.60000000149
+              },
+              {
+                "name": "app.js:render",
+                "start": 24461,
+                "ms": 10.699999999254942
+              }
+            ],
+            "fileBytes": 18216939,
+            "sha256": "daaf09698663982c0da1f3209da6c8d732d888f565424643ead4628ba38c934c"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 53.899999998509884,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1676.5,
+                "ms": 8.800000000745058
+              }
+            ],
+            "requests": 0,
+            "heap": 7841562
+          },
+          "export": {
+            "ms": 25023.400000002235,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1805.800000000745,
+                "ms": 1009.8999999985099
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 4176.39999999851,
+                "ms": 3323.10000000149
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 4176.300000000745,
+                "ms": 6549.39999999851
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 3172,
+                "ms": 7575.89999999851
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 15370.89999999851,
+                "ms": 225.40000000223517
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 15370.800000000745,
+                "ms": 225.59999999776483
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 15601,
+                "ms": 429.80000000074506
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 12180.5,
+                "ms": 3850.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 3172,
+                "ms": 12858.800000000745
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 16039.699999999255,
+                "ms": 0.8000000007450581
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 16040.5,
+                "ms": 795.1999999992549
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 16033.60000000149,
+                "ms": 802.0999999977648
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 16033.5,
+                "ms": 804.1000000014901
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2816.800000000745,
+                "ms": 14020.800000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 16863.39999999851,
+                "ms": 788.5
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 21054.89999999851,
+                "ms": 288.80000000074506
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 21054.89999999851,
+                "ms": 288.80000000074506
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 21346.5,
+                "ms": 231
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 17652,
+                "ms": 3926.199999999255
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 21868,
+                "ms": 1273
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 21591.89999999851,
+                "ms": 1549.1000000014901
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 23141.10000000149,
+                "ms": 2614.39999999851
+              },
+              {
+                "name": "app.js:render",
+                "start": 26652.39999999851,
+                "ms": 62.100000001490116
+              }
+            ],
+            "fileBytes": 18216939,
+            "sha256": "bade5a905fdbf719fd4bf7442cb53924382d414b1041baf2ec487bfcf144672b"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 45.19999999925494,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2045.0999999977648,
+                "ms": 8.199999999254942
+              }
+            ],
+            "requests": 0,
+            "heap": 8284685
+          },
+          "export": {
+            "ms": 24678.800000000745,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 2137.2999999970198,
+                "ms": 772.1000000014901
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 4064,
+                "ms": 2786.89999999851
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 4063.099999997765,
+                "ms": 5520.60000000149
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 3188.89999999851,
+                "ms": 6416.5
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 15333.099999997765,
+                "ms": 209.80000000074506
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 15333.099999997765,
+                "ms": 209.80000000074506
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 15546.099999997765,
+                "ms": 231.30000000074506
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 11000.099999997765,
+                "ms": 4777.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 3188.099999997765,
+                "ms": 12589.400000002235
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 15784.099999997765,
+                "ms": 0.10000000149011612
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 15784.199999999255,
+                "ms": 438.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 15782.5,
+                "ms": 440.19999999925494
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 15782.099999997765,
+                "ms": 441.69999999925494
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2913.2999999970198,
+                "ms": 13310.5
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 16250.699999999255,
+                "ms": 735.0999999977648
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 20390.39999999851,
+                "ms": 487.8999999985099
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 20390.39999999851,
+                "ms": 488
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 20914,
+                "ms": 199.39999999850988
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 16986.29999999702,
+                "ms": 4127.10000000149
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 21415.099999997765,
+                "ms": 1087.4000000022352
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 21118.5,
+                "ms": 1384
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 22502.5,
+                "ms": 2734.7999999970198
+              },
+              {
+                "name": "app.js:render",
+                "start": 26750.699999999255,
+                "ms": 2.399999998509884
+              }
+            ],
+            "fileBytes": 18216939,
+            "sha256": "2d9e091194c65bf91cd988aeab3049935214955e87b695fe53010bd1691e46b8"
+          }
+        }
+      ]
+    },
+    "history40-escaped16": {
+      "fixtureSHA256": "438fae2d14fb6b32202cd0c19187b197716da8ba85cd27546857ad940ad9fd77",
+      "before": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 24591.699999999255,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1393.9000000003725,
+                "ms": 1295.5999999996275
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 3757.4000000003725,
+                "ms": 5282.0999999996275
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 3756.699999999255,
+                "ms": 9989.5
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2946.300000000745,
+                "ms": 10927.39999999851
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 24628.5,
+                "ms": 325.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 24627.800000000745,
+                "ms": 326.19999999925494
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 24958.5,
+                "ms": 359.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 16321.099999999627,
+                "ms": 8996.900000000373
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2946.0999999996275,
+                "ms": 22372
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 25331.300000000745,
+                "ms": 3
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 25334.300000000745,
+                "ms": 554.5999999996275
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 25323.300000000745,
+                "ms": 565.5999999996275
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 25323.199999999255,
+                "ms": 566.5
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2691.199999999255,
+                "ms": 23198.5
+              },
+              {
+                "name": "app.js:render",
+                "start": 25919.599999999627,
+                "ms": 13.599999999627471
+              }
+            ],
+            "requests": 274,
+            "heap": 179552813
+          },
+          "export": {
+            "ms": 21100.300000000745,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 26005.099999999627,
+                "ms": 1220.5
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 36350.90000000037,
+                "ms": 368.90000000037253
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 36350.90000000037,
+                "ms": 368.90000000037253
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 36735.5,
+                "ms": 190.90000000037253
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 27225.599999999627,
+                "ms": 9701.200000001118
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 37593.40000000037,
+                "ms": 2471.699999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 36931.59999999963,
+                "ms": 3133.5
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 40066,
+                "ms": 5205
+              },
+              {
+                "name": "app.js:render",
+                "start": 47062.699999999255,
+                "ms": 7.400000000372529
+              }
+            ],
+            "fileBytes": 45712931,
+            "sha256": "be665b0a4a2d1ecda4a4bf49c290383d8cf835062dfedcd1d35f796a6f9e3263"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 23176.400000000373,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1092.4000000003725,
+                "ms": 1203.5999999996275
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 3362.9000000003725,
+                "ms": 5076.5
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 3362.7000000011176,
+                "ms": 9521.39999999851
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2546.0999999996275,
+                "ms": 10440.5
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 23195.099999999627,
+                "ms": 210.60000000149012
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 23194.300000000745,
+                "ms": 211.40000000037253
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 23410.200000001118,
+                "ms": 222.7999999988824
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 15251.599999999627,
+                "ms": 8381.400000000373
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2545.300000000745,
+                "ms": 21087.799999998882
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 23691.5,
+                "ms": 0.900000000372529
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 23692.400000000373,
+                "ms": 475.69999999925494
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 23638.099999999627,
+                "ms": 530
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 23638.099999999627,
+                "ms": 532
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2297.300000000745,
+                "ms": 21872.799999998882
+              },
+              {
+                "name": "app.js:render",
+                "start": 24200.700000001118,
+                "ms": 12.399999998509884
+              }
+            ],
+            "requests": 274,
+            "heap": 179465163
+          },
+          "export": {
+            "ms": 21829.099999999627,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 24285.599999999627,
+                "ms": 1365.6000000014901
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 35794.40000000037,
+                "ms": 419.19999999925494
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 35794.40000000037,
+                "ms": 419.19999999925494
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 36218.40000000037,
+                "ms": 217.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 25651.900000000373,
+                "ms": 10784
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 37167.40000000037,
+                "ms": 2579.699999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 36443.59999999963,
+                "ms": 3303.5
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 39748.09999999963,
+                "ms": 4498.60000000149
+              },
+              {
+                "name": "app.js:render",
+                "start": 46060.09999999963,
+                "ms": 7.300000000745058
+              }
+            ],
+            "fileBytes": 45712931,
+            "sha256": "b7251ba0745dbb433c21d2500df8dd7a523e6ebcac6610b421f3f6ea4bad3e38"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 23591.699999999255,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1165.5999999996275,
+                "ms": 1357
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 3630.89999999851,
+                "ms": 4906.4000000003725
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 3630,
+                "ms": 9219.099999999627
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2789.2999999988824,
+                "ms": 10168.800000000745
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 23700.599999999627,
+                "ms": 218
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 23700.5,
+                "ms": 218.19999999925494
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 23924.599999999627,
+                "ms": 217.2999999988824
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 15249.5,
+                "ms": 8892.39999999851
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2788.2999999988824,
+                "ms": 21353.599999999627
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 24150.5,
+                "ms": 1.3999999985098839
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 24151.89999999851,
+                "ms": 511.40000000037253
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 24146.699999999255,
+                "ms": 517.0999999996275
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 24146.599999999627,
+                "ms": 517.9000000003725
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2523.7999999988824,
+                "ms": 22140.700000001118
+              },
+              {
+                "name": "app.js:render",
+                "start": 24698.199999999255,
+                "ms": 10.800000000745058
+              }
+            ],
+            "requests": 274,
+            "heap": 179549180
+          },
+          "export": {
+            "ms": 22334.400000000373,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 24771.299999998882,
+                "ms": 1230.0999999996275
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 35505.59999999963,
+                "ms": 387.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 35505.59999999963,
+                "ms": 387.59999999962747
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 35898.5,
+                "ms": 251.59999999962747
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 26001.5,
+                "ms": 10149.299999998882
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 36867.199999999255,
+                "ms": 2766.5999999996275
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 36187.79999999888,
+                "ms": 3446
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 39635.09999999963,
+                "ms": 5256.5999999996275
+              },
+              {
+                "name": "app.js:render",
+                "start": 47058.5,
+                "ms": 9.399999998509884
+              }
+            ],
+            "fileBytes": 45712931,
+            "sha256": "6d6713449dcfcee757f755ea2e93a3baae50c76545c03f158696838a0a657ab9"
+          }
+        }
+      ],
+      "after": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 55.899999998509884,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1863,
+                "ms": 12
+              }
+            ],
+            "requests": 0,
+            "heap": 7837302
+          },
+          "export": {
+            "ms": 49075.5,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1996,
+                "ms": 1448.199999999255
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 4624.60000000149,
+                "ms": 6061.39999999851
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 4623.5,
+                "ms": 11998.10000000149
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 3723.5,
+                "ms": 13014.400000002235
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 27597.300000000745,
+                "ms": 213.80000000074506
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 27597.300000000745,
+                "ms": 213.80000000074506
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 27815.900000002235,
+                "ms": 236.39999999850988
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 18962.10000000149,
+                "ms": 9090.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 3723.300000000745,
+                "ms": 24329.10000000149
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 28074.800000000745,
+                "ms": 0.10000000149011612
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 28074.900000002235,
+                "ms": 495
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 28057.10000000149,
+                "ms": 512.8000000007451
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 28056.60000000149,
+                "ms": 514.5
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 3444.800000000745,
+                "ms": 25126.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 28598.10000000149,
+                "ms": 1364.5999999977648
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 39498.60000000149,
+                "ms": 309.19999999925494
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 39498.60000000149,
+                "ms": 309.19999999925494
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 39811.5,
+                "ms": 243
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 29962.699999999255,
+                "ms": 10091.800000000745
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 40719.400000002235,
+                "ms": 2744.7999999970198
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 40063.199999999255,
+                "ms": 3401
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 43464.300000000745,
+                "ms": 5278.5
+              },
+              {
+                "name": "app.js:render",
+                "start": 50967.400000002235,
+                "ms": 15.199999999254942
+              }
+            ],
+            "fileBytes": 45712931,
+            "sha256": "940bd737693387dea775cbd8004a887143ac3f39208e599e7d1aa7f948c80d13"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 38.900000002235174,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1161,
+                "ms": 6
+              }
+            ],
+            "requests": 0,
+            "heap": 7854405
+          },
+          "export": {
+            "ms": 50968.300000000745,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1276.699999999255,
+                "ms": 1377.199999999255
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 3836.699999999255,
+                "ms": 5772.199999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 3835.699999999255,
+                "ms": 11985.60000000149
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2922.699999999255,
+                "ms": 13127.10000000149
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 29082.699999999255,
+                "ms": 226.60000000149012
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 29082,
+                "ms": 227.30000000074506
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 29316,
+                "ms": 243.69999999925494
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 19576.39999999851,
+                "ms": 9983.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2921.89999999851,
+                "ms": 26637.800000000745
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 29599.800000000745,
+                "ms": 0.3999999985098839
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 29600.199999999255,
+                "ms": 495.19999999925494
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 29563.5,
+                "ms": 531.8999999985099
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 29563.099999997765,
+                "ms": 533.5
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2655.300000000745,
+                "ms": 27441.29999999702
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 30129.699999999255,
+                "ms": 1304.1000000014901
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 41436,
+                "ms": 328.80000000074506
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 41436,
+                "ms": 328.80000000074506
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 41770.699999999255,
+                "ms": 201.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 31433.800000000745,
+                "ms": 10538.5
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 42626.89999999851,
+                "ms": 2666.5
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 42010.300000000745,
+                "ms": 3283.099999997765
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 45294.199999999255,
+                "ms": 4885.800000000745
+              },
+              {
+                "name": "app.js:render",
+                "start": 52147.199999999255,
+                "ms": 10.100000001490116
+              }
+            ],
+            "fileBytes": 45712931,
+            "sha256": "672ea835a307dc3840c3693645c897c7665807c240e56ecc812731b7de15b0da"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 38.80000000074506,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1266.1000000014901,
+                "ms": 6.100000001490116
+              }
+            ],
+            "requests": 0,
+            "heap": 7981680
+          },
+          "export": {
+            "ms": 58560.5,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1347.9000000022352,
+                "ms": 1413.699999999255
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 3870,
+                "ms": 5782.20000000298
+              },
+              {
+                "name": "model/legacy-model.mjs:verifyLegacyModel",
+                "start": 3869.400000002235,
+                "ms": 11183
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 3011.10000000149,
+                "ms": 12302.10000000149
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 29843.900000002235,
+                "ms": 304.8999999985099
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 29843.800000000745,
+                "ms": 305
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 30158.800000000745,
+                "ms": 314.9000000022352
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 19456.5,
+                "ms": 11017.60000000149
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 3010.10000000149,
+                "ms": 27464
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 30541.10000000149,
+                "ms": 2.100000001490116
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 30543.20000000298,
+                "ms": 518.3999999985099
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 30480.10000000149,
+                "ms": 581.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 30480.10000000149,
+                "ms": 583.3000000007451
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2762.5,
+                "ms": 28300.900000002235
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 31092.20000000298,
+                "ms": 1171.2999999970198
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 42381.400000002235,
+                "ms": 696.6999999992549
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 42381.400000002235,
+                "ms": 696.8000000007451
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 43118,
+                "ms": 562.4000000022352
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 32263.5,
+                "ms": 11418.400000002235
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 44760,
+                "ms": 5164.800000000745
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 43700.400000002235,
+                "ms": 6225.199999999255
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 49926.800000000745,
+                "ms": 7289.300000000745
+              },
+              {
+                "name": "app.js:render",
+                "start": 59797.300000000745,
+                "ms": 13.300000000745058
+              }
+            ],
+            "fileBytes": 45712931,
+            "sha256": "486dff93e4c22088fbc679ef575b467714d43ba1db425ef5e17a612c6fd8f4dc"
+          }
+        }
+      ]
+    },
+    "history400-raw4": {
+      "fixtureSHA256": "f55358bf1212585371cee33a193ac75fe8e58fb897fcec4a628ffd4f6d53b55c",
+      "before": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 10323,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1561.9000000003725,
+                "ms": 729.7000000011176
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2447.5,
+                "ms": 34.80000000074506
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 6339.300000000745,
+                "ms": 1672
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 6339.10000000149,
+                "ms": 1672.199999999255
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 8026.800000000745,
+                "ms": 2690.300000000745
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 2487.10000000149,
+                "ms": 8230
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2447.300000000745,
+                "ms": 8269.800000000745
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 10732.700000001118,
+                "ms": 3.299999998882413
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 10736,
+                "ms": 843
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 10727.5,
+                "ms": 851.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 10727.5,
+                "ms": 853.7000000011176
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2293.10000000149,
+                "ms": 9288.099999999627
+              },
+              {
+                "name": "app.js:render",
+                "start": 11814.300000000745,
+                "ms": 13.800000000745058
+              }
+            ],
+            "requests": 298,
+            "heap": 71966960
+          },
+          "export": {
+            "ms": 50918.40000000037,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 11946.5,
+                "ms": 754.7000000011176
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 16328.5,
+                "ms": 1579.4000000003725
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 16328.5,
+                "ms": 1579.9000000003725
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 17913.60000000149,
+                "ms": 2266.699999999255
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 12701.200000001118,
+                "ms": 7479.299999998882
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 22149.5,
+                "ms": 8666.5
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 20185.10000000149,
+                "ms": 10631.099999999627
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 30818.400000000373,
+                "ms": 24168.400000000373
+              },
+              {
+                "name": "app.js:render",
+                "start": 62705,
+                "ms": 72.30000000074506
+              }
+            ],
+            "fileBytes": 141705315,
+            "sha256": "a8da98447f12f212fd5cf34d43b65275f8ddf15662586885ba0e4457fef19632"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 9872.200000001118,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1714.199999999255,
+                "ms": 796.3000000007451
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2678.5,
+                "ms": 34.59999999962747
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 6531.89999999851,
+                "ms": 1772.6000000014901
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 6531.39999999851,
+                "ms": 1773.1000000014901
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 8316.099999999627,
+                "ms": 2309.7999999988824
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 2833,
+                "ms": 7793.299999998882
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2678.5,
+                "ms": 7947.799999998882
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 10642,
+                "ms": 0.2999999988824129
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 10642.299999998882,
+                "ms": 661.7000000011176
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 10636.299999998882,
+                "ms": 667.7000000011176
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 10636.299999998882,
+                "ms": 669.7000000011176
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2512.0999999996275,
+                "ms": 8793.900000000373
+              },
+              {
+                "name": "app.js:render",
+                "start": 11524.199999999255,
+                "ms": 13.800000000745058
+              }
+            ],
+            "requests": 298,
+            "heap": 71962167
+          },
+          "export": {
+            "ms": 51737.800000000745,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 11605.199999999255,
+                "ms": 559.3000000007451
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 15268.299999998882,
+                "ms": 1721.7000000011176
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 15268.299999998882,
+                "ms": 1721.7000000011176
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 17002.39999999851,
+                "ms": 2255.7000000011176
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 12164.5,
+                "ms": 7093.699999999255
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 21176.39999999851,
+                "ms": 8777.200000001118
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 19267.39999999851,
+                "ms": 10686.300000000745
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 29954.5,
+                "ms": 25320.89999999851
+              },
+              {
+                "name": "app.js:render",
+                "start": 63299.59999999963,
+                "ms": 12
+              }
+            ],
+            "fileBytes": 141705315,
+            "sha256": "fbf6970dd5a3383114a9d9ea17d5dc8684fb71a34c39023b4e90de541ee79182"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 9668.5,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1719.699999999255,
+                "ms": 796.8000000007451
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2673.4000000003725,
+                "ms": 49.5
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 5521.199999999255,
+                "ms": 2153.60000000149
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 5520.9000000003725,
+                "ms": 2153.9000000003725
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 7688.699999999255,
+                "ms": 2609.9000000003725
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 2726.9000000003725,
+                "ms": 7571.699999999255
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2672.5,
+                "ms": 7626.0999999996275
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 10315.900000000373,
+                "ms": 1
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 10316.900000000373,
+                "ms": 764.6999999992549
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 10308.5,
+                "ms": 773.1999999992549
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 10308.199999999255,
+                "ms": 775.6000000014901
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2519.0999999996275,
+                "ms": 8564.700000001118
+              },
+              {
+                "name": "app.js:render",
+                "start": 11323.900000000373,
+                "ms": 12.699999999254942
+              }
+            ],
+            "requests": 298,
+            "heap": 71964343
+          },
+          "export": {
+            "ms": 58193.40000000037,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 11415.300000000745,
+                "ms": 612.6999999992549
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 15717,
+                "ms": 1767.4000000003725
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 15717,
+                "ms": 1768.300000000745
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 17499.599999999627,
+                "ms": 3184.5999999996275
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 12029,
+                "ms": 8655.900000000373
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 23145.199999999255,
+                "ms": 14572.200000001118
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 20691.699999999255,
+                "ms": 17025.700000001118
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 37719.300000000745,
+                "ms": 23476.699999999255
+              },
+              {
+                "name": "app.js:render",
+                "start": 69577.5,
+                "ms": 3.400000000372529
+              }
+            ],
+            "fileBytes": 141705315,
+            "sha256": "110fd039f461b454a9a6637249bcbb385cc90e258ce06b656ea5f67e7832d696"
+          }
+        }
+      ],
+      "after": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 47.69999999925494,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2276.39999999851,
+                "ms": 6.400000002235174
+              }
+            ],
+            "requests": 0,
+            "heap": 6867570
+          },
+          "export": {
+            "ms": 70497.69999999925,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 2405.10000000149,
+                "ms": 1599
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 4839.800000000745,
+                "ms": 101.80000000074506
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 9972.199999999255,
+                "ms": 1647.6000000014901
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 9971.800000000745,
+                "ms": 1648.0999999977648
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 11640.10000000149,
+                "ms": 2581.2999999970198
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 4947.199999999255,
+                "ms": 9274.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 4839.60000000149,
+                "ms": 9381.89999999851
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 14232.300000000745,
+                "ms": 0.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 14232.800000000745,
+                "ms": 709
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 14228.300000000745,
+                "ms": 713.8999999985099
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 14228.199999999255,
+                "ms": 716.1000000014901
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 4006.39999999851,
+                "ms": 10937.900000002235
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 15182.199999999255,
+                "ms": 699
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 19917.800000000745,
+                "ms": 2061.300000000745
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 19917.800000000745,
+                "ms": 2061.300000000745
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 21989.699999999255,
+                "ms": 2951.699999999255
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 15881.199999999255,
+                "ms": 9060.199999999255
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 27613.5,
+                "ms": 13883.699999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 24954.199999999255,
+                "ms": 16543
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 41498.199999999255,
+                "ms": 24595.900000002235
+              },
+              {
+                "name": "app.js:render",
+                "start": 72772.5,
+                "ms": 9.399999998509884
+              }
+            ],
+            "fileBytes": 141705315,
+            "sha256": "86eb0bfed8fe6fe04d017a48458527f0439dedb819840be9ec57cfe347f57587"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 44.399999998509884,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1696.5,
+                "ms": 6.5
+              }
+            ],
+            "requests": 0,
+            "heap": 6861513
+          },
+          "export": {
+            "ms": 56590.5,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1789.699999999255,
+                "ms": 695.3000000007451
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2649.2999999970198,
+                "ms": 22.900000002235174
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 5673.599999997765,
+                "ms": 1566.699999999255
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 5673.5,
+                "ms": 1566.8999999985099
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 7245.5,
+                "ms": 2678.599999997765
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 2677.89999999851,
+                "ms": 7246.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2649.199999999255,
+                "ms": 7275
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 9934,
+                "ms": 0.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 9934.5,
+                "ms": 594.6999999992549
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 9930.39999999851,
+                "ms": 598.8999999985099
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 9930.39999999851,
+                "ms": 601.3000000007451
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2485.89999999851,
+                "ms": 8045.800000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 10789.29999999702,
+                "ms": 906.6000000014901
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 15406.599999997765,
+                "ms": 1558.9000000022352
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 15406.599999997765,
+                "ms": 1559.6000000014901
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 16983.29999999702,
+                "ms": 2462.900000002235
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 11695.89999999851,
+                "ms": 7750.89999999851
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 21436.39999999851,
+                "ms": 8797.300000000745
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 19459.39999999851,
+                "ms": 10774.300000000745
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 30234.29999999702,
+                "ms": 20874.70000000298
+              },
+              {
+                "name": "app.js:render",
+                "start": 57822.29999999702,
+                "ms": 10.5
+              }
+            ],
+            "fileBytes": 141705315,
+            "sha256": "5e2e622aff8f9c4c592e66ae50df9f4ab7cdfdea4ac8d6715d332927766b02ec"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 46.30000000074506,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1651.300000000745,
+                "ms": 7.100000001490116
+              }
+            ],
+            "requests": 0,
+            "heap": 6857429
+          },
+          "export": {
+            "ms": 57252.300000000745,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1742.800000000745,
+                "ms": 721.6000000014901
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2655.300000000745,
+                "ms": 25.300000000745058
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 6299.900000002235,
+                "ms": 1750
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 6299.900000002235,
+                "ms": 1750
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 8055.900000002235,
+                "ms": 2784.89999999851
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 2686.900000002235,
+                "ms": 8154.699999999255
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2654.400000002235,
+                "ms": 8187.199999999255
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 10883.10000000149,
+                "ms": 0.8000000007450581
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 10883.900000002235,
+                "ms": 605.5999999977648
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 10849.400000002235,
+                "ms": 640.0999999977648
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 10849.400000002235,
+                "ms": 642.5
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2465.5,
+                "ms": 9026.400000002235
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 11752.800000000745,
+                "ms": 933.5
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 16531.10000000149,
+                "ms": 1736.800000000745
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 16531.10000000149,
+                "ms": 1736.800000000745
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 18279.699999999255,
+                "ms": 2468.60000000149
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 12686.300000000745,
+                "ms": 8062.199999999255
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 22708.300000000745,
+                "ms": 8655.199999999255
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 20756.5,
+                "ms": 10607
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 31363.699999999255,
+                "ms": 20785.60000000149
+              },
+              {
+                "name": "app.js:render",
+                "start": 58827.199999999255,
+                "ms": 37.5
+              }
+            ],
+            "fileBytes": 141705315,
+            "sha256": "b8abe2a9cd3167cdd2dfc6162964680bd0b52a674fff9fa95ede7b65a9ee890f"
+          }
+        }
+      ]
+    },
+    "history400-escaped16": {
+      "fixtureSHA256": "04372187accbbe8dbd87b37cfa43d1a920122c4b1ac07d26a5f428fa349b0e88",
+      "before": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 11680,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 2303.199999999255,
+                "ms": 1558.2000000011176
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 4192.5,
+                "ms": 34.40000000037253
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 8790.400000000373,
+                "ms": 1615
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 8790.300000000745,
+                "ms": 1615.199999999255
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 10416.300000000745,
+                "ms": 2592.89999999851
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 4240.5,
+                "ms": 8769.5
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 4192,
+                "ms": 8818
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 13075,
+                "ms": 0.19999999925494194
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 13075.199999999255,
+                "ms": 603.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 13014.199999999255,
+                "ms": 664.7000000011176
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 13014.199999999255,
+                "ms": 666.6000000014901
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 3863.699999999255,
+                "ms": 9817.5
+              },
+              {
+                "name": "app.js:render",
+                "start": 13922,
+                "ms": 11.599999999627471
+              }
+            ],
+            "requests": 298,
+            "heap": 222980595
+          },
+          "export": {
+            "ms": 71692.59999999963,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 14100.599999999627,
+                "ms": 1113.0999999996275
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 20155,
+                "ms": 1754
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 20154.900000000373,
+                "ms": 1755
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 21914.599999999627,
+                "ms": 3376.800000000745
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 15213.699999999255,
+                "ms": 10078.60000000149
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 28403.300000000745,
+                "ms": 17608.099999999627
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 25298.599999999627,
+                "ms": 20712.800000000745
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 46011.800000000745,
+                "ms": 30019.299999998882
+              },
+              {
+                "name": "app.js:render",
+                "start": 85569,
+                "ms": 12.199999999254942
+              }
+            ],
+            "fileBytes": 169201307,
+            "sha256": "b213403ff5f9f47461aee7f2b3f463c1114db8095b2a2e96358c214635e3f7d0"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 10464,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1706.699999999255,
+                "ms": 942.1999999992549
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2835.699999999255,
+                "ms": 11.699999999254942
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 6562.599999997765,
+                "ms": 1601.6000000014901
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 6562.599999997765,
+                "ms": 1601.6000000014901
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 8177.599999997765,
+                "ms": 2559.10000000149
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 2851.300000000745,
+                "ms": 7885.5
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2835.39999999851,
+                "ms": 7901.400000002235
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 10759.39999999851,
+                "ms": 4.400000002235174
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 10763.800000000745,
+                "ms": 1102.0999999977648
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 10752.800000000745,
+                "ms": 1113.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 10752.800000000745,
+                "ms": 1115.2999999970198
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2650,
+                "ms": 9218.099999997765
+              },
+              {
+                "name": "app.js:render",
+                "start": 12102,
+                "ms": 12.099999997764826
+              }
+            ],
+            "requests": 298,
+            "heap": 102629684
+          },
+          "export": {
+            "ms": 61463.39999999851,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 12216.89999999851,
+                "ms": 1007.5
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 17409.800000000745,
+                "ms": 1651.2999999970198
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 17409.800000000745,
+                "ms": 1651.2999999970198
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 19068.39999999851,
+                "ms": 2564.699999999255
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 13224.39999999851,
+                "ms": 8409.199999999255
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 24815.39999999851,
+                "ms": 11209.10000000149
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 21637.800000000745,
+                "ms": 14386.79999999702
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 36025.099999997765,
+                "ms": 27282.800000000745
+              },
+              {
+                "name": "app.js:render",
+                "start": 73327.39999999851,
+                "ms": 11.300000000745058
+              }
+            ],
+            "fileBytes": 169201307,
+            "sha256": "9a3c8606512fbf2ed8b7aa5e0d0d89ddf87d9ee62588d867936381518fa6d2f8"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 12411.10000000149,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1712.5999999977648,
+                "ms": 1062.1000000014901
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 3008.699999999255,
+                "ms": 11.100000001490116
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 7582.199999999255,
+                "ms": 2270.39999999851
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 7581.599999997765,
+                "ms": 2271.400000002235
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 9860,
+                "ms": 2836.099999997765
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 3025,
+                "ms": 9671.800000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 3008.599999997765,
+                "ms": 9688.20000000298
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 12710.599999997765,
+                "ms": 0.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 12711.099999997765,
+                "ms": 1043
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 12708.599999997765,
+                "ms": 1045.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 12708.599999997765,
+                "ms": 1048.1000000014901
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2776,
+                "ms": 10980.699999999255
+              },
+              {
+                "name": "app.js:render",
+                "start": 14050.89999999851,
+                "ms": 15
+              }
+            ],
+            "requests": 298,
+            "heap": 102701436
+          },
+          "export": {
+            "ms": 70034.60000000149,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 14150.099999997765,
+                "ms": 1113.300000000745
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 20437.300000000745,
+                "ms": 1846.7999999970198
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 20437.300000000745,
+                "ms": 1846.7999999970198
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 22294.199999999255,
+                "ms": 3545.10000000149
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 15263.39999999851,
+                "ms": 10575.900000002235
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 29072,
+                "ms": 15271.89999999851
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 25844.300000000745,
+                "ms": 18499.699999999255
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 44349.099999997765,
+                "ms": 30898
+              },
+              {
+                "name": "app.js:render",
+                "start": 83796.19999999925,
+                "ms": 11.199999999254942
+              }
+            ],
+            "fileBytes": 169201307,
+            "sha256": "2ccb5767bf9c75b47c9cd7ff3f33058ca2495906065292b26b6f0d836a52f01e"
+          }
+        }
+      ],
+      "after": [
+        {
+          "trial": 0,
+          "navigation": {
+            "ms": 48.30000000074506,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1710.9000000022352,
+                "ms": 13
+              }
+            ],
+            "requests": 0,
+            "heap": 7494227
+          },
+          "export": {
+            "ms": 79970.60000000149,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1802.7000000029802,
+                "ms": 955.6999999992549
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 3012.5,
+                "ms": 21.800000000745058
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 8584.10000000149,
+                "ms": 1883.800000000745
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 8583.70000000298,
+                "ms": 1884.199999999255
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 10478.20000000298,
+                "ms": 4543.89999999851
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 3039.900000002235,
+                "ms": 11983.099999997765
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 3011.900000002235,
+                "ms": 12011.099999997765
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 15037.400000002235,
+                "ms": 0.8999999985098839
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 15038.300000000745,
+                "ms": 1230.5
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 15029.400000002235,
+                "ms": 1239.3999999985099
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 15029.300000000745,
+                "ms": 1242.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2760.300000000745,
+                "ms": 13511.400000002235
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 16557.10000000149,
+                "ms": 1163.300000000745
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 22619.10000000149,
+                "ms": 1847.300000000745
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 22619,
+                "ms": 1847.4000000022352
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 24472.300000000745,
+                "ms": 2908.10000000149
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 17720.70000000298,
+                "ms": 9659.699999999255
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 30113.900000002235,
+                "ms": 13032.800000000745
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 27384.300000000745,
+                "ms": 15762.400000002235
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 43148.10000000149,
+                "ms": 28740.89999999851
+              },
+              {
+                "name": "app.js:render",
+                "start": 81686.20000000298,
+                "ms": 16.799999997019768
+              }
+            ],
+            "fileBytes": 169201307,
+            "sha256": "dc6a881ecb980ecf28544d0652c39b41498fc9cce11742367ef04e3feff0f7a9"
+          }
+        },
+        {
+          "trial": 1,
+          "navigation": {
+            "ms": 43.19999999925494,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1732.800000000745,
+                "ms": 6.399999998509884
+              }
+            ],
+            "requests": 0,
+            "heap": 7786322
+          },
+          "export": {
+            "ms": 82245.69999999925,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1828.199999999255,
+                "ms": 905.4000000022352
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 2921.60000000149,
+                "ms": 16.599999997764826
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 6940,
+                "ms": 2308.60000000149
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 6939.800000000745,
+                "ms": 2309.199999999255
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 9289.400000002235,
+                "ms": 2956.199999999255
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 2942.10000000149,
+                "ms": 9304.199999999255
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 2921.10000000149,
+                "ms": 9325.199999999255
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 12350.800000000745,
+                "ms": 7.399999998509884
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 12358.199999999255,
+                "ms": 1505.4000000022352
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 12253.10000000149,
+                "ms": 1610.5999999977648
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 12253,
+                "ms": 1616
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 2734.800000000745,
+                "ms": 11134.199999999255
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 14143.699999999255,
+                "ms": 898.8000000007451
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 20841.5,
+                "ms": 2306.10000000149
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 20841.400000002235,
+                "ms": 2306.199999999255
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 23223.400000002235,
+                "ms": 3220
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 15042.60000000149,
+                "ms": 11400.89999999851
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 28916.800000000745,
+                "ms": 18912.10000000149
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 26450.60000000149,
+                "ms": 21378.300000000745
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 47831.400000002235,
+                "ms": 26708.199999999255
+              },
+              {
+                "name": "app.js:render",
+                "start": 83871.19999999925,
+                "ms": 25
+              }
+            ],
+            "fileBytes": 169201307,
+            "sha256": "1e09dafa49f8d36bfde1717aae17fad0f49b50148652244ba2602b75f858cd60"
+          }
+        },
+        {
+          "trial": 2,
+          "navigation": {
+            "ms": 40.600000001490116,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1745.199999999255,
+                "ms": 5.899999998509884
+              }
+            ],
+            "requests": 0,
+            "heap": 6860678
+          },
+          "export": {
+            "ms": 77186.60000000149,
+            "spans": [
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 1836.5999999977648,
+                "ms": 1255.5
+              },
+              {
+                "name": "indexeddb.js:verifyEvidence",
+                "start": 3322.199999999255,
+                "ms": 26.199999999254942
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 7468.099999997765,
+                "ms": 1609.9000000022352
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 7467.5,
+                "ms": 1610.5
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 9084,
+                "ms": 2639.5
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 3354,
+                "ms": 8370.199999999255
+              },
+              {
+                "name": "model/journal-idb.mjs:auditBundle",
+                "start": 3322,
+                "ms": 8402.199999999255
+              },
+              {
+                "name": "model/journal-runtime.mjs:reader",
+                "start": 11735.699999999255,
+                "ms": 1
+              },
+              {
+                "name": "model/journal-runtime.mjs:selectedSource",
+                "start": 11736.699999999255,
+                "ms": 834.0999999977648
+              },
+              {
+                "name": "model/journal-runtime.mjs:readIndexed",
+                "start": 11729.699999999255,
+                "ms": 841.0999999977648
+              },
+              {
+                "name": "model/journal-runtime.mjs:openIndexedWriter",
+                "start": 11729,
+                "ms": 845.5999999977648
+              },
+              {
+                "name": "model/journal-idb.mjs:openWriter",
+                "start": 3094.2999999970198,
+                "ms": 9480.300000000745
+              },
+              {
+                "name": "model/journal-idb.mjs:readRecords",
+                "start": 12811.29999999702,
+                "ms": 1012.7000000029802
+              },
+              {
+                "name": "model/legacy-model.mjs:validateStructuredSource",
+                "start": 18438.099999997765,
+                "ms": 1684.300000000745
+              },
+              {
+                "name": "model/journal-protocol.mjs:validateSource",
+                "start": 18438.099999997765,
+                "ms": 1684.300000000745
+              },
+              {
+                "name": "model/journal-runtime-index.mjs:auditRuntime",
+                "start": 20127.699999999255,
+                "ms": 2530.599999997765
+              },
+              {
+                "name": "model/journal-protocol.mjs:materialize",
+                "start": 13824.099999997765,
+                "ms": 8834.900000002235
+              },
+              {
+                "name": "model/backup.mjs:createBackup",
+                "start": 25637.29999999702,
+                "ms": 16763.400000002235
+              },
+              {
+                "name": "model/legacy-model.mjs:createLegacyModelFromSource",
+                "start": 22663.199999999255,
+                "ms": 19737.5
+              },
+              {
+                "name": "model/backup.mjs:validateBackup",
+                "start": 42401.699999999255,
+                "ms": 26778.39999999851
+              },
+              {
+                "name": "app.js:render",
+                "start": 78936.89999999851,
+                "ms": 15.199999999254942
+              }
+            ],
+            "fileBytes": 169201307,
+            "sha256": "664520f7c3f11721a618d5b1a4bdf14d2445bf7dcc785601b2069ccfec842e3c"
+          }
+        }
+      ]
+    }
+  },
+  "artifacts": {
+    "before": {
+      "ref": "cbbf2d1",
+      "hashes": {
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+        "app.js": "e675cafb9509d751bb9cc36c3024c7611ce01c780546fc6bb7421b5320f62975",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+        "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+        "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+        "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+        "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+        "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+        "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+        "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+        "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+        "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+        "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+        "model/performance.mjs": "fbccd5556e0e1c2e6bbab86ba6aee7aa04ce049fa3a23c7309436f86cec74073",
+        "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+        "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+        "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+      },
+      "release": {
+        "format": "pushpull-static-release",
+        "version": 1,
+        "release": "1f7001d35f7c8b8fbac427b8",
+        "files": {
+          "app.js": "0a0747e59210767ce6c97814ba920901a941dcd7700b89af824b192e707ed400",
+          "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+          "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+          "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+          "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+          "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+          "indexeddb.js": "2dc03d3256ce03b56a7c459d8fcc82b7a0ea708c1282872b39d98419b13bd3c7",
+          "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+          "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+          "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+          "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+          "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+          "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+          "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+          "model/backup.mjs": "ee164d1f158d1f90580cc34cc7a3939aa6fc85723ddbee19784edeb301f875bc",
+          "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+          "model/drive-sync.mjs": "032f98db76a50613fa791287f08945dcb62cc6fd1cef9a557f236b6b95c2ca09",
+          "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+          "model/journal-database.mjs": "96ba6e31863d4fab24ae1556579ef69d22df2c8ea1cafa8e7ff10348677531d5",
+          "model/journal-idb.mjs": "4a80656abe29ab6eda8de002b6e11163785c18ca98e962ed665168c4a6648b20",
+          "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+          "model/journal-protocol.mjs": "14e287819216581d9f93f425180f8cb15d7acf0f79361d224fb2fbe3bfb91343",
+          "model/journal-runtime-index.mjs": "2cca3744cedfa177bd66ed8c88bc2268b950949c31a04bd81a1bf5b7eb11f573",
+          "model/journal-runtime.mjs": "45283e185d3014c78beb80ff436d900d55ff7fbfc6b9c389072c15f93dff53df",
+          "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+          "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+          "model/legacy-model.mjs": "18f53dd308edebfbbf7d00f24720f2ef54d587edb6bc013538b34b6023dbcf2c",
+          "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+          "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+          "model/performance.mjs": "fbccd5556e0e1c2e6bbab86ba6aee7aa04ce049fa3a23c7309436f86cec74073",
+          "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+          "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+          "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+          "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+          "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+          "model/workout-drafts.mjs": "b0a7bcb29a81994542beb69332125790606989c8a7ce73ee7372fe3369d6e409",
+          "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+          "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+          "sw.js": "23a9d445d906cd9c11314263a2ea65316196b0f962b58ea0e7e360c6bcbd8868"
+        }
+      }
+    },
+    "after": {
+      "ref": "working",
+      "hashes": {
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+        "app.js": "d510e0a583995b00441f5eec4f37e019f3a1712712921bb749b99e9f1117dab0",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+        "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+        "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+        "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+        "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+        "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+        "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+        "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+        "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+        "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+        "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+        "model/performance.mjs": "fbccd5556e0e1c2e6bbab86ba6aee7aa04ce049fa3a23c7309436f86cec74073",
+        "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+        "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+        "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+      },
+      "release": {
+        "format": "pushpull-static-release",
+        "version": 1,
+        "release": "fead4a35d32b64e430dd3ee3",
+        "files": {
+          "app.js": "23d7eba011f6c25d8a5a011a347b939467494c62ced2cbf2e758ceecf26bc875",
+          "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+          "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+          "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+          "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+          "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+          "indexeddb.js": "2dc03d3256ce03b56a7c459d8fcc82b7a0ea708c1282872b39d98419b13bd3c7",
+          "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+          "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+          "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+          "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+          "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+          "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+          "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+          "model/backup.mjs": "ee164d1f158d1f90580cc34cc7a3939aa6fc85723ddbee19784edeb301f875bc",
+          "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+          "model/drive-sync.mjs": "032f98db76a50613fa791287f08945dcb62cc6fd1cef9a557f236b6b95c2ca09",
+          "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+          "model/journal-database.mjs": "96ba6e31863d4fab24ae1556579ef69d22df2c8ea1cafa8e7ff10348677531d5",
+          "model/journal-idb.mjs": "4a80656abe29ab6eda8de002b6e11163785c18ca98e962ed665168c4a6648b20",
+          "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+          "model/journal-protocol.mjs": "14e287819216581d9f93f425180f8cb15d7acf0f79361d224fb2fbe3bfb91343",
+          "model/journal-runtime-index.mjs": "2cca3744cedfa177bd66ed8c88bc2268b950949c31a04bd81a1bf5b7eb11f573",
+          "model/journal-runtime.mjs": "45283e185d3014c78beb80ff436d900d55ff7fbfc6b9c389072c15f93dff53df",
+          "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+          "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+          "model/legacy-model.mjs": "18f53dd308edebfbbf7d00f24720f2ef54d587edb6bc013538b34b6023dbcf2c",
+          "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+          "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+          "model/performance.mjs": "fbccd5556e0e1c2e6bbab86ba6aee7aa04ce049fa3a23c7309436f86cec74073",
+          "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+          "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+          "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+          "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+          "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+          "model/workout-drafts.mjs": "b0a7bcb29a81994542beb69332125790606989c8a7ce73ee7372fe3369d6e409",
+          "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+          "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+          "sw.js": "8de80d69436234474f85ee0965b8bd9483518a735710a66f697871075d47243a"
+        }
+      }
+    }
+  }
+}
