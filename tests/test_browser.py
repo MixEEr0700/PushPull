@@ -12,6 +12,8 @@ import shutil
 import threading
 import unittest
 from playwright.sync_api import sync_playwright, expect
+from ci_annotations import install as install_ci_annotations
+install_ci_annotations()
 
 ROOT = Path(__file__).resolve().parents[1]
 KEY = 'pushpull_skeleton_v1'
