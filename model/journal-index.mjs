@@ -92,3 +92,11 @@ export async function auditIndex(root,read,leaves,{signal}={}){
  }
  portable(root);await visit(root);check(pending.size===0,'index missing records');return seen;
 }
+
+/** Intermediate AVL versions created during preparation were never committed.
+ * Retain only added nodes reachable from the final roots, never remove old data. */
+export function committedNodes(roots,added){
+ const kept=new Map();
+ function visit(id){if(!id||kept.has(id)||!added.has(id))return;const n=added.get(id);kept.set(id,n);visit(n.left);visit(n.right)}
+ for(const root of roots)visit(root);return kept;
+}

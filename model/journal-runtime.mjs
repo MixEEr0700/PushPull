@@ -1,7 +1,7 @@
 /** Native selective reader and strict delta writer. No history array rebuilding. */
 import {freeze,portable,requireThat as check} from './backup-json.mjs';
 import {STORES,ROW_STORES,protocolInput,trainingProof,protocolBudget,materialize,objectRecord,readObject,sealState,validateState,validateAllocation,limitsFor} from './journal-protocol.mjs';
-import {hashJSON,indexKey,editIndex,checkAbort} from './journal-index.mjs';
+import {hashJSON,indexKey,editIndex,checkAbort,committedNodes} from './journal-index.mjs';
 import {runtimeKey,lookupIndex,buildRuntime,descriptor,contextSummary,resultIds,runtimeInfo,sessionHeader} from './journal-runtime-index.mjs';
 import {transact,request,same,MARKER,readRecords} from './journal-idb.mjs';
 import * as journal from './journal.mjs';
@@ -13,6 +13,14 @@ function sessionData(source,{starting=false}={}){
  const d=source.data,j=d.trainingJournal;
  return {...d,exercises:starting?structuredClone(d.exercises):d.exercises,sessions:d.sessions.slice(),entries:d.entries,
  ...(j?{trainingJournal:{...j,...(starting?{model:structuredClone(j.model)}:{}),sessionSnapshots:j.sessionSnapshots.slice()}}:{})};
+}
+async function checkRows(tx,store,rows,message){
+ const actual=await Promise.all(rows.map(row=>request(tx.objectStore(store).get(row.id))));
+ rows.forEach((row,i)=>check(same(actual[i],row),message+' '+store));
+}
+async function addRows(tx,store,rows){
+ const actual=await Promise.all(rows.map(row=>request(tx.objectStore(store).get(row.id))));
+ rows.forEach((row,i)=>{if(actual[i])check(same(actual[i],row),'immutable collision '+store);else tx.objectStore(store).add(row)});
 }
 const marker=state=>({key:MARKER,protocol:2,status:'active',epoch:state.epoch});
 /** Capture per-key reads with a root CAS on completion. Hashing never holds a tx. */
@@ -133,23 +141,31 @@ export async function openIndexedWriter(db,{token,guard=()=>{},signal,completeSo
    const result=await prepare({ref,collection,putNew,metadata,index,before});checkAbort(signal);
    const primary=await editIndex(before.indexRoot,r.node,await Promise.all(changed.map(async({store,row})=>[indexKey(store,row.id),await hashJSON(row)])),{signal});
    const secondary=await editIndex(before.runtime.indexRoot,r.node,runtimeChanges,{signal});
-   const nodes=new Map([...primary.added,...secondary.added]);
+   const nodes=committedNodes([primary.root,secondary.root],new Map([...primary.added,...secondary.added]));
    let addBytes=0,addRecords=0,maxObjectBytes=before.allocation.maxObjectBytes;
-   for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])for(const [id,row] of rows){const old=await transact(db,[store],'readonly',tx=>request(tx.objectStore(store).get(id)),{signal});if(old)check(same(old,row),'immutable collision');else{addRecords++;if(store==='journalObjects'){addBytes+=row.bytes;maxObjectBytes=Math.max(maxObjectBytes,row.bytes)}}}
+   await transact(db,['journalObjects','journalIndex'],'readonly',async tx=>{
+    await Promise.all([['journalObjects',objects],['journalIndex',nodes]].map(async([store,rows])=>{
+     const pairs=[...rows],actual=await Promise.all(pairs.map(([id])=>request(tx.objectStore(store).get(id))));
+     pairs.forEach(([,row],i)=>{if(actual[i])check(same(actual[i],row),'immutable collision');else{addRecords++;if(store==='journalObjects'){addBytes+=row.bytes;maxObjectBytes=Math.max(maxObjectBytes,row.bytes)}}});
+    }));
+   },{signal});
    const counts={...before.counts};for(const {store,row} of changed)if(row.version===1){counts[store]++;addRecords++}
    const allocation={bytes:before.allocation.bytes+addBytes,records:before.allocation.records+addRecords,maxObjectBytes};validateAllocation(allocation,limits);
    const next=await sealState({...before,revision:before.revision+1,indexRoot:primary.root,counts,allocation,runtime:{version:1,indexRoot:secondary.root,sourceRoot:primary.root}});
    // Capture every authenticated dependency, including absence paths, in CAS.
    await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
     guard();check(same(await request(tx.objectStore('journalState').get('active')),before),'root CAS');check(same(await request(tx.objectStore('meta').get(MARKER)),marker(before)),'protocol marker');
-    for(const store of ROW_STORES)check(await request(tx.objectStore(store).count())===before.counts[store],'collection count CAS');
-    for(const store of [...ROW_STORES,'journalObjects','journalIndex'])for(const [id,row] of r.maps[store])if(row)check(same(await request(tx.objectStore(store).get(id)),row),'required CAS '+store);
-    for(const n of [...primary.observed.values(),...secondary.observed.values()])check(same(await request(tx.objectStore('journalIndex').get(n.id)),n),'index CAS');
-    for(const {store,row} of changed)if(row.version===1)check(!await request(tx.objectStore(store).get(row.id)),'new record CAS');
-    for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])for(const row of rows.values()){const old=await request(tx.objectStore(store).get(row.id));if(old)check(same(old,row),'immutable collision');else tx.objectStore(store).add(row)}
+    const counts=await Promise.all(STORES.map(store=>request(tx.objectStore(store).count())));
+    for(const store of ROW_STORES)check(counts[STORES.indexOf(store)]===before.counts[store],'collection count CAS');
+    check(counts.reduce((n,v)=>n+v,0)===before.allocation.records,'allocation count CAS');
+    await Promise.all([...ROW_STORES,'journalObjects','journalIndex'].map(store=>checkRows(tx,store,[...r.maps[store].values()].filter(Boolean),'required CAS')));
+    await checkRows(tx,'journalIndex',[...primary.observed.values(),...secondary.observed.values()],'index CAS');
+    const newRows=changed.filter(v=>v.row.version===1),existing=await Promise.all(newRows.map(({store,row})=>request(tx.objectStore(store).get(row.id))));
+    check(existing.every(v=>!v),'new record CAS');
+    for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])await addRows(tx,store,[...rows.values()]);
     for(const {store,row} of changed){if(row.version===1)tx.objectStore(store).add(row);else tx.objectStore(store).put(row);}tx.objectStore('journalState').put(next);
-    for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])for(const row of rows.values())check(same(await request(tx.objectStore(store).get(row.id)),row),'delta readback '+store);
-    for(const {store,row} of changed)check(same(await request(tx.objectStore(store).get(row.id)),row),'delta readback '+store);
+    await Promise.all([['journalObjects',objects],['journalIndex',nodes]].map(([store,rows])=>checkRows(tx,store,[...rows.values()],'delta readback')));
+    await Promise.all(changed.map(({store,row})=>checkRows(tx,store,[row],'delta readback')));
     check(same(await request(tx.objectStore('journalState').get('active')),next),'root readback');check(same(await request(tx.objectStore('meta').get(MARKER)),marker(next)),'marker readback');guard();
    },{signal});
    // Publish only after the native strict transaction's complete event.

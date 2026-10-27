@@ -44,3 +44,9 @@ test('long equal runs, corrections, invalid comparisons and date/sequence order 
  const history=data.entries.map(e=>descriptor(data,e)),summary=contextSummary(history),ages=new Map(summary.ages);
  for(const e of data.entries){const d=descriptor(data,e);assert.equal(d.measurement?(ages.get(d.measurement.context)??null):null,resultChangeAge(data,e));}
 });
+test('committing a batch retains final AVL paths and all old nodes, without transient preparation versions',async()=>{
+ const {committedNodes}=await import('../model/journal-index.mjs'),leaves=new Map();for(let i=0;i<100;i++)leaves.set('batch-'+i,await hashJSON(i));
+ const original=await buildIndex(leaves),changes=[];for(let i=0;i<35;i++){const key='batch-'+i,value=await hashJSON({corrected:i});changes.push([key,value]);leaves.set(key,value)}
+ const edit=await editIndex(original.root,id=>original.nodes.get(id),changes),kept=committedNodes([edit.root],edit.added),nodes=new Map([...original.nodes,...kept]);
+ assert.ok(kept.size<edit.added.size/2);for(const id of original.nodes.keys())assert.ok(nodes.has(id));await auditIndex(edit.root,id=>nodes.get(id),leaves);
+});

@@ -60,9 +60,9 @@ def instrument_runtime(text):
       ('   const primary=await editIndex(', 'index-prepare'),
       ("   await transact(db,[...STORES,'meta'],'readwrite',async tx=>{",'transaction-open'),
       ("    guard();check(same(await request(tx.objectStore('journalState')",'cas'),
-      ("    for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])for(const row of rows.values()){",'write-objects'),
+      ("    for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])await addRows(",'write-objects'),
       ("    for(const {store,row} of changed){if(row.version===1)tx.objectStore(store).add(row);else tx.objectStore(store).put(row);}",'write-result-root'),
-      ("    for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])for(const row of rows.values())check(",'readback'),
+      ("    await Promise.all([['journalObjects',objects],['journalIndex',nodes]].map(([store,rows])=>checkRows(",'readback'),
       ('   state=next;source=result.source;', 'publication')]
     # Command entry marker occurs on all three command functions.
     for target,label in markers:
