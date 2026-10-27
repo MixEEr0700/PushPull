@@ -180,8 +180,9 @@ class BrowserRegression(BrowserHarness):
         self.assertEqual(self.page.locator('.series-total strong').inner_text().replace('\xa0','').replace(' ',''), '1640kg')
         self.save()
         self.assertEqual(len(self.state()['entries'][0]['series']), 2)
+        self.page.locator('[data-personal-note] > summary').click()
         self.page.locator('#notesForm textarea').fill('Łopatki stabilnie')
-        self.page.locator('#notesForm button').click()
+        self.page.locator('#notesForm [type=submit]').click()
         expect(self.page.locator('[data-training-pending]')).to_have_count(0)
         self.page.locator('[data-panel=stats]').click()
         expect(self.page.locator('.stat-tile.selected strong')).to_contain_text('640')
@@ -337,40 +338,29 @@ class BrowserRegression(BrowserHarness):
         self.assertEqual(self.local_raw(),'external-change')
         self.assertEqual(len(self.state()['sessions']),1)
 
-    def test_mobile_visuals_match_approved_commit(self):
-        # Compare actual rendered pixels against the approved source in the same
-        # browser, fonts, viewport and clock. No regenerated golden screenshots.
-        original_app=subprocess.check_output(['git','show',f'{BASE}:app.js'],cwd=ROOT).decode()
-        original_index=subprocess.check_output(['git','show',f'{BASE}:index.html'],cwd=ROOT).decode()
+    def test_mobile_compact_matrix_visual_contract(self):
+        # Issue43 replaces v0.3 pixel equality with the approved v0.4 contract.
+        # Functional assertions elsewhere remain unchanged.
+        from pathlib import Path
+        output=Path('/tmp/pushpull-compact-review');output.mkdir(exist_ok=True)
         for width,height in [(360,800),(390,844),(412,915)]:
-            baseline=self.new_context(service_workers='block', viewport={'width':width,'height':height})
-            baseline.route(self.url,lambda route: route.fulfill(body=original_index,content_type='text/html'))
-            baseline.route(self.url+'app.js',lambda route: route.fulfill(body=original_app,content_type='text/javascript'))
-            old=baseline.new_page()
-            old.clock.install(time=datetime.datetime(2026,10,21,10,0,tzinfo=datetime.timezone.utc))
-            old.goto(self.url)
-            expect(old.locator('h1')).to_have_text('Trening')
             self.page.set_viewport_size({'width':width,'height':height})
-            self.page.reload()
-            expect(self.page.locator('h1')).to_have_text('Trening')
-            for screen in ['training','expanded','stats','calendar']:
-                for page in [old,self.page]:
-                    if screen=='expanded':page.locator('[data-expand="PUSH-A-1"]').click()
-                    if screen=='stats':
-                        page.locator('[data-panel=stats]').click()
-                        expect(page.locator('.stat-grid')).to_be_visible()
-                    if screen=='calendar':page.locator('[data-tab=calendar]').click()
-                    page.evaluate('document.fonts.ready')
-                if screen!='calendar':
-                    # Issue #12 intentionally clarifies the source skeleton. Mask only
-                    # that copy for the original pixel comparison; exercise UI stays exact.
-                    self.page.locator('[data-source-plan-hint]').evaluate_all('(els)=>els.forEach(el=>el.remove())')
-                    self.page.locator('.eyebrow').evaluate('(el)=>el.textContent="PUSH / PULL V2 · SZKIELET"')
-                # Issue #44 adds an authorized update/error notice. This pixel
-                # harness blocks SW; real-worker tests verify the notice itself.
-                self.page.locator('[data-pwa-notice]').evaluate_all('(els)=>els.forEach(el=>el.remove())')
-                self.assertEqual(old.screenshot(full_page=True,animations='disabled'), self.page.screenshot(full_page=True,animations='disabled'),f'{width}x{height} {screen}')
-            baseline.close()
+            self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()
+            self.assertEqual(self.page.evaluate('getComputedStyle(document.body).backgroundColor'),'rgb(0, 0, 0)')
+            card=self.page.locator('.exercise-card').first
+            self.assertEqual(card.evaluate('(e)=>getComputedStyle(e).backgroundColor'),'rgb(17, 17, 17)')
+            expect(card.locator('.detail').first).not_to_be_visible()
+            self.assertGreaterEqual(card.locator('[data-expand]').bounding_box()['height'],44)
+            before=self.state();card.locator('[data-expand]').click()
+            expect(card.locator('.detail').first).to_be_visible()
+            expect(card.locator('[data-personal-note] textarea')).not_to_be_visible()
+            card.locator('[data-personal-note] > summary').click()
+            expect(card.locator('[data-personal-note] textarea')).to_be_visible()
+            self.assertEqual(self.state(),before)
+            self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+            self.page.screenshot(path=str(output/(str(width)+'-expanded.png')),full_page=True)
+            self.page.locator('[data-tab=calendar]').click();expect(self.page.locator('h1')).to_have_text('Kalendarz')
+            self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
 
     def test_offline_reload_and_new_cache_does_not_serve_old_app(self):
         context=self.new_context(service_workers='allow')
