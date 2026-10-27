@@ -19,13 +19,17 @@ const marker=state=>({key:MARKER,protocol:2,status:'active',epoch:state.epoch});
 export async function reader(db,state,{signal}={}){
  validateState(state);validateAllocation(state.allocation);check(state.runtime?.version===1,'runtime index required');
  const {root,...body}=state;check(root===await hashJSON(body),'state SHA-256');
- const maps=Object.fromEntries(STORES.map(s=>[s,new Map()])),values=new Map();
+ const maps=Object.fromEntries(STORES.map(s=>[s,new Map()])),values=new Map(),pending=new Map();
  async function get(store,id){
-  checkAbort(signal);if(!maps[store].has(id))maps[store].set(id,await transact(db,[store],'readonly',tx=>request(tx.objectStore(store).get(id)),{signal})??null);
-  return maps[store].get(id);
+  checkAbort(signal);if(maps[store].has(id))return maps[store].get(id);
+  const key=indexKey(store,id);
+  // Concurrent paths often share the same node/model. One owned native read,
+  // one immutable proof; every use still participates in the strict tx CAS.
+  if(!pending.has(key))pending.set(key,transact(db,[store],'readonly',tx=>request(tx.objectStore(store).get(id)),{signal}).then(value=>{const row=value?freeze(value):null;maps[store].set(id,row);return row}));
+  return pending.get(key);
  }
  const node=id=>get('journalIndex',id);
- async function object(id){if(!values.has(id))values.set(id,await readObject(await get('journalObjects',id)));return values.get(id)}
+ async function object(id){if(!values.has(id))values.set(id,(async()=>readObject(await get('journalObjects',id)))());return values.get(id)}
  async function row(store,id){const value=await get(store,id);check(value&&await lookupIndex(state.indexRoot,indexKey(store,id),node,{signal})===await hashJSON(value),'required index record');return value;}
  async function collection(store,id){const r=await row(store,id);return r.fields?freeze(Object.fromEntries(await Promise.all(r.fields.map(async([key,ref])=>[key,await object(ref)])))):object(r.ref)}
  async function runtime(...parts){const id=await lookupIndex(state.runtime.indexRoot,runtimeKey(...parts),node,{signal});return id?object(id):null}

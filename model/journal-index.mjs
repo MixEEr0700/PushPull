@@ -22,11 +22,13 @@ export async function shaBytes(bytes){return Array.from(new Uint8Array(await cry
 export const sha=value=>shaBytes(encodedJSON(value));
 export const hashJSON=value=>sha(JSON.stringify(value));
 export const indexKey=(store,id)=>JSON.stringify([store,id]);
+const verifiedNodes=new WeakSet();
 export async function verifyNode(node){
- portable(node);node=freeze({...node}); // Capture before awaiting SHA; caller-owned nodes can change.
+ if(node&&verifiedNodes.has(node))return node;
+ portable(node);node=Object.isFrozen(node)?node:freeze({...node}); // Capture before awaiting SHA; caller-owned nodes can change.
  check(node&&Object.keys(node).join(',')==='id,key,value,left,right,height','index shape');
  check(typeof node.key==='string'&&/^[a-f0-9]{64}$/.test(node.value)&&[node.left,node.right].every(v=>v===null||/^[a-f0-9]{64}$/.test(v))&&Number.isSafeInteger(node.height)&&node.height>0,'index fields');
- const {id,...body}=node;check(id===await hashJSON(body),'index SHA-256');return freeze(node);
+ const {id,...body}=node;check(id===await hashJSON(body),'index SHA-256');verifiedNodes.add(node);return node;
 }
 export async function editIndex(root,read,changes,{signal}={}){
  const added=new Map(),observed=new Map();
