@@ -15,7 +15,7 @@ Zakres zatwierdzony przez właściciela: zmiana istniejącego UI, bez przebudowy
 
 Instrukcje o pochodzeniu `trainer` trafiają do „Wskazówek trenera”. Dzisiejszy plan zawiera również mieszane teksty C1/C2/D2 ze źródłem `owner`: pozostają w całości w osobnym bloku źródłowym. UI nie zgaduje autorstwa fragmentów ani nie zmienia planu. Historyczne teksty o nieustalonym autorze też pozostają dostępne.
 
-Notatki V2 wykorzystują dotychczasową strukturę `userNotes`; ID nowego wpisu obejmuje wersję planu i ćwiczenie. Stare dowolne ID pozostają czytelne. Widok nie przenosi notatki z innej znanej wersji planu. Nie zmieniono schematu, kodeków ani formatów kopii. Stary UI może nie rozumieć nowego zakresu ID, choć stary czytnik nadal zachowuje wpisy.
+Notatki V2 wykorzystują dotychczasową strukturę `userNotes`; ID nowego wpisu obejmuje wersję planu i ćwiczenie. Stare dowolne ID pozostają czytelne. Widok nie przenosi notatki z innej znanej wersji planu ani wpisu związanego z pojedynczą sesją. Kolizja ID z innym kontekstem blokuje zapis i zachowuje szkic zamiast nadpisania źródłowego wpisu. Nie zmieniono schematu, kodeków ani formatów kopii. Stary UI może nie rozumieć nowego zakresu ID, choć stary czytnik nadal zachowuje wpisy.
 
 Niezatwierdzony tekst notatki jest osobnym lokalnym szkicem UI. Każda karta przeglądarki ma własny rekord/token; przy restarcie różne źródła nie mają automatycznie wybieranego zwycięzcy. Konflikt blokuje zapis do ręcznego uzgodnienia, a przycisk pobrania zachowuje źródłowe wersje. Dopiero potwierdzony zapis lub świadome anulowanie oznacza konkretny token jako zakończony. Nie usuwa się danych innych kart. Błąd quota zapisu szkicu pokazuje ostrzeżenie i umożliwia pobranie tekstu z pamięci. Nie obiecuje to atomowego snapshotu wszystkich kart.
 
@@ -30,8 +30,9 @@ Bez zmian w IndexedDB v2, indeksach i protokole zapisu przyrostowego, CAS, walid
 Wyniki lokalnej regresji i pomiarów poniżej. Testy zamrożonego HEAD są również wykonywane przez standardowy workflow PR. Dawne asercje identycznych bajtów CSS v0.3 zastąpiono kontraktem zatwierdzonego v0.4; asercje danych, PWA identity/ikon i importów bez efektów ubocznych pozostają.
 
 - Pełna lokalna regresja Chromium/PWA: 195 testów, 193 PASS i dwa stare oczekiwania wyglądu opisane wyżej; po dostosowaniu układu 10 testów docelowych PASS (w tym oba przypadki). Asercje danych nie zostały osłabione.
+- Końcowy przegląd odtworzył pożyczanie notatki przypisanej do sesji jako ogólnej; nowy test był RED przed filtrem, następnie PASS. Dodano też natywny test kolizji ID bez zmiany rekordów. Nie zmieniono kontraktu danych. Po wcześniejszych pomiarach dodano wyłącznie filtr/guard zakresu notatki; nie ponawiano benchmarków writerów, których kod pozostał identyczny.
 - Nowe scenariusze: treść notatki po zwinięciu/reload, quota i retry bez utraty tekstu, druga edycja/anulowanie, dwa rozbieżne źródła, pochodzenie trenera i jego pusty blok; układ mobilny 360/390/412 px. Pełne scenariusze: indywidualne serie, L/P, back-off/drop/grupy, historie, CAS/abort/quota, backup/restore, offline, restart i aktualizacja PWA.
-- Ostateczny pełny Node: **211/211 PASS**; build produkcyjny i zgodność worker/hash PASS; zamrożony HEAD przechodzi pełny workflow (Node + Chromium/PWA).
+- Ostateczny pełny Node: **212/212 PASS**; build produkcyjny i zgodność worker/hash PASS; zamrożony HEAD przechodzi pełny workflow (Node + Chromium/PWA).
 
 Pomiar seryjny na dokładnie tych samych zachowanych syntetycznych fixture’ach A–E; po jednym izolowanym profilu i 8 zapisów na wariant (4 nowe i 4 korekty). p95 przy n=8 jest maksimum, nie wiarygodnym oszacowaniem ogona dla telefonu. Źródłowe historie/archiwa sprawdzone przez orakle benchmarku. Dane zagregowane: [compact-matrix-f.json](performance/compact-matrix-f.json).
 

@@ -9,6 +9,7 @@ class CompactMatrix(BrowserHarness):
     activate=test_v2_training.V2Training.activate
     prepare=test_v2_training.V2Training.prepare
     ready=test_v2_training.V2Training.ready
+    records=test_v2_training.V2Training.records
 
     def open_note(self,page=None):
         p=page or self.page
@@ -88,3 +89,15 @@ class CompactMatrix(BrowserHarness):
         self.page.locator('[data-type="PUSH A"]').click()
         self.page.locator('[data-expand="PUSH-A-1"]').click()
         expect(self.page.locator('.exercise-card').first.locator('[data-instructions=coach]')).to_have_count(0)
+
+    def test_session_note_collision_cannot_be_overwritten_as_a_general_note(self):
+        self.activate()
+        self.page.evaluate("""async()=>{const h=await PushPullDB.open(()=>{});try{const d=h.value;d.trainingJournal.model.userNotes.push({id:'user:v2-owner-2026-10-22:PUSH-A-1',exerciseId:'PUSH-A-1',sessionId:d.sessions[0].id,text:'Tylko historyczna sesja',origin:'user',revision:1,source:{kind:'owner',reference:'synthetic collision',recordedAt:'2026-10-22T00:00:00.000Z'}});await h.commit(d,{importing:true})}finally{h.close()}}""")
+        self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        self.page.locator('[data-act=start]').click();note=self.open_note()
+        expect(note.locator('textarea')).to_have_value('')
+        before=self.records();note.locator('textarea').fill('Nowa ogólna notatka')
+        with self.page.expect_event('dialog'):note.locator('[type=submit]').click()
+        expect(self.page.locator('[data-personal-note] textarea')).to_have_value('Nowa ogólna notatka')
+        self.assertEqual(self.records(),before)
+        self.assertIn('innego kontekstu',self.alerts[-1])
