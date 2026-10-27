@@ -9,6 +9,9 @@ from measure_ui_response import UI_PROBE
 
 class DurableTiming(BrowserHarness):
     legacy_backend = True
+    # Native event chronology must use the real monotonic clock. Playwright's
+    # virtual Event.timeStamp and performance.now can differ by one tick.
+    mock_clock = False
     def test_native_complete_clock_excludes_work_resumed_before_later_listeners(self):
         expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.page.evaluate(UI_PROBE)

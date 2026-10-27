@@ -60,6 +60,7 @@ class QuietServer(http.server.SimpleHTTPRequestHandler):
 
 class BrowserHarness(unittest.TestCase):
     legacy_backend = False
+    mock_clock = True
     @classmethod
     def setUpClass(cls):
         handler=QuietServer
@@ -99,7 +100,8 @@ class BrowserHarness(unittest.TestCase):
         self.page.on('dialog', self.dialog)
         self.errors = []
         self.page.on('pageerror', lambda error: self.errors.append(str(error)))
-        self.page.clock.install(time=datetime.datetime(2026, 10, 21, 10, 0, tzinfo=datetime.timezone.utc))
+        if self.mock_clock:
+            self.page.clock.install(time=datetime.datetime(2026, 10, 21, 10, 0, tzinfo=datetime.timezone.utc))
         self.page.goto(self.url)
 
     def tearDown(self):
