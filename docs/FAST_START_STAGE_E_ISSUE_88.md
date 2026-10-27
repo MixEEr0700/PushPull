@@ -88,7 +88,10 @@ zewnętrznym kluczem — ten kontrakt pozostaje niezmieniony.
 ## Instalacja, odmowa i rollback
 
 Baza D bez indeksu: jednorazowy zweryfikowany odczyt live, wyprowadzenie
-indeksu, strict CAS/readback i aktywacja nowego root. Oryginalne wiersze,
+indeksu, strict CAS/readback i aktywacja nowego root. Sama instalacja indeksu
+nie zmienia rewizji dziennika ani obserwacji szkiców: nie zmieniła treningów.
+Zmiana pełnego root nadal odrzuca każdego wcześniej przygotowanego writera.
+Oryginalne wiersze,
 archiwa, checkpointy, rewizje i modele pozostają. Równoległa instalacja
 nie nadpisuje nowszego root. Przerwanie/quota pozostawia poprzedni root;
 ponowne otwarcie może powtórzyć przygotowanie bez częściowego indeksu.

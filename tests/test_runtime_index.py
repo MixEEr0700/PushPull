@@ -75,3 +75,29 @@ class RuntimeIndex(BrowserHarness):
          const unchanged=a.same(before,await a.readRecords(db));db.close();return {partialRefused,injected,rejected,unchanged};
         }""")
         self.assertTrue(all(result.values()),result)
+
+    def test_observed_source_preview_keeps_result_after_incremental_session_finish(self):
+        self.page.wait_for_selector('[data-act=start]')
+        self.page.evaluate("""async()=>{const d=await(await fetch('./tests/fixtures/v1.json')).json(),j=await import('./model/journal.mjs');d.sessions.forEach(s=>s.status='done');d.activeId=null;d.nextType='PUSH A';d.trainingJournal=j.initialize('source-preview-test');const h=await PushPullDB.open(()=>{});try{await h.commit(d,{importing:true})}finally{h.close()}}""")
+        self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        self.page.locator('[data-act=start]').click();expect(self.page.locator('[data-act=finish]')).to_be_visible()
+        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-main=kg]').fill('27');self.page.locator('[data-main=reps]').fill('8')
+        self.page.locator('.seriesResultForm [type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        self.page.locator('[data-type="PUSH A"]').click()
+        expect(self.page.locator('.exercise-card').filter(has=self.page.locator('[data-expand="PUSH-A-1"]')).locator('.last-result')).to_have_text('8 × 27 kg')
+        self.assertFalse(self.alerts,self.alerts)
+
+    def test_index_installation_preserves_journal_revision_but_blocks_prepared_old_writer(self):
+        self.prepare()
+        result=self.page.evaluate("""async()=>{
+         const a=await import('./model/journal-idb.mjs'),p=await import('./model/journal-protocol.mjs'),e=await import('./model/journal-runtime.mjs'),db=await a.connectV2('pushpull');
+         try{const before=await a.readRecords(db),{runtime,...body}=before.state,old=await p.sealState(body);await a.transact(db,['journalState'],'readwrite',tx=>tx.objectStore('journalState').put(old));
+          const w=await a.openWriter(db),entry=structuredClone(w.source.data.entries.find(e=>e.performance)),context=w.context(entry.sessionId,entry.exerciseId);
+          await e.installRuntime(db,await a.readTraining(db));const after=await a.readRecords(db);let rejected=false;
+          try{await w.saveResult({entry,sessionId:entry.sessionId,exerciseId:entry.exerciseId,...context})}catch(error){rejected=/root CAS/.test(error.message)}
+          return {rejected,sameRevision:old.revision===after.state.revision,differentRoot:old.root!==after.state.root,primaryUnchanged:old.indexRoot===after.state.indexRoot,exactSource:a.same(await p.materialize(before),await p.materialize(after)),allObjectsKept:before.records.journalObjects.every(r=>after.records.journalObjects.some(v=>a.same(r,v)))};
+         }finally{db.close()}
+        }""")
+        self.assertTrue(all(result.values()),result)

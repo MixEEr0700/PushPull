@@ -85,7 +85,10 @@ export async function installRuntime(db,bundle,{guard=()=>{},signal}={}){
  // Training proof includes all retained IDs, even objects not read at startup.
  const ids=new Set(trainingProof(bundle)?.objectIds??objects.keys());const addedObjects=built.objects.filter(r=>!ids.has(r.id)),addedNodes=built.nodes.filter(r=>!nodes.has(r.id));
  const allocation={bytes:budget.bytes+addedObjects.reduce((n,r)=>n+r.bytes,0),records:budget.records+addedObjects.length+addedNodes.length,maxObjectBytes:Math.max(budget.maxObjectBytes,...addedObjects.map(r=>r.bytes))};validateAllocation(allocation);
- const state=await sealState({...bundle.state,revision:bundle.state.revision+1,runtime:built.runtime,allocation});
+ // This installs derived representation only; the journal has not changed.
+ // Preserve its revision/draft observations. The changed SHA-bound full root
+ // still makes every older prepared writer fail its exact root CAS.
+ const state=await sealState({...bundle.state,runtime:built.runtime,allocation});
  await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
   guard();check(same(await request(tx.objectStore('journalState').get('active')),bundle.state),'install root CAS');check(same(await request(tx.objectStore('meta').get(MARKER)),marker(state)),'install marker');
   for(const store of ROW_STORES){check(await request(tx.objectStore(store).count())===bundle.records[store].length,'install count CAS');for(const row of bundle.records[store])check(same(await request(tx.objectStore(store).get(row.id)),row),'install row CAS')}
