@@ -1,0 +1,623 @@
+{
+  "syntheticOnly": true,
+  "base": "1be8b75",
+  "beforeBenchmarkRef": "dc3766f",
+  "cpuThrottle": 4,
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "note": "Serial, same retained synthetic fixtures. n=8 writes and n=5 navigation; empirical p95=max. Heap is sampled JS only. Final G includes note-scope correction; baseline F measurements precede that scope-only correction. Native writers unchanged.",
+  "writes": {
+    "small": {
+      "beforeF": {
+        "clickToStrictCompleteMs": {
+          "n": 8,
+          "median": 154.90000000037253,
+          "p95": 253.2999999988824,
+          "max": 253.2999999988824
+        },
+        "firstMs": {
+          "n": 8,
+          "median": 28.950000000186265,
+          "p95": 30.199999999254942,
+          "max": 30.199999999254942
+        },
+        "fullMs": {
+          "n": 8,
+          "median": 211.70000000018626,
+          "p95": 329.2999999988824,
+          "max": 329.2999999988824
+        },
+        "maxTaskMs": {
+          "n": 8,
+          "median": 0.0,
+          "p95": 86,
+          "max": 86
+        },
+        "blockingMs": {
+          "n": 8,
+          "median": 0.0,
+          "p95": 36,
+          "max": 36
+        },
+        "sampledHeapHighWaterBytes": {
+          "n": 8,
+          "median": 10239684.5,
+          "p95": 12863078,
+          "max": 12863078
+        }
+      },
+      "afterG": {
+        "clickToStrictCompleteMs": {
+          "n": 8,
+          "median": 148.45000000018626,
+          "p95": 237.19999999925494,
+          "max": 237.19999999925494
+        },
+        "firstMs": {
+          "n": 8,
+          "median": 29.249999999068677,
+          "p95": 31.699999999254942,
+          "max": 31.699999999254942
+        },
+        "fullMs": {
+          "n": 8,
+          "median": 214.20000000018626,
+          "p95": 294.7999999988824,
+          "max": 294.7999999988824
+        },
+        "maxTaskMs": {
+          "n": 8,
+          "median": 0.0,
+          "p95": 77,
+          "max": 77
+        },
+        "blockingMs": {
+          "n": 8,
+          "median": 0.0,
+          "p95": 27,
+          "max": 27
+        },
+        "sampledHeapHighWaterBytes": {
+          "n": 8,
+          "median": 10495498.0,
+          "p95": 12740694,
+          "max": 12740694
+        }
+      },
+      "fixtureSHA256": "0f2b19da8b7f58e68cb3ad0799bd6320c03a80d074788ca8d958760ada6c30cb",
+      "preserved": true,
+      "proof": {
+        "history": "9527c34932eeeb7dee347bffb73fb86f3fe91979c49a0786d626d6267bd01c1e",
+        "archives": "82eaf21ae79d029e15aa23cc58e5f764e26ed76780ce8c2514c0303a7be993bf",
+        "sessions": 4,
+        "results": 35,
+        "snapshots": 4
+      },
+      "retainedBefore": {
+        "usedSize": 5613532,
+        "totalSize": 6221824,
+        "embedderHeapUsedSize": 938376,
+        "backingStorageSize": 490996
+      },
+      "retainedAfter": {
+        "usedSize": 6121536,
+        "totalSize": 6746112,
+        "embedderHeapUsedSize": 1822104,
+        "backingStorageSize": 490791
+      }
+    },
+    "history40-raw4": {
+      "beforeF": {
+        "clickToStrictCompleteMs": {
+          "n": 8,
+          "median": 181.90000000037253,
+          "p95": 301.2000000011176,
+          "max": 301.2000000011176
+        },
+        "firstMs": {
+          "n": 8,
+          "median": 29.450000000186265,
+          "p95": 30.59999999962747,
+          "max": 30.59999999962747
+        },
+        "fullMs": {
+          "n": 8,
+          "median": 254.30000000074506,
+          "p95": 360.7000000011176,
+          "max": 360.7000000011176
+        },
+        "maxTaskMs": {
+          "n": 8,
+          "median": 0.0,
+          "p95": 104,
+          "max": 104
+        },
+        "blockingMs": {
+          "n": 8,
+          "median": 0.0,
+          "p95": 54,
+          "max": 54
+        },
+        "sampledHeapHighWaterBytes": {
+          "n": 8,
+          "median": 17628428.5,
+          "p95": 21362611,
+          "max": 21362611
+        }
+      },
+      "afterG": {
+        "clickToStrictCompleteMs": {
+          "n": 8,
+          "median": 187.6499999994412,
+          "p95": 336.09999999962747,
+          "max": 336.09999999962747
+        },
+        "firstMs": {
+          "n": 8,
+          "median": 29.049999999813735,
+          "p95": 30,
+          "max": 30
+        },
+        "fullMs": {
+          "n": 8,
+          "median": 254.30000000074506,
+          "p95": 424.69999999925494,
+          "max": 424.69999999925494
+        },
+        "maxTaskMs": {
+          "n": 8,
+          "median": 0.0,
+          "p95": 110,
+          "max": 110
+        },
+        "blockingMs": {
+          "n": 8,
+          "median": 0.0,
+          "p95": 60,
+          "max": 60
+        },
+        "sampledHeapHighWaterBytes": {
+          "n": 8,
+          "median": 17407703.0,
+          "p95": 21358115,
+          "max": 21358115
+        }
+      },
+      "fixtureSHA256": "04397db19db0ef0ed66571126f6533d5bb6e3a53ef55181235c9a3a713f4fef2",
+      "preserved": true,
+      "proof": {
+        "history": "c82c5a9cf205b5ac7831ef506ef791b27ebabb4b2b931a7236db98fb76aca559",
+        "archives": "9d92f740ff7821d90cd294f6d0e3da8e56eed7717a2e0b08201a3b83fb2ac904",
+        "sessions": 40,
+        "results": 350,
+        "snapshots": 40
+      },
+      "retainedBefore": {
+        "usedSize": 11676532,
+        "totalSize": 12906496,
+        "embedderHeapUsedSize": 1059744,
+        "backingStorageSize": 497986
+      },
+      "retainedAfter": {
+        "usedSize": 12300144,
+        "totalSize": 13430784,
+        "embedderHeapUsedSize": 2121088,
+        "backingStorageSize": 494999
+      }
+    }
+  },
+  "navigation": {
+    "beforeF": {
+      "small": {
+        "fixtureSHA256": "0f2b19da8b7f58e68cb3ad0799bd6320c03a80d074788ca8d958760ada6c30cb",
+        "runs": [
+          {
+            "ms": 57.100000001490116,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1519.699999999255,
+                "ms": 11
+              }
+            ],
+            "heapBytes": 5927708
+          },
+          {
+            "ms": 30.40000000037253,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1695.4000000003725,
+                "ms": 2.699999999254942
+              }
+            ],
+            "heapBytes": 6266560
+          },
+          {
+            "ms": 22.299999998882413,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1845.0999999996275,
+                "ms": 3.099999999627471
+              }
+            ],
+            "heapBytes": 6536208
+          },
+          {
+            "ms": 32.5,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1944.5999999996275,
+                "ms": 4
+              }
+            ],
+            "heapBytes": 6785832
+          },
+          {
+            "ms": 60.40000000037253,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2077.9000000003725,
+                "ms": 4.5
+              }
+            ],
+            "heapBytes": 7157828
+          }
+        ],
+        "medianMs": 32.5,
+        "p95Ms": 60.40000000037253
+      },
+      "history40-raw4": {
+        "fixtureSHA256": "04397db19db0ef0ed66571126f6533d5bb6e3a53ef55181235c9a3a713f4fef2",
+        "runs": [
+          {
+            "ms": 57.59999999962747,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1717.4000000003725,
+                "ms": 8
+              }
+            ],
+            "heapBytes": 8290276
+          },
+          {
+            "ms": 29.799999998882413,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1886,
+                "ms": 3.400000000372529
+              }
+            ],
+            "heapBytes": 8620260
+          },
+          {
+            "ms": 27.299999998882413,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2034.9000000003725,
+                "ms": 4.199999999254942
+              }
+            ],
+            "heapBytes": 6326512
+          },
+          {
+            "ms": 26.09999999962747,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2153.5999999996275,
+                "ms": 3.800000000745058
+              }
+            ],
+            "heapBytes": 6578900
+          },
+          {
+            "ms": 25,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2300.7000000011176,
+                "ms": 3.699999999254942
+              }
+            ],
+            "heapBytes": 6964916
+          }
+        ],
+        "medianMs": 27.299999998882413,
+        "p95Ms": 57.59999999962747
+      },
+      "history400-raw4": {
+        "fixtureSHA256": "f55358bf1212585371cee33a193ac75fe8e58fb897fcec4a628ffd4f6d53b55c",
+        "runs": [
+          {
+            "ms": 49.30000000074506,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1762.699999999255,
+                "ms": 6.700000001117587
+              }
+            ],
+            "heapBytes": 7840576
+          },
+          {
+            "ms": 34.30000000074506,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1893.5999999996275,
+                "ms": 4.400000000372529
+              }
+            ],
+            "heapBytes": 8170816
+          },
+          {
+            "ms": 32.19999999925494,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2037.9000000003725,
+                "ms": 4.400000000372529
+              }
+            ],
+            "heapBytes": 8448936
+          },
+          {
+            "ms": 32.90000000037253,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2159.9000000003725,
+                "ms": 3.699999999254942
+              }
+            ],
+            "heapBytes": 6436028
+          },
+          {
+            "ms": 29.200000001117587,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2312.9000000003725,
+                "ms": 2.799999998882413
+              }
+            ],
+            "heapBytes": 6821912
+          }
+        ],
+        "medianMs": 32.90000000037253,
+        "p95Ms": 49.30000000074506
+      }
+    },
+    "afterG": {
+      "small": {
+        "fixtureSHA256": "0f2b19da8b7f58e68cb3ad0799bd6320c03a80d074788ca8d958760ada6c30cb",
+        "runs": [
+          {
+            "ms": 68.30000000074506,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1574.199999999255,
+                "ms": 11.800000000745058
+              }
+            ],
+            "heapBytes": 6514682
+          },
+          {
+            "ms": 24.59999999962747,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1748.0999999996275,
+                "ms": 2.800000000745058
+              }
+            ],
+            "heapBytes": 6854974
+          },
+          {
+            "ms": 26.299999998882413,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1866.699999999255,
+                "ms": 4.700000001117587
+              }
+            ],
+            "heapBytes": 7126870
+          },
+          {
+            "ms": 22.5,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1981.699999999255,
+                "ms": 3.5
+              }
+            ],
+            "heapBytes": 7377698
+          },
+          {
+            "ms": 36.19999999925494,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2078.9000000003725,
+                "ms": 4.5
+              }
+            ],
+            "heapBytes": 6182730
+          }
+        ],
+        "medianMs": 26.299999998882413,
+        "p95Ms": 68.30000000074506
+      },
+      "history40-raw4": {
+        "fixtureSHA256": "04397db19db0ef0ed66571126f6533d5bb6e3a53ef55181235c9a3a713f4fef2",
+        "runs": [
+          {
+            "ms": 51,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1397.5999999996275,
+                "ms": 8.900000000372529
+              }
+            ],
+            "heapBytes": 7904351
+          },
+          {
+            "ms": 28.200000001117587,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1543,
+                "ms": 4.5
+              }
+            ],
+            "heapBytes": 8244667
+          },
+          {
+            "ms": 19.59999999962747,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1665.7000000011176,
+                "ms": 3.099999999627471
+              }
+            ],
+            "heapBytes": 8517495
+          },
+          {
+            "ms": 25.699999999254942,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1787.800000000745,
+                "ms": 3.900000000372529
+              }
+            ],
+            "heapBytes": 6437647
+          },
+          {
+            "ms": 23.40000000037253,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1939.9000000003725,
+                "ms": 2.300000000745058
+              }
+            ],
+            "heapBytes": 6815395
+          }
+        ],
+        "medianMs": 25.699999999254942,
+        "p95Ms": 51
+      },
+      "history400-raw4": {
+        "fixtureSHA256": "f55358bf1212585371cee33a193ac75fe8e58fb897fcec4a628ffd4f6d53b55c",
+        "runs": [
+          {
+            "ms": 48.40000000037253,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1732.5,
+                "ms": 8.200000001117587
+              }
+            ],
+            "heapBytes": 7561126
+          },
+          {
+            "ms": 42.90000000037253,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 1876.5,
+                "ms": 5
+              }
+            ],
+            "heapBytes": 7900754
+          },
+          {
+            "ms": 28.09999999962747,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2039.1000000014901,
+                "ms": 3.599999999627471
+              }
+            ],
+            "heapBytes": 8172670
+          },
+          {
+            "ms": 29.90000000037253,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2193.4000000003725,
+                "ms": 3.300000000745058
+              }
+            ],
+            "heapBytes": 6502382
+          },
+          {
+            "ms": 44.79999999888241,
+            "requests": 0,
+            "spans": [
+              {
+                "name": "app.js:render",
+                "start": 2323.300000000745,
+                "ms": 4.699999999254942
+              }
+            ],
+            "heapBytes": 6894826
+          }
+        ],
+        "medianMs": 42.90000000037253,
+        "p95Ms": 48.40000000037253
+      }
+    }
+  },
+  "runtimeSha256": {
+    "style.css": "13e87e84d7160daf0de4b1791bb85869c8e9a54e1469688958c4758677582883",
+    "app.js": "2cc114e36443839d98437b198945a376e4bd8b69487fdf4141ab9ac06905fa68",
+    "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+    "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+    "model/v2-plan.mjs": "8a8b130daadc49168f19618454384168e4678baf57bf1b16fc726e9dcc486edf"
+  }
+}

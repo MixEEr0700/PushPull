@@ -24,7 +24,7 @@ class BackupV5Preview(BrowserHarness):
         before=self.records()
         text=self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const source=d.export();source.archives.push({id:'c1-large',kind:'opaque',createdAt:'2026-10-24T00:00:00.000Z',raw:'x'.repeat(4*1024*1024)+'\\ud800'});return (await(await import('./model/backup-v5.mjs')).exportBackupV5(source,{createdAt:'2026-10-24T00:00:00.000Z'})).text}finally{d.close()}}""")
         self.page.evaluate('navigator.serviceWorker.ready');self.page.wait_for_function('navigator.serviceWorker.controller!==null')
-        self.context.set_offline(True);self.page.reload();self.page.locator('[data-tab=settings]').click()
+        self.context.set_offline(True);self.page.reload();self.page.locator('[data-tab=settings]').click();self.advanced_data()
         self.page.locator('[data-preview-v5]').set_input_files({'name':'v5.json','mimeType':'application/json','buffer':text.encode()})
         expect(self.page.locator('[data-v5-preview]')).to_contain_text('Szkice nie są zawarte',timeout=120000)
         expect(self.page.locator('[data-v5-trial]')).to_contain_text('pełna zgodność')

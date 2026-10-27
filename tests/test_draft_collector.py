@@ -27,13 +27,13 @@ class DraftCollector(BrowserHarness):
         before=self.records();ls=self.page.evaluate('Object.entries(localStorage)')
         self.page.evaluate('navigator.serviceWorker.ready');self.page.wait_for_function('navigator.serviceWorker.controller!==null')
         self.context.set_offline(True)
-        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-collect-drafts]').click()
+        self.page.locator('[data-tab=settings]').click();self.advanced_data();self.page.locator('[data-collect-drafts]').click()
         expect(self.page.locator('[data-draft-collect-report]')).to_contain_text('Odpowiadające inne karty: 1',timeout=20000)
         self.assertEqual(before,self.records());self.assertEqual(ls,self.page.evaluate('Object.entries(localStorage)'))
         self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         other.close()
         # Test actual closed/restarted offline app with persisted sources.
-        self.page.reload();self.page.locator('[data-tab=settings]').click();self.page.locator('[data-collect-drafts]').click()
+        self.page.reload();self.page.locator('[data-tab=settings]').click();self.advanced_data();self.page.locator('[data-collect-drafts]').click()
         expect(self.page.locator('[data-draft-collect-report]')).to_contain_text('Stan pozostałych kart jest nieznany',timeout=20000)
         self.assertEqual(before,self.records())
 

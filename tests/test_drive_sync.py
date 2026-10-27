@@ -57,6 +57,7 @@ class ManualDriveFlow(BrowserHarness):
 
     def configure(self):
         self.page.locator('[data-tab=settings]').click()
+        self.advanced_data()
         self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
         self.page.locator('#driveConfig button').click()
@@ -70,6 +71,7 @@ class ManualDriveFlow(BrowserHarness):
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=60000)
 
     def restore_preview(self,file_id=None):
+        self.advanced_data()
         self.page.locator('[data-drive-action=restore]').click()
         expect(self.page.locator('#driveCopy')).to_be_visible(timeout=60000)
         if file_id:self.page.locator('#driveCopy').select_option(file_id)
@@ -111,7 +113,7 @@ class ManualDriveFlow(BrowserHarness):
         before=self.state();drafts=self.drafts()
         for width,height in [(390,844),(360,640),(1280,800)]:
             self.page.set_viewport_size({'width':width,'height':height})
-            self.page.get_by_role('button',name='Przywróć z Google Drive',exact=True).click()
+            self.advanced_data();self.page.get_by_role('button',name='Przywróć z Google Drive',exact=True).click()
             choice=self.page.locator('[data-drive-action=preview]')
             expect(choice).to_have_text('Wybierz tę kopię',timeout=60000)
             expect(self.page.locator('[data-restore-confirm]')).to_have_count(0)
@@ -205,8 +207,8 @@ class ManualDriveFlow(BrowserHarness):
         self.page.goto(self.url);self.activate();f=self.open_result('PUSH A','PUSH-A-1');self.fill_rows(f,'81.123','7')
         expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         local=self.state();drafts=self.drafts();self.configure();self.assertEqual(mock.posts,1)
-        mock.corrupt=True;self.page.locator('[data-drive-action=restore]').click()
-        expect(self.page.locator('[data-drive-status]')).to_contain_text('Nie znaleziono prawidłowej kopii')
+        mock.corrupt=True;self.advanced_data();self.page.locator('[data-drive-action=restore]').click()
+        expect(self.page.locator('[data-drive-detail]')).to_contain_text('Nie znaleziono prawidłowej kopii')
         self.assertEqual(self.state(),local);self.assertEqual(self.drafts(),drafts);mock.corrupt=False
         self.restore_preview();preview=self.page.locator('[data-restore-preview]')
         for text in ['Na tym urządzeniu','W wybranej kopii','TEST 3×5','ZASTĄPI','nie scala','Szkice']:expect(preview).to_contain_text(text)
@@ -257,7 +259,7 @@ class ManualDriveFlow(BrowserHarness):
         confirm_restore(self.page)
         expect(self.page.locator('[data-restore-success]')).to_have_count(0)
         expect(self.page.locator('h1')).to_have_text('Dane wymagają odzyskania')
-        expect(self.page.locator('#backupKey')).to_be_visible()
+        self.advanced_data();expect(self.page.locator('#backupKey')).to_be_visible()
         self.page.evaluate('()=>{IDBDatabase.prototype.transaction=window.__originalTransaction}')
         self.assertEqual(self.state(),candidate['data']) # Commit happened; failed post-read is never called success.
         self.assertTrue(self.alerts)
@@ -296,7 +298,7 @@ class ManualDriveFlow(BrowserHarness):
     def test_expired_auth_manual_retry_does_not_block_local_result_or_duplicate_series(self):
         mock=MockGoogle();mock.install(self.context);self.prepare();self.ready();self.configure();self.upload()
         before=self.state();mock.error=401;self.page.locator('[data-drive-action=upload]').click()
-        expect(self.page.locator('[data-drive-status]')).to_contain_text('Autoryzacja Google wygasła')
+        expect(self.page.locator('[data-drive-detail]')).to_contain_text('Autoryzacja Google wygasła')
         expect(self.page.locator('[data-drive-action=connect]')).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
         form=self.page.locator('.seriesResultForm');form.locator('[data-main=kg]').fill('77');form.locator('[data-main=reps]').fill('9')

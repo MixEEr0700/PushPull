@@ -60,3 +60,9 @@ input,textarea,select{background:#080808;border-color:#555;color:#fff;min-height
 button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-offset:3px}
 
 .series-line{grid-template-columns:52px minmax(0,1fr) 20px minmax(0,1fr) 44px}.series-line .btn{min-width:44px}
+
+/* Stage G: four manual backup actions; technical controls stay available. */
+[data-primary-backups]>.btn{text-align:left;width:100%}
+.backup-import{display:block;cursor:pointer;font-size:13px;min-height:44px}
+.backup-import input{display:block;width:100%;margin-top:6px;min-height:44px}
+[data-backup-advanced]{min-width:0}[data-drive-detail]{overflow-wrap:anywhere}

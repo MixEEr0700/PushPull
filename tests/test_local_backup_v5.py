@@ -13,7 +13,7 @@ class LocalBackupV5(BrowserHarness):
         return super().new_context(**options)
 
     def settings(self):
-        self.page.locator('[data-tab=settings]').click()
+        self.page.locator('[data-tab=settings]').click();self.advanced_data()
 
     def test_offline_mobile_download_preview_large_archive_and_no_writes(self):
         expect(self.page.locator('[data-act=start]')).to_be_visible()
