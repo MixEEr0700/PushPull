@@ -1,5 +1,5 @@
 """Stage E native reader / strict commands against independent full oracle."""
-from test_browser import BrowserHarness,confirm_restore
+from test_browser import BrowserHarness,confirm_restore,open_result_panel
 import test_fast_start
 from playwright.sync_api import expect
 
@@ -81,7 +81,7 @@ class RuntimeIndex(BrowserHarness):
         self.page.evaluate("""async()=>{const d=await(await fetch('./tests/fixtures/v1.json')).json(),j=await import('./model/journal.mjs');d.sessions.forEach(s=>s.status='done');d.activeId=null;d.nextType='PUSH A';d.trainingJournal=j.initialize('source-preview-test');const h=await PushPullDB.open(()=>{});try{await h.commit(d,{importing:true})}finally{h.close()}}""")
         self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.page.locator('[data-act=start]').click();expect(self.page.locator('[data-act=finish]')).to_be_visible()
-        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-expand="PUSH-A-1"]').click();open_result_panel(self.page)
         self.page.locator('[data-main=kg]').fill('27');self.page.locator('[data-main=reps]').fill('8')
         self.page.locator('.seriesResultForm [type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()

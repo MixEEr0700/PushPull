@@ -11,17 +11,17 @@ const lines=(e,targets=ex.targets,asSets=false)=>text(summary(e,targets,asSets))
 test('three prescribed L/P pairs compress to exactly one line; rendering leaves data, projections and editor drafts unchanged',()=>{
  const e=result(),before=structuredClone(e),projection=flatten(e.performance);
  editor(ex,'summary-draft',e,null);const draft=state(ex.id,'summary-draft');
- assert.deepEqual(lines(e),['15 × 105 kg']);assert.deepEqual(e,before);assert.deepEqual(flatten(e.performance),projection);assert.deepEqual(state(ex.id,'summary-draft'),draft);forget(ex.id,'summary-draft');
+ assert.deepEqual(lines(e),['L/P 15 × 105 kg']);assert.deepEqual(e,before);assert.deepEqual(flatten(e.performance),projection);assert.deepEqual(state(ex.id,'summary-draft'),draft);forget(ex.id,'summary-draft');
 });
 test('only asymmetric third set displays L/P, in target order regardless of physical row order',()=>{
  const e=result();e.performance.rows[4].segments[0].reps='12';e.performance.rows[5].segments[0].reps='14';e.performance.rows.reverse();
- assert.deepEqual(lines(e),['Seria 1: 15 × 105 kg','Seria 2: 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg']);
+ assert.deepEqual(lines(e),['Seria 1: L/P 15 × 105 kg','Seria 2: L/P 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg']);
  e.performance.rows.find(r=>r.setId===ex.targets[2].id&&r.side==='right').segments[0].kg='95';
  assert.equal(lines(e)[2],'Seria 3: L 12 × 105 kg · P 14 × 95 kg');
 });
 test('different sets with equal sides have one row per actual set; optional separated and unsplit records are supported',()=>{
  const e=result();for(const r of e.performance.rows.filter(r=>r.setId===ex.targets[2].id))r.segments[0].reps='12';
- assert.deepEqual(lines(e),['Seria 1: 15 × 105 kg','Seria 2: 15 × 105 kg','Seria 3: 12 × 105 kg']);
+ assert.deepEqual(lines(e),['Seria 1: L/P 15 × 105 kg','Seria 2: L/P 15 × 105 kg','Seria 3: L/P 12 × 105 kg']);
  const optional={...ex,sideMode:'optional'},unsplit=result(optional);assert.deepEqual(lines(unsplit),['15 × 105 kg']);
  unsplit.performance.rows=structuredClone(e.performance.rows);assert.deepEqual(lines(unsplit),lines(e));
  const legacy=result({...ex,sideMode:null});legacy.performance.rows[2].segments[0].kg='90';assert.deepEqual(lines(legacy),['Seria 1: 15 × 105 kg','Seria 2: 15 × 105 kg','Seria 3: 15 × 90 kg']);
@@ -29,10 +29,10 @@ test('different sets with equal sides have one row per actual set; optional sepa
 test('incomplete/ambiguous pairs never collapse; extra unprescribed pairs use only safe unique grouping',()=>{
  const e=result();e.performance.rows.splice(5,1);assert.equal(lines(e).length,3);assert.match(lines(e)[2],/Seria 3: L 15 × 105 kg · para L\/P nieustalona/);
  const extra=structuredClone(result().performance.rows.slice(0,2));extra.forEach(r=>{r.id=crypto.randomUUID();r.setId=null;});e.performance.rows=extra;
- assert.deepEqual(lines(e),['15 × 105 kg']);
+ assert.deepEqual(lines(e),['L/P 15 × 105 kg']);
  e.performance.rows.push(...structuredClone(extra).map(r=>({...r,id:crypto.randomUUID()})));
  assert.equal(lines(e).length,4);assert.ok(lines(e).every(s=>s.includes('para L/P nieustalona')));
- const bad=result();bad.performance.rows[0].segments[0].kg='';assert.match(summary(bad,ex.targets),/niepełny wynik/);assert.notDeepEqual(lines(bad),['15 × 105 kg']);
+ const bad=result();bad.performance.rows[0].segments[0].kg='';assert.match(summary(bad,ex.targets),/niepełny wynik/);assert.notDeepEqual(lines(bad),['L/P 15 × 105 kg']);
  bad.performance.rows[0].segments=undefined;assert.match(summary(bad,ex.targets),/Brak pełnych danych/);assert.match(summary({performance:{rows:[]}}),/Brak pełnych danych/);
  // More physical records than targets: extra target-less results stay visible.
  const more=result(),onePair=structuredClone(result().performance.rows.slice(0,2));onePair.forEach(r=>r.setId=null);onePair[0].segments[0].reps='10';more.performance.rows.push(...onePair);
@@ -54,6 +54,6 @@ test('rounds remain meaningful; independent A/B cards have independent compact r
 test('missing prescribed rows and unrelated targets cannot renumber actual extra sets',()=>{
  const e=result();e.performance.rows=e.performance.rows.slice(0,2);const extra=structuredClone(e.performance.rows);extra.forEach(r=>{r.id=crypto.randomUUID();r.setId=null;r.segments[0].kg='90';});e.performance.rows.push(...extra);
  const other={id:'unrelated-target',order:99,positionId:'other'};
- assert.deepEqual(lines(e,[...ex.targets,other]),['Seria 1: 15 × 105 kg','Seria 2: 15 × 90 kg']);
+ assert.deepEqual(lines(e,[...ex.targets,other]),['Seria 1: L/P 15 × 105 kg','Seria 2: L/P 15 × 90 kg']);
  const before=structuredClone(e);summary(e,ex.targets);assert.deepEqual(e,before);
 });

@@ -1,6 +1,6 @@
 """Actual editors/IDB/LS, same-origin peers and read-only observation."""
 from playwright.sync_api import expect
-from test_browser import BrowserHarness
+from test_browser import BrowserHarness,open_result_panel
 import test_indexeddb as legacy
 import test_v2_training as native
 import shutil
@@ -21,7 +21,7 @@ class DraftCollector(BrowserHarness):
         self.activate();f=self.open_result('PUSH A','PUSH-A-3');self.fill_rows(f,'100','6')
         expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         other=self.context.new_page();other.goto(self.url);expect(other.locator('[data-act=finish]')).to_be_visible()
-        other.locator('[data-expand="PUSH-A-3"]').click();other.locator('[data-panel=result]').click()
+        other.locator('[data-expand="PUSH-A-3"]').click();open_result_panel(other)
         other.locator('[data-rich-action=toggle]').click();other.locator('[data-field=kg]').first.fill('77')
         expect(other.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         before=self.records();ls=self.page.evaluate('Object.entries(localStorage)')

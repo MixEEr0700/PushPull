@@ -3,7 +3,7 @@ import json
 import os
 import signal
 from playwright.sync_api import expect
-from test_browser import BrowserHarness
+from test_browser import BrowserHarness,open_result_panel
 import test_v2_training as v2tests
 import test_indexeddb as legacy
 
@@ -93,11 +93,11 @@ class WorkoutDrafts(BrowserHarness):
         self.page.goto(self.url)
         self.activate();form=self.open_result('PULL B','PULL-B-6-SKI');self.fill_rows(form,'50','8');self.persisted(form)
         expect(self.page.locator('[data-expand="PULL-B-6-SKI"] .name')).to_have_text('Narciarz')
-        self.page.locator('[data-expand="PULL-B-6-SHRUGS"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-expand="PULL-B-6-SHRUGS"]').click();open_result_panel(self.page)
         form_b=self.page.locator('.performanceForm');form_b.locator('[data-rich-action=toggle]').click()
         self.fill_rows(form_b,'15','10');self.persisted(form_b)
         b=next(r for r in self.drafts() if r['exerciseId']=='PULL-B-6-SHRUGS')
-        self.page.locator('[data-expand="PULL-B-6-SKI"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-expand="PULL-B-6-SKI"]').click();open_result_panel(self.page)
         self.save_form(self.page.locator('.performanceForm'))
         self.assertEqual([d['exerciseId'] for d in self.drafts()],['PULL-B-6-SHRUGS'])
         self.page.evaluate('navigator.serviceWorker.ready')

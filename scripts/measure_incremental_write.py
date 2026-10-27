@@ -171,7 +171,8 @@ def one_profile(pw,url,profile,seed,cpu,writes):
         for n in range(writes):
             ex=exercises[n%len(exercises)]
             page.evaluate("id=>{const b=document.querySelector('[data-expand=\"'+id+'\"]');if(b.getAttribute('aria-expanded')!=='true')b.click()}",ex)
-            page.wait_for_selector('[data-panel=result]');page.evaluate("document.querySelector('[data-panel=result]').click()");page.wait_for_selector('.performanceForm')
+            # Current cards auto-open the editor; older/correction views need the opener.
+            page.wait_for_selector('.performanceForm,[data-panel=result]',state='attached');page.evaluate("if(!document.querySelector('.performanceForm'))document.querySelector('[data-panel=result]').click()");page.wait_for_selector('.performanceForm')
             page.evaluate(FILL,{'native':True,'weight':str(31+n)})
             page.wait_for_function("document.querySelector('[data-draft-status]')?.textContent.includes('Szkic zapisany lokalnie')",timeout=600000)
             dialogs.clear()

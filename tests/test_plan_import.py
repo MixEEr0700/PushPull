@@ -1,5 +1,5 @@
 """Synthetic data-only V3/V4 through the existing mobile UI; no owner plan."""
-from test_browser import confirm_restore
+from test_browser import confirm_restore,open_result_panel
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -30,7 +30,7 @@ class PlanImport(BrowserHarness):
         with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
     def form(self,id):
-        self.page.locator(f'[data-expand="{id}"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator(f'[data-expand="{id}"]').click();open_result_panel(self.page)
         f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click();return f
     def fill(self,f):
         for x in f.locator('[data-field=kg]').all():x.fill('20')
@@ -42,7 +42,7 @@ class PlanImport(BrowserHarness):
     def test_import_preview_cancel_failure_future_only_activation_and_old_draft(self):
         self.prepare();self.ready();before=self.state()
         # Existing legacy draft must survive preview/import/activation.
-        self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-expand="PUSH-A-1"]').click();open_result_panel(self.page)
         self.page.locator('[data-main=kg]').fill('61');self.page.locator('[data-main=reps]').fill('7')
         self.page.wait_for_function("document.querySelector('[data-draft-status]')?.textContent.includes('Szkic zapisany')")
         self.preview();self.assertEqual(self.state(),before)
@@ -53,7 +53,7 @@ class PlanImport(BrowserHarness):
         self.confirm=True;self.activate();self.page.locator('[data-tab=training]').click()
         self.assertEqual(self.state()['sessions'],before['sessions'])
         if self.page.locator('[data-expand="PUSH-A-1"]').get_attribute('aria-expanded')!='true':self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         expect(self.page.locator('[data-main=kg]')).to_have_value('61')
         self.page.locator('.seriesResultForm [type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-type="TEST-A"]')).to_be_visible()
@@ -131,7 +131,7 @@ class PlanImport(BrowserHarness):
         snapshot=state['trainingJournal']['sessionSnapshots'][-1]
         self.page.locator('[data-panel=stats]').click();expect(self.page.locator('.stat-table')).to_contain_text('640')
         self.page.locator('[data-tab=calendar]').click();self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click()
-        self.page.locator('[data-expand="TEST-4"]').click();self.page.locator('[data-panel=historicalResult]').click()
+        self.page.locator('[data-expand="TEST-4"]').click();open_result_panel(self.page)
         f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click();f.locator('[data-row="0"][data-segment="2"][data-field=kg]').fill('11');self.save(f)
         self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'][-1],snapshot)
         state=self.state()
@@ -148,8 +148,8 @@ class PlanImport(BrowserHarness):
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="TEST-A"]').click();self.page.locator('[data-act=start]').click()
         f=self.form('TEST-1');self.fill(f)
-        self.page.locator('[data-expand="TEST-2"]').click();self.page.locator('[data-panel=result]').click();self.page.locator('[data-rich-action=toggle]').click();self.fill(self.page.locator('.performanceForm'))
-        self.page.locator('[data-expand="TEST-1"]').click();self.page.locator('[data-panel=result]').click();self.save(self.page.locator('.performanceForm'))
+        self.page.locator('[data-expand="TEST-2"]').click();open_result_panel(self.page);self.page.locator('[data-rich-action=toggle]').click();self.fill(self.page.locator('.performanceForm'))
+        self.page.locator('[data-expand="TEST-1"]').click();open_result_panel(self.page);self.save(self.page.locator('.performanceForm'))
         self.page.reload();expect(self.page.locator('[data-draft-resume]')).to_have_count(1)
         self.page.locator('[data-draft-resume]').click();expect(self.page.locator('.performanceForm')).to_have_attribute('data-id','TEST-2')
         self.assertEqual(self.local_raw(),legacy.RAW)
@@ -161,7 +161,7 @@ class PlanImport(BrowserHarness):
         training.V2Training.activate(self)
         form=training.V2Training.open_result(self,'PUSH A','PUSH-A-1')
         training.V2Training.fill_rows(self,form,'22.25','9');training.V2Training.save_form(self,form)
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         self.page.locator('[data-quick=kg]').fill('45.5')
         expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         before=self.state()

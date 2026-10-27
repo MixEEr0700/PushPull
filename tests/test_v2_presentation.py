@@ -1,6 +1,6 @@
 """Issue #12: source skeleton, read-only preview and approved V2 cards."""
 from playwright.sync_api import expect
-from test_browser import BrowserHarness
+from test_browser import BrowserHarness,open_result_panel
 import test_indexeddb as legacy
 import test_v2_training as flows
 
@@ -48,9 +48,8 @@ class V2Presentation(BrowserHarness):
             card=self.page.locator('.exercise-card').filter(has=self.page.locator(f'[data-expand="{eid}"]'))
             expect(card.locator('.name')).to_have_text(label)
             expect(card.locator('.exercise-description')).to_have_count(0)
-            expect(card).to_contain_text('2 serie | 8–10 / 8–10 powt. | Tempo 2 0 1 0 | RIR 0')
+            expect(card).to_contain_text('2 × 8–10 | tempo 2010 | RIR 0')
             card.locator('[data-expand]').click()
-            card.locator('.expanded .coach-note > summary').click()
             expect(card.locator('.expanded p.small')).to_contain_text('C1: narciarz')
             card.locator('[data-personal-note] > summary').click()
             expect(card.locator('.v2NoteForm textarea')).to_be_visible()
@@ -59,7 +58,7 @@ class V2Presentation(BrowserHarness):
             card.locator('.v2NoteForm [type=submit]').click()
             expect(self.page.get_by_text('Notatka zapisana',exact=True)).to_be_visible()
             expect(card.locator('.v2NoteForm textarea')).to_have_value('Moja notatka '+eid)
-            card.locator('[data-panel=result]').click()
+            open_result_panel(card)
             form=card.locator('.performanceForm')
             expect(form).to_have_attribute('data-id',eid)
             form.locator('[data-rich-action=toggle]').click()
@@ -71,7 +70,7 @@ class V2Presentation(BrowserHarness):
         self.assertEqual(self.state()['entries'],before['entries'])
         for eid in ['PULL-B-6-SKI','PULL-B-6-SHRUGS']:
             self.page.locator(f'[data-expand="{eid}"]').click()
-            self.page.locator('[data-panel=result]').click()
+            open_result_panel(self.page)
             flows.V2Training.save_form(self,self.page.locator('.performanceForm'))
         entries=self.state()['entries'][-2:]
         self.assertEqual([e['exerciseId'] for e in entries],['PULL-B-6-SKI','PULL-B-6-SHRUGS'])

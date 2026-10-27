@@ -24,6 +24,15 @@ def confirm_restore(page):
     page.locator('[data-restore-confirm]').click()
     expect(page.locator('[data-restore-busy]')).to_have_count(0,timeout=120000)
 
+def open_result_panel(scope):
+    """Issue95 auto-opens the form; correction/history still have an opener.
+    Also exercises old-release upgrade fixtures that need an explicit click.
+    """
+    form=scope.locator('.performanceForm,.seriesResultForm').first
+    if not form.is_visible():
+        scope.locator('[data-panel=result],[data-panel=historicalResult]').click()
+    expect(form).to_be_visible()
+
 class QuietServer(http.server.SimpleHTTPRequestHandler):
     upgrade_latest = False
     runtime_ref = None
@@ -143,7 +152,7 @@ class BrowserHarness(unittest.TestCase):
 
     def result(self, kg='100', reps='10'):
         self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         self.page.locator('[data-main=kg]').fill(kg)
         self.page.locator('[data-main=reps]').fill(reps)
 
@@ -204,7 +213,7 @@ class BrowserRegression(BrowserHarness):
         self.page.locator('[data-act=openSession]').click()
         if self.page.locator('[data-expand="PUSH-A-1"]').get_attribute('aria-expanded') == 'false':
             self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=historicalResult]').click()
+        open_result_panel(self.page)
         self.page.locator('[data-series-toggle]').click()
         self.page.locator('[data-series-index="1"][data-field=kg]').fill('85')
         self.save()
@@ -300,7 +309,7 @@ class BrowserRegression(BrowserHarness):
         self.assertEqual(self.state(),json.loads(original))
         self.assertIn('Operacja przerwana',self.alerts[0])
         self.page.locator('[data-tab=training]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         expect(self.page.locator('[data-main=kg]')).to_have_value('120')
 
     def test_storage_access_denied_is_not_a_new_database(self):
@@ -331,7 +340,7 @@ class BrowserRegression(BrowserHarness):
         self.page.locator('[data-type="PUSH A"]').click()
         self.start()
         self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         self.confirm=False
         self.page.locator('[data-main=kg]').fill('110')
         expect(self.page.locator('[data-main=kg]')).to_have_value('100')
@@ -358,7 +367,7 @@ class BrowserRegression(BrowserHarness):
             self.assertEqual(self.page.evaluate('getComputedStyle(document.body).backgroundColor'),'rgb(0, 0, 0)')
             card=self.page.locator('.exercise-card').first
             self.assertEqual(card.evaluate('(e)=>getComputedStyle(e).backgroundColor'),'rgb(17, 17, 17)')
-            expect(card.locator('.detail').first).not_to_be_visible()
+            expect(card.locator('.detail').first).to_be_visible()
             self.assertGreaterEqual(card.locator('[data-expand]').bounding_box()['height'],44)
             before=self.state();card.locator('[data-expand]').click()
             expect(card.locator('.detail').first).to_be_visible()

@@ -66,3 +66,22 @@ button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-off
 .backup-import{display:block;cursor:pointer;font-size:13px;min-height:44px}
 .backup-import input{display:block;width:100%;margin-top:6px;min-height:44px}
 [data-backup-advanced]{min-width:0}[data-drive-detail]{overflow-wrap:anywhere}
+
+/* Issue #95 — compact cards retain their plan and actual result when closed. */
+.exercise-toggle .num{font-size:20px;width:36px;height:36px;align-self:flex-start}
+.exercise-toggle .name{font-size:18px;font-weight:750}
+.exercise-toggle[aria-expanded=false] .detail{display:block}
+.exercise-toggle[aria-expanded=false] .last-series{display:inline}
+.exercise-toggle .detail{overflow-wrap:anywhere}
+.exercise-notes{margin:0 0 8px}.exercise-notes h3{font-size:12px;font-weight:600;color:#aaa;margin:0 0 4px}
+.exercise-notes .coach-note{margin:4px 0}.coach-note small{font-size:10px;color:#999}
+.coach-note p{margin:2px 0 6px}.personal-note{margin:0}.personal-note summary{padding:2px 0}
+.result-panel{margin-top:8px;padding-top:8px}.quick-result input{width:100%;font-size:16px}
+.result-buttons{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:8px 0}
+.result-buttons .btn{width:100%;padding:9px 5px}
+.expanded:has(.result-panel) .result-opener{display:none}
+.series-line,.individual-line{display:grid;grid-template-columns:22px minmax(0,1fr) minmax(0,1fr) 44px;gap:6px;align-items:center;margin:6px 0}
+.individual-line input{width:100%;font-size:16px;padding:10px 6px}
+.individual-line .btn{min-width:44px;padding:7px 2px}
+.bottom .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;padding:5px}
+.nav-icon{width:23px;height:23px;flex-shrink:0}

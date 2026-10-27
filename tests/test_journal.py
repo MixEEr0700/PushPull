@@ -1,5 +1,5 @@
 """The opt-in journal through the real mobile forms, calendar and JSON controls."""
-from test_browser import confirm_restore
+from test_browser import confirm_restore,open_result_panel
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -34,7 +34,7 @@ class JournalFlow(BrowserHarness):
     def start_result(self):
         self.page.locator('[data-act=start]').click();self.ready()
         self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         expect(self.page.locator('[data-main=kg]')).to_have_value('')
         self.page.locator('[data-main=kg]').fill('100')
         self.page.locator('[data-main=reps]').fill('8')
@@ -90,7 +90,7 @@ class JournalFlow(BrowserHarness):
         self.page.locator('[data-tab=calendar]').click()
         self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click()
         self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=historicalResult]').click()
+        open_result_panel(self.page)
         self.page.locator('[data-series-toggle]').click()
         self.page.locator('[data-series-index="1"][data-field=kg]').fill('60')
         self.page.locator('.seriesResultForm [type=submit]').click()
@@ -128,7 +128,7 @@ class JournalFlow(BrowserHarness):
         expect(page.locator('.exercise-card').first).to_contain_text('60 kg')
         page.locator('[data-act=start]').click()
         page.locator('[data-expand="PUSH-A-1"]').click()
-        page.locator('[data-panel=result]').click()
+        open_result_panel(page)
         page.locator('.seriesResultForm [type=submit]').click()
         expect(page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
         newer=page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value.entries.at(-1)}finally{d.close()}}')
@@ -140,7 +140,7 @@ class JournalFlow(BrowserHarness):
         self.page.locator('[data-act=start]').click();self.ready()
         before=self.state()
         self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         self.page.locator('[data-main=kg]').fill('100')
         self.page.locator('[data-main=reps]').fill('8')
         self.page.evaluate("""() => {window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='journalState' && v.id==='active')throw new DOMException('Journal quota','QuotaExceededError');return window.__put.call(this,v)}}""")
@@ -196,7 +196,7 @@ class JournalFlow(BrowserHarness):
         self.assertTrue(snapshot['planVersionId'].startswith('observed:'))
         self.assertNotIn('activePlanVersionId',before['trainingJournal'])
         for eid,kg in [('PULL-B-6-SKI','23'),('PULL-B-6-SHRUGS','12')]:
-            self.page.locator(f'[data-expand="{eid}"]').click();self.page.locator('[data-panel=result]').click()
+            self.page.locator(f'[data-expand="{eid}"]').click();open_result_panel(self.page)
             form=self.page.locator('.seriesResultForm')
             form.locator('[data-main=kg]').fill(kg);form.locator('[data-main=reps]').fill('8')
             expect(form.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')

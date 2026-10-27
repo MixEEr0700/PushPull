@@ -2,7 +2,7 @@
 import json
 import subprocess
 from playwright.sync_api import expect
-from test_browser import BrowserHarness, ROOT
+from test_browser import BrowserHarness, ROOT,open_result_panel
 import test_indexeddb as legacy_tests
 
 KEY='training-model-v1'
@@ -100,7 +100,7 @@ class ModelMigration(BrowserHarness):
         before=self.records()
         self.page.evaluate("""() => {window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='meta' && v.key==='training-model-v1')throw new DOMException('Model quota','QuotaExceededError');return window.__put.call(this,v)}}""")
         self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         self.page.locator('[data-main=kg]').fill('110')
         self.page.locator('[data-main=reps]').fill('10')
         # Draft persistence is independent of the approved source/model transaction.
