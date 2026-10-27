@@ -28,6 +28,7 @@ export const LIMITS=Object.freeze({objectBytes:128*1024*1024,totalBytes:512*1024
 const verifiedBundles=new WeakMap();
 const trainingBundles=new WeakMap();
 const checkpointDigests=new WeakMap();
+const verifiedObjects=new WeakMap();
 async function checkpointDigest(checkpoint,maxBytes=LIMITS.totalBytes){
  checkpoint=protocolInput(checkpoint);
  if(!checkpointDigests.has(checkpoint)){
@@ -47,13 +48,17 @@ export async function objectRecord(value,limits=LIMITS){
  return freeze({id:await shaBytes(bytes),json,bytes:bytes.length});
 }
 export async function readObject(row,limits=LIMITS){
- portable(row);row=freeze({...row}); // Primitive JSON text/ID/length are detached before SHA awaits.
+ portable(row);
+ const proven=verifiedObjects.get(row);
+ if(verifiedObjects.has(row)){check(row.bytes<=limits.objectBytes,'object size');return proven;}
+ row=Object.isFrozen(row)?row:freeze({...row}); // Detach mutable rows before SHA awaits.
  check(row&&Object.keys(row).join(',')==='id,json,bytes'&&typeof row.json==='string','object shape');
  check(Number.isSafeInteger(row.bytes)&&row.bytes<=limits.objectBytes,'object size');const bytes=encodedJSON(row.json,limits.objectBytes);check(row.bytes===bytes.length,'object size');
- check(row.id===await shaBytes(bytes),'object SHA-256');const value=parseJson(row.json);portable(value);return freeze(value);
+ check(row.id===await shaBytes(bytes),'object SHA-256');const value=parseJson(row.json);portable(value);const owned=freeze(value);verifiedObjects.set(row,owned);return owned;
 }
 export function validateState(state){
- check(state&&['id,protocol,epoch,revision,indexRoot,counts,ownerId,modelEnabled,legacyRef,checkpointRefs,root','id,protocol,epoch,revision,indexRoot,counts,ownerId,modelEnabled,legacyRef,checkpointRefs,allocation,root'].includes(Object.keys(state).join(',')),'state shape');
+ if(state&&Object.hasOwn(state,'runtime'))check(state.runtime&&Object.keys(state.runtime).join(',')==='version,indexRoot,sourceRoot'&&state.runtime.version===1&&state.runtime.sourceRoot===state.indexRoot&&/^[a-f0-9]{64}$/.test(state.runtime.indexRoot),'runtime index version/root');
+ check(state&&['id,protocol,epoch,revision,indexRoot,counts,ownerId,modelEnabled,legacyRef,checkpointRefs,root','id,protocol,epoch,revision,indexRoot,counts,ownerId,modelEnabled,legacyRef,checkpointRefs,allocation,root','id,protocol,epoch,revision,indexRoot,counts,ownerId,modelEnabled,legacyRef,checkpointRefs,allocation,runtime,root'].includes(Object.keys(state).join(',')),'state shape');
  check(state.id==='active'&&state.protocol===PROTOCOL&&typeof state.epoch==='string'&&state.epoch.length>0&&Number.isSafeInteger(state.revision)&&state.revision>=0&&[state.root,state.indexRoot].every(v=>/^[a-f0-9]{64}$/.test(v))&&typeof state.ownerId==='string'&&state.ownerId.length>0,'protocol state');
  check(Object.keys(state.counts).join(',')===ROW_STORES.join(',')&&Object.values(state.counts).every(n=>Number.isSafeInteger(n)&&n>=0)&&typeof state.modelEnabled==='boolean'&&/^[a-f0-9]{64}$/.test(state.legacyRef),'state counts/capability');
  check(Array.isArray(state.checkpointRefs)&&state.checkpointRefs.every(r=>r&&Object.keys(r).join(',')==='id,sha256'&&typeof r.id==='string'&&r.id.length>0&&/^[a-f0-9]{64}$/.test(r.sha256))&&new Set(state.checkpointRefs.map(r=>r.id)).size===state.checkpointRefs.length,'checkpoint references');return state;
@@ -203,6 +208,7 @@ async function decodeBundle(input,{signal,limits:requestedLimits}={},training=fa
  const source=metadata('source');check(seenMeta.size===maps.journalMetadata.size,'unused metadata');
  for(const store of ROW_STORES.filter(s=>s!=='journalMetadata'))check(seenCollections.has(store)||records[store].length===0,'unused collection');
  await validateSource(source,state.ownerId);checkAbort(signal);
+ if(!training&&state.runtime)await (await import('./journal-runtime-index.mjs')).auditRuntime(state,maps,source,{signal});
  if(!training){
   const budget=freeze({bytes:total,records:count,maxObjectBytes});
   if(state.allocation){validateAllocation(state.allocation,limits);check(JSON.stringify(state.allocation)===JSON.stringify(budget),'allocation mismatch');}

@@ -34,7 +34,7 @@ class FastStart(BrowserHarness):
         self.prepare()
         result=self.page.evaluate("""async()=>{
          const api=await import('./model/journal-idb.mjs'),db=await api.connectV2('pushpull'),before=await api.readRecords(db);
-         const d=__fastDB.value;d.sessions.find(s=>s.id===d.activeId).status='done';d.activeId=null;
+         await __fastDB.ensureHistory();const d=__fastDB.value;d.sessions.find(s=>s.id===d.activeId).status='done';d.activeId=null;
          __reads=[];await __fastDB.commit(d);const reads=structuredClone(__reads),deferred=__fastDB.archivesDeferred,after=await api.readRecords(db),audited=await __fastDB.auditExport();db.close();
          const kept=s=>before.records[s].every(r=>after.records[s].some(v=>api.same(r,v)));
          return {deferred,unchangedCheckpoints:api.same(before.records.journalCheckpoints,after.records.journalCheckpoints),unchangedArchives:api.same(before.records.journalArchives,after.records.journalArchives),objectsKept:kept('journalObjects'),indexKept:kept('journalIndex'),noRaw:!reads.some(r=>r.name==='journalCheckpoints'||r.name==='journalObjects'&&r.op==='getAll'),data:api.same(audited.data,d)};
@@ -62,7 +62,7 @@ class FastStart(BrowserHarness):
     def test_old_c_root_certification_is_once_and_does_not_rewrite_history(self):
         self.prepare()
         self.page.evaluate("""async()=>{const api=await import('./model/journal-idb.mjs'),codec=await import('./model/journal-protocol.mjs'),db=await api.connectV2('pushpull');try{
-         const b=await api.readRecords(db),{allocation,...old}=b.state,state=await codec.sealState(old);window.__oldRows=b.records;
+         const b=await api.readRecords(db),{allocation,runtime,...old}=b.state,state=await codec.sealState(old);window.__oldRows=b.records;
          await api.transact(db,['journalState'],'readwrite',tx=>tx.objectStore('journalState').put(state));
         }finally{db.close()}}""")
         self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
@@ -86,7 +86,7 @@ class FastStart(BrowserHarness):
     def test_live_abort_and_quota_leave_every_store_and_memory_unchanged(self):
         self.prepare()
         result=self.page.evaluate("""async()=>{
-         const api=await import('./model/journal-idb.mjs'),db=await api.connectV2('pushpull'),before=await api.readRecords(db),value=__fastDB.value;let failures=0;
+         const api=await import('./model/journal-idb.mjs'),db=await api.connectV2('pushpull'),before=await api.readRecords(db);await __fastDB.ensureHistory();const value=__fastDB.value;let failures=0;
          for(const kind of ['QuotaExceededError','AbortError']){
           const add=IDBObjectStore.prototype.add;let fired=false;
           IDBObjectStore.prototype.add=function(...args){if(this.name==='journalSessions'&&!fired){fired=true;if(kind==='AbortError')this.transaction.abort();throw new DOMException('injected',kind)}return add.apply(this,args)};

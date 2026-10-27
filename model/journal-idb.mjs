@@ -167,13 +167,15 @@ export async function replaceLive(db,input,{expectedState,ownerId,modelEnabled,l
  const limits=limitsFor(),old=before.state,original=before.records;
  const created=await createProtocol(source,{epoch:old.epoch,revision:old.revision+1,ownerId,modelEnabled,legacyRaw,signal});
  const records={...created.records,journalArchives:original.journalArchives};
+ const runtime=old.runtime?await (await import('./journal-runtime-index.mjs')).buildRuntime(source,{signal,sourceRoot:before.state.indexRoot}):null;
+ if(runtime)records.journalObjects=[...new Map([...records.journalObjects,...runtime.objects].map(r=>[r.id,r])).values()];
  const leaves=[];for(const store of ROW_STORES)for(const row of records[store])leaves.push([indexKey(store,row.id),await hashJSON(row)]);
- const tree=await buildIndex(leaves,{signal});records.journalIndex=[...tree.nodes.values()];
+ const tree=await buildIndex(leaves,{signal});records.journalIndex=[...new Map([...tree.nodes.values(),...(runtime?.nodes??[])].map(r=>[r.id,r])).values()];
  const knownObjects=new Set(trainingProof(before).objectIds),knownNodes=new Set(original.journalIndex.map(r=>r.id));
  const addedObjects=records.journalObjects.filter(r=>!knownObjects.has(r.id)),addedNodes=records.journalIndex.filter(r=>!knownNodes.has(r.id));
  const allocation={bytes:old.allocation.bytes+addedObjects.reduce((n,r)=>n+r.bytes,0),records:old.allocation.records+addedObjects.length+addedNodes.length+ROW_STORES.reduce((n,s)=>n+records[s].length-original[s].length,0),maxObjectBytes:records.journalObjects.reduce((n,r)=>Math.max(n,r.bytes),old.allocation.maxObjectBytes)};
  validateAllocation(allocation,limits);
- const state=await sealState({...created.state,indexRoot:tree.root,counts:Object.fromEntries(ROW_STORES.map(s=>[s,records[s].length])),checkpointRefs:old.checkpointRefs,allocation});
+ const state=await sealState({...created.state,indexRoot:tree.root,counts:Object.fromEntries(ROW_STORES.map(s=>[s,records[s].length])),checkpointRefs:old.checkpointRefs,allocation,...(runtime?{runtime:{...runtime.runtime,sourceRoot:tree.root}}:{})});
  await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
   guard();check(same(await request(tx.objectStore('journalState').get('active')),old),'live root CAS');
   const marker={key:MARKER,protocol:2,status:'active',epoch:old.epoch};check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'live marker CAS');
@@ -196,7 +198,7 @@ export async function replaceLive(db,input,{expectedState,ownerId,modelEnabled,l
 }
 /** Full operation for archive additions, preimages and explicit import/restore. A confirmed restore can quarantine a corrupt representation
  * as exact opaque evidence; normal operations never purge immutable records. */
-export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0}={}){
+export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0,indexed=false}={}){
  portable(input);const source=freeze(structuredClone(input)),before=await readRecords(db,{signal});
  check(same(before.state??null,expectedState??null),'bulk root CAS');
  if(!recovery)await auditBundle(before,{signal});
@@ -205,6 +207,11 @@ export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled
  const checkpoint=recovery?{id:'recovery:'+crypto.randomUUID(),protocol:2,raw:JSON.stringify(before.records)}:null;
  if(checkpoint)checkpoint.sha256=await sha(checkpoint.raw);
  let bundle=await createProtocol(source,{epoch:recovery?crypto.randomUUID():before.state.epoch,revision:previousRevision+1,ownerId,modelEnabled,legacyRaw,checkpoints:recovery?[checkpoint]:before.records.journalCheckpoints,signal});
+ if(indexed||before.state?.runtime){
+  const runtime=await (await import('./journal-runtime-index.mjs')).buildRuntime(source,{signal,sourceRoot:bundle.state.indexRoot});
+  const records={...bundle.records,journalObjects:[...new Map([...bundle.records.journalObjects,...runtime.objects].map(r=>[r.id,r])).values()],journalIndex:[...new Map([...bundle.records.journalIndex,...runtime.nodes].map(r=>[r.id,r])).values()]};
+  const state=await sealState({...bundle.state,runtime:{...runtime.runtime,sourceRoot:bundle.state.indexRoot}});records.journalState=[state];bundle=freeze({state,records});
+ }
  const anticipated={...bundle.records};
  for(const store of ['journalObjects','journalIndex'])anticipated[store]=[...new Map([...(recovery?[]:before.records[store]),...bundle.records[store]].map(r=>[r.id,r])).values()];
  anticipated.journalCheckpoints=recovery?[checkpoint]:before.records.journalCheckpoints;
@@ -238,6 +245,7 @@ export async function openWriter(db,{bundle,signal,guard=()=>{},limits:requested
  const limits=limitsFor(requestedLimits);
  let saved=protocolInput(bundle??await readRecords(db,{signal})),training=trainingProof(saved),source=training?.source??await auditBundle(saved,{signal,limits}),state=saved.state,busy=false;
  let allocation=training?.budget??protocolBudget(saved);validateAllocation(allocation,limits);
+ if(state.runtime){const {openIndexedWriter}=await import('./journal-runtime.mjs');return openIndexedWriter(db,{guard,signal,completeSource:source,bundle:saved,limits});}
  const maps=Object.fromEntries(STORES.map(s=>[s,new Map(saved.records[s].map(r=>[r.id,r]))]));saved=null;
  if(training)for(const id of training.objectIds)if(!maps.journalObjects.has(id))maps.journalObjects.set(id,null);
  let pairs,globalIds;

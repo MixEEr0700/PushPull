@@ -22,11 +22,13 @@ export async function shaBytes(bytes){return Array.from(new Uint8Array(await cry
 export const sha=value=>shaBytes(encodedJSON(value));
 export const hashJSON=value=>sha(JSON.stringify(value));
 export const indexKey=(store,id)=>JSON.stringify([store,id]);
+const verifiedNodes=new WeakSet();
 export async function verifyNode(node){
- portable(node);node=freeze({...node}); // Capture before awaiting SHA; caller-owned nodes can change.
+ if(node&&verifiedNodes.has(node))return node;
+ portable(node);node=Object.isFrozen(node)?node:freeze({...node}); // Capture before awaiting SHA; caller-owned nodes can change.
  check(node&&Object.keys(node).join(',')==='id,key,value,left,right,height','index shape');
  check(typeof node.key==='string'&&/^[a-f0-9]{64}$/.test(node.value)&&[node.left,node.right].every(v=>v===null||/^[a-f0-9]{64}$/.test(v))&&Number.isSafeInteger(node.height)&&node.height>0,'index fields');
- const {id,...body}=node;check(id===await hashJSON(body),'index SHA-256');return freeze(node);
+ const {id,...body}=node;check(id===await hashJSON(body),'index SHA-256');verifiedNodes.add(node);return node;
 }
 export async function editIndex(root,read,changes,{signal}={}){
  const added=new Map(),observed=new Map();
@@ -57,8 +59,13 @@ export async function editIndex(root,read,changes,{signal}={}){
   return node(key,value,left,right);
  }
  async function insert(id,key,value){
-  const old=await get(id);if(!old)return node(key,value,null,null);
-  if(key===old.key)return node(key,value,old.left,old.right);
+  const old=await get(id);if(!old)return value===null?null:node(key,value,null,null);
+  if(key===old.key){
+   if(value!==null)return node(key,value,old.left,old.right);
+   if(!old.left)return old.right;if(!old.right)return old.left;
+   let successor=await get(old.right);while(successor.left)successor=await get(successor.left);
+   return balance(successor.key,successor.value,old.left,await insert(old.right,successor.key,null));
+  }
   return key<old.key?balance(old.key,old.value,await insert(old.left,key,value),old.right):balance(old.key,old.value,old.left,await insert(old.right,key,value));
  }
  for(const [key,value] of changes){checkAbort(signal);root=await insert(root,key,value);}
@@ -84,4 +91,12 @@ export async function auditIndex(root,read,leaves,{signal}={}){
   check(n.height===1+Math.max(left,right)&&Math.abs(left-right)<=1,'index balance');return n.height;
  }
  portable(root);await visit(root);check(pending.size===0,'index missing records');return seen;
+}
+
+/** Intermediate AVL versions created during preparation were never committed.
+ * Retain only added nodes reachable from the final roots, never remove old data. */
+export function committedNodes(roots,added){
+ const kept=new Map();
+ function visit(id){if(!id||kept.has(id)||!added.has(id))return;const n=added.get(id);kept.set(id,n);visit(n.left);visit(n.right)}
+ for(const root of roots)visit(root);return kept;
 }

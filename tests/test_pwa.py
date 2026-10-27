@@ -26,7 +26,7 @@ from serve_test import ReleaseHandler, make_server, verify_release
 # Historical app bytes stay at their original ref. The current release builder
 # also precaches the newly introduced, unused-by-old-app v4 support modules.
 V4_ASSETS={'model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs'}
-V4_ASSETS.update({'model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'})
+V4_ASSETS.update({'model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'})
 def historical_asset(ref,name):
     if name in V4_ASSETS:return (ROOT/name).read_bytes()
     return subprocess.check_output(['git','show',ref+':'+name],cwd=ROOT)
@@ -218,7 +218,8 @@ class PWADeployment(unittest.TestCase):
         f.locator('[data-row="1"][data-field=kg]').fill('35')
         expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         before=self.notification_state()
-        self.controller['directory']=current;self.wait_update();self.reopen()
+        # One-time verified index installation is not an ordinary startup.
+        self.controller['directory']=current;self.wait_update();self.reopen(timeout=20000)
         self.assertEqual(self.notification_state(),before)
         release=json.loads((current/'release.json').read_text())['release'][:12]
         self.page.locator('[data-tab=settings]').click();expect(self.page.locator('[data-pwa-version]')).to_have_text('Wersja aplikacji: '+release)
@@ -722,7 +723,8 @@ class PWADeployment(unittest.TestCase):
         before=self.snapshot();sid=before['data']['activeId']
         draft=lambda:self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
         old_drafts=draft()
-        self.controller['directory']=current_release;self.wait_update();self.reopen();self.context.set_offline(True)
+        # One-time v1 conversion plus index installation; all data assertions stay exact.
+        self.controller['directory']=current_release;self.wait_update();self.reopen(timeout=20000);self.context.set_offline(True)
         self.assertEqual(self.snapshot(),before);self.assertEqual(draft(),old_drafts)
         card=self.page.locator('.exercise-card').filter(has=self.page.locator('[data-expand="PULL-B-1"]'))
         expect(card.locator('.exercise-toggle .last-result')).to_have_text('15 × 105 kg')

@@ -55,6 +55,25 @@ def instrument_v2(text):
     body=body.replace('   maps.journalObjects.set(object.id,object);',"   if(window.__slowPublish){const until=performance.now()+60;while(performance.now()<until){}}\n   maps.journalObjects.set(object.id,object);",1)
     return text[:start]+body+text[end:]
 
+def instrument_runtime(text):
+    markers=[('  portable(command);const cmd=protocolInput(command);','detach-validate'),
+      ('   const primary=await editIndex(', 'index-prepare'),
+      ("   await transact(db,[...STORES,'meta'],'readwrite',async tx=>{",'transaction-open'),
+      ("    guard();check(same(await request(tx.objectStore('journalState')",'cas'),
+      ("    for(const [store,rows] of [['journalObjects',objects],['journalIndex',nodes]])await addRows(",'write-objects'),
+      ("    for(const {store,row} of changed){if(row.version===1)tx.objectStore(store).add(row);else tx.objectStore(store).put(row);}",'write-result-root'),
+      ("    await Promise.all([['journalObjects',objects],['journalIndex',nodes]].map(([store,rows])=>checkRows(",'readback'),
+      ('   state=next;source=result.source;', 'publication')]
+    # Command entry marker occurs on all three command functions.
+    for target,label in markers:
+        if target not in text:raise ValueError('runtime stage marker changed: '+label)
+        indent=target[:len(target)-len(target.lstrip())]
+        injected=indent+f"window.__writeMarks?.push({{name:'{label}',at:performance.now()}});\n"
+        if label=='cas':injected+=indent+'window.__saveTx=tx;\n'
+        if label=='publication':injected+="   if(window.__slowPublish){const until=performance.now()+60;while(performance.now()<until){}}\n"
+        text=text.replace(target,injected+target)
+    return text
+
 class Server(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.split('?')[0]=='/benchmark.html':
@@ -75,6 +94,7 @@ def artifact(ref,directory):
         data=(source/name).read_bytes();hashes[name]=hashlib.sha256(data).hexdigest()
         if name=='indexeddb.js' and 'model/journal-idb.mjs' not in builder['ASSETS']:data=old_instrument(name,data.decode(),False).encode()
         if name=='model/journal-idb.mjs':data=instrument_v2(data.decode()).encode()
+        if name=='model/journal-runtime.mjs':data=instrument_runtime(data.decode()).encode()
         target=staging/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(data)
     template=staging/'scripts/service-worker.template.js';template.parent.mkdir();shutil.copyfile(source/'scripts/service-worker.template.js',template)
     release=builder['build'](directory/'site',staging)
@@ -168,10 +188,18 @@ def one_profile(pw,url,profile,seed,cpu,writes):
                 sample['stageMs'][a['name']]=b['at']-a['at']
             samples.append(sample);print(f'  write {n+1}/{writes} {sample["kind"]} native={sample["clickToStrictCompleteMs"]:.1f}ms UI={sample["fullMs"]:.1f}ms',flush=True)
             profile.with_suffix('.measurements.json').write_text(json.dumps({'completed':False,'fixtureSourceHash':seed['sourceHash'],'samples':samples},indent=2)+'\n')
+        page.evaluate(r"""()=>{
+         window.__finishComplete=[];window.__finishTransaction=IDBDatabase.prototype.transaction;
+         IDBDatabase.prototype.transaction=function(...args){const tx=__finishTransaction.apply(this,args);if(tx.mode==='readwrite'&&[...tx.objectStoreNames].includes('journalState'))tx.addEventListener('complete',event=>__finishComplete.push({at:performance.now(),eventTimeStamp:event.timeStamp,durability:tx.durability}));return tx};
+         __ui.begin();document.querySelector('[data-act=finish]').click();
+        }""")
+        page.wait_for_function("document.querySelector('[data-act=start]')&&!document.querySelector('#app').inert",timeout=600000)
+        session_finish=page.evaluate('__ui.end()')
+        session_finish['nativeComplete']=page.evaluate("()=>{IDBDatabase.prototype.transaction=__finishTransaction;return __finishComplete.map(m=>({...m,clickToStrictCompleteMs:m.at-__ui.sample.start,nativeEventMs:m.eventTimeStamp-__ui.sample.start}))}")
         if page.evaluate(PROOF)!=proof:raise ValueError('Original history/snapshots/archive changed')
         if errors:raise ValueError(errors)
         cdp.send('HeapProfiler.collectGarbage');retained_after=cdp.send('Runtime.getHeapUsage')
-        result={'sessionStart':session_start,'initialReadyMs':initial,'processColdReadyMs':cold,'warmReadyMs':warm,'startupDiagnostics':{'initial':initial_diagnostics,'processCold':cold_diagnostics,'warm':warm_diagnostics},'preserved':True,'proof':proof,'retainedBefore':retained_before,'retainedAfter':retained_after,'samples':samples}
+        result={'sessionStart':session_start,'sessionFinish':session_finish,'initialReadyMs':initial,'processColdReadyMs':cold,'warmReadyMs':warm,'startupDiagnostics':{'initial':initial_diagnostics,'processCold':cold_diagnostics,'warm':warm_diagnostics},'preserved':True,'proof':proof,'retainedBefore':retained_before,'retainedAfter':retained_after,'samples':samples}
         profile.with_suffix('.measurements.json').write_text(json.dumps({'completed':True,**result},indent=2)+'\n');return result
     finally:context.close()
 
