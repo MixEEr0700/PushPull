@@ -116,23 +116,40 @@ async function registerPwa(){
  watchPwa(await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}));
 }
 
+// A full audit belongs to an explicit data operation, never to navigation.
+let fullAudit=null;
+function paintFullAudit(){
+ document.querySelector('[data-full-audit]')?.remove();
+ if(fullAudit)document.querySelector('#app main')?.insertAdjacentHTML('afterbegin',`<section class="card stack" data-full-audit role="status"><p>${fullAudit.cancelled?'Anulowano operację. Kończenie odczytu…':'Wczytywanie i weryfikowanie pełnych danych…'}</p><button class="btn" data-full-audit-cancel ${fullAudit.cancelled?'disabled':''}>Anuluj operację</button></section>`);
+}
+async function requireFullData(){
+ const operation={cancelled:false};fullAudit=operation;paintFullAudit();
+ try{await feedbackFrame();if(operation.cancelled)return false;await database.ensureFull();data=database.value;return !operation.cancelled;}
+ finally{fullAudit=null;if(operation.cancelled)render();else paintFullAudit();}
+}
 function on(event,handler){
  if(!handlers.has(event)){
   handlers.set(event,[]);
   document.addEventListener(event,e=>{
    if(event==='submit')e.preventDefault();
+   if(fullAudit&&e.target.closest?.('#app')){
+    if(e.target.closest('[data-full-audit-cancel]')){fullAudit.cancelled=true;paintFullAudit();}
+    const nav=e.target.closest('[data-tab]');if(event==='click'&&nav){
+     fullAudit.cancelled=true;
+     if(nav.dataset.tab==='calendar')actions=actions.then(async()=>{try{await database.ensureHistory();data=database.value;tab='calendar';historicalId=null;panel=null;render();}catch(error){alert(error.message)}});
+     else {tab=nav.dataset.tab;dataView='data';historicalId=null;panel=null;render();}
+    }
+    return;
+   }
    if(trainingWrite&&e.target.closest?.('#app'))return;
    if(event==='input'){try{for(const callback of handlers.get(event))callback(e)}catch(error){render();alert('Operacja przerwana. '+error.message)}return;}
    const pending=trainingWriteFeedback(e);if(pending)trainingWrite=pending;
    actions=actions.then(async()=>{
     try{
      if(pending){await feedbackFrame();if(!e.target.isConnected)return;}
-     // Archive-backed controls are opened only after a full integrity audit.
-     // Training/calendar keep the live view; no raw recovery data is needed.
-     if(event==='click'&&e.target.closest('[data-tab="settings"]')&&database.archivesDeferred){
-      toast('Wczytywanie i weryfikowanie pełnych danych…');await feedbackFrame();await database.ensureFull();data=database.value;
-     }
-     const needsHistory=event==='submit'&&!e.target.matches('.performanceForm,.seriesResultForm,#resultForm,.historicalResultForm,.editForm')||event==='click'&&e.target.closest('[data-tab=calendar],[data-panel=history],[data-panel=stats]');
+     const fullOperation=event==='click'&&e.target.closest('[data-act="export"],[data-export-v4],[data-export-v5],[data-plan-save],[data-plan-activate],[data-switch-activate],[data-enable-journal],[data-backup-export],[data-load-backups],[data-drive-action="upload"],[data-drive-action="restore"],[data-drive-action="preview"],[data-restore-confirm]')||event==='change'&&e.target.matches('#importFile');
+     if(fullOperation&&!recoveryError&&database.archivesDeferred&&!await requireFullData())return;
+     const needsHistory=event==='submit'&&!e.target.matches('.performanceForm,.seriesResultForm,#resultForm,.historicalResultForm,.editForm')||event==='click'&&e.target.closest('[data-tab=calendar],[data-panel=history],[data-panel=stats],[data-view="weekly"],[data-view="plans"]')||event==='change'&&e.target.matches('[data-preview-v4]');
      if(needsHistory&&database.historyDeferred){await database.ensureHistory();data=database.value;}
      for(const callback of handlers.get(event))await callback(e);
     }catch(error){render();alert('Operacja przerwana. '+error.message)}
@@ -251,7 +268,7 @@ function weeklyScreen(){
  return `<button class="btn" data-view="data">‹ Dane</button><h1>Statystyki ogólne</h1><div class="card stack"><label>Plan<select id="weeklyPlan">${all.map(p=>`<option value="${esc(p.id)}" ${p.id===plan.id?'selected':''}>${esc(p.label)}${p.current?' · Aktualny plan':''}</option>`).join('')}</select></label><form id="weeklyRange" class="stack"><div class="grid2"><label>Od<input name="from" type="date" value="${esc(weeklyFrom??report?.from)}" required></label><label>Do<input name="to" type="date" value="${esc(weeklyTo??report?.to)}" required></label></div><button class="btn">Pokaż zakres</button></form>${weeklyError?`<p role="alert">${esc(weeklyError)}</p>`:''}<p class="hint">Tygodnie ISO: poniedziałek–niedziela, Europe/Warsaw, według daty zakończonej sesji. Bez założenia liczby treningów. Szkice i sesje w toku są poza zestawieniem.</p><p class="hint">Każdy zapis L/P jest osobną serią wykonania; dropset to jedna seria z wieloma segmentami. Tonaż i powtórzenia sumują segmenty raz, bez dodatkowego ×2. Nieustalona konwencja kg pozostaje nieustalona.</p></div>${report?`<div class="card"><div class="stat-grid">${weeklyMetrics.map(([id,label,unit])=>`<button class="stat-tile ${id===k?'selected':''}" data-weekly-metric="${id}"><small>${label}</small><strong>${report.missing[id]?'≥ ':''}${fmt(report.totals[id])} ${unit}</strong></button>`).join('')}</div><p class="hint">Większy tonaż może wynikać z większej liczby treningów i serii; sam nie dowodzi poprawy siły. ≥ oznacza niepełne dane, a 0 brak zapisów w danym tygodniu, nie odtworzoną aktywność.</p>${report.invalidDates?'<p class="hint">Pominięto sesje z nieprawidłową datą.</p>':''}${!report.totals.workouts?'<p class="hint">Brak zakończonych treningów w tym zakresie.</p>':''}<h3>${esc(metric[1])} · tygodniowo</h3>${chart(report.rows)}<p class="hint">Pomarańczowy punkt: tydzień częściowy. Nie porównujemy częściowych lub niepełnych tygodni; brakujących wartości i tygodni bez treningów tego planu nie łączymy linią.</p><div class="stat-table" role="table" aria-label="Statystyki tygodniowe"><div class="stat-row" role="row"><b>Tydzień / frekwencja</b><b>${esc(metric[1])} / zmiana</b></div>${report.rows.map(w=>`<div class="stat-row" role="row" data-week="${w.id}"><span role="rowheader">${w.id}<br><small>${w.from} – ${w.to}${w.partial?'<br>Częściowy tydzień':''}<br>${w.workouts} treningów · ${w.sets} serii${w.unknownConvention?'<br>Konwencja kg nieustalona':''}</small></span><span role="cell">${w.missing[k]?'≥ ':''}${fmt(w[k])} ${metric[2]}${w.missing[k]?'<br>Brak pełnych danych':''}<br>Δ ${esc(delta(w))}</span></div>`).join('')}</div></div>`:''}`;
 }
 let historicalId=null;
-function backupControls(){let backups=database.backups();return `${backups.length?`<div class="card stack"><label>Zachowane kopie danych<select id="backupKey">${backups.map((key,i)=>`<option value="${esc(key)}">${i+1}. ${esc(database.backupLabel(key))}</option>`).join('')}</select></label><button class="btn" data-backup-export>↓ Pobierz kopię sprzed przywrócenia</button><p class="hint">Aby przywrócić te dane, pobierz kopię i wybierz „Przywróć z pliku JSON”. Zachowaj również kopię poza przeglądarką.</p></div>`:''}`}
+function backupControls(){if(database.archivesDeferred)return '<div class="card stack"><button class="btn" data-load-backups>Pokaż zachowane kopie danych</button></div>';let backups=database.backups();return `${backups.length?`<div class="card stack"><label>Zachowane kopie danych<select id="backupKey">${backups.map((key,i)=>`<option value="${esc(key)}">${i+1}. ${esc(database.backupLabel(key))}</option>`).join('')}</select></label><button class="btn" data-backup-export>↓ Pobierz kopię sprzed przywrócenia</button><p class="hint">Aby przywrócić te dane, pobierz kopię i wybierz „Przywróć z pliku JSON”. Zachowaj również kopię poza przeglądarką.</p></div>`:''}`}
 function driveStatusText(){return drive?.status.detail||'Zapis lokalny działa.'+(driveInitError?' Drive niedostępny: '+driveInitError:'');}
 function paintDrive(){document.querySelectorAll('[data-drive-status]').forEach(el=>el.textContent=driveStatusText());document.querySelectorAll('[data-drive-action="connect"]').forEach(el=>el.hidden=!!drive?.config.connected);document.querySelectorAll('[data-drive-action="upload"],[data-drive-action="restore"],[data-drive-action="preview"]').forEach(el=>el.disabled=!!drive?.status.busy);}
 const localV4=await import('./model/local-backup-v4.mjs');
@@ -332,7 +349,7 @@ function importedPlanPanel(){
  }catch(error){planError=error.message;}}
  return `<div class="card stack"><strong>Importuj nowy plan</strong><p class="hint">Plik planu pushpull-plan v1 jest osobny od kopii historii. Wczytanie pokazuje podgląd. Zapis nie zmienia aktywnego planu ani rozpoczętej sesji.</p><label>Plan JSON<input id="planFile" type="file" accept="application/json,.json"></label>${planError?`<p role="alert" data-plan-error>${esc(planError)}</p>`:''}${preview}</div>`;
 }
-on('click',e=>{const view=e.target.closest('[data-view]'),plan=e.target.closest('[data-select-plan]'),metric=e.target.closest('[data-weekly-metric]');if(view){switchPlans=false;switchPlanId=null;dataView=view.dataset.view;if(dataView==='weekly')weeklyPlanId=null;render();}if(plan){selectedPlanId=plan.dataset.selectPlan;render();}if(metric){weeklyMetric=metric.dataset.weeklyMetric;render();}});
+on('click',e=>{if(e.target.closest('[data-load-backups]'))render();const view=e.target.closest('[data-view]'),plan=e.target.closest('[data-select-plan]'),metric=e.target.closest('[data-weekly-metric]');if(view){switchPlans=false;switchPlanId=null;dataView=view.dataset.view;if(dataView==='weekly')weeklyPlanId=null;render();}if(plan){selectedPlanId=plan.dataset.selectPlan;render();}if(metric){weeklyMetric=metric.dataset.weeklyMetric;render();}});
 on('click',e=>{if(e.target.closest('[data-plan-switch]')){switchPlans=true;switchPlanId=null;render();}if(e.target.closest('[data-switch-cancel]')){switchPlans=false;switchPlanId=null;render();}if(e.target.closest('[data-switch-preview]')&&switchPlanId){selectedPlanId=switchPlanId;render();document.querySelector('[data-selected-plan]').scrollIntoView({block:'start'});}});
 on('change',e=>{if(e.target.id==='switchPlanId'){switchPlanId=e.target.value||null;render();}if(e.target.id==='importedPlanId'){selectedPlanId=e.target.value;render();}if(e.target.id==='weeklyPlan'){weeklyPlanId=e.target.value;render();}if(e.target.matches('[data-exercise-plan]')){exercisePlanFilters.set(e.target.dataset.exercisePlan,e.target.value);render();}});
 on('submit',e=>{if(e.target.id!=='weeklyRange')return;weeklyFrom=e.target.elements.from.value;weeklyTo=e.target.elements.to.value;render();});
@@ -363,7 +380,7 @@ on('click',async e=>{
  }
 });
 function recovery(){return `<main class="app"><h1>Dane wymagają odzyskania</h1>${draftRecoveryPanel()}<div class="card stack" role="alert"><p>Zapis został zablokowany. Aplikacja nie wyzerowała historii ani nie nadpisała oryginalnego zapisu localStorage. Pobierz je przed próbą odzyskania. Jeśli dane zmieniono w innej karcie lub pamięć jest niedostępna, odśwież stronę po zabezpieczeniu kopii.</p><p>${esc(recoveryError.message)}</p><button class="btn" data-recovery-current>↓ Pobierz historię z IndexedDB</button><button class="btn" data-recovery-export>↓ Pobierz oryginalne dane</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json"></label></div>${restorePanel()}${backupControls()}</main>`}
-function render(){let app=$('#app');if(recoveryError){app.innerHTML=recovery();paintPwa();return}app.innerHTML=`<main class="app">${tab==='training'?main():tab==='calendar'?(historicalId?historical():calendar()):settings()}</main><nav class="bottom"><div class="inner"><button class="btn ${tab==='training'?'active':''}" data-tab="training">Trening</button><button class="btn ${tab==='calendar'?'active':''}" data-tab="calendar">Kalendarz</button><button class="btn ${tab==='settings'?'active':''}" data-tab="settings">Dane</button></div></nav>`;paintPwa()}
+function render(){let app=$('#app');if(recoveryError){app.innerHTML=recovery();paintPwa();return}app.innerHTML=`<main class="app">${tab==='training'?main():tab==='calendar'?(historicalId?historical():calendar()):settings()}</main><nav class="bottom"><div class="inner"><button class="btn ${tab==='training'?'active':''}" data-tab="training">Trening</button><button class="btn ${tab==='calendar'?'active':''}" data-tab="calendar">Kalendarz</button><button class="btn ${tab==='settings'?'active':''}" data-tab="settings">Dane</button></div></nav>`;paintPwa();paintFullAudit()}
 async function finish(){let s=session();if(!s)return;await savedDrafts.flush();if(savedDrafts.records.some(r=>r.sessionId===s.id)){alert('Masz niezapisane szkice. Zapisz wyniki lub świadomie odrzuć szkice przed zakończeniem treningu.');render();return;} if(!confirm('Zakończyć '+s.type+' z dnia '+s.date+'? Wyniki będzie można poprawić w kalendarzu.'))return;if(database.finishSession){await database.finishSession({id:s.id});data=database.value;}else{s.status='done';data.activeId=null;journal.advance(data,s);await persist();}chosenType=null;panel=null;render();toast('Trening zakończony')}
 async function submitResult(exId,kg,reps,sid,series=null){savedDrafts.assertCurrent(bindingFor(sid,exId));const draftTicket=savedDrafts.ticket(sid,exId);kg=kg.trim().replace(',','.');reps=reps.trim();if(!/^\d+(\.\d+)?$/.test(kg)||!/^\d+$/.test(reps)||Number(reps)<1){toast('Podaj poprawny ciężar i liczbę powtórzeń');return}const old=data.entries.find(e=>e.sessionId===sid&&e.exerciseId===exId);let found;if(old){found={...old,kg,reps,correctedAt:new Date().toISOString()};if(series)found.series=series;}else found={id:uid(),sessionId:sid,exerciseId:exId,kg,reps,series,createdAt:new Date().toISOString()};if(journalAPI)journalAPI.recordEntry(data,found);await persistResult(found);await savedDrafts.confirmed(sid,exId,draftTicket);panel=null;render();toast('Wynik zapisany')}
 on('input',rich.input);on('change',rich.change);on('click',rich.click);
