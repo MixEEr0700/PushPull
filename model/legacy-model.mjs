@@ -2,12 +2,12 @@
 import {project} from './journal.mjs';
 import {storedPlanModel} from './plan-import.mjs';
 import {createModel} from './training-model.mjs';
-import {createBackup,validateBackup,exportBackup,readLegacyBackup} from './backup.mjs';
-import {prepareLegacyBackup,legacySource} from './legacy-backup.mjs';
+import {createBackup,validateBackup,validatePayload,exportBackup,readLegacyBackup} from './backup.mjs';
+import {prepareLegacyBackup,legacySource,validateLegacyStructure} from './legacy-backup.mjs';
 import {canonical,portable,freeze,requireThat as check} from './backup-json.mjs';
 export const MODEL_KEY='training-model-v1';
 const source=id=>({kind:'legacy',reference:id,recordedAt:null});
-function payload(legacy,ownerId) {
+function payload(legacy,ownerId,includeSource=true) {
   check(legacy.formatVersion===2,'migration requires the complete v2 backup');
   const data=legacy.data,exercises=Object.values(data.exercises).flat();
   return project(data,{
@@ -20,8 +20,14 @@ function payload(legacy,ownerId) {
     sessionRecords:data.sessions.map(s=>({id:s.id,snapshotId:null,payloadVersion:1,data:s,
       legacyPlanLink:legacy.catalog.sessionVersions[s.id]})),
     resultRecords:data.entries.map(e=>({id:e.id,sessionId:e.sessionId,binding:'uninterpreted',payloadVersion:1,data:e})),
-    legacySources:[legacySource(legacy,'current-legacy')]
+    legacySources:includeSource?[legacySource(legacy,'current-legacy')]:[]
   });
+}
+/** All source schemas, global IDs and native graph relations, without building
+ * a second complete raw history or a v3 checksum that nobody is exporting. */
+export function validateStructuredSource(value,ownerId){
+ validateLegacyStructure(value);
+ return validatePayload(freeze(payload({formatVersion:2,data:value.data,catalog:value.catalog},ownerId,false)));
 }
 /** Retain every legacy record/extension, with no inferred plan, role, side or kg. */
 export async function createLegacyModel(raw,{ownerId,createdAt}) {

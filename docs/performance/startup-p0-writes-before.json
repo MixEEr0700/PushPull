@@ -1,0 +1,1109 @@
+{
+  "syntheticOnly": true,
+  "ref": "5b735e4",
+  "runtimeSha256": {
+    "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+    "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+    "app.js": "5d17db7fcb58dd52649017e3b4172c95178ac6962e22c770f3461d0421c856cf",
+    "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+    "indexeddb.js": "1be2146c65e8476b2d9f83c4ab504af2bc083ee40d98857f617b8ac730f494ec",
+    "model/journal-index.mjs": "049ae7a7f5f95c5436f538b9f6e2d2b3d9caad6565b3adbf0ef9df14c2eb1baf",
+    "model/journal-protocol.mjs": "7d24f879a46d8134dcbd6b754ef0ea9a3f00e741e526a0ed535f752923df685c",
+    "model/journal-idb.mjs": "30ca0d60c40f7cb65f1e639d1e2a223d553737b5f8850bb003f6fa2edbb2843a",
+    "model/journal-database.mjs": "62f49b46c919099f44b937bf2ac1b390c4a1800f676e4791af151726afcf8537",
+    "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+    "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+    "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+    "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+    "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+    "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+    "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+    "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+    "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+    "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+    "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+    "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+    "model/backup.mjs": "02cfcae9b85c51e21f1a25c569efbcc66c4b2a1ab4e95ecb599169dcbe908f3a",
+    "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+    "model/legacy-backup.mjs": "9518426834a1b0304a096fec1e0459c1c9fa1a230e20051e67e68a77e0eb2705",
+    "model/legacy-model.mjs": "d3ba389ab9ac06b1cbbae59f604ee8f151df332dc40f5a02d2021443abe45811",
+    "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+    "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+    "model/performance.mjs": "527512863b5f89f0dc701db34e217d9afb6c49ab718f96bd78ba78a7d5cf51f0",
+    "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+    "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+    "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+    "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+    "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+    "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+    "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+    "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+  },
+  "instrumentedRelease": {
+    "format": "pushpull-static-release",
+    "version": 1,
+    "release": "e2be0304b06db6868ab26b46",
+    "files": {
+      "app.js": "5d17db7fcb58dd52649017e3b4172c95178ac6962e22c770f3461d0421c856cf",
+      "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+      "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+      "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+      "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+      "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+      "indexeddb.js": "1be2146c65e8476b2d9f83c4ab504af2bc083ee40d98857f617b8ac730f494ec",
+      "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+      "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+      "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+      "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+      "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+      "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+      "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+      "model/backup.mjs": "02cfcae9b85c51e21f1a25c569efbcc66c4b2a1ab4e95ecb599169dcbe908f3a",
+      "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+      "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+      "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+      "model/journal-database.mjs": "62f49b46c919099f44b937bf2ac1b390c4a1800f676e4791af151726afcf8537",
+      "model/journal-idb.mjs": "147497337721a8297ac6cfd9d805cb9d22fc59e1afb0fa605addaf48a5003619",
+      "model/journal-index.mjs": "049ae7a7f5f95c5436f538b9f6e2d2b3d9caad6565b3adbf0ef9df14c2eb1baf",
+      "model/journal-protocol.mjs": "7d24f879a46d8134dcbd6b754ef0ea9a3f00e741e526a0ed535f752923df685c",
+      "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+      "model/legacy-backup.mjs": "9518426834a1b0304a096fec1e0459c1c9fa1a230e20051e67e68a77e0eb2705",
+      "model/legacy-model.mjs": "d3ba389ab9ac06b1cbbae59f604ee8f151df332dc40f5a02d2021443abe45811",
+      "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+      "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+      "model/performance.mjs": "527512863b5f89f0dc701db34e217d9afb6c49ab718f96bd78ba78a7d5cf51f0",
+      "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+      "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+      "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+      "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+      "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+      "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+      "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+      "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+      "sw.js": "da56a0242b00defc909ad7f9cc00f1f4de602303617e39c897c5359912589996"
+    }
+  },
+  "cpuThrottle": 4,
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "cases": {
+    "history40-raw4": {
+      "fixtureSHA256": "7fa05f0ae14dfb809997be1a6d3d111529f7b448ca4ca89a80eaa1cbe13eee82",
+      "sourceHash": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+      "profiles": [
+        {
+          "sessionStart": {
+            "firstMs": 19,
+            "fullMs": 43562,
+            "durableMs": [
+              {
+                "ms": 27767,
+                "durability": "strict"
+              }
+            ],
+            "handlerQueueMs": [],
+            "spans": [
+              {
+                "name": "innerHTML",
+                "start": 58713.59999999963,
+                "ms": 3.099999999627471
+              }
+            ],
+            "maxTaskMs": 11458,
+            "blockingMs": 40892,
+            "transactions": [
+              {
+                "start": 15747.900000000373,
+                "ms": 361.7999999988824,
+                "mode": "readonly"
+              },
+              {
+                "start": 39520.29999999888,
+                "ms": 3456.2000000011176,
+                "mode": "readwrite"
+              },
+              {
+                "start": 42977.5,
+                "ms": 399.19999999925494,
+                "mode": "readonly"
+              }
+            ],
+            "nativeComplete": [
+              {
+                "at": 42976.59999999963,
+                "eventTimeStamp": 42976.5,
+                "durability": "strict",
+                "clickToStrictCompleteMs": 27765,
+                "nativeEventMs": 27764.900000000373
+              }
+            ]
+          },
+          "initialReadyMs": 16274.699999999255,
+          "processColdReadyMs": 15168.199999999255,
+          "warmReadyMs": 15203.5,
+          "startupDiagnostics": {
+            "initial": {
+              "sampledHeapHighWaterBytes": 206446050,
+              "longTasks": 4,
+              "maxTaskMs": 11583
+            },
+            "processCold": {
+              "sampledHeapHighWaterBytes": 500905331,
+              "longTasks": 6,
+              "maxTaskMs": 9638
+            },
+            "warm": {
+              "sampledHeapHighWaterBytes": 535694535,
+              "longTasks": 4,
+              "maxTaskMs": 11104
+            }
+          },
+          "preserved": true,
+          "proof": {
+            "history": "c82c5a9cf205b5ac7831ef506ef791b27ebabb4b2b931a7236db98fb76aca559",
+            "archives": "9d92f740ff7821d90cd294f6d0e3da8e56eed7717a2e0b08201a3b83fb2ac904",
+            "sessions": 40,
+            "results": 350,
+            "snapshots": 40
+          },
+          "retainedBefore": {
+            "usedSize": 62224972,
+            "totalSize": 63762432,
+            "embedderHeapUsedSize": 954840,
+            "backingStorageSize": 5323782
+          },
+          "retainedAfter": {
+            "usedSize": 62867788,
+            "totalSize": 64286720,
+            "embedderHeapUsedSize": 1845488,
+            "backingStorageSize": 5330303
+          },
+          "samples": [
+            {
+              "firstMs": 44.19999999925494,
+              "fullMs": 661.0999999996275,
+              "handlerQueueMs": [],
+              "spans": [
+                {
+                  "name": "innerHTML",
+                  "start": 80707.79999999888,
+                  "ms": 9.700000001117587
+                }
+              ],
+              "maxTaskMs": 340,
+              "blockingMs": 316,
+              "transactions": [
+                {
+                  "start": 80526.19999999925,
+                  "ms": 138.5,
+                  "mode": "readwrite"
+                },
+                {
+                  "start": 80667.79999999888,
+                  "ms": 4.200000001117587,
+                  "mode": "readwrite"
+                }
+              ],
+              "kind": "new",
+              "first": true,
+              "clickToStrictCompleteMs": 519.6999999992549,
+              "nativeEventMs": 519.0999999996275,
+              "sampledHeapHighWaterBytes": 70644520,
+              "marks": [
+                {
+                  "name": "detach-validate",
+                  "at": 80203.19999999925
+                },
+                {
+                  "name": "context",
+                  "at": 80366
+                },
+                {
+                  "name": "entry-hash",
+                  "at": 80513.69999999925
+                },
+                {
+                  "name": "index-prepare",
+                  "at": 80514.40000000037
+                },
+                {
+                  "name": "transaction-open",
+                  "at": 80526.19999999925
+                },
+                {
+                  "name": "cas",
+                  "at": 80528.69999999925
+                },
+                {
+                  "name": "write-objects",
+                  "at": 80585.19999999925
+                },
+                {
+                  "name": "write-result-root",
+                  "at": 80606.90000000037
+                },
+                {
+                  "name": "readback",
+                  "at": 80607.69999999925
+                },
+                {
+                  "name": "strict-complete",
+                  "at": 80665.19999999925,
+                  "eventTimeStamp": 80664.59999999963,
+                  "durability": "strict"
+                },
+                {
+                  "name": "publication",
+                  "at": 80665.29999999888
+                }
+              ],
+              "completionCallbackMs": [
+                {
+                  "ms": 522.5,
+                  "durability": "strict"
+                }
+              ],
+              "stageMs": {
+                "detach-validate": 162.80000000074506,
+                "context": 147.69999999925494,
+                "entry-hash": 0.7000000011175871,
+                "index-prepare": 11.799999998882413,
+                "transaction-open": 2.5,
+                "cas": 56.5,
+                "write-objects": 21.700000001117587,
+                "write-result-root": 0.7999999988824129,
+                "readback": 57.5
+              }
+            },
+            {
+              "firstMs": 36.79999999888241,
+              "fullMs": 378.3999999985099,
+              "handlerQueueMs": [],
+              "spans": [
+                {
+                  "name": "innerHTML",
+                  "start": 81429,
+                  "ms": 6
+                }
+              ],
+              "maxTaskMs": 0,
+              "blockingMs": 0,
+              "transactions": [
+                {
+                  "start": 81169.09999999963,
+                  "ms": 232.40000000037253,
+                  "mode": "readwrite"
+                },
+                {
+                  "start": 81408.79999999888,
+                  "ms": 4.700000001117587,
+                  "mode": "readwrite"
+                }
+              ],
+              "kind": "new",
+              "first": false,
+              "clickToStrictCompleteMs": 290.09999999962747,
+              "nativeEventMs": 289.59999999962747,
+              "sampledHeapHighWaterBytes": 71322853,
+              "marks": [
+                {
+                  "name": "detach-validate",
+                  "at": 81153.29999999888
+                },
+                {
+                  "name": "context",
+                  "at": 81153.29999999888
+                },
+                {
+                  "name": "entry-hash",
+                  "at": 81163.69999999925
+                },
+                {
+                  "name": "index-prepare",
+                  "at": 81165.79999999888
+                },
+                {
+                  "name": "transaction-open",
+                  "at": 81169
+                },
+                {
+                  "name": "cas",
+                  "at": 81169.19999999925
+                },
+                {
+                  "name": "write-objects",
+                  "at": 81333.59999999963
+                },
+                {
+                  "name": "write-result-root",
+                  "at": 81346.09999999963
+                },
+                {
+                  "name": "readback",
+                  "at": 81346.79999999888
+                },
+                {
+                  "name": "strict-complete",
+                  "at": 81401.5,
+                  "eventTimeStamp": 81401,
+                  "durability": "strict"
+                },
+                {
+                  "name": "publication",
+                  "at": 81401.59999999963
+                }
+              ],
+              "completionCallbackMs": [
+                {
+                  "ms": 297.5,
+                  "durability": "strict"
+                }
+              ],
+              "stageMs": {
+                "detach-validate": 0.0,
+                "context": 10.400000000372529,
+                "entry-hash": 2.099999999627471,
+                "index-prepare": 3.200000001117587,
+                "transaction-open": 0.19999999925494194,
+                "cas": 164.40000000037253,
+                "write-objects": 12.5,
+                "write-result-root": 0.6999999992549419,
+                "readback": 54.70000000111759
+              }
+            },
+            {
+              "firstMs": 25.5,
+              "fullMs": 242.59999999962747,
+              "handlerQueueMs": [],
+              "spans": [
+                {
+                  "name": "innerHTML",
+                  "start": 82008.19999999925,
+                  "ms": 6.200000001117587
+                }
+              ],
+              "maxTaskMs": 0,
+              "blockingMs": 0,
+              "transactions": [
+                {
+                  "start": 81860.19999999925,
+                  "ms": 129.59999999962747,
+                  "mode": "readwrite"
+                },
+                {
+                  "start": 81992.29999999888,
+                  "ms": 4.600000001490116,
+                  "mode": "readwrite"
+                }
+              ],
+              "kind": "new",
+              "first": false,
+              "clickToStrictCompleteMs": 175.7999999988824,
+              "nativeEventMs": 175.7999999988824,
+              "sampledHeapHighWaterBytes": 70761334,
+              "marks": [
+                {
+                  "name": "detach-validate",
+                  "at": 81842.40000000037
+                },
+                {
+                  "name": "context",
+                  "at": 81843.29999999888
+                },
+                {
+                  "name": "entry-hash",
+                  "at": 81854
+                },
+                {
+                  "name": "index-prepare",
+                  "at": 81854.79999999888
+                },
+                {
+                  "name": "transaction-open",
+                  "at": 81860.19999999925
+                },
+                {
+                  "name": "cas",
+                  "at": 81860.19999999925
+                },
+                {
+                  "name": "write-objects",
+                  "at": 81917.90000000037
+                },
+                {
+                  "name": "write-result-root",
+                  "at": 81933.69999999925
+                },
+                {
+                  "name": "readback",
+                  "at": 81934.29999999888
+                },
+                {
+                  "name": "strict-complete",
+                  "at": 81989.79999999888,
+                  "eventTimeStamp": 81989.79999999888,
+                  "durability": "strict"
+                },
+                {
+                  "name": "publication",
+                  "at": 81989.90000000037
+                }
+              ],
+              "completionCallbackMs": [
+                {
+                  "ms": 178.40000000037253,
+                  "durability": "strict"
+                }
+              ],
+              "stageMs": {
+                "detach-validate": 0.8999999985098839,
+                "context": 10.700000001117587,
+                "entry-hash": 0.7999999988824129,
+                "index-prepare": 5.400000000372529,
+                "transaction-open": 0.0,
+                "cas": 57.70000000111759,
+                "write-objects": 15.799999998882413,
+                "write-result-root": 0.599999999627471,
+                "readback": 55.5
+              }
+            },
+            {
+              "firstMs": 27.5,
+              "fullMs": 227.40000000037253,
+              "handlerQueueMs": [],
+              "spans": [
+                {
+                  "name": "innerHTML",
+                  "start": 82417.90000000037,
+                  "ms": 2.899999998509884
+                }
+              ],
+              "maxTaskMs": 0,
+              "blockingMs": 0,
+              "transactions": [
+                {
+                  "start": 82285.5,
+                  "ms": 116.29999999888241,
+                  "mode": "readwrite"
+                },
+                {
+                  "start": 82403.90000000037,
+                  "ms": 3.699999999254942,
+                  "mode": "readwrite"
+                }
+              ],
+              "kind": "new",
+              "first": false,
+              "clickToStrictCompleteMs": 156.5,
+              "nativeEventMs": 156.5,
+              "sampledHeapHighWaterBytes": 71349023,
+              "marks": [
+                {
+                  "name": "detach-validate",
+                  "at": 82276.59999999963
+                },
+                {
+                  "name": "context",
+                  "at": 82276.90000000037
+                },
+                {
+                  "name": "entry-hash",
+                  "at": 82280.59999999963
+                },
+                {
+                  "name": "index-prepare",
+                  "at": 82282.19999999925
+                },
+                {
+                  "name": "transaction-open",
+                  "at": 82285.5
+                },
+                {
+                  "name": "cas",
+                  "at": 82286
+                },
+                {
+                  "name": "write-objects",
+                  "at": 82329.59999999963
+                },
+                {
+                  "name": "write-result-root",
+                  "at": 82343.40000000037
+                },
+                {
+                  "name": "readback",
+                  "at": 82343.5
+                },
+                {
+                  "name": "strict-complete",
+                  "at": 82401.79999999888,
+                  "eventTimeStamp": 82401.79999999888,
+                  "durability": "strict"
+                },
+                {
+                  "name": "publication",
+                  "at": 82401.79999999888
+                }
+              ],
+              "completionCallbackMs": [
+                {
+                  "ms": 159.10000000149012,
+                  "durability": "strict"
+                }
+              ],
+              "stageMs": {
+                "detach-validate": 0.30000000074505806,
+                "context": 3.699999999254942,
+                "entry-hash": 1.599999999627471,
+                "index-prepare": 3.300000000745058,
+                "transaction-open": 0.5,
+                "cas": 43.59999999962747,
+                "write-objects": 13.800000000745058,
+                "write-result-root": 0.09999999962747097,
+                "readback": 58.29999999888241
+              }
+            },
+            {
+              "firstMs": 26.5,
+              "fullMs": 225.59999999962747,
+              "handlerQueueMs": [],
+              "spans": [
+                {
+                  "name": "innerHTML",
+                  "start": 82845.5,
+                  "ms": 3
+                }
+              ],
+              "maxTaskMs": 0,
+              "blockingMs": 0,
+              "transactions": [
+                {
+                  "start": 82718.40000000037,
+                  "ms": 105.29999999888241,
+                  "mode": "readwrite"
+                },
+                {
+                  "start": 82826.29999999888,
+                  "ms": 5.5,
+                  "mode": "readwrite"
+                }
+              ],
+              "kind": "correction",
+              "first": false,
+              "clickToStrictCompleteMs": 143.09999999962747,
+              "nativeEventMs": 143.09999999962747,
+              "sampledHeapHighWaterBytes": 73194845,
+              "marks": [
+                {
+                  "name": "detach-validate",
+                  "at": 82710.5
+                },
+                {
+                  "name": "context",
+                  "at": 82710.59999999963
+                },
+                {
+                  "name": "entry-hash",
+                  "at": 82715.19999999925
+                },
+                {
+                  "name": "index-prepare",
+                  "at": 82715.40000000037
+                },
+                {
+                  "name": "transaction-open",
+                  "at": 82718.40000000037
+                },
+                {
+                  "name": "cas",
+                  "at": 82719.29999999888
+                },
+                {
+                  "name": "write-objects",
+                  "at": 82771
+                },
+                {
+                  "name": "write-result-root",
+                  "at": 82781.79999999888
+                },
+                {
+                  "name": "readback",
+                  "at": 82781.90000000037
+                },
+                {
+                  "name": "strict-complete",
+                  "at": 82823.69999999925,
+                  "eventTimeStamp": 82823.69999999925,
+                  "durability": "strict"
+                },
+                {
+                  "name": "publication",
+                  "at": 82823.69999999925
+                }
+              ],
+              "completionCallbackMs": [
+                {
+                  "ms": 146.69999999925494,
+                  "durability": "strict"
+                }
+              ],
+              "stageMs": {
+                "detach-validate": 0.09999999962747097,
+                "context": 4.599999999627471,
+                "entry-hash": 0.2000000011175871,
+                "index-prepare": 3.0,
+                "transaction-open": 0.8999999985098839,
+                "cas": 51.70000000111759,
+                "write-objects": 10.799999998882413,
+                "write-result-root": 0.10000000149011612,
+                "readback": 41.79999999888241
+              }
+            },
+            {
+              "firstMs": 29.300000000745058,
+              "fullMs": 195.69999999925494,
+              "handlerQueueMs": [],
+              "spans": [
+                {
+                  "name": "innerHTML",
+                  "start": 83294.90000000037,
+                  "ms": 3
+                }
+              ],
+              "maxTaskMs": 0,
+              "blockingMs": 0,
+              "transactions": [
+                {
+                  "start": 83183.79999999888,
+                  "ms": 97.80000000074506,
+                  "mode": "readwrite"
+                },
+                {
+                  "start": 83283.40000000037,
+                  "ms": 2.5,
+                  "mode": "readwrite"
+                }
+              ],
+              "kind": "correction",
+              "first": false,
+              "clickToStrictCompleteMs": 137.59999999962747,
+              "nativeEventMs": 137.5,
+              "sampledHeapHighWaterBytes": 74632209,
+              "marks": [
+                {
+                  "name": "detach-validate",
+                  "at": 83175.90000000037
+                },
+                {
+                  "name": "context",
+                  "at": 83176
+                },
+                {
+                  "name": "entry-hash",
+                  "at": 83180.09999999963
+                },
+                {
+                  "name": "index-prepare",
+                  "at": 83181
+                },
+                {
+                  "name": "transaction-open",
+                  "at": 83183.79999999888
+                },
+                {
+                  "name": "cas",
+                  "at": 83183.90000000037
+                },
+                {
+                  "name": "write-objects",
+                  "at": 83230.29999999888
+                },
+                {
+                  "name": "write-result-root",
+                  "at": 83240.5
+                },
+                {
+                  "name": "readback",
+                  "at": 83240.59999999963
+                },
+                {
+                  "name": "strict-complete",
+                  "at": 83281.69999999925,
+                  "eventTimeStamp": 83281.59999999963,
+                  "durability": "strict"
+                },
+                {
+                  "name": "publication",
+                  "at": 83281.69999999925
+                }
+              ],
+              "completionCallbackMs": [
+                {
+                  "ms": 140.09999999962747,
+                  "durability": "strict"
+                }
+              ],
+              "stageMs": {
+                "detach-validate": 0.09999999962747097,
+                "context": 4.099999999627471,
+                "entry-hash": 0.900000000372529,
+                "index-prepare": 2.799999998882413,
+                "transaction-open": 0.10000000149011612,
+                "cas": 46.399999998509884,
+                "write-objects": 10.200000001117587,
+                "write-result-root": 0.09999999962747097,
+                "readback": 41.09999999962747
+              }
+            },
+            {
+              "firstMs": 29.5,
+              "fullMs": 179.59999999962747,
+              "handlerQueueMs": [],
+              "spans": [
+                {
+                  "name": "innerHTML",
+                  "start": 83644.5,
+                  "ms": 3
+                }
+              ],
+              "maxTaskMs": 0,
+              "blockingMs": 0,
+              "transactions": [
+                {
+                  "start": 83547.40000000037,
+                  "ms": 81.29999999888241,
+                  "mode": "readwrite"
+                },
+                {
+                  "start": 83630.5,
+                  "ms": 2.699999999254942,
+                  "mode": "readwrite"
+                }
+              ],
+              "kind": "correction",
+              "first": false,
+              "clickToStrictCompleteMs": 118.69999999925494,
+              "nativeEventMs": 118.59999999962747,
+              "sampledHeapHighWaterBytes": 75252684,
+              "marks": [
+                {
+                  "name": "detach-validate",
+                  "at": 83541.5
+                },
+                {
+                  "name": "context",
+                  "at": 83542.19999999925
+                },
+                {
+                  "name": "entry-hash",
+                  "at": 83545.40000000037
+                },
+                {
+                  "name": "index-prepare",
+                  "at": 83545.5
+                },
+                {
+                  "name": "transaction-open",
+                  "at": 83547.40000000037
+                },
+                {
+                  "name": "cas",
+                  "at": 83548.29999999888
+                },
+                {
+                  "name": "write-objects",
+                  "at": 83581.40000000037
+                },
+                {
+                  "name": "write-result-root",
+                  "at": 83590.79999999888
+                },
+                {
+                  "name": "readback",
+                  "at": 83590.90000000037
+                },
+                {
+                  "name": "strict-complete",
+                  "at": 83628.69999999925,
+                  "eventTimeStamp": 83628.59999999963,
+                  "durability": "strict"
+                },
+                {
+                  "name": "publication",
+                  "at": 83628.69999999925
+                }
+              ],
+              "completionCallbackMs": [
+                {
+                  "ms": 120.59999999962747,
+                  "durability": "strict"
+                }
+              ],
+              "stageMs": {
+                "detach-validate": 0.6999999992549419,
+                "context": 3.200000001117587,
+                "entry-hash": 0.09999999962747097,
+                "index-prepare": 1.900000000372529,
+                "transaction-open": 0.8999999985098839,
+                "cas": 33.100000001490116,
+                "write-objects": 9.399999998509884,
+                "write-result-root": 0.10000000149011612,
+                "readback": 37.79999999888241
+              }
+            },
+            {
+              "firstMs": 27.399999998509884,
+              "fullMs": 227.39999999850988,
+              "handlerQueueMs": [],
+              "spans": [
+                {
+                  "name": "innerHTML",
+                  "start": 84016.29999999888,
+                  "ms": 3.200000001117587
+                }
+              ],
+              "maxTaskMs": 50,
+              "blockingMs": 0,
+              "transactions": [
+                {
+                  "start": 83882.19999999925,
+                  "ms": 120.20000000111759,
+                  "mode": "readwrite"
+                },
+                {
+                  "start": 84003.5,
+                  "ms": 2.900000000372529,
+                  "mode": "readwrite"
+                }
+              ],
+              "kind": "correction",
+              "first": false,
+              "clickToStrictCompleteMs": 157.0,
+              "nativeEventMs": 157.0,
+              "sampledHeapHighWaterBytes": 74576220,
+              "marks": [
+                {
+                  "name": "detach-validate",
+                  "at": 83874.40000000037
+                },
+                {
+                  "name": "context",
+                  "at": 83874.5
+                },
+                {
+                  "name": "entry-hash",
+                  "at": 83878.90000000037
+                },
+                {
+                  "name": "index-prepare",
+                  "at": 83879.09999999963
+                },
+                {
+                  "name": "transaction-open",
+                  "at": 83882.19999999925
+                },
+                {
+                  "name": "cas",
+                  "at": 83882.29999999888
+                },
+                {
+                  "name": "write-objects",
+                  "at": 83910
+                },
+                {
+                  "name": "write-result-root",
+                  "at": 83920.79999999888
+                },
+                {
+                  "name": "readback",
+                  "at": 83920.90000000037
+                },
+                {
+                  "name": "strict-complete",
+                  "at": 84002.40000000037,
+                  "eventTimeStamp": 84002.40000000037,
+                  "durability": "strict"
+                },
+                {
+                  "name": "publication",
+                  "at": 84002.40000000037
+                }
+              ],
+              "completionCallbackMs": [
+                {
+                  "ms": 158.19999999925494,
+                  "durability": "strict"
+                }
+              ],
+              "stageMs": {
+                "detach-validate": 0.09999999962747097,
+                "context": 4.400000000372529,
+                "entry-hash": 0.19999999925494194,
+                "index-prepare": 3.099999999627471,
+                "transaction-open": 0.09999999962747097,
+                "cas": 27.700000001117587,
+                "write-objects": 10.799999998882413,
+                "write-result-root": 0.10000000149011612,
+                "readback": 81.5
+              }
+            }
+          ]
+        }
+      ],
+      "statistics": {
+        "all": {
+          "clickToStrictCompleteMs": {
+            "n": 8,
+            "median": 156.75,
+            "p95": 519.6999999992549,
+            "max": 519.6999999992549
+          },
+          "firstMs": {
+            "n": 8,
+            "median": 28.40000000037253,
+            "p95": 44.19999999925494,
+            "max": 44.19999999925494
+          },
+          "fullMs": {
+            "n": 8,
+            "median": 227.3999999994412,
+            "p95": 661.0999999996275,
+            "max": 661.0999999996275
+          },
+          "maxTaskMs": {
+            "n": 8,
+            "median": 0.0,
+            "p95": 340,
+            "max": 340
+          },
+          "blockingMs": {
+            "n": 8,
+            "median": 0.0,
+            "p95": 316,
+            "max": 316
+          },
+          "sampledHeapHighWaterBytes": {
+            "n": 8,
+            "median": 72271934.0,
+            "p95": 75252684,
+            "max": 75252684
+          }
+        },
+        "new": {
+          "clickToStrictCompleteMs": {
+            "n": 4,
+            "median": 232.94999999925494,
+            "p95": 519.6999999992549,
+            "max": 519.6999999992549
+          },
+          "firstMs": {
+            "n": 4,
+            "median": 32.14999999944121,
+            "p95": 44.19999999925494,
+            "max": 44.19999999925494
+          },
+          "fullMs": {
+            "n": 4,
+            "median": 310.4999999990687,
+            "p95": 661.0999999996275,
+            "max": 661.0999999996275
+          },
+          "maxTaskMs": {
+            "n": 4,
+            "median": 0.0,
+            "p95": 340,
+            "max": 340
+          },
+          "blockingMs": {
+            "n": 4,
+            "median": 0.0,
+            "p95": 316,
+            "max": 316
+          },
+          "sampledHeapHighWaterBytes": {
+            "n": 4,
+            "median": 71042093.5,
+            "p95": 71349023,
+            "max": 71349023
+          }
+        },
+        "correction": {
+          "clickToStrictCompleteMs": {
+            "n": 4,
+            "median": 140.34999999962747,
+            "p95": 157.0,
+            "max": 157.0
+          },
+          "firstMs": {
+            "n": 4,
+            "median": 28.34999999962747,
+            "p95": 29.5,
+            "max": 29.5
+          },
+          "fullMs": {
+            "n": 4,
+            "median": 210.6499999994412,
+            "p95": 227.39999999850988,
+            "max": 227.39999999850988
+          },
+          "maxTaskMs": {
+            "n": 4,
+            "median": 0.0,
+            "p95": 50,
+            "max": 50
+          },
+          "blockingMs": {
+            "n": 4,
+            "median": 0.0,
+            "p95": 0,
+            "max": 0
+          },
+          "sampledHeapHighWaterBytes": {
+            "n": 4,
+            "median": 74604214.5,
+            "p95": 75252684,
+            "max": 75252684
+          }
+        },
+        "first": {
+          "clickToStrictCompleteMs": {
+            "n": 1,
+            "median": 519.6999999992549,
+            "p95": 519.6999999992549,
+            "max": 519.6999999992549
+          },
+          "firstMs": {
+            "n": 1,
+            "median": 44.19999999925494,
+            "p95": 44.19999999925494,
+            "max": 44.19999999925494
+          },
+          "fullMs": {
+            "n": 1,
+            "median": 661.0999999996275,
+            "p95": 661.0999999996275,
+            "max": 661.0999999996275
+          },
+          "maxTaskMs": {
+            "n": 1,
+            "median": 340,
+            "p95": 340,
+            "max": 340
+          },
+          "blockingMs": {
+            "n": 1,
+            "median": 316,
+            "p95": 316,
+            "max": 316
+          },
+          "sampledHeapHighWaterBytes": {
+            "n": 1,
+            "median": 70644520,
+            "p95": 70644520,
+            "max": 70644520
+          }
+        }
+      }
+    }
+  },
+  "sourceReportSHA256": "b81f452afb3b347f27ef49bbb50466988b8dfc9c697189918d7691fff4dddcc8"
+}

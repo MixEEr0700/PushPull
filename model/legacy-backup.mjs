@@ -78,6 +78,8 @@ function validateV2(x) {
     }
   }
 }
+/** Same complete structured validation, without manufacturing backup text. */
+export function validateLegacyStructure(value){portable(value);validateV2(value);return value;}
 function legacyValue(original,raw) {
   portable(original);
   check(original?.format!=='pushpull-backup' || [1,2].includes(original.version),

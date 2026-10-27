@@ -11,20 +11,26 @@ const raw={
 const initialExercises=Object.fromEntries(Object.entries(raw).map(([type,rows])=>[type,rows.map((r,i)=>({id:type.replace(/ /g,'-')+'-'+(i+1),name:r[0],sets:r[1],target:r[2],initialKg:r[3],tempo:'do uzupełnienia',rir:'do uzupełnienia',notes:''}))]));
 const STORE='pushpull_skeleton_v1';const today=()=>new Date().toLocaleDateString('en-CA');const uid=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());
 function fresh(){return {version:1,exercises:initialExercises,sessions:[],entries:[],changes:{},nextType:'PUSH A',activeId:null}}
-const database=await PushPullDB.open(fresh);
+const startupModules=Promise.all(['journal','v2-plan','performance-editor','performance','plan-import','plan-overview'].map(name=>import('./model/'+name+'.mjs')));
+// The imports can fail while the database is still opening. Await below still
+// reports the error, without an early unhandled rejection.
+void startupModules.catch(()=>{});
+performance.mark('pushpull-database-start');
+const database=await PushPullDB.open(fresh,{training:true});
+performance.mark('pushpull-database-ready');
 let recoveryError=database.error;
 let data=database.value||fresh();
-const journal=await import('./model/journal.mjs');
+const [journal,v2,rich,performanceAPI,planImport,overview]=await startupModules;
 let journalAPI=data.trainingJournal?journal:null;
-const v2=await import('./model/v2-plan.mjs'),rich=await import('./model/performance-editor.mjs'),performanceAPI=await import('./model/performance.mjs');
-const planImport=await import('./model/plan-import.mjs'),overview=await import('./model/plan-overview.mjs');
 let dataView='data',selectedPlanId=null,weeklyPlanId=null,weeklyFrom=null,weeklyTo=null,weeklyMetric='tonnage',weeklyError='',planCandidate=null,planError='';
 let switchPlans=false,switchPlanId=null;
 const exercisePlanFilters=new Map();
 let overviewRevision=null,overviewCatalog=null;
 function planCatalog(){if(overviewRevision!==database.revision){overviewCatalog=database.catalog??database.export().catalog;overviewRevision=database.revision;}return overviewCatalog;}
 const sessionExercises=s=>journal.exercisesFor(data,s);
+performance.mark('pushpull-drafts-start');
 const savedDrafts=await (await import('./model/workout-drafts.mjs')).openDrafts(database);
+performance.mark('pushpull-drafts-ready');
 const draftCollector=await import('./model/draft-collector.mjs');
 const draftObserver=draftCollector.openDraftObserver(()=>savedDrafts.readEvidence());
 let draftReport=null,draftCollectError='',draftCollecting=false,draftCollectController=null;
@@ -120,6 +126,11 @@ function on(event,handler){
    actions=actions.then(async()=>{
     try{
      if(pending){await feedbackFrame();if(!e.target.isConnected)return;}
+     // Archive-backed controls are opened only after a full integrity audit.
+     // Training/calendar keep the live view; no raw recovery data is needed.
+     if(event==='click'&&e.target.closest('[data-tab="settings"]')&&database.archivesDeferred){
+      toast('Wczytywanie i weryfikowanie pełnych danych…');await feedbackFrame();await database.ensureFull();
+     }
      for(const callback of handlers.get(event))await callback(e);
     }catch(error){render();alert('Operacja przerwana. '+error.message)}
     finally{if(pending)clearTrainingWrite(pending);}
@@ -449,7 +460,7 @@ on('click',async e=>{
   if(typeof database.raw!=='string')throw Error('Odczyt pamięci niedostępny. Odblokuj pamięć i odśwież stronę.');
   downloadRaw(database.raw,'pushpull-oryginalne-dane.json');
  }
- if(e.target.closest('[data-recovery-current]')){const copy=database.recovery();if(!copy)throw Error('Brak odczytanej bazy IndexedDB.');downloadRaw(JSON.stringify(copy,null,2),'pushpull-odzyskiwanie-indexeddb.json')}
+ if(e.target.closest('[data-recovery-current]')){const copy=database.recoveryEvidence?await database.recoveryEvidence():database.recovery();if(!copy)throw Error('Brak odczytanej bazy IndexedDB.');downloadRaw(JSON.stringify(copy,null,2),'pushpull-odzyskiwanie-indexeddb.json')}
  if(e.target.closest('[data-backup-export]')){
   const key=$('#backupKey').value;if(key)downloadRaw(await database.readBackup(key),'pushpull-przed-importem.json');
  }
@@ -499,6 +510,7 @@ on('click',async e=>{
 });
 
 on('input',e=>{if(e.target.matches('textarea.notes-large')){e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'}});new MutationObserver(()=>document.querySelectorAll('textarea.notes-large').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})).observe(document.getElementById('app'),{childList:true,subtree:true});render();
+if(!recoveryError)performance.mark('pushpull-training-ready');
 if('serviceWorker'in navigator&&location.protocol!=='file:'){
  navigator.serviceWorker.addEventListener('controllerchange',()=>{identifyPwa();readPwaWaiting();});
  identifyPwa();void registerPwa().catch(pwaFailure);

@@ -1,7 +1,7 @@
 /** Issue #82 B. Explicit v2 connection, conversion and isolated strict writer. */
 import {freeze,portable,canonical,requireThat as check} from './backup-json.mjs';
-import {STORES,ROW_STORES,createProtocol,materialize,sealState,objectRecord,protocolInput,protocolBudget,limitsFor} from './journal-protocol.mjs';
-import {hashJSON,sha,indexKey,editIndex,checkAbort} from './journal-index.mjs';
+import {equalJSON,STORES,ROW_STORES,createProtocol,materialize,materializeTraining,trainingProof,validateState,validateAllocation,allocationFor,sealState,objectRecord,protocolInput,protocolBudget,limitsFor} from './journal-protocol.mjs';
+import {hashJSON,sha,indexKey,editIndex,buildIndex,checkAbort} from './journal-index.mjs';
 import {prepareLegacyBackup} from './legacy-backup.mjs';
 import {validateSessionSnapshot} from './training-model.mjs';
 import {projectEntry} from './journal.mjs';
@@ -9,8 +9,14 @@ export const VERSION=2,MARKER='journal-protocol-v2';
 export const LEGACY_STORES=['meta','plans','planVersions','exercises','sessions','entries','sets','notes','changes','backups'];
 const conversions=new WeakMap();
 const auditedBundles=new WeakSet();
+const verifiedEvidence=new WeakMap();
+export async function verifyConversionEvidence(evidence){
+ const captured=protocolInput(evidence);
+ if(!verifiedEvidence.has(captured))verifiedEvidence.set(captured,protocolInput(await PushPullDB.verifyEvidence(captured)));
+ return verifiedEvidence.get(captured);
+}
 export const request=req=>new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
-export const same=(a,b)=>{portable(a);portable(b);return JSON.stringify(a)===JSON.stringify(b);};
+export const same=(a,b)=>{portable(a);portable(b);return equalJSON(a,b);};
 export function transact(db,stores,mode,work,{signal}={}){
  checkAbort(signal);
  return new Promise((resolve,reject)=>{
@@ -51,6 +57,43 @@ export async function readRecords(db,{signal}={}){
 export async function legacyEvidence(db){
  return transact(db,LEGACY_STORES,'readonly',async tx=>Object.fromEntries(await Promise.all(LEGACY_STORES.map(async s=>[s,await request(tx.objectStore(s).getAll())]))));
 }
+/** Single native read snapshot; never getAll large objects/checkpoints. */
+export async function readTraining(db,{signal}={}){
+ const captured=await transact(db,[...STORES,'meta'],'readonly',async tx=>{
+  const records=Object.fromEntries(await Promise.all(STORES.filter(s=>!['journalObjects','journalCheckpoints'].includes(s)).map(async s=>[s,await request(tx.objectStore(s).getAll())])));
+  const state=records.journalState.find(s=>s.id==='active');
+  if(!state?.allocation)return null; // Older C roots need one full certification.
+  validateState(state);validateAllocation(state.allocation);
+  check(same(await request(tx.objectStore('meta').get(MARKER)),{key:MARKER,protocol:2,status:'active',epoch:state.epoch}),'protocol marker');
+  const [objectIds,checkpointIds]=await Promise.all(['journalObjects','journalCheckpoints'].map(s=>request(tx.objectStore(s).getAllKeys())));
+  check(objectIds.length+checkpointIds.length+Object.values(records).reduce((n,rows)=>n+rows.length,0)===state.allocation.records,'allocation record count');
+  const refs=new Set([state.legacyRef]);
+  for(const row of records.journalMetadata)for(const [,slot] of row.fields)if(slot.kind==='object')refs.add(slot.ref);
+  for(const store of ['journalSessions','journalResults'])for(const row of records[store])refs.add(row.ref);
+  for(const row of records.journalSnapshots)for(const [,id] of row.fields)refs.add(id);
+  const known=new Set(objectIds);
+  for(const row of records.journalArchives)check(known.has(row.ref),'missing archive object');
+  records.journalObjects=await Promise.all([...refs].map(id=>request(tx.objectStore('journalObjects').get(id))));
+  records.journalCheckpoints=checkpointIds.map(id=>({id}));return {bundle:{state,records},objectIds};
+ },{signal});
+ if(!captured)return null;
+ const bundle=protocolInput(captured.bundle);await materializeTraining(bundle,{objectIds:freeze(captured.objectIds),signal});return bundle;
+}
+/** One-time upgrade for roots written by C: full independent audit first,
+ * then only a strict CAS root update. No schema reset or data deletion. */
+export async function certifyAllocation(db,bundle,{guard=()=>{}}={}){
+ if(bundle.state.allocation)return bundle;
+ await auditBundle(bundle);const next=await sealState({...bundle.state,revision:bundle.state.revision+1,allocation:protocolBudget(bundle)});
+ await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
+  guard();await equalRows(tx,bundle.records);
+  check(same(await request(tx.objectStore('meta').get(MARKER)),{key:MARKER,protocol:2,status:'active',epoch:next.epoch}),'certification marker CAS');
+  tx.objectStore('journalState').put(next);await readback(tx,'journalState',[next]);guard();
+ });
+ // Every existing row was independently read and compared in the strict tx;
+ // retain those proven immutable objects instead of cloning the checkpoint yet
+ // again solely to publish the new small root.
+ return freeze({state:next,records:{...bundle.records,journalState:[next]}});
+}
 async function equalRows(tx,expected){
  for(const [store,rows] of Object.entries(expected)){
   const actual=await request(tx.objectStore(store).getAll()),key=store==='meta'?'key':'id';
@@ -69,9 +112,9 @@ async function readback(tx,store,rows){for(const row of rows)check(same(await re
  * It is checked again inside the conversion tx, including unknown meta/drafts.
  * A stale preparation never restores the checkpoint over a later v1 write. */
 export async function prepareConversion(source,evidence,{ownerId,signal}={}){
- portable(evidence);portable(source);const captured=freeze(structuredClone(evidence)),original=freeze(structuredClone(source));
- const verified=await PushPullDB.verifyEvidence(captured);
- check(canonical(verified)===canonical(original),'conversion v1 source binding');
+ const captured=protocolInput(evidence),original=protocolInput(source);
+ const verified=await verifyConversionEvidence(captured);
+ check(equalJSON(verified,original,{ordered:false}),'conversion v1 source binding');
  const previousOwner=captured.meta.find(r=>r.key==='training-model-v1')?.document.payload.model.ownerId;
  check(ownerId===undefined||previousOwner===undefined||ownerId===previousOwner,'conversion owner');ownerId??=previousOwner;
  const revision=captured.meta.find(r=>r.key==='state')?.revision;check(Number.isSafeInteger(revision),'v1 revision');
@@ -97,20 +140,61 @@ export async function activateConversion(db,token,{signal,guard=()=>{}}={}){
  },{signal});
  // A complete readonly restart audit is independent of the pre-commit objects.
  const stored=await readRecords(db,{signal});check(same(stored.state,bundle.state),'conversion restart revision');
- check(same(await materialize(stored,{signal}),original),'conversion restart oracle');return openWriter(db,{bundle:stored,signal,guard});
+ check(same(await materialize(stored,{signal}),original),'conversion restart oracle');
+ // Native readback, root-bound checkpoint hash and exact detached equality
+ // establish the same v1 validation proof; never infer it from a revision/ID.
+ const readCheckpoint=stored.records.journalCheckpoints.find(r=>r.id===checkpoint.id);
+ check(same(readCheckpoint,checkpoint),'conversion checkpoint restart oracle');
+ verifiedEvidence.set(readCheckpoint.evidence,await verifyConversionEvidence(captured));
+ return openWriter(db,{bundle:stored,signal,guard});
 }
 export async function convertV1(db,source,evidence,options={}){return activateConversion(db,await prepareConversion(source,evidence,options),options);}
 async function auditBundle(input,options={}){
  const bundle=protocolInput(input);
  for(const checkpoint of auditedBundles.has(bundle)?[]:bundle.records.journalCheckpoints){
   if(checkpoint.protocol!==1)continue;
-  const original=await PushPullDB.verifyEvidence(checkpoint.evidence);
+ const original=await verifyConversionEvidence(checkpoint.evidence);
   check(checkpoint.sourceHash===await sha(canonical(original)),'checkpoint source SHA-256');
  }
  const source=await materialize(bundle,options);auditedBundles.add(bundle);return source;
 }
-/** Deliberately slower full operation for start/finish, plans and explicit
- * import/restore. A confirmed restore can quarantine a corrupt representation
+/** Live graph operation (session start/finish, notes/date/plan edits). Archive
+ * rows, checkpoint references and every retained immutable object stay intact.
+ * Import, preimage creation and explicit backup operations use replaceSource. */
+export async function replaceLive(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,guard=()=>{},signal}={}){
+ const source=protocolInput(input);check(source.archives?.length===0,'live operation cannot replace archives');
+ const before=await readTraining(db,{signal});check(before&&same(before.state,expectedState),'live root CAS');
+ const limits=limitsFor(),old=before.state,original=before.records;
+ const created=await createProtocol(source,{epoch:old.epoch,revision:old.revision+1,ownerId,modelEnabled,legacyRaw,signal});
+ const records={...created.records,journalArchives:original.journalArchives};
+ const leaves=[];for(const store of ROW_STORES)for(const row of records[store])leaves.push([indexKey(store,row.id),await hashJSON(row)]);
+ const tree=await buildIndex(leaves,{signal});records.journalIndex=[...tree.nodes.values()];
+ const knownObjects=new Set(trainingProof(before).objectIds),knownNodes=new Set(original.journalIndex.map(r=>r.id));
+ const addedObjects=records.journalObjects.filter(r=>!knownObjects.has(r.id)),addedNodes=records.journalIndex.filter(r=>!knownNodes.has(r.id));
+ const allocation={bytes:old.allocation.bytes+addedObjects.reduce((n,r)=>n+r.bytes,0),records:old.allocation.records+addedObjects.length+addedNodes.length+ROW_STORES.reduce((n,s)=>n+records[s].length-original[s].length,0),maxObjectBytes:records.journalObjects.reduce((n,r)=>Math.max(n,r.bytes),old.allocation.maxObjectBytes)};
+ validateAllocation(allocation,limits);
+ const state=await sealState({...created.state,indexRoot:tree.root,counts:Object.fromEntries(ROW_STORES.map(s=>[s,records[s].length])),checkpointRefs:old.checkpointRefs,allocation});
+ await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
+  guard();check(same(await request(tx.objectStore('journalState').get('active')),old),'live root CAS');
+  const marker={key:MARKER,protocol:2,status:'active',epoch:old.epoch};check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'live marker CAS');
+  for(const store of ROW_STORES)check(await request(tx.objectStore(store).count())===original[store].length,'live collection count CAS');
+  // Required live contents are checked again inside the transaction. This does
+  // not read opaque archives/checkpoints under the pretext of a small edit.
+  for(const store of ROW_STORES)await readback(tx,store,original[store]);
+  await readback(tx,'journalObjects',original.journalObjects);await readback(tx,'journalIndex',original.journalIndex);
+  for(const store of ROW_STORES.filter(s=>s!=='journalArchives')){tx.objectStore(store).clear();for(const row of records[store])tx.objectStore(store).add(row);}
+  await addImmutable(tx,'journalObjects',records.journalObjects);await addImmutable(tx,'journalIndex',records.journalIndex);
+  for(const store of ROW_STORES)await readback(tx,store,records[store]);
+  await readback(tx,'journalObjects',records.journalObjects);await readback(tx,'journalIndex',records.journalIndex);
+  tx.objectStore('journalState').put(state);await readback(tx,'journalState',[state]);
+  check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'live marker readback');guard();
+ },{signal});
+ try{
+  const stored=await readTraining(db,{signal});check(stored&&same(stored.state,state),'live restart root');
+  check(same(trainingProof(stored).source,source),'live restart source oracle');return await openWriter(db,{bundle:stored,guard,signal});
+ }catch(failure){throw Object.assign(Error('Nie potwierdzono odczytu po zapisie. Nie usunięto danych. '+failure.message,{cause:failure}),{code:'post-complete-readback'});}
+}
+/** Full operation for archive additions, preimages and explicit import/restore. A confirmed restore can quarantine a corrupt representation
  * as exact opaque evidence; normal operations never purge immutable records. */
 export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0}={}){
  portable(input);const source=freeze(structuredClone(input)),before=await readRecords(db,{signal});
@@ -120,10 +204,12 @@ export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled
  const previousRevision=Number.isSafeInteger(before.state?.revision)?before.state.revision:revision;
  const checkpoint=recovery?{id:'recovery:'+crypto.randomUUID(),protocol:2,raw:JSON.stringify(before.records)}:null;
  if(checkpoint)checkpoint.sha256=await sha(checkpoint.raw);
- const bundle=await createProtocol(source,{epoch:recovery?crypto.randomUUID():before.state.epoch,revision:previousRevision+1,ownerId,modelEnabled,legacyRaw,checkpoints:recovery?[checkpoint]:before.records.journalCheckpoints,signal});
+ let bundle=await createProtocol(source,{epoch:recovery?crypto.randomUUID():before.state.epoch,revision:previousRevision+1,ownerId,modelEnabled,legacyRaw,checkpoints:recovery?[checkpoint]:before.records.journalCheckpoints,signal});
  const anticipated={...bundle.records};
  for(const store of ['journalObjects','journalIndex'])anticipated[store]=[...new Map([...(recovery?[]:before.records[store]),...bundle.records[store]].map(r=>[r.id,r])).values()];
  anticipated.journalCheckpoints=recovery?[checkpoint]:before.records.journalCheckpoints;
+ const allocated=await sealState({...bundle.state,allocation:await allocationFor(anticipated)});
+ anticipated.journalState=[allocated];bundle=freeze({state:allocated,records:{...bundle.records,journalState:[allocated]}});
  check(same(await materialize({state:bundle.state,records:anticipated},{signal}),source),'bulk retained capacity/source oracle');
  await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
   guard();await equalRows(tx,before.records);
@@ -150,9 +236,10 @@ export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled
 }
 export async function openWriter(db,{bundle,signal,guard=()=>{},limits:requestedLimits}={}){
  const limits=limitsFor(requestedLimits);
- let saved=protocolInput(bundle??await readRecords(db,{signal})),source=await auditBundle(saved,{signal,limits}),state=saved.state,busy=false;
- let allocation=protocolBudget(saved);
+ let saved=protocolInput(bundle??await readRecords(db,{signal})),training=trainingProof(saved),source=training?.source??await auditBundle(saved,{signal,limits}),state=saved.state,busy=false;
+ let allocation=training?.budget??protocolBudget(saved);validateAllocation(allocation,limits);
  const maps=Object.fromEntries(STORES.map(s=>[s,new Map(saved.records[s].map(r=>[r.id,r]))]));saved=null;
+ if(training)for(const id of training.objectIds)if(!maps.journalObjects.has(id))maps.journalObjects.set(id,null);
  let pairs,globalIds;
  function ids(entry){if(!source.data.trainingJournal)return [entry.id];const snapshot=source.data.trainingJournal.sessionSnapshots.find(s=>s.sessionId===entry.sessionId);return projectEntry({id:entry.id,sessionId:entry.sessionId,binding:'uninterpreted',payloadVersion:1,data:entry},snapshot).resultRecords.map(r=>r.id)}
  function indexResults(){pairs=new Map();globalIds=new Map();for(const e of source.data.entries){pairs.set(JSON.stringify([e.sessionId,e.exerciseId]),e.id);for(const id of ids(e))globalIds.set(id,e.id)}}
@@ -198,10 +285,10 @@ export async function openWriter(db,{bundle,signal,guard=()=>{},limits:requested
     while(id){const n=maps.journalIndex.get(id);check(n,'required index');tree.observed.set(id,n);if(n.key===key){check(n.value===await hashJSON(record),'required index record');found=true;break}id=key<n.key?n.left:n.right;}
     check(found,'required index missing');
    }
-   const next=await sealState({...before,revision:before.revision+1,indexRoot:tree.root,counts:{...before.counts,journalResults:before.counts.journalResults+(old?0:1)}});
    const newObject=maps.journalObjects.has(object.id)?0:1,newNodes=[...tree.added.keys()].filter(id=>!maps.journalIndex.has(id)).length;
-   const nextAllocation={bytes:allocation.bytes+(newObject?object.bytes:0),records:allocation.records+newObject+newNodes+(old?0:1)};
+   const nextAllocation={bytes:allocation.bytes+(newObject?object.bytes:0),records:allocation.records+newObject+newNodes+(old?0:1),maxObjectBytes:Math.max(allocation.maxObjectBytes,object.bytes)};
    check(nextAllocation.bytes<=limits.totalBytes,'protocol total size');check(nextAllocation.records<=limits.records,'protocol record count');
+   const next=await sealState({...before,revision:before.revision+1,indexRoot:tree.root,counts:{...before.counts,journalResults:before.counts.journalResults+(old?0:1)},...(before.allocation?{allocation:nextAllocation}:{})});
    await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
     guard();check(same(await request(tx.objectStore('journalState').get('active')),before),'root CAS');
     const marker={key:MARKER,protocol:2,status:'active',epoch:before.epoch};check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'protocol marker');

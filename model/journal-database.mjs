@@ -1,6 +1,8 @@
 /** Matrix-compatible facade. All official writes after activation use v2. */
 import {freeze,portable,canonical} from './backup-json.mjs';
-import {openWriter,connectV2,readRecords,legacyEvidence,prepareConversion,activateConversion,replaceSource,transact,request,same,MARKER} from './journal-idb.mjs';
+import {openWriter,connectV2,readRecords,readTraining,certifyAllocation,legacyEvidence,prepareConversion,activateConversion,replaceSource,replaceLive,transact,request,same,MARKER} from './journal-idb.mjs';
+import {protocolInput} from './journal-protocol.mjs';
+import {verifyConversionEvidence} from './journal-idb.mjs';
 import {createLegacyModelFromSource,legacyPayload,exportBackup,readLegacyBackup,parseModelBackup} from './legacy-model.mjs';
 const OWNER='pushpull_indexeddb_owner';
 const clone=value=>structuredClone(value);
@@ -19,8 +21,8 @@ function editable(data){
  const {trainingJournal}=data,journal=clone({...trainingJournal,sessionSnapshots:[]}),result=clone({...data,trainingJournal:null});
  journal.sessionSnapshots=trainingJournal.sessionSnapshots.slice();result.trainingJournal=journal;return result;
 }
-export async function openDatabase(v1,fresh){
- let db,writer,source=null,unverified=null,error=null,stale=false,closed=false,notify=()=>{},anchor=null,pendingRevision=0,recoveryCopies=[];
+export async function openDatabase(v1,fresh,{training=false}={}){
+ let db,writer,source=null,unverified=null,error=null,stale=false,closed=false,notify=()=>{},anchor=null,pendingRevision=0,recoveryCopies=[],deferred=false;
  const channel=typeof BroadcastChannel==='undefined'?null:new BroadcastChannel('pushpull-indexeddb');
  const raw=()=>localStorage.getItem(PushPullStorage.KEY);
  const block=message=>{stale=true;error=Error(message);notify(error)};
@@ -30,7 +32,12 @@ export async function openDatabase(v1,fresh){
  };
  const versionChanged=()=>{closed=true;block('Zmieniono wersję bazy. Zachowaj szkice i zamknij inne karty. Nie wyzerowano danych.')};
  const announce=()=>channel?.postMessage({revision:writer.state.revision,epoch:writer.state.epoch});
- function publish(next){writer=next;source=writer.source;anchor=writer.legacyRaw;error=null;stale=false;localStorage.setItem(OWNER,v1.NAME+':2');}
+ function publish(next,{live=false}={}){
+  const knownArchives=live&&!deferred?source?.archives:null;
+  writer=next;source=knownArchives?Object.freeze({...writer.source,archives:knownArchives}):writer.source;
+  if(live)deferred=!knownArchives;
+  anchor=writer.legacyRaw;error=null;stale=false;localStorage.setItem(OWNER,v1.NAME+':2');
+ }
  async function activateLatest(prepared){
   for(let attempt=0;attempt<3;attempt++){
    try{return await activateConversion(db,prepared,{guard})}
@@ -46,6 +53,15 @@ export async function openDatabase(v1,fresh){
  try{
   db=await probe(v1.NAME);
   if(!db||db.version===1){
+   // Existing v1 needs one native capture and one full oracle, not openV1's
+   // load/model build followed by a second independent capture of the same DB.
+   const present=db&&await transact(db,['meta'],'readonly',tx=>request(tx.objectStore('meta').get('state')));
+   if(present){
+    const evidence=protocolInput(await legacyEvidence(db));unverified={format:'pushpull-idb-recovery',version:1,evidence};
+    source=await verifyConversionEvidence(evidence);anchor=raw();pendingRevision=present.revision;
+    if(anchor!==evidence.meta.find(r=>r.key==='state').legacyRaw)throw Error('Starsza wersja zmieniła dane. Zachowaj obie kopie przed odzyskaniem.');
+    const prepared=await prepareConversion(source,evidence);guard();db.close();db=await connectV2(v1.NAME,{onVersionChange:versionChanged});publish(await activateLatest(prepared));
+   }else{
    const legacy=await v1.openV1(fresh);
    if(legacy.error){
     // Another new tab can finish upgrade while this v1 handle is loading or
@@ -61,10 +77,14 @@ export async function openDatabase(v1,fresh){
     guard();legacy.close();db.close();db=await connectV2(v1.NAME,{onVersionChange:versionChanged});
     publish(await activateLatest(prepared));
    }finally{legacy.close();}
+   }
   }else{
    db.onversionchange=()=>{versionChanged();db.close()};
-   const bundle=await readRecords(db);unverified={format:'pushpull-idb-recovery',version:2,...bundle};
+   let bundle=training?await readTraining(db):null;deferred=!!bundle;
+   if(!bundle)bundle=await readRecords(db);
+   unverified=deferred?null:{format:'pushpull-idb-recovery',version:2,...bundle};
    if(bundle.state){
+    if(training&&!bundle.state.allocation){anchor=JSON.parse(bundle.records.journalObjects.find(r=>r.id===bundle.state.legacyRef).json);bundle=await certifyAllocation(db,bundle,{guard});}
     publish(await openWriter(db,{bundle,guard}));guard();
    }else{
     // Pending conversion reads current v1 stores, never replays an earlier
@@ -76,16 +96,26 @@ export async function openDatabase(v1,fresh){
    }
   }
   unverified=null;guard();
- }catch(failure){error=failure;}
+ }catch(failure){error=failure;if(db?.version===2&&!unverified)try{unverified={format:'pushpull-idb-recovery',version:2,...await readRecords(db)}}catch{}}
  const storageListener=event=>{if(event.key===PushPullStorage.KEY||event.key===null)block('Starsza wersja zmieniła dane. Zapis wstrzymany.')};
  window.addEventListener('storage',storageListener);
  if(channel)channel.onmessage=({data})=>{if(data?.modelChanged||data?.revision>(writer?.state.revision??pendingRevision)||data?.epoch&&writer&&data.epoch!==writer.state.epoch)block('Dane zapisano w innej karcie. Zachowaj szkice i odśwież stronę.')};
  const requireDB=()=>{if(!db||closed)throw Error('IndexedDB niedostępne. Zachowaj szkice i uruchom ponownie.');};
  const revision=()=>{const n=writer?.state.revision??unverified?.state?.revision??pendingRevision;return Number.isSafeInteger(n)?n:pendingRevision;};
- const snapshot=()=>{if(!source)throw Error('Brak zweryfikowanej bazy do eksportu.');return {...clone({...source,data:null}),data:editable(source.data)};};
+ const snapshot=()=>{if(!source)throw Error('Brak zweryfikowanej bazy do eksportu.');if(deferred)throw Error('Pełna kopia wymaga odczytu i audytu archiwów.');return {...clone({...source,data:null}),data:editable(source.data)};};
+ async function ensureFull(){
+  if(error)throw error;guard();if(!deferred)return;
+  const expected=writer.state,bundle=await readRecords(db);
+  if(!same(bundle.state,expected))throw Error('Pełny odczyt: root CAS. Otwórz aplikację ponownie.');
+  const complete=await openWriter(db,{bundle,guard});
+  const actual=await transact(db,['journalState'],'readonly',tx=>request(tx.objectStore('journalState').get('active')));
+  guard();if(!same(actual,expected)||!same(writer.state,expected))throw Error('Pełny odczyt: root CAS. Otwórz aplikację ponownie.');
+  publish(complete);deferred=false;
+ }
  async function auditExport(){
   if(error)throw error;guard();const expected=writer.state,actual=await writer.audit();
-  if(!same((await readRecords(db)).state,expected))throw Error('Baza zmieniła się podczas eksportu. Otwórz ponownie.');
+  const current=await transact(db,['journalState'],'readonly',tx=>request(tx.objectStore('journalState').get('active')));
+  if(!same(current,expected))throw Error('Baza zmieniła się podczas eksportu. Otwórz ponownie.');
   return actual;
  }
  function additions(archives,incoming){
@@ -95,12 +125,14 @@ export async function openDatabase(v1,fresh){
   // Own the candidate before awaiting anything; callers may keep editing theirs.
   portable(data);portable(importedArchives);const own=clone(data),givenCatalog=importedCatalog&&clone(importedCatalog),incoming=clone(importedArchives);
   requireDB();if(error&&!importing)throw error;
+  const liveOnly=!importing&&!backupBefore&&!incoming.length&&writer?.state.allocation;
+  if(deferred&&!liveOnly)await ensureFull();
   const expected=writer?.state??unverified?.state??null,currentRevision=revision(),legacy=raw();
   if(expectedRevision!==null&&expectedRevision!==currentRevision)throw Error('Dane zmieniły się od podglądu kopii. Otwórz podgląd ponownie.');
   if(expectedLegacyRaw!==undefined&&expectedLegacyRaw!==legacy)throw Error('Starsza wersja zmieniła dane od podglądu.');
   if(!importing)guard();
   PushPullStorage.validate(own);const catalog=givenCatalog??v1.catalogFor(own,source?.catalog);v1.validateCatalog(own,catalog);v1.validateArchives(incoming);
-  let archives=source?clone(source.archives):[];
+  let archives=liveOnly?[]:source?clone(source.archives):[];
   if(importing||backupBefore){
    const preimage=source?(writer?.state.modelEnabled?JSON.stringify(await createLegacyModelFromSource(source,{ownerId:writer.state.ownerId,createdAt:new Date().toISOString()})):JSON.stringify(source)):JSON.stringify(unverified);
    archives.push({id:'idb:'+crypto.randomUUID(),kind:'before-import',createdAt:new Date().toISOString(),raw:preimage});
@@ -110,8 +142,8 @@ export async function openDatabase(v1,fresh){
   const candidate={format:'pushpull-backup',version:2,data:own,catalog,archives},ownerId=modelOwnerId??own.trainingJournal?.model.ownerId??writer?.state.ownerId??'local-journal';
   const operationGuard=()=>{if(closed)throw Error('Połączenie zamknięte.');if(raw()!==legacy)throw Error('Starsza wersja zmieniła dane w trakcie operacji.');if(!importing&&stale)throw error;};
   try{
-   const next=await replaceSource(db,candidate,{expectedState:expected,ownerId,modelEnabled:modelEnabled??(!!own.trainingJournal||writer?.state.modelEnabled||modelOwnerId!==null),legacyRaw:legacy,recovery:importing&&!writer,revision:pendingRevision,guard:operationGuard});
-   publish(next);unverified=null;recoveryCopies=[];announce();
+   const next=await (liveOnly?replaceLive:replaceSource)(db,candidate,{expectedState:expected,ownerId,modelEnabled:modelEnabled??(!!own.trainingJournal||writer?.state.modelEnabled||modelOwnerId!==null),legacyRaw:legacy,recovery:importing&&!writer,revision:pendingRevision,guard:operationGuard});
+   publish(next,{live:liveOnly});if(!liveOnly)deferred=false;unverified=null;recoveryCopies=[];announce();
   }catch(failure){
    if(failure.code==='post-complete-readback'){recoveryCopies=archives;block(failure.message);}
    else if(/CAS/.test(failure.message)){block('Dane zmieniły się w innej karcie. Otwórz podgląd ponownie.');throw error;}
@@ -120,18 +152,28 @@ export async function openDatabase(v1,fresh){
  }
  return {
   get error(){return error},get value(){return source&&editable(source.data)},get catalog(){return source&&clone(source.catalog)},
+  get archivesDeferred(){return deferred},ensureFull,
   get raw(){try{return raw()}catch{return anchor}},get revision(){return revision()},
-  get model(){return writer?.state.modelEnabled&&source?clone(legacyPayload(source,writer.state.ownerId)):null},
+  get model(){if(deferred)throw Error('Pełny model wymaga odczytu i audytu archiwów.');return writer?.state.modelEnabled&&source?clone(legacyPayload(source,writer.state.ownerId)):null},
   set onchange(fn){notify=fn},
   export:snapshot,auditExport,recovery(){return unverified?clone(unverified):source?snapshot():null},
+  async recoveryEvidence(){
+   requireDB();const stores=[...db.objectStoreNames];
+   // A pending v2 conversion still owns the original v1 tables. A diagnostic
+   // download must retain both representations, drafts and unknown metadata,
+   // in one native snapshot, even if the v2 stores are empty or corrupt.
+   const records=await transact(db,stores,'readonly',async tx=>Object.fromEntries(await Promise.all(stores.map(async store=>[store,await request(tx.objectStore(store).getAll())]))));
+   return db.version===1?{format:'pushpull-idb-recovery',version:1,evidence:records}:{format:'pushpull-idb-recovery',version:2,state:records.journalState?.find(r=>r.id==='active')??null,records};
+  },
   async saveResult(command){
    if(error)throw error;guard();
-   try{const ack=await writer.saveResult(command);source=writer.source;announce();return ack}
+   try{const archives=!deferred&&source.archives,ack=await writer.saveResult(command);source=archives?Object.freeze({...writer.source,archives}):writer.source;announce();return ack}
    catch(failure){if(/CAS|marker|index|object|closed|Starsza/.test(failure.message))block(failure.message);throw failure}
   },
   resultContext(sessionId,exerciseId){if(error)throw error;guard();return writer.context(sessionId,exerciseId)},
   commit,
   async prepareModel({backupText,ownerId}={}){
+   await ensureFull();
    if(error)throw error;guard();
    if(writer.state.modelEnabled){if(ownerId!==writer.state.ownerId)throw Error('Inny właściciel modelu.');return createLegacyModelFromSource(source,{ownerId,createdAt:new Date().toISOString()})}
    if(canonical(readLegacyBackup(backupText).original)!==canonical(source))throw Error('Kopia nie odpowiada pełnej bieżącej bazie.');
@@ -143,7 +185,7 @@ export async function openDatabase(v1,fresh){
   async importModelBackup(text,options={}){const parsed=await parseModelBackup(text);return commit(parsed.data,{...options,importing:true,importedCatalog:parsed.catalog,importedArchives:parsed.archives??[],modelOwnerId:parsed.document.payload.model.ownerId});},
   backups(){return [...new Set([...(source?.archives??[]),...recoveryCopies].map(a=>a.id))]},
   backupLabel(id){const item=[...(source?.archives??[]),...recoveryCopies].find(a=>a.id===id);return ({migration:'Przed migracją','before-import':'Przed przywróceniem / importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item?.kind]??'Kopia')+' · '+new Date(item?.createdAt).toLocaleString('pl-PL')},
-  async readBackup(id){const item=[...(source?.archives??[]),...recoveryCopies].find(a=>a.id===id);if(!item)throw Error('Brak kopii');return item.raw},
+  async readBackup(id){await ensureFull();const item=[...(source?.archives??[]),...recoveryCopies].find(a=>a.id===id);if(!item)throw Error('Brak kopii');return item.raw},
   async readDriveState(){requireDB();return transact(db,['meta'],'readonly',tx=>request(tx.objectStore('meta').get('drive-sync-v1')))},
   async writeDriveState(value,expectedToken){
    requireDB();const next={...clone(value),key:'drive-sync-v1',token:crypto.randomUUID()};

@@ -35,7 +35,7 @@ class IncrementalMatrix(BrowserHarness):
         self.assertEqual(result,{'replayed':False,'value':None,'results':len(before['entries']),'dump':2})
 
     def expose_handle(self):
-        code=(ROOT/'app.js').read_text().replace('const database=await PushPullDB.open(fresh);','const database=await PushPullDB.open(fresh);window.__appDB=database;').replace('let data=database.value||fresh();','let data=database.value||fresh();window.__peek=()=>data;')
+        code=(ROOT/'app.js').read_text().replace('const database=await PushPullDB.open(fresh,{training:true});','const database=await PushPullDB.open(fresh,{training:true});window.__appDB=database;').replace('let data=database.value||fresh();','let data=database.value||fresh();window.__peek=()=>data;')
         self.page.route('**/app.js',lambda route:route.fulfill(body=code,content_type='text/javascript'))
         self.page.reload()
 

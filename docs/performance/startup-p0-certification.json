@@ -1,0 +1,1803 @@
+{
+  "syntheticOnly": true,
+  "cpuThrottle": 4,
+  "artifacts": {
+    "after": {
+      "ref": "c580d69",
+      "hashes": {
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+        "app.js": "ac0531f874dca4bebcdd623df6e9b78f21f393562f44c4f47cd3d88137d41e1a",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+        "model/journal-index.mjs": "049ae7a7f5f95c5436f538b9f6e2d2b3d9caad6565b3adbf0ef9df14c2eb1baf",
+        "model/journal-protocol.mjs": "396187b4860000073bcb4f7679adfc7ca533fb91883446e42984eb8bc1936bb8",
+        "model/journal-idb.mjs": "97f82c52b97d9a9eb09ee259557f3f1b4d2249ed799690326af5e667b7ee9ef9",
+        "model/journal-database.mjs": "ce2899c058b762d9aeed3702714cd63e88485f4dfef7a5167471709be11fd2c3",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+        "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+        "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+        "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+        "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+        "model/performance.mjs": "527512863b5f89f0dc701db34e217d9afb6c49ab718f96bd78ba78a7d5cf51f0",
+        "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+        "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+        "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+      },
+      "release": {
+        "format": "pushpull-static-release",
+        "version": 1,
+        "release": "1e770208fa2649c35f91b3ef",
+        "files": {
+          "app.js": "b0692ee7f3fb91681743cd0ccf3c296aa70ffdaa1b517c553e6825a6a2762175",
+          "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+          "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+          "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+          "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+          "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+          "indexeddb.js": "2dc03d3256ce03b56a7c459d8fcc82b7a0ea708c1282872b39d98419b13bd3c7",
+          "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+          "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+          "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+          "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+          "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+          "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+          "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+          "model/backup.mjs": "ee164d1f158d1f90580cc34cc7a3939aa6fc85723ddbee19784edeb301f875bc",
+          "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+          "model/drive-sync.mjs": "032f98db76a50613fa791287f08945dcb62cc6fd1cef9a557f236b6b95c2ca09",
+          "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+          "model/journal-database.mjs": "c226f18a91711b38de8b7769ce5a2fc85bfd1e448cb98ec058ceafbd7c10f8e2",
+          "model/journal-idb.mjs": "eb3b55be71c5a468b92e4a52fad8cc9581bd680b5072838ac3d200a0dc52d4ce",
+          "model/journal-index.mjs": "049ae7a7f5f95c5436f538b9f6e2d2b3d9caad6565b3adbf0ef9df14c2eb1baf",
+          "model/journal-protocol.mjs": "805ea2bcc670cdeb9dc772c07afd56a4e9ab8563890558111b58099a23147bb8",
+          "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+          "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+          "model/legacy-model.mjs": "18f53dd308edebfbbf7d00f24720f2ef54d587edb6bc013538b34b6023dbcf2c",
+          "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+          "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+          "model/performance.mjs": "527512863b5f89f0dc701db34e217d9afb6c49ab718f96bd78ba78a7d5cf51f0",
+          "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+          "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+          "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+          "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+          "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+          "model/workout-drafts.mjs": "b0a7bcb29a81994542beb69332125790606989c8a7ce73ee7372fe3369d6e409",
+          "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+          "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+          "sw.js": "31a5c5eaeeb8b138fc3c2e43f786281356770f7051510cc5376e7691d9dd692e"
+        }
+      }
+    }
+  },
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "chromium": "Chromium 154.0.8037.57 built on Debian GNU/Linux 13 (trixie)",
+  "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "repeats": 1,
+  "sourceReportSHA256": "4a8bb310d132e5bb4a326a3e5eed7cad52d8dd851699327c4bc8860dbc442cf1",
+  "note": "Inclusive spans overlap. Sampled JS heap, not process RSS or an absolute peak. CPU x4 is not Android emulation. No concurrent tests during final measurements.",
+  "cases": {
+    "history40-raw4": {
+      "after": {
+        "initial": {
+          "readyMs": 21288.099999999627,
+          "uiReadyMarkMs": 21078.39999999851,
+          "paint": [
+            {
+              "name": "first-paint",
+              "entryType": "paint",
+              "startTime": 200,
+              "duration": 0,
+              "navigationId": 8231,
+              "paintTime": 190.5,
+              "presentationTime": 200
+            },
+            {
+              "name": "first-contentful-paint",
+              "entryType": "paint",
+              "startTime": 392,
+              "duration": 0,
+              "navigationId": 8231,
+              "paintTime": 361.59999999962747,
+              "presentationTime": 392
+            }
+          ],
+          "marks": [
+            {
+              "name": "pushpull-database-start",
+              "entryType": "mark",
+              "startTime": 249.19999999925494,
+              "duration": 0,
+              "navigationId": 8231
+            },
+            {
+              "name": "pushpull-database-ready",
+              "entryType": "mark",
+              "startTime": 20886.599999999627,
+              "duration": 0,
+              "navigationId": 8231
+            },
+            {
+              "name": "pushpull-drafts-start",
+              "entryType": "mark",
+              "startTime": 20909.5,
+              "duration": 0,
+              "navigationId": 8231
+            },
+            {
+              "name": "pushpull-drafts-ready",
+              "entryType": "mark",
+              "startTime": 20933.299999998882,
+              "duration": 0,
+              "navigationId": 8231
+            },
+            {
+              "name": "pushpull-training-ready",
+              "entryType": "mark",
+              "startTime": 21078.39999999851,
+              "duration": 0,
+              "navigationId": 8231
+            }
+          ],
+          "navigation": {
+            "name": "http://127.0.0.1:36549/",
+            "entryType": "navigation",
+            "startTime": 0,
+            "duration": 278.09999999962747,
+            "navigationId": 8231,
+            "initiatorType": "navigation",
+            "deliveryType": "",
+            "nextHopProtocol": "http/1.0",
+            "renderBlockingStatus": "non-blocking",
+            "contentType": "text/html",
+            "contentEncoding": "",
+            "workerStart": 0,
+            "workerRouterEvaluationStart": 0,
+            "workerCacheLookupStart": 0,
+            "workerMatchedSourceType": "",
+            "workerFinalSourceType": "",
+            "redirectStart": 0,
+            "redirectEnd": 0,
+            "fetchStart": 0.599999999627471,
+            "domainLookupStart": 0.599999999627471,
+            "domainLookupEnd": 0.599999999627471,
+            "connectStart": 0.599999999627471,
+            "secureConnectionStart": 0,
+            "connectEnd": 0.599999999627471,
+            "requestStart": 2,
+            "responseStart": 9.199999999254942,
+            "firstInterimResponseStart": 0,
+            "finalResponseHeadersStart": 9.199999999254942,
+            "responseEnd": 10.199999999254942,
+            "transferSize": 869,
+            "encodedBodySize": 569,
+            "decodedBodySize": 569,
+            "responseStatus": 200,
+            "serverTiming": [],
+            "unloadEventStart": 0,
+            "unloadEventEnd": 0,
+            "domInteractive": 199.09999999962747,
+            "domContentLoadedEventStart": 259.09999999962747,
+            "domContentLoadedEventEnd": 259.2999999988824,
+            "domComplete": 278.09999999962747,
+            "loadEventStart": 278.09999999962747,
+            "loadEventEnd": 278.09999999962747,
+            "type": "navigate",
+            "redirectCount": 0,
+            "activationStart": 0,
+            "criticalCHRestart": 0,
+            "notRestoredReasons": null,
+            "confidence": {
+              "randomizedTriggerRate": 0.4994798,
+              "value": "high"
+            }
+          },
+          "long": [
+            {
+              "start": 205,
+              "ms": 152
+            },
+            {
+              "start": 876.5999999996275,
+              "ms": 360
+            },
+            {
+              "start": 1241.5,
+              "ms": 1317
+            },
+            {
+              "start": 2562.5,
+              "ms": 12396
+            },
+            {
+              "start": 14963.599999999627,
+              "ms": 436
+            },
+            {
+              "start": 15555.599999999627,
+              "ms": 668
+            },
+            {
+              "start": 16244.099999999627,
+              "ms": 4334
+            },
+            {
+              "start": 20591.299999998882,
+              "ms": 319
+            }
+          ],
+          "heapHighWaterBytes": 464880445,
+          "inclusiveSpans": {
+            "model/journal-idb.mjs:readTraining": {
+              "calls": 1,
+              "totalMs": 17.399999998509884,
+              "maxMs": 17.399999998509884
+            },
+            "model/journal-idb.mjs:readRecords": {
+              "calls": 1,
+              "totalMs": 721,
+              "maxMs": 721
+            },
+            "model/backup.mjs:validateBackup": {
+              "calls": 1,
+              "totalMs": 2578.4000000003725,
+              "maxMs": 2578.4000000003725
+            },
+            "model/legacy-model.mjs:verifyLegacyModel": {
+              "calls": 1,
+              "totalMs": 6181.4000000003725,
+              "maxMs": 6181.4000000003725
+            },
+            "indexeddb.js:verifyEvidence": {
+              "calls": 1,
+              "totalMs": 7039.200000001118,
+              "maxMs": 7039.200000001118
+            },
+            "model/legacy-model.mjs:validateStructuredSource": {
+              "calls": 2,
+              "totalMs": 583.5999999996275,
+              "maxMs": 395
+            },
+            "model/journal-protocol.mjs:validateSource": {
+              "calls": 2,
+              "totalMs": 584.5999999996275,
+              "maxMs": 396
+            },
+            "model/journal-protocol.mjs:materialize": {
+              "calls": 2,
+              "totalMs": 9403.599999999627,
+              "maxMs": 5614.0999999996275
+            },
+            "model/journal-idb.mjs:auditBundle": {
+              "calls": 2,
+              "totalMs": 18432.400000000373,
+              "maxMs": 13874.300000000745
+            },
+            "model/journal-idb.mjs:certifyAllocation": {
+              "calls": 1,
+              "totalMs": 14732.5,
+              "maxMs": 14732.5
+            },
+            "model/journal-idb.mjs:openWriter": {
+              "calls": 1,
+              "totalMs": 4638.9000000003725,
+              "maxMs": 4638.9000000003725
+            },
+            "model/journal-database.mjs:openDatabase": {
+              "calls": 1,
+              "totalMs": 20120.200000001118,
+              "maxMs": 20120.200000001118
+            },
+            "model/workout-drafts.mjs:openDrafts": {
+              "calls": 1,
+              "totalMs": 5.199999999254942,
+              "maxMs": 5.199999999254942
+            },
+            "model/drive-sync.mjs:openDriveBackup": {
+              "calls": 1,
+              "totalMs": 11.199999999254942,
+              "maxMs": 11.199999999254942
+            },
+            "app.js:main": {
+              "calls": 1,
+              "totalMs": 26,
+              "maxMs": 26
+            },
+            "app.js:render": {
+              "calls": 1,
+              "totalMs": 30.699999999254942,
+              "maxMs": 30.699999999254942
+            }
+          },
+          "nativeRequests": {
+            "open:open": {
+              "count": 1,
+              "sumMsOverlapping": 3.700000001117587,
+              "maxMs": 3.700000001117587,
+              "rows": 0
+            },
+            "journalMetadata:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 77.10000000149012,
+              "maxMs": 69,
+              "rows": 9
+            },
+            "journalSessions:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 76.49999999813735,
+              "maxMs": 69.09999999962747,
+              "rows": 120
+            },
+            "journalResults:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 80.09999999962747,
+              "maxMs": 69.09999999962747,
+              "rows": 1050
+            },
+            "journalSnapshots:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 80.40000000037253,
+              "maxMs": 70.59999999962747,
+              "rows": 120
+            },
+            "journalArchives:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 82.79999999888241,
+              "maxMs": 72.29999999888241,
+              "rows": 6
+            },
+            "journalIndex:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 91.09999999776483,
+              "maxMs": 72.29999999888241,
+              "rows": 1305
+            },
+            "journalState:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 87.59999999776483,
+              "maxMs": 73.79999999888241,
+              "rows": 3
+            },
+            "journalObjects:getAll": {
+              "count": 2,
+              "sumMsOverlapping": 85.90000000037253,
+              "maxMs": 53.09999999962747,
+              "rows": 974
+            },
+            "journalCheckpoints:getAll": {
+              "count": 2,
+              "sumMsOverlapping": 122.59999999776483,
+              "maxMs": 85.79999999888241,
+              "rows": 2
+            },
+            "meta:get": {
+              "count": 2,
+              "sumMsOverlapping": 3.900000000372529,
+              "maxMs": 3.400000000372529,
+              "rows": 2
+            },
+            "journalState:get": {
+              "count": 1,
+              "sumMsOverlapping": 5.800000000745058,
+              "maxMs": 5.800000000745058,
+              "rows": 1
+            },
+            "meta:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 2.099999999627471,
+              "maxMs": 2.099999999627471,
+              "rows": 0
+            }
+          }
+        },
+        "cold0": {
+          "readyMs": 1617.5,
+          "uiReadyMarkMs": 1209.199999999255,
+          "paint": [
+            {
+              "name": "first-paint",
+              "entryType": "paint",
+              "startTime": 112,
+              "duration": 0,
+              "navigationId": 1895,
+              "paintTime": 100.59999999962747,
+              "presentationTime": 112
+            },
+            {
+              "name": "first-contentful-paint",
+              "entryType": "paint",
+              "startTime": 200,
+              "duration": 0,
+              "navigationId": 1895,
+              "paintTime": 188.39999999850988,
+              "presentationTime": 200
+            }
+          ],
+          "marks": [
+            {
+              "name": "pushpull-database-start",
+              "entryType": "mark",
+              "startTime": 161,
+              "duration": 0,
+              "navigationId": 1895
+            },
+            {
+              "name": "pushpull-database-ready",
+              "entryType": "mark",
+              "startTime": 1019.5,
+              "duration": 0,
+              "navigationId": 1895
+            },
+            {
+              "name": "pushpull-drafts-start",
+              "entryType": "mark",
+              "startTime": 1041,
+              "duration": 0,
+              "navigationId": 1895
+            },
+            {
+              "name": "pushpull-drafts-ready",
+              "entryType": "mark",
+              "startTime": 1053.199999999255,
+              "duration": 0,
+              "navigationId": 1895
+            },
+            {
+              "name": "pushpull-training-ready",
+              "entryType": "mark",
+              "startTime": 1209.199999999255,
+              "duration": 0,
+              "navigationId": 1895
+            }
+          ],
+          "navigation": {
+            "name": "http://127.0.0.1:36549/",
+            "entryType": "navigation",
+            "startTime": 0,
+            "duration": 167.19999999925494,
+            "navigationId": 1895,
+            "initiatorType": "navigation",
+            "deliveryType": "cache-storage",
+            "nextHopProtocol": "",
+            "renderBlockingStatus": "non-blocking",
+            "contentType": "text/html",
+            "contentEncoding": "",
+            "workerStart": 2.899999998509884,
+            "workerRouterEvaluationStart": 0,
+            "workerCacheLookupStart": 0,
+            "workerMatchedSourceType": "",
+            "workerFinalSourceType": "",
+            "redirectStart": 0,
+            "redirectEnd": 0,
+            "fetchStart": 3.199999999254942,
+            "domainLookupStart": 3.199999999254942,
+            "domainLookupEnd": 3.199999999254942,
+            "connectStart": 3.199999999254942,
+            "secureConnectionStart": 0,
+            "connectEnd": 3.199999999254942,
+            "requestStart": 3.199999999254942,
+            "responseStart": 8.899999998509884,
+            "firstInterimResponseStart": 8.899999998509884,
+            "finalResponseHeadersStart": 0,
+            "responseEnd": 19.199999999254942,
+            "transferSize": 0,
+            "encodedBodySize": 569,
+            "decodedBodySize": 569,
+            "responseStatus": 200,
+            "serverTiming": [],
+            "unloadEventStart": 0,
+            "unloadEventEnd": 0,
+            "domInteractive": 83.19999999925494,
+            "domContentLoadedEventStart": 164.69999999925494,
+            "domContentLoadedEventEnd": 166,
+            "domComplete": 167.09999999962747,
+            "loadEventStart": 167.19999999925494,
+            "loadEventEnd": 167.19999999925494,
+            "type": "navigate",
+            "redirectCount": 0,
+            "activationStart": 0,
+            "criticalCHRestart": 0,
+            "notRestoredReasons": null,
+            "confidence": {
+              "randomizedTriggerRate": 0.4994798,
+              "value": "low"
+            }
+          },
+          "long": [
+            {
+              "start": 106.69999999925494,
+              "ms": 76
+            },
+            {
+              "start": 415.8999999985099,
+              "ms": 260
+            },
+            {
+              "start": 679.2999999988824,
+              "ms": 363
+            },
+            {
+              "start": 1093.699999999255,
+              "ms": 66
+            }
+          ],
+          "heapHighWaterBytes": 15654825,
+          "inclusiveSpans": {
+            "model/legacy-model.mjs:validateStructuredSource": {
+              "calls": 1,
+              "totalMs": 234.2999999988824,
+              "maxMs": 234.2999999988824
+            },
+            "model/journal-protocol.mjs:validateSource": {
+              "calls": 1,
+              "totalMs": 235.2999999988824,
+              "maxMs": 235.2999999988824
+            },
+            "model/journal-protocol.mjs:materializeTraining": {
+              "calls": 1,
+              "totalMs": 482.2999999988824,
+              "maxMs": 482.2999999988824
+            },
+            "model/journal-idb.mjs:readTraining": {
+              "calls": 1,
+              "totalMs": 606,
+              "maxMs": 606
+            },
+            "model/journal-idb.mjs:openWriter": {
+              "calls": 1,
+              "totalMs": 71.10000000149012,
+              "maxMs": 71.10000000149012
+            },
+            "model/journal-database.mjs:openDatabase": {
+              "calls": 1,
+              "totalMs": 690.4000000003725,
+              "maxMs": 690.4000000003725
+            },
+            "model/workout-drafts.mjs:openDrafts": {
+              "calls": 1,
+              "totalMs": 3.099999999627471,
+              "maxMs": 3.099999999627471
+            },
+            "model/drive-sync.mjs:openDriveBackup": {
+              "calls": 1,
+              "totalMs": 5.400000000372529,
+              "maxMs": 5.400000000372529
+            },
+            "app.js:main": {
+              "calls": 1,
+              "totalMs": 37.79999999888241,
+              "maxMs": 37.79999999888241
+            },
+            "app.js:render": {
+              "calls": 1,
+              "totalMs": 43.30000000074506,
+              "maxMs": 43.30000000074506
+            }
+          },
+          "nativeRequests": {
+            "open:open": {
+              "count": 1,
+              "sumMsOverlapping": 3.299999998882413,
+              "maxMs": 3.299999998882413,
+              "rows": 0
+            },
+            "journalMetadata:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 3.200000001117587,
+              "maxMs": 3.200000001117587,
+              "rows": 3
+            },
+            "journalSessions:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 3.5,
+              "maxMs": 3.5,
+              "rows": 40
+            },
+            "journalResults:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 3.699999999254942,
+              "maxMs": 3.699999999254942,
+              "rows": 350
+            },
+            "journalSnapshots:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 4,
+              "maxMs": 4,
+              "rows": 40
+            },
+            "journalArchives:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 4,
+              "maxMs": 4,
+              "rows": 2
+            },
+            "journalIndex:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 7.599999999627471,
+              "maxMs": 7.599999999627471,
+              "rows": 435
+            },
+            "journalState:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 9.800000000745058,
+              "maxMs": 9.800000000745058,
+              "rows": 1
+            },
+            "meta:get": {
+              "count": 2,
+              "sumMsOverlapping": 6.699999999254942,
+              "maxMs": 6.5,
+              "rows": 2
+            },
+            "journalObjects:get": {
+              "count": 485,
+              "sumMsOverlapping": 12402.200000045821,
+              "maxMs": 32.30000000074506,
+              "rows": 485
+            },
+            "meta:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 0.7999999988824129,
+              "maxMs": 0.7999999988824129,
+              "rows": 0
+            }
+          }
+        },
+        "warm0": {
+          "readyMs": 2767.4000000003725,
+          "uiReadyMarkMs": 2334.0999999996275,
+          "paint": [
+            {
+              "name": "first-paint",
+              "entryType": "paint",
+              "startTime": 140,
+              "duration": 0,
+              "navigationId": 615,
+              "paintTime": 118.69999999925494,
+              "presentationTime": 140
+            },
+            {
+              "name": "first-contentful-paint",
+              "entryType": "paint",
+              "startTime": 292,
+              "duration": 0,
+              "navigationId": 615,
+              "paintTime": 263.09999999962747,
+              "presentationTime": 292
+            }
+          ],
+          "marks": [
+            {
+              "name": "pushpull-database-start",
+              "entryType": "mark",
+              "startTime": 213.09999999962747,
+              "duration": 0,
+              "navigationId": 615
+            },
+            {
+              "name": "pushpull-database-ready",
+              "entryType": "mark",
+              "startTime": 2041.5,
+              "duration": 0,
+              "navigationId": 615
+            },
+            {
+              "name": "pushpull-drafts-start",
+              "entryType": "mark",
+              "startTime": 2073.9000000003725,
+              "duration": 0,
+              "navigationId": 615
+            },
+            {
+              "name": "pushpull-drafts-ready",
+              "entryType": "mark",
+              "startTime": 2091.0999999996275,
+              "duration": 0,
+              "navigationId": 615
+            },
+            {
+              "name": "pushpull-training-ready",
+              "entryType": "mark",
+              "startTime": 2334.0999999996275,
+              "duration": 0,
+              "navigationId": 615
+            }
+          ],
+          "navigation": {
+            "name": "http://127.0.0.1:36549/",
+            "entryType": "navigation",
+            "startTime": 0,
+            "duration": 279.90000000037253,
+            "navigationId": 615,
+            "initiatorType": "navigation",
+            "deliveryType": "cache-storage",
+            "nextHopProtocol": "",
+            "renderBlockingStatus": "non-blocking",
+            "contentType": "text/html",
+            "contentEncoding": "",
+            "workerStart": 2,
+            "workerRouterEvaluationStart": 0,
+            "workerCacheLookupStart": 0,
+            "workerMatchedSourceType": "",
+            "workerFinalSourceType": "",
+            "redirectStart": 0,
+            "redirectEnd": 0,
+            "fetchStart": 2.599999999627471,
+            "domainLookupStart": 2.599999999627471,
+            "domainLookupEnd": 2.599999999627471,
+            "connectStart": 2.599999999627471,
+            "secureConnectionStart": 0,
+            "connectEnd": 2.599999999627471,
+            "requestStart": 2.599999999627471,
+            "responseStart": 3.699999999254942,
+            "firstInterimResponseStart": 3.699999999254942,
+            "finalResponseHeadersStart": 0,
+            "responseEnd": 7.300000000745058,
+            "transferSize": 0,
+            "encodedBodySize": 569,
+            "decodedBodySize": 569,
+            "responseStatus": 200,
+            "serverTiming": [],
+            "unloadEventStart": 0,
+            "unloadEventEnd": 0,
+            "domInteractive": 112.19999999925494,
+            "domContentLoadedEventStart": 230.40000000037253,
+            "domContentLoadedEventEnd": 234.40000000037253,
+            "domComplete": 279.90000000037253,
+            "loadEventStart": 279.90000000037253,
+            "loadEventEnd": 279.90000000037253,
+            "type": "navigate",
+            "redirectCount": 0,
+            "activationStart": 0,
+            "criticalCHRestart": 0,
+            "notRestoredReasons": null,
+            "confidence": {
+              "randomizedTriggerRate": 0.4994798,
+              "value": "low"
+            }
+          },
+          "long": [
+            {
+              "start": 130.40000000037253,
+              "ms": 104
+            },
+            {
+              "start": 292.80000000074506,
+              "ms": 52
+            },
+            {
+              "start": 664.8000000007451,
+              "ms": 683
+            },
+            {
+              "start": 1365.9000000003725,
+              "ms": 710
+            },
+            {
+              "start": 2152.800000000745,
+              "ms": 103
+            },
+            {
+              "start": 2260.5999999996275,
+              "ms": 80
+            }
+          ],
+          "heapHighWaterBytes": 15080540,
+          "inclusiveSpans": {
+            "model/legacy-model.mjs:validateStructuredSource": {
+              "calls": 1,
+              "totalMs": 462.69999999925494,
+              "maxMs": 462.69999999925494
+            },
+            "model/journal-protocol.mjs:validateSource": {
+              "calls": 1,
+              "totalMs": 466.09999999962747,
+              "maxMs": 466.09999999962747
+            },
+            "model/journal-protocol.mjs:materializeTraining": {
+              "calls": 1,
+              "totalMs": 1126.699999999255,
+              "maxMs": 1126.699999999255
+            },
+            "model/journal-idb.mjs:readTraining": {
+              "calls": 1,
+              "totalMs": 1408,
+              "maxMs": 1408
+            },
+            "model/journal-idb.mjs:openWriter": {
+              "calls": 1,
+              "totalMs": 132.80000000074506,
+              "maxMs": 132.80000000074506
+            },
+            "model/journal-database.mjs:openDatabase": {
+              "calls": 1,
+              "totalMs": 1556.5999999996275,
+              "maxMs": 1556.5999999996275
+            },
+            "model/workout-drafts.mjs:openDrafts": {
+              "calls": 1,
+              "totalMs": 6.099999999627471,
+              "maxMs": 6.099999999627471
+            },
+            "model/drive-sync.mjs:openDriveBackup": {
+              "calls": 1,
+              "totalMs": 12.199999999254942,
+              "maxMs": 12.199999999254942
+            },
+            "app.js:main": {
+              "calls": 1,
+              "totalMs": 60.40000000037253,
+              "maxMs": 60.40000000037253
+            },
+            "app.js:render": {
+              "calls": 1,
+              "totalMs": 70.5,
+              "maxMs": 70.5
+            }
+          },
+          "nativeRequests": {
+            "open:open": {
+              "count": 1,
+              "sumMsOverlapping": 4.299999998882413,
+              "maxMs": 4.299999998882413,
+              "rows": 0
+            },
+            "journalMetadata:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 11.399999998509884,
+              "maxMs": 11.399999998509884,
+              "rows": 3
+            },
+            "journalSessions:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 11.400000000372529,
+              "maxMs": 11.400000000372529,
+              "rows": 40
+            },
+            "journalResults:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 17.90000000037253,
+              "maxMs": 17.90000000037253,
+              "rows": 350
+            },
+            "journalSnapshots:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 18.59999999962747,
+              "maxMs": 18.59999999962747,
+              "rows": 40
+            },
+            "journalArchives:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 18.699999999254942,
+              "maxMs": 18.699999999254942,
+              "rows": 2
+            },
+            "journalIndex:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 33.69999999925494,
+              "maxMs": 33.69999999925494,
+              "rows": 435
+            },
+            "journalState:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 34.40000000037253,
+              "maxMs": 34.40000000037253,
+              "rows": 1
+            },
+            "meta:get": {
+              "count": 2,
+              "sumMsOverlapping": 1.799999998882413,
+              "maxMs": 0.900000000372529,
+              "rows": 2
+            },
+            "journalObjects:get": {
+              "count": 485,
+              "sumMsOverlapping": 21217.29999995604,
+              "maxMs": 65.80000000074506,
+              "rows": 485
+            },
+            "meta:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 2.599999999627471,
+              "maxMs": 2.599999999627471,
+              "rows": 0
+            }
+          }
+        }
+      },
+      "fixture": {
+        "sha256": "7fa05f0ae14dfb809997be1a6d3d111529f7b448ca4ca89a80eaa1cbe13eee82",
+        "databaseVersion": 2,
+        "counts": {
+          "backups": 2,
+          "changes": 0,
+          "entries": 350,
+          "exercises": 37,
+          "journalArchives": 2,
+          "journalCheckpoints": 1,
+          "journalIndex": 435,
+          "journalMetadata": 3,
+          "journalObjects": 487,
+          "journalResults": 350,
+          "journalSessions": 40,
+          "journalSnapshots": 40,
+          "journalState": 1,
+          "meta": 3,
+          "notes": 37,
+          "planVersions": 6,
+          "plans": 4,
+          "sessions": 40,
+          "sets": 1080
+        }
+      }
+    },
+    "history40-escaped16": {
+      "after": {
+        "initial": {
+          "readyMs": 29455.300000000745,
+          "uiReadyMarkMs": 29280,
+          "paint": [
+            {
+              "name": "first-paint",
+              "entryType": "paint",
+              "startTime": 96,
+              "duration": 0,
+              "navigationId": 5489,
+              "paintTime": 94,
+              "presentationTime": 96
+            },
+            {
+              "name": "first-contentful-paint",
+              "entryType": "paint",
+              "startTime": 176,
+              "duration": 0,
+              "navigationId": 5489,
+              "paintTime": 153.10000000149012,
+              "presentationTime": 176
+            }
+          ],
+          "marks": [
+            {
+              "name": "pushpull-database-start",
+              "entryType": "mark",
+              "startTime": 130.30000000074506,
+              "duration": 0,
+              "navigationId": 5489
+            },
+            {
+              "name": "pushpull-database-ready",
+              "entryType": "mark",
+              "startTime": 29147.10000000149,
+              "duration": 0,
+              "navigationId": 5489
+            },
+            {
+              "name": "pushpull-drafts-start",
+              "entryType": "mark",
+              "startTime": 29167.700000001118,
+              "duration": 0,
+              "navigationId": 5489
+            },
+            {
+              "name": "pushpull-drafts-ready",
+              "entryType": "mark",
+              "startTime": 29176.900000000373,
+              "duration": 0,
+              "navigationId": 5489
+            },
+            {
+              "name": "pushpull-training-ready",
+              "entryType": "mark",
+              "startTime": 29280,
+              "duration": 0,
+              "navigationId": 5489
+            }
+          ],
+          "navigation": {
+            "name": "http://127.0.0.1:36549/",
+            "entryType": "navigation",
+            "startTime": 0,
+            "duration": 132.80000000074506,
+            "navigationId": 5489,
+            "initiatorType": "navigation",
+            "deliveryType": "",
+            "nextHopProtocol": "http/1.0",
+            "renderBlockingStatus": "non-blocking",
+            "contentType": "text/html",
+            "contentEncoding": "",
+            "workerStart": 0,
+            "workerRouterEvaluationStart": 0,
+            "workerCacheLookupStart": 0,
+            "workerMatchedSourceType": "",
+            "workerFinalSourceType": "",
+            "redirectStart": 0,
+            "redirectEnd": 0,
+            "fetchStart": 0.6000000014901161,
+            "domainLookupStart": 0.6000000014901161,
+            "domainLookupEnd": 0.6000000014901161,
+            "connectStart": 0.6000000014901161,
+            "secureConnectionStart": 0,
+            "connectEnd": 0.6000000014901161,
+            "requestStart": 2.400000000372529,
+            "responseStart": 2.900000000372529,
+            "firstInterimResponseStart": 0,
+            "finalResponseHeadersStart": 2.900000000372529,
+            "responseEnd": 5.200000001117587,
+            "transferSize": 869,
+            "encodedBodySize": 569,
+            "decodedBodySize": 569,
+            "responseStatus": 200,
+            "serverTiming": [],
+            "unloadEventStart": 0,
+            "unloadEventEnd": 0,
+            "domInteractive": 89.70000000111759,
+            "domContentLoadedEventStart": 132.5,
+            "domContentLoadedEventEnd": 132.60000000149012,
+            "domComplete": 132.80000000074506,
+            "loadEventStart": 132.80000000074506,
+            "loadEventEnd": 132.80000000074506,
+            "type": "navigate",
+            "redirectCount": 0,
+            "activationStart": 0,
+            "criticalCHRestart": 0,
+            "notRestoredReasons": null,
+            "confidence": {
+              "randomizedTriggerRate": 0.4994798,
+              "value": "low"
+            }
+          },
+          "long": [
+            {
+              "start": 323.30000000074506,
+              "ms": 222
+            },
+            {
+              "start": 565.7000000011176,
+              "ms": 691
+            },
+            {
+              "start": 1261.6000000014901,
+              "ms": 1441
+            },
+            {
+              "start": 2714.10000000149,
+              "ms": 18884
+            },
+            {
+              "start": 21603.5,
+              "ms": 225
+            },
+            {
+              "start": 21867.300000000745,
+              "ms": 238
+            },
+            {
+              "start": 22146,
+              "ms": 919
+            },
+            {
+              "start": 23078.700000001118,
+              "ms": 5793
+            },
+            {
+              "start": 28876.900000000373,
+              "ms": 291
+            }
+          ],
+          "heapHighWaterBytes": 256944257,
+          "inclusiveSpans": {
+            "model/journal-idb.mjs:readTraining": {
+              "calls": 1,
+              "totalMs": 20.800000000745058,
+              "maxMs": 20.800000000745058
+            },
+            "model/journal-idb.mjs:readRecords": {
+              "calls": 1,
+              "totalMs": 1306.9000000003725,
+              "maxMs": 1306.9000000003725
+            },
+            "model/backup.mjs:validateBackup": {
+              "calls": 1,
+              "totalMs": 4457.5,
+              "maxMs": 4457.5
+            },
+            "model/legacy-model.mjs:verifyLegacyModel": {
+              "calls": 1,
+              "totalMs": 8792.400000000373,
+              "maxMs": 8792.400000000373
+            },
+            "indexeddb.js:verifyEvidence": {
+              "calls": 1,
+              "totalMs": 9845.299999998882,
+              "maxMs": 9845.299999998882
+            },
+            "model/legacy-model.mjs:validateStructuredSource": {
+              "calls": 2,
+              "totalMs": 365,
+              "maxMs": 192
+            },
+            "model/journal-protocol.mjs:validateSource": {
+              "calls": 2,
+              "totalMs": 365.1000000014901,
+              "maxMs": 192.10000000149012
+            },
+            "model/journal-protocol.mjs:materialize": {
+              "calls": 2,
+              "totalMs": 12081.300000000745,
+              "maxMs": 7705.800000000745
+            },
+            "model/journal-idb.mjs:auditBundle": {
+              "calls": 2,
+              "totalMs": 26217.300000000745,
+              "maxMs": 20223.5
+            },
+            "model/journal-idb.mjs:certifyAllocation": {
+              "calls": 1,
+              "totalMs": 21483.199999999255,
+              "maxMs": 21483.199999999255
+            },
+            "model/journal-idb.mjs:openWriter": {
+              "calls": 1,
+              "totalMs": 6062.4000000003725,
+              "maxMs": 6062.4000000003725
+            },
+            "model/journal-database.mjs:openDatabase": {
+              "calls": 1,
+              "totalMs": 28886.10000000149,
+              "maxMs": 28886.10000000149
+            },
+            "model/workout-drafts.mjs:openDrafts": {
+              "calls": 1,
+              "totalMs": 3.299999998882413,
+              "maxMs": 3.299999998882413
+            },
+            "model/drive-sync.mjs:openDriveBackup": {
+              "calls": 1,
+              "totalMs": 6.5,
+              "maxMs": 6.5
+            },
+            "app.js:main": {
+              "calls": 1,
+              "totalMs": 26.700000001117587,
+              "maxMs": 26.700000001117587
+            },
+            "app.js:render": {
+              "calls": 1,
+              "totalMs": 30.09999999962747,
+              "maxMs": 30.09999999962747
+            }
+          },
+          "nativeRequests": {
+            "open:open": {
+              "count": 1,
+              "sumMsOverlapping": 5.699999999254942,
+              "maxMs": 5.699999999254942,
+              "rows": 0
+            },
+            "journalMetadata:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 256.20000000298023,
+              "maxMs": 248.30000000074506,
+              "rows": 9
+            },
+            "journalSessions:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 253.69999999925494,
+              "maxMs": 247.5,
+              "rows": 120
+            },
+            "journalResults:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 257.69999999925494,
+              "maxMs": 247.5,
+              "rows": 1050
+            },
+            "journalSnapshots:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 258.1000000014901,
+              "maxMs": 248.90000000037253,
+              "rows": 120
+            },
+            "journalArchives:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 258.69999999925494,
+              "maxMs": 249.19999999925494,
+              "rows": 6
+            },
+            "journalIndex:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 263.3999999985099,
+              "maxMs": 249.19999999925494,
+              "rows": 1305
+            },
+            "journalState:getAll": {
+              "count": 3,
+              "sumMsOverlapping": 270.5,
+              "maxMs": 253.5,
+              "rows": 3
+            },
+            "journalObjects:getAll": {
+              "count": 2,
+              "sumMsOverlapping": 73.00000000186265,
+              "maxMs": 39.80000000074506,
+              "rows": 974
+            },
+            "journalCheckpoints:getAll": {
+              "count": 2,
+              "sumMsOverlapping": 290.80000000074506,
+              "maxMs": 274.69999999925494,
+              "rows": 2
+            },
+            "meta:get": {
+              "count": 2,
+              "sumMsOverlapping": 12.799999998882413,
+              "maxMs": 12,
+              "rows": 2
+            },
+            "journalState:get": {
+              "count": 1,
+              "sumMsOverlapping": 0.19999999925494194,
+              "maxMs": 0.19999999925494194,
+              "rows": 1
+            },
+            "meta:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 0.6000000014901161,
+              "maxMs": 0.6000000014901161,
+              "rows": 0
+            }
+          }
+        },
+        "cold0": {
+          "readyMs": 1964.7000000011176,
+          "uiReadyMarkMs": 1578.5,
+          "paint": [
+            {
+              "name": "first-paint",
+              "entryType": "paint",
+              "startTime": 160,
+              "duration": 0,
+              "navigationId": 3235,
+              "paintTime": 147.5,
+              "presentationTime": 160
+            },
+            {
+              "name": "first-contentful-paint",
+              "entryType": "paint",
+              "startTime": 336,
+              "duration": 0,
+              "navigationId": 3235,
+              "paintTime": 230.40000000037253,
+              "presentationTime": 336
+            }
+          ],
+          "marks": [
+            {
+              "name": "pushpull-database-start",
+              "entryType": "mark",
+              "startTime": 203.5,
+              "duration": 0,
+              "navigationId": 3235
+            },
+            {
+              "name": "pushpull-database-ready",
+              "entryType": "mark",
+              "startTime": 1379.7000000011176,
+              "duration": 0,
+              "navigationId": 3235
+            },
+            {
+              "name": "pushpull-drafts-start",
+              "entryType": "mark",
+              "startTime": 1395,
+              "duration": 0,
+              "navigationId": 3235
+            },
+            {
+              "name": "pushpull-drafts-ready",
+              "entryType": "mark",
+              "startTime": 1409.800000000745,
+              "duration": 0,
+              "navigationId": 3235
+            },
+            {
+              "name": "pushpull-training-ready",
+              "entryType": "mark",
+              "startTime": 1578.5,
+              "duration": 0,
+              "navigationId": 3235
+            }
+          ],
+          "navigation": {
+            "name": "http://127.0.0.1:36549/",
+            "entryType": "navigation",
+            "startTime": 0,
+            "duration": 204.80000000074506,
+            "navigationId": 3235,
+            "initiatorType": "navigation",
+            "deliveryType": "cache-storage",
+            "nextHopProtocol": "",
+            "renderBlockingStatus": "non-blocking",
+            "contentType": "text/html",
+            "contentEncoding": "",
+            "workerStart": 1.6000000014901161,
+            "workerRouterEvaluationStart": 0,
+            "workerCacheLookupStart": 0,
+            "workerMatchedSourceType": "",
+            "workerFinalSourceType": "",
+            "redirectStart": 0,
+            "redirectEnd": 0,
+            "fetchStart": 1.900000000372529,
+            "domainLookupStart": 1.900000000372529,
+            "domainLookupEnd": 1.900000000372529,
+            "connectStart": 1.900000000372529,
+            "secureConnectionStart": 0,
+            "connectEnd": 1.900000000372529,
+            "requestStart": 1.900000000372529,
+            "responseStart": 13.400000000372529,
+            "firstInterimResponseStart": 13.400000000372529,
+            "finalResponseHeadersStart": 0,
+            "responseEnd": 23.40000000037253,
+            "transferSize": 0,
+            "encodedBodySize": 569,
+            "decodedBodySize": 569,
+            "responseStatus": 200,
+            "serverTiming": [],
+            "unloadEventStart": 0,
+            "unloadEventEnd": 0,
+            "domInteractive": 157.80000000074506,
+            "domContentLoadedEventStart": 204.2000000011176,
+            "domContentLoadedEventEnd": 204.5,
+            "domComplete": 204.80000000074506,
+            "loadEventStart": 204.80000000074506,
+            "loadEventEnd": 204.80000000074506,
+            "type": "navigate",
+            "redirectCount": 0,
+            "activationStart": 0,
+            "criticalCHRestart": 0,
+            "notRestoredReasons": null,
+            "confidence": {
+              "randomizedTriggerRate": 0.4994798,
+              "value": "high"
+            }
+          },
+          "long": [
+            {
+              "start": 158.7000000011176,
+              "ms": 66
+            },
+            {
+              "start": 544.5,
+              "ms": 349
+            },
+            {
+              "start": 897.8000000007451,
+              "ms": 497
+            },
+            {
+              "start": 1454.5,
+              "ms": 72
+            }
+          ],
+          "heapHighWaterBytes": 15073114,
+          "inclusiveSpans": {
+            "model/legacy-model.mjs:validateStructuredSource": {
+              "calls": 1,
+              "totalMs": 347.30000000074506,
+              "maxMs": 347.30000000074506
+            },
+            "model/journal-protocol.mjs:validateSource": {
+              "calls": 1,
+              "totalMs": 347.80000000074506,
+              "maxMs": 347.80000000074506
+            },
+            "model/journal-protocol.mjs:materializeTraining": {
+              "calls": 1,
+              "totalMs": 631.5999999996275,
+              "maxMs": 631.5999999996275
+            },
+            "model/journal-idb.mjs:readTraining": {
+              "calls": 1,
+              "totalMs": 846.5999999996275,
+              "maxMs": 846.5999999996275
+            },
+            "model/journal-idb.mjs:openWriter": {
+              "calls": 1,
+              "totalMs": 98.20000000111759,
+              "maxMs": 98.20000000111759
+            },
+            "model/journal-database.mjs:openDatabase": {
+              "calls": 1,
+              "totalMs": 956.9000000003725,
+              "maxMs": 956.9000000003725
+            },
+            "model/workout-drafts.mjs:openDrafts": {
+              "calls": 1,
+              "totalMs": 5.400000000372529,
+              "maxMs": 5.400000000372529
+            },
+            "model/drive-sync.mjs:openDriveBackup": {
+              "calls": 1,
+              "totalMs": 6.800000000745058,
+              "maxMs": 6.800000000745058
+            },
+            "app.js:main": {
+              "calls": 1,
+              "totalMs": 38,
+              "maxMs": 38
+            },
+            "app.js:render": {
+              "calls": 1,
+              "totalMs": 44.80000000074506,
+              "maxMs": 44.80000000074506
+            }
+          },
+          "nativeRequests": {
+            "open:open": {
+              "count": 1,
+              "sumMsOverlapping": 3.800000000745058,
+              "maxMs": 3.800000000745058,
+              "rows": 0
+            },
+            "journalMetadata:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 3.599999999627471,
+              "maxMs": 3.599999999627471,
+              "rows": 3
+            },
+            "journalSessions:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 4.599999999627471,
+              "maxMs": 4.599999999627471,
+              "rows": 40
+            },
+            "journalResults:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 6.099999999627471,
+              "maxMs": 6.099999999627471,
+              "rows": 350
+            },
+            "journalSnapshots:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 8.400000000372529,
+              "maxMs": 8.400000000372529,
+              "rows": 40
+            },
+            "journalArchives:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 8.5,
+              "maxMs": 8.5,
+              "rows": 2
+            },
+            "journalIndex:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 10.699999999254942,
+              "maxMs": 10.699999999254942,
+              "rows": 435
+            },
+            "journalState:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 13.099999999627471,
+              "maxMs": 13.099999999627471,
+              "rows": 1
+            },
+            "meta:get": {
+              "count": 2,
+              "sumMsOverlapping": 1.599999999627471,
+              "maxMs": 0.8000000007450581,
+              "rows": 2
+            },
+            "journalObjects:get": {
+              "count": 485,
+              "sumMsOverlapping": 22909.799999972805,
+              "maxMs": 59.19999999925494,
+              "rows": 485
+            },
+            "meta:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 0.900000000372529,
+              "maxMs": 0.900000000372529,
+              "rows": 0
+            }
+          }
+        },
+        "warm0": {
+          "readyMs": 1574.5999999996275,
+          "uiReadyMarkMs": 1149.699999999255,
+          "paint": [
+            {
+              "name": "first-paint",
+              "entryType": "paint",
+              "startTime": 144,
+              "duration": 0,
+              "navigationId": 4869,
+              "paintTime": 126.59999999962747,
+              "presentationTime": 144
+            },
+            {
+              "name": "first-contentful-paint",
+              "entryType": "paint",
+              "startTime": 144,
+              "duration": 0,
+              "navigationId": 4869,
+              "paintTime": 126.59999999962747,
+              "presentationTime": 144
+            }
+          ],
+          "marks": [
+            {
+              "name": "pushpull-database-start",
+              "entryType": "mark",
+              "startTime": 102.90000000037253,
+              "duration": 0,
+              "navigationId": 4869
+            },
+            {
+              "name": "pushpull-database-ready",
+              "entryType": "mark",
+              "startTime": 991.0999999996275,
+              "duration": 0,
+              "navigationId": 4869
+            },
+            {
+              "name": "pushpull-drafts-start",
+              "entryType": "mark",
+              "startTime": 1010.9000000003725,
+              "duration": 0,
+              "navigationId": 4869
+            },
+            {
+              "name": "pushpull-drafts-ready",
+              "entryType": "mark",
+              "startTime": 1021.9000000003725,
+              "duration": 0,
+              "navigationId": 4869
+            },
+            {
+              "name": "pushpull-training-ready",
+              "entryType": "mark",
+              "startTime": 1149.699999999255,
+              "duration": 0,
+              "navigationId": 4869
+            }
+          ],
+          "navigation": {
+            "name": "http://127.0.0.1:36549/",
+            "entryType": "navigation",
+            "startTime": 0,
+            "duration": 111.90000000037253,
+            "navigationId": 4869,
+            "initiatorType": "navigation",
+            "deliveryType": "cache-storage",
+            "nextHopProtocol": "",
+            "renderBlockingStatus": "non-blocking",
+            "contentType": "text/html",
+            "contentEncoding": "",
+            "workerStart": 1.299999998882413,
+            "workerRouterEvaluationStart": 0,
+            "workerCacheLookupStart": 0,
+            "workerMatchedSourceType": "",
+            "workerFinalSourceType": "",
+            "redirectStart": 0,
+            "redirectEnd": 0,
+            "fetchStart": 2.299999998882413,
+            "domainLookupStart": 2.299999998882413,
+            "domainLookupEnd": 2.299999998882413,
+            "connectStart": 2.299999998882413,
+            "secureConnectionStart": 0,
+            "connectEnd": 2.299999998882413,
+            "requestStart": 2.299999998882413,
+            "responseStart": 3.400000000372529,
+            "firstInterimResponseStart": 3.400000000372529,
+            "finalResponseHeadersStart": 0,
+            "responseEnd": 5.799999998882413,
+            "transferSize": 0,
+            "encodedBodySize": 569,
+            "decodedBodySize": 569,
+            "responseStatus": 200,
+            "serverTiming": [],
+            "unloadEventStart": 0,
+            "unloadEventEnd": 0,
+            "domInteractive": 63.69999999925494,
+            "domContentLoadedEventStart": 105,
+            "domContentLoadedEventEnd": 108.79999999888241,
+            "domComplete": 111.90000000037253,
+            "loadEventStart": 111.90000000037253,
+            "loadEventEnd": 111.90000000037253,
+            "type": "navigate",
+            "redirectCount": 0,
+            "activationStart": 0,
+            "criticalCHRestart": 0,
+            "notRestoredReasons": null,
+            "confidence": {
+              "randomizedTriggerRate": 0.4994798,
+              "value": "low"
+            }
+          },
+          "long": [
+            {
+              "start": 72,
+              "ms": 52
+            },
+            {
+              "start": 361.7999999988824,
+              "ms": 291
+            },
+            {
+              "start": 655.7999999988824,
+              "ms": 356
+            },
+            {
+              "start": 1055.0999999996275,
+              "ms": 57
+            }
+          ],
+          "heapHighWaterBytes": 16348090,
+          "inclusiveSpans": {
+            "model/legacy-model.mjs:validateStructuredSource": {
+              "calls": 1,
+              "totalMs": 234.69999999925494,
+              "maxMs": 234.69999999925494
+            },
+            "model/journal-protocol.mjs:validateSource": {
+              "calls": 1,
+              "totalMs": 235.09999999962747,
+              "maxMs": 235.09999999962747
+            },
+            "model/journal-protocol.mjs:materializeTraining": {
+              "calls": 1,
+              "totalMs": 518,
+              "maxMs": 518
+            },
+            "model/journal-idb.mjs:readTraining": {
+              "calls": 1,
+              "totalMs": 688.6999999992549,
+              "maxMs": 688.6999999992549
+            },
+            "model/journal-idb.mjs:openWriter": {
+              "calls": 1,
+              "totalMs": 61.80000000074506,
+              "maxMs": 61.80000000074506
+            },
+            "model/journal-database.mjs:openDatabase": {
+              "calls": 1,
+              "totalMs": 761,
+              "maxMs": 761
+            },
+            "model/workout-drafts.mjs:openDrafts": {
+              "calls": 1,
+              "totalMs": 3.700000001117587,
+              "maxMs": 3.700000001117587
+            },
+            "model/drive-sync.mjs:openDriveBackup": {
+              "calls": 1,
+              "totalMs": 5.300000000745058,
+              "maxMs": 5.300000000745058
+            },
+            "app.js:main": {
+              "calls": 1,
+              "totalMs": 27.90000000037253,
+              "maxMs": 27.90000000037253
+            },
+            "app.js:render": {
+              "calls": 1,
+              "totalMs": 32.09999999962747,
+              "maxMs": 32.09999999962747
+            }
+          },
+          "nativeRequests": {
+            "open:open": {
+              "count": 1,
+              "sumMsOverlapping": 1.900000000372529,
+              "maxMs": 1.900000000372529,
+              "rows": 0
+            },
+            "journalMetadata:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 2.199999999254942,
+              "maxMs": 2.199999999254942,
+              "rows": 3
+            },
+            "journalSessions:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 2.400000000372529,
+              "maxMs": 2.400000000372529,
+              "rows": 40
+            },
+            "journalResults:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 2.599999999627471,
+              "maxMs": 2.599999999627471,
+              "rows": 350
+            },
+            "journalSnapshots:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 2.699999999254942,
+              "maxMs": 2.699999999254942,
+              "rows": 40
+            },
+            "journalArchives:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 2.800000000745058,
+              "maxMs": 2.800000000745058,
+              "rows": 2
+            },
+            "journalIndex:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 12.900000000372529,
+              "maxMs": 12.900000000372529,
+              "rows": 435
+            },
+            "journalState:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 15.300000000745058,
+              "maxMs": 15.300000000745058,
+              "rows": 1
+            },
+            "meta:get": {
+              "count": 2,
+              "sumMsOverlapping": 5.700000001117587,
+              "maxMs": 4.900000000372529,
+              "rows": 2
+            },
+            "journalObjects:get": {
+              "count": 485,
+              "sumMsOverlapping": 24053.40000002086,
+              "maxMs": 51.70000000111759,
+              "rows": 485
+            },
+            "meta:getAll": {
+              "count": 1,
+              "sumMsOverlapping": 1.1000000014901161,
+              "maxMs": 1.1000000014901161,
+              "rows": 0
+            }
+          }
+        }
+      },
+      "fixture": {
+        "sha256": "9e41e5139ad60cc8b5fccb9aaf2b42b9f1507f5b4b1657c08a29f43ca0eb652f",
+        "databaseVersion": 2,
+        "counts": {
+          "backups": 2,
+          "changes": 0,
+          "entries": 350,
+          "exercises": 37,
+          "journalArchives": 2,
+          "journalCheckpoints": 1,
+          "journalIndex": 435,
+          "journalMetadata": 3,
+          "journalObjects": 487,
+          "journalResults": 350,
+          "journalSessions": 40,
+          "journalSnapshots": 40,
+          "journalState": 1,
+          "meta": 3,
+          "notes": 37,
+          "planVersions": 6,
+          "plans": 4,
+          "sessions": 40,
+          "sets": 1080
+        }
+      }
+    }
+  }
+}

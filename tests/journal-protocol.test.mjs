@@ -123,3 +123,27 @@ test('sealed root binds metadata and the exact complete checkpoint set',async()=
  await assert.rejects(materialize(tampered),/binding/);
  tampered.state.checkpointRefs[0].sha256=await hashJSON(tampered.records.journalCheckpoints[0]);await assert.rejects(materialize(tampered),/state SHA/);
 });
+
+test('structured-only validation rejects the same invalid native graph without constructing backup text',async()=>{
+ const {validateStructuredSource}=await import('../model/legacy-model.mjs');
+ for(const mutate of [s=>{s.data.entries[0].kg='invalid'},s=>{s.catalog.sessionVersions={}},s=>{s.data.trainingJournal.model.ownerId='other'},s=>{s.data.trainingJournal.sessionSnapshots[0].model.positions[0].exerciseId='missing'},s=>{s.data.entries.push(structuredClone(s.data.entries[0]))},s=>{s.archives[0].raw=42}]){
+  const value=fixture();mutate(value);
+  assert.throws(()=>validateStructuredSource(value,options.ownerId));
+  await assert.rejects(createLegacyModelFromSource(value,options));
+ }
+ const valid=freeze(fixture());assert.doesNotThrow(()=>validateStructuredSource(valid,options.ownerId));
+});
+test('allocation is root-bound and verified against every retained byte and record on a full audit',async()=>{
+ const {sealState,equalJSON}=await import('../model/journal-protocol.mjs');
+ const bundle=await createProtocol(fixture(false));await materialize(bundle);assert.deepEqual(bundle.state.allocation,protocolBudget(bundle));
+ for(const field of ['bytes','records','maxObjectBytes']){
+  const copy=structuredClone(bundle);copy.state.allocation[field]++;
+  await assert.rejects(materialize(copy),/state SHA/);
+  copy.state=await sealState(copy.state);copy.records.journalState=[copy.state];await assert.rejects(materialize(copy),/allocation mismatch/);
+ }
+ const {allocation,...old}=bundle.state,oldState=await sealState(old);
+ assert.equal(JSON.stringify(await materialize({state:oldState,records:{...bundle.records,journalState:[oldState]}})),JSON.stringify(await materialize(bundle)));
+ assert.equal(equalJSON({z:1,a:[2]},{a:[2],z:1}),false);
+ assert.equal(equalJSON({z:1,a:[2]},{a:[2],z:1},{ordered:false}),true);
+ assert.equal(equalJSON([1,2],[2,1],{ordered:false}),false);
+});
