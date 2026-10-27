@@ -165,7 +165,7 @@ export async function openDatabase(v1,fresh,{training=false}={}){
   const candidate={format:'pushpull-backup',version:2,data:own,catalog,archives},ownerId=modelOwnerId??own.trainingJournal?.model.ownerId??writer?.state.ownerId??'local-journal';
   const operationGuard=()=>{if(closed)throw Error('Połączenie zamknięte.');if(raw()!==legacy)throw Error('Starsza wersja zmieniła dane w trakcie operacji.');if(!importing&&stale)throw error;};
   try{
-   const next=await (liveOnly?replaceLive:replaceSource)(db,candidate,{expectedState:expected,ownerId,modelEnabled:modelEnabled??(!!own.trainingJournal||writer?.state.modelEnabled||modelOwnerId!==null),legacyRaw:legacy,recovery:importing&&!writer,revision:pendingRevision,guard:operationGuard});
+   const next=await (liveOnly?replaceLive:replaceSource)(db,candidate,{expectedState:expected,ownerId,modelEnabled:modelEnabled??(!!own.trainingJournal||writer?.state.modelEnabled||modelOwnerId!==null),legacyRaw:legacy,recovery:importing&&!writer,revision:pendingRevision,indexed:training,guard:operationGuard});
    publish(next,{live:liveOnly});if(!liveOnly)deferred=false;historyDeferred=false;unverified=null;recoveryCopies=[];announce();
   }catch(failure){
    if(failure.code==='post-complete-readback'){recoveryCopies=archives;block(failure.message);}
@@ -176,7 +176,8 @@ export async function openDatabase(v1,fresh,{training=false}={}){
  return {
   get error(){return error},get value(){return source&&editable(source.data)},get catalog(){return source&&clone(source.catalog)},
   get archivesDeferred(){return deferred},get historyDeferred(){return historyDeferred},ensureFull,ensureHistory,
-  startSession(command){return sessionCommand('startSession',command)},finishSession(command){return sessionCommand('finishSession',command)},
+  get startSession(){return writer?.startSession?command=>sessionCommand('startSession',command):undefined},
+  get finishSession(){return writer?.finishSession?command=>sessionCommand('finishSession',command):undefined},
   changeAge(entry){return writer?.changeAge?.(entry)??null},
   get raw(){try{return raw()}catch{return anchor}},get revision(){return revision()},
   get model(){if(deferred)throw Error('Pełny model wymaga odczytu i audytu archiwów.');return writer?.state.modelEnabled&&source?clone(legacyPayload(source,writer.state.ownerId)):null},

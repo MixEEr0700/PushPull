@@ -1,5 +1,5 @@
 """Stage E native reader / strict commands against independent full oracle."""
-from test_browser import BrowserHarness
+from test_browser import BrowserHarness,confirm_restore
 import test_fast_start
 from playwright.sync_api import expect
 
@@ -115,3 +115,20 @@ class RuntimeIndex(BrowserHarness):
          const unchanged=a.same(before,await a.readRecords(db)),memory=a.same(value,__fastDB.value);db.close();return {rejected,unchanged,memory};
         }""")
         self.assertTrue(all(result.values()),result)
+
+    def test_restore_after_missing_root_immediately_supports_incremental_session_commands(self):
+        self.prepare()
+        raw=self.page.evaluate("""async()=>{const source=structuredClone(await __fastDB.auditExport());source.data.sessions.forEach(s=>s.status='done');source.data.activeId=null;
+         const a=await import('./model/journal-idb.mjs'),db=await a.connectV2('pushpull');try{await a.transact(db,['journalState'],'readwrite',tx=>tx.objectStore('journalState').delete('active'))}finally{db.close()}return JSON.stringify(source);
+        }""")
+        self.page.reload();expect(self.page.locator('[role=alert]').first).to_be_visible()
+        self.page.locator('#importFile').set_input_files({'name':'synthetic-full-v2.json','mimeType':'application/json','buffer':raw.encode()})
+        confirm_restore(self.page);expect(self.page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible()
+        self.page.locator('[data-act=start]').click();expect(self.page.locator('[data-act=finish]')).to_be_visible()
+        preserved=self.page.evaluate("""async raw=>{const expected=JSON.parse(raw),actual=await __fastDB.auditExport(),a=await import('./model/journal-idb.mjs'),db=await a.connectV2('pushpull');try{return {
+         indexed:!!(await a.readRecords(db)).state.runtime,entries:a.same(actual.data.entries,expected.data.entries),
+         snapshots:expected.data.trainingJournal.sessionSnapshots.every(s=>actual.data.trainingJournal.sessionSnapshots.some(v=>a.same(s,v))),
+         archives:expected.archives.every(s=>actual.archives.some(v=>a.same(s,v)))
+        }}finally{db.close()}}""",raw)
+        self.assertTrue(all(preserved.values()),preserved)
+        self.assertFalse(self.alerts,self.alerts)

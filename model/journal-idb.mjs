@@ -198,7 +198,7 @@ export async function replaceLive(db,input,{expectedState,ownerId,modelEnabled,l
 }
 /** Full operation for archive additions, preimages and explicit import/restore. A confirmed restore can quarantine a corrupt representation
  * as exact opaque evidence; normal operations never purge immutable records. */
-export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0}={}){
+export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0,indexed=false}={}){
  portable(input);const source=freeze(structuredClone(input)),before=await readRecords(db,{signal});
  check(same(before.state??null,expectedState??null),'bulk root CAS');
  if(!recovery)await auditBundle(before,{signal});
@@ -207,8 +207,8 @@ export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled
  const checkpoint=recovery?{id:'recovery:'+crypto.randomUUID(),protocol:2,raw:JSON.stringify(before.records)}:null;
  if(checkpoint)checkpoint.sha256=await sha(checkpoint.raw);
  let bundle=await createProtocol(source,{epoch:recovery?crypto.randomUUID():before.state.epoch,revision:previousRevision+1,ownerId,modelEnabled,legacyRaw,checkpoints:recovery?[checkpoint]:before.records.journalCheckpoints,signal});
- if(before.state?.runtime){
-  const runtime=await (await import('./journal-runtime-index.mjs')).buildRuntime(source,{signal,sourceRoot:before.state.indexRoot});
+ if(indexed||before.state?.runtime){
+  const runtime=await (await import('./journal-runtime-index.mjs')).buildRuntime(source,{signal,sourceRoot:bundle.state.indexRoot});
   const records={...bundle.records,journalObjects:[...new Map([...bundle.records.journalObjects,...runtime.objects].map(r=>[r.id,r])).values()],journalIndex:[...new Map([...bundle.records.journalIndex,...runtime.nodes].map(r=>[r.id,r])).values()]};
   const state=await sealState({...bundle.state,runtime:{...runtime.runtime,sourceRoot:bundle.state.indexRoot}});records.journalState=[state];bundle=freeze({state,records});
  }

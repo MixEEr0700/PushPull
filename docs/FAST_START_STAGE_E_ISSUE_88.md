@@ -115,7 +115,10 @@ przywracać samego starego JS do nowej reprezentacji.
 Pomiary końcowe: `643928914a420b874cb096f90129f63b94db025a`.
 Ostatnia kontrola formatu po tych pomiarach dodatkowo odrzuca jawne
 `runtime:null/false/0` zamiast traktować je jak dawny root bez indeksu.
-Nie zmienia ścieżki poprawnych danych. Dokładne manifesty źródeł i hashe
+Końcowa poprawka odtwarzania dodatkowo buduje indeks w tej samej transakcji,
+gdy zatwierdzony import odzyskuje bazę bez dawnego root. Nowe komendy są
+dostępne od razu, bez restartu. Obie poprawki nie zmieniają zwykłej ścieżki
+zmierzonych poprawnych danych. Dokładne manifesty źródeł i hashe
 artefaktów zapisano w dowodach. Nie uruchamiano pomiarów na telefonie.
 
 ### Zwykły start, bez instalacji/konwersji
@@ -212,11 +215,14 @@ reader, nie instalację indeksu, eksport lub całkowity limit RAM procesu.
   zmieniającym się kodzie ujawnił błędy; nie uznano go za PASS. Poprawiono
   źródłowe konteksty, zachowanie rewizji instalacji, zakres prezentacji
   opisów i synchronizację lazy widoków. Zakończone testy częściowe obejmują
-  wszystkie te przypadki oraz 20 testów aktualnego writera/clock/feedback:
+  wszystkie te przypadki oraz 20 testów writera/clock/feedback i 16 testów końcowej poprawki odzyskiwania:
   CAS dwóch klientów, quota/abort/readback, zamknięcie, restart, szkice,
   niekompletny zapis, native tamper mimo ponownego użycia proofu i offline.
-- Pełną regresję końcowego SHA w GitHub Actions należy odczytać z PR.
-  Oczekiwane 183 przypadki Chromium/PWA; status/URL zostaną uzupełnione
+- CI commita `664448a`: **PASS** (210 Node + pełne Chromium/PWA). Po tym
+  przebiegu dodatkowy scenariusz utraty root odtworzył brak natychmiastowych
+  komend sesji po restore; poprawkę potwierdzono, zachowując wpisy, snapshoty
+  i archiwa. Pełną regresję nowego końcowego SHA należy odczytać z PR.
+  Oczekiwane 184 przypadki Chromium/PWA; status/URL zostaną uzupełnione
   w opisie PR po rzeczywistym zakończeniu. Nie uruchomiono płatnych runners
   ani workflow publikacji. Build produkcyjny i spójność SW: PASS.
 - Piksele zatwierdzonego Matrix: PASS, 360/390/412 px. Test czeka na
