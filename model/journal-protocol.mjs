@@ -57,7 +57,7 @@ export async function readObject(row,limits=LIMITS){
  check(row.id===await shaBytes(bytes),'object SHA-256');const value=parseJson(row.json);portable(value);const owned=freeze(value);verifiedObjects.set(row,owned);return owned;
 }
 export function validateState(state){
- if(state?.runtime)check(Object.keys(state.runtime).join(',')==='version,indexRoot,sourceRoot'&&state.runtime.version===1&&state.runtime.sourceRoot===state.indexRoot&&/^[a-f0-9]{64}$/.test(state.runtime.indexRoot),'runtime index version/root');
+ if(state&&Object.hasOwn(state,'runtime'))check(state.runtime&&Object.keys(state.runtime).join(',')==='version,indexRoot,sourceRoot'&&state.runtime.version===1&&state.runtime.sourceRoot===state.indexRoot&&/^[a-f0-9]{64}$/.test(state.runtime.indexRoot),'runtime index version/root');
  check(state&&['id,protocol,epoch,revision,indexRoot,counts,ownerId,modelEnabled,legacyRef,checkpointRefs,root','id,protocol,epoch,revision,indexRoot,counts,ownerId,modelEnabled,legacyRef,checkpointRefs,allocation,root','id,protocol,epoch,revision,indexRoot,counts,ownerId,modelEnabled,legacyRef,checkpointRefs,allocation,runtime,root'].includes(Object.keys(state).join(',')),'state shape');
  check(state.id==='active'&&state.protocol===PROTOCOL&&typeof state.epoch==='string'&&state.epoch.length>0&&Number.isSafeInteger(state.revision)&&state.revision>=0&&[state.root,state.indexRoot].every(v=>/^[a-f0-9]{64}$/.test(v))&&typeof state.ownerId==='string'&&state.ownerId.length>0,'protocol state');
  check(Object.keys(state.counts).join(',')===ROW_STORES.join(',')&&Object.values(state.counts).every(n=>Number.isSafeInteger(n)&&n>=0)&&typeof state.modelEnabled==='boolean'&&/^[a-f0-9]{64}$/.test(state.legacyRef),'state counts/capability');

@@ -50,3 +50,6 @@ test('committing a batch retains final AVL paths and all old nodes, without tran
  const edit=await editIndex(original.root,id=>original.nodes.get(id),changes),kept=committedNodes([edit.root],edit.added),nodes=new Map([...original.nodes,...kept]);
  assert.ok(kept.size<edit.added.size/2);for(const id of original.nodes.keys())assert.ok(nodes.has(id));await auditIndex(edit.root,id=>nodes.get(id),leaves);
 });
+test('an explicitly invalid runtime field cannot masquerade as an old root without an index',async()=>{
+ const base=await createProtocol(fixture());for(const runtime of [null,false,0,'',{}, {version:99,indexRoot:base.state.indexRoot,sourceRoot:base.state.indexRoot}])await assert.rejects(sealState({...base.state,runtime}),/runtime index/);
+});

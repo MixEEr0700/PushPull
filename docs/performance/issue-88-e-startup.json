@@ -1,0 +1,1194 @@
+{
+  "artifacts": {
+    "after": {
+      "ref": "643928914a420b874cb096f90129f63b94db025a",
+      "hashes": {
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+        "app.js": "e675cafb9509d751bb9cc36c3024c7611ce01c780546fc6bb7421b5320f62975",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+        "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+        "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+        "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+        "model/journal-protocol.mjs": "7f45bd3dec8740a2060e3987b4abff166af5b6b84fedce688c2d9ea100eeeb6e",
+        "model/journal-idb.mjs": "6d67b63c77b03875e68be73b4d613cdb9537d46150998531d58af053231075a1",
+        "model/journal-database.mjs": "525abe4980623efe7ae5f8ff9795e4023812d151e4955f8d2c6dfb44b63ec067",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+        "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+        "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+        "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+        "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+        "model/performance.mjs": "fbccd5556e0e1c2e6bbab86ba6aee7aa04ce049fa3a23c7309436f86cec74073",
+        "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+        "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+        "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+      },
+      "release": {
+        "format": "pushpull-static-release",
+        "version": 1,
+        "release": "5dbd830ccee0efd6bbc6b7e0",
+        "files": {
+          "app.js": "0a0747e59210767ce6c97814ba920901a941dcd7700b89af824b192e707ed400",
+          "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+          "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+          "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+          "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+          "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+          "indexeddb.js": "2dc03d3256ce03b56a7c459d8fcc82b7a0ea708c1282872b39d98419b13bd3c7",
+          "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+          "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+          "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+          "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+          "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+          "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+          "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+          "model/backup.mjs": "ee164d1f158d1f90580cc34cc7a3939aa6fc85723ddbee19784edeb301f875bc",
+          "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+          "model/drive-sync.mjs": "032f98db76a50613fa791287f08945dcb62cc6fd1cef9a557f236b6b95c2ca09",
+          "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+          "model/journal-database.mjs": "265377427a310a91ea9e0381600addf7f4be3f94c83afa83bf0391f8b42ee884",
+          "model/journal-idb.mjs": "5b4d802730f9a030c35981d4d2d1cb34f150d3435bad951abd4a00504b9ed6ed",
+          "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+          "model/journal-protocol.mjs": "a6a05cfdfd1635161aa4076ae32af50c03aa5915beddc24d911f8baf3415ccc8",
+          "model/journal-runtime-index.mjs": "2cca3744cedfa177bd66ed8c88bc2268b950949c31a04bd81a1bf5b7eb11f573",
+          "model/journal-runtime.mjs": "45283e185d3014c78beb80ff436d900d55ff7fbfc6b9c389072c15f93dff53df",
+          "model/journal.mjs": "cd4644c0534135fd6332a5d5b431950dbb98c1e462f6446c09a3ff19cad22c1f",
+          "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+          "model/legacy-model.mjs": "18f53dd308edebfbbf7d00f24720f2ef54d587edb6bc013538b34b6023dbcf2c",
+          "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+          "model/performance-editor.mjs": "2e38fdfa9cba4924059f7d1ad5c952c4b168ad49a747e4377dd098dcdeb51a48",
+          "model/performance.mjs": "fbccd5556e0e1c2e6bbab86ba6aee7aa04ce049fa3a23c7309436f86cec74073",
+          "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+          "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+          "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+          "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+          "model/v2-plan.mjs": "5026b8befc3cb3d521a09c6a699b1ca9638a563f39daf967abe1f5b94932a7cb",
+          "model/workout-drafts.mjs": "b0a7bcb29a81994542beb69332125790606989c8a7ce73ee7372fe3369d6e409",
+          "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+          "style.css": "e134e7bfba7e4c13466cc9e171814d1f1d68fb5308d0d1df8ce1929b60243d57",
+          "sw.js": "bc0946e6e6cef118ac9575af63e4ba91c7b4984048d11b217b9ee5a9db47fb68"
+        }
+      }
+    }
+  },
+  "cpuThrottle": 4,
+  "cases": {
+    "empty": {
+      "fixture": {
+        "sha256": "363927c3f524ddaf39b7affd77528570365abb247c051c24655ca91c48673f5a",
+        "databaseVersion": 2,
+        "counts": {
+          "backups": 1,
+          "changes": 0,
+          "entries": 0,
+          "exercises": 37,
+          "journalArchives": 1,
+          "journalCheckpoints": 1,
+          "journalIndex": 5,
+          "journalMetadata": 3,
+          "journalObjects": 13,
+          "journalResults": 0,
+          "journalSessions": 0,
+          "journalSnapshots": 0,
+          "journalState": 1,
+          "meta": 3,
+          "notes": 37,
+          "planVersions": 6,
+          "plans": 4,
+          "sessions": 0,
+          "sets": 0
+        }
+      },
+      "summary": {
+        "uiReadyMarkMs": {
+          "n": 6,
+          "median": 707.4000000003725,
+          "p95": 798.5,
+          "max": 798.5
+        },
+        "observedReadyMs": {
+          "n": 6,
+          "median": 1301.0,
+          "p95": 1371.699999999255,
+          "max": 1371.699999999255
+        },
+        "heapHighWaterBytes": {
+          "n": 6,
+          "median": 5540818.0,
+          "p95": 5572172,
+          "max": 5572172
+        }
+      },
+      "coldWarmReadyMs": {
+        "cold": {
+          "n": 3,
+          "median": 772,
+          "p95": 798.5,
+          "max": 798.5
+        },
+        "warm": {
+          "n": 3,
+          "median": 640.8999999985099,
+          "p95": 654.8000000007451,
+          "max": 654.8000000007451
+        }
+      },
+      "samples": [
+        {
+          "kind": "cold0",
+          "uiReadyMarkMs": 798.5,
+          "observedReadyMs": 1371.699999999255,
+          "heapHighWaterBytes": 5483984,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 6.300000000745058,
+            "model/journal-runtime.mjs:selectedSource": 166.89999999850988,
+            "model/journal-runtime.mjs:readIndexed": 184.59999999776483,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.8999999985098839,
+            "model/journal-database.mjs:openDatabase": 209.60000000149012,
+            "model/workout-drafts.mjs:openDrafts": 4.800000000745058,
+            "model/drive-sync.mjs:openDriveBackup": 16.300000000745058,
+            "app.js:main": 9,
+            "app.js:render": 17.5
+          },
+          "nativeRequests": 25,
+          "longTaskCount": 2,
+          "maxLongTaskMs": 101
+        },
+        {
+          "kind": "warm0",
+          "uiReadyMarkMs": 550.1999999992549,
+          "observedReadyMs": 1127.699999999255,
+          "heapHighWaterBytes": 5572172,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 3.699999999254942,
+            "model/journal-runtime.mjs:selectedSource": 130.5,
+            "model/journal-runtime.mjs:readIndexed": 139.90000000223517,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.199999999254942,
+            "model/journal-database.mjs:openDatabase": 159.19999999925494,
+            "model/workout-drafts.mjs:openDrafts": 4.199999999254942,
+            "model/drive-sync.mjs:openDriveBackup": 7.199999999254942,
+            "app.js:main": 5.599999997764826,
+            "app.js:render": 9.600000001490116
+          },
+          "nativeRequests": 25,
+          "longTaskCount": 2,
+          "maxLongTaskMs": 73
+        },
+        {
+          "kind": "cold1",
+          "uiReadyMarkMs": 760,
+          "observedReadyMs": 1333.8999999985099,
+          "heapHighWaterBytes": 5489660,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 4.400000002235174,
+            "model/journal-runtime.mjs:selectedSource": 149.70000000298023,
+            "model/journal-runtime.mjs:readIndexed": 162.70000000298023,
+            "model/journal-runtime.mjs:openIndexedWriter": 0.8000000007450581,
+            "model/journal-database.mjs:openDatabase": 183.40000000223517,
+            "model/workout-drafts.mjs:openDrafts": 5.699999999254942,
+            "model/drive-sync.mjs:openDriveBackup": 7.5,
+            "app.js:main": 9.199999999254942,
+            "app.js:render": 15.600000001490116
+          },
+          "nativeRequests": 25,
+          "longTaskCount": 2,
+          "maxLongTaskMs": 93
+        },
+        {
+          "kind": "warm1",
+          "uiReadyMarkMs": 654.8000000007451,
+          "observedReadyMs": 1270,
+          "heapHighWaterBytes": 5548592,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 5.699999999254942,
+            "model/journal-runtime.mjs:selectedSource": 137.89999999850988,
+            "model/journal-runtime.mjs:readIndexed": 153.89999999850988,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.6000000014901161,
+            "model/journal-database.mjs:openDatabase": 174.5,
+            "model/workout-drafts.mjs:openDrafts": 7.900000002235174,
+            "model/drive-sync.mjs:openDriveBackup": 10.600000001490116,
+            "app.js:main": 7.400000002235174,
+            "app.js:render": 11.800000000745058
+          },
+          "nativeRequests": 25,
+          "longTaskCount": 2,
+          "maxLongTaskMs": 80
+        },
+        {
+          "kind": "cold2",
+          "uiReadyMarkMs": 772,
+          "observedReadyMs": 1332,
+          "heapHighWaterBytes": 5533044,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 4.299999997019768,
+            "model/journal-runtime.mjs:selectedSource": 164.40000000223517,
+            "model/journal-runtime.mjs:readIndexed": 173.69999999925494,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.699999999254942,
+            "model/journal-database.mjs:openDatabase": 189.19999999925494,
+            "model/workout-drafts.mjs:openDrafts": 2.800000000745058,
+            "model/drive-sync.mjs:openDriveBackup": 9.600000001490116,
+            "app.js:main": 5.600000001490116,
+            "app.js:render": 10.599999997764826
+          },
+          "nativeRequests": 25,
+          "longTaskCount": 3,
+          "maxLongTaskMs": 108
+        },
+        {
+          "kind": "warm2",
+          "uiReadyMarkMs": 640.8999999985099,
+          "observedReadyMs": 1127.8999999985099,
+          "heapHighWaterBytes": 5570964,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 2,
+            "model/journal-runtime.mjs:selectedSource": 167.70000000298023,
+            "model/journal-runtime.mjs:readIndexed": 174.20000000298023,
+            "model/journal-runtime.mjs:openIndexedWriter": 3.699999999254942,
+            "model/journal-database.mjs:openDatabase": 205.39999999850988,
+            "model/workout-drafts.mjs:openDrafts": 3.2000000029802322,
+            "model/drive-sync.mjs:openDriveBackup": 7.599999997764826,
+            "app.js:main": 6,
+            "app.js:render": 9.900000002235174
+          },
+          "nativeRequests": 25,
+          "longTaskCount": 2,
+          "maxLongTaskMs": 75
+        }
+      ]
+    },
+    "small": {
+      "fixture": {
+        "sha256": "0f2b19da8b7f58e68cb3ad0799bd6320c03a80d074788ca8d958760ada6c30cb",
+        "databaseVersion": 2,
+        "counts": {
+          "backups": 1,
+          "changes": 0,
+          "entries": 35,
+          "exercises": 37,
+          "journalArchives": 1,
+          "journalCheckpoints": 1,
+          "journalIndex": 259,
+          "journalMetadata": 3,
+          "journalObjects": 173,
+          "journalResults": 35,
+          "journalSessions": 4,
+          "journalSnapshots": 4,
+          "journalState": 1,
+          "meta": 3,
+          "notes": 37,
+          "planVersions": 6,
+          "plans": 4,
+          "sessions": 4,
+          "sets": 108
+        }
+      },
+      "summary": {
+        "uiReadyMarkMs": {
+          "n": 6,
+          "median": 1455.0500000026077,
+          "p95": 1577.800000000745,
+          "max": 1577.800000000745
+        },
+        "observedReadyMs": {
+          "n": 6,
+          "median": 1866.4500000011176,
+          "p95": 1984.5999999977648,
+          "max": 1984.5999999977648
+        },
+        "heapHighWaterBytes": {
+          "n": 6,
+          "median": 6756374.0,
+          "p95": 8478341,
+          "max": 8478341
+        }
+      },
+      "coldWarmReadyMs": {
+        "cold": {
+          "n": 3,
+          "median": 1507.9000000022352,
+          "p95": 1559.0999999977648,
+          "max": 1559.0999999977648
+        },
+        "warm": {
+          "n": 3,
+          "median": 1402.2000000029802,
+          "p95": 1577.800000000745,
+          "max": 1577.800000000745
+        }
+      },
+      "samples": [
+        {
+          "kind": "cold0",
+          "uiReadyMarkMs": 1507.9000000022352,
+          "observedReadyMs": 1888.2000000029802,
+          "heapHighWaterBytes": 8231924,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 10.300000000745058,
+            "model/journal-runtime.mjs:selectedSource": 801.1999999992549,
+            "model/journal-runtime.mjs:readIndexed": 825.5,
+            "model/journal-runtime.mjs:openIndexedWriter": 0.30000000074505806,
+            "model/journal-database.mjs:openDatabase": 843.8000000007451,
+            "model/workout-drafts.mjs:openDrafts": 6.800000000745058,
+            "model/drive-sync.mjs:openDriveBackup": 9.199999999254942,
+            "app.js:main": 17.399999998509884,
+            "app.js:render": 26.400000002235174
+          },
+          "nativeRequests": 242,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 198
+        },
+        {
+          "kind": "warm0",
+          "uiReadyMarkMs": 1402.2000000029802,
+          "observedReadyMs": 1756.5,
+          "heapHighWaterBytes": 8478341,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 8,
+            "model/journal-runtime.mjs:selectedSource": 808.5,
+            "model/journal-runtime.mjs:readIndexed": 822.3999999985099,
+            "model/journal-runtime.mjs:openIndexedWriter": 6.199999999254942,
+            "model/journal-database.mjs:openDatabase": 846.2999999970198,
+            "model/workout-drafts.mjs:openDrafts": 3.899999998509884,
+            "model/drive-sync.mjs:openDriveBackup": 15.100000001490116,
+            "app.js:main": 21,
+            "app.js:render": 27
+          },
+          "nativeRequests": 242,
+          "longTaskCount": 3,
+          "maxLongTaskMs": 234
+        },
+        {
+          "kind": "cold1",
+          "uiReadyMarkMs": 1363.1000000014901,
+          "observedReadyMs": 1844.699999999255,
+          "heapHighWaterBytes": 6311733,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 4.100000001490116,
+            "model/journal-runtime.mjs:selectedSource": 712.6000000014901,
+            "model/journal-runtime.mjs:readIndexed": 725,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.7000000029802322,
+            "model/journal-database.mjs:openDatabase": 744.3000000007451,
+            "model/workout-drafts.mjs:openDrafts": 6.700000002980232,
+            "model/drive-sync.mjs:openDriveBackup": 6.699999999254942,
+            "app.js:main": 18.400000002235174,
+            "app.js:render": 24.900000002235174
+          },
+          "nativeRequests": 242,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 195
+        },
+        {
+          "kind": "warm1",
+          "uiReadyMarkMs": 1577.800000000745,
+          "observedReadyMs": 1984.5999999977648,
+          "heapHighWaterBytes": 6379109,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 5.699999999254942,
+            "model/journal-runtime.mjs:selectedSource": 850.9000000022352,
+            "model/journal-runtime.mjs:readIndexed": 862.4000000022352,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.4000000022351742,
+            "model/journal-database.mjs:openDatabase": 886.6000000014901,
+            "model/workout-drafts.mjs:openDrafts": 5.100000001490116,
+            "model/drive-sync.mjs:openDriveBackup": 11,
+            "app.js:main": 22.199999999254942,
+            "app.js:render": 29.399999998509884
+          },
+          "nativeRequests": 242,
+          "longTaskCount": 3,
+          "maxLongTaskMs": 233
+        },
+        {
+          "kind": "cold2",
+          "uiReadyMarkMs": 1559.0999999977648,
+          "observedReadyMs": 1907,
+          "heapHighWaterBytes": 7037828,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 4.5,
+            "model/journal-runtime.mjs:selectedSource": 959.5,
+            "model/journal-runtime.mjs:readIndexed": 972.9000000022352,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.8999999985098839,
+            "model/journal-database.mjs:openDatabase": 997.6000000014901,
+            "model/workout-drafts.mjs:openDrafts": 3.100000001490116,
+            "model/drive-sync.mjs:openDriveBackup": 7.300000000745058,
+            "app.js:main": 30.400000002235174,
+            "app.js:render": 37.69999999925494
+          },
+          "nativeRequests": 242,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 269
+        },
+        {
+          "kind": "warm2",
+          "uiReadyMarkMs": 1051.9000000022352,
+          "observedReadyMs": 1593.6000000014901,
+          "heapHighWaterBytes": 6474920,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 5.099999997764826,
+            "model/journal-runtime.mjs:selectedSource": 630.8000000007451,
+            "model/journal-runtime.mjs:readIndexed": 643,
+            "model/journal-runtime.mjs:openIndexedWriter": 1,
+            "model/journal-database.mjs:openDatabase": 654.7999999970198,
+            "model/workout-drafts.mjs:openDrafts": 4.399999998509884,
+            "model/drive-sync.mjs:openDriveBackup": 6.699999999254942,
+            "app.js:main": 18.5,
+            "app.js:render": 24.199999999254942
+          },
+          "nativeRequests": 242,
+          "longTaskCount": 3,
+          "maxLongTaskMs": 191
+        }
+      ]
+    },
+    "history40-raw4": {
+      "fixture": {
+        "sha256": "04397db19db0ef0ed66571126f6533d5bb6e3a53ef55181235c9a3a713f4fef2",
+        "databaseVersion": 2,
+        "counts": {
+          "backups": 2,
+          "changes": 0,
+          "entries": 350,
+          "exercises": 37,
+          "journalArchives": 2,
+          "journalCheckpoints": 1,
+          "journalIndex": 1916,
+          "journalMetadata": 3,
+          "journalObjects": 948,
+          "journalResults": 350,
+          "journalSessions": 40,
+          "journalSnapshots": 40,
+          "journalState": 1,
+          "meta": 3,
+          "notes": 37,
+          "planVersions": 6,
+          "plans": 4,
+          "sessions": 40,
+          "sets": 1080
+        }
+      },
+      "summary": {
+        "uiReadyMarkMs": {
+          "n": 6,
+          "median": 2059.0499999988824,
+          "p95": 3386.699999999255,
+          "max": 3386.699999999255
+        },
+        "observedReadyMs": {
+          "n": 6,
+          "median": 2499.25,
+          "p95": 3871.2999999970198,
+          "max": 3871.2999999970198
+        },
+        "heapHighWaterBytes": {
+          "n": 6,
+          "median": 8053837.5,
+          "p95": 8272478,
+          "max": 8272478
+        }
+      },
+      "coldWarmReadyMs": {
+        "cold": {
+          "n": 3,
+          "median": 2365.5,
+          "p95": 3386.699999999255,
+          "max": 3386.699999999255
+        },
+        "warm": {
+          "n": 3,
+          "median": 1649.0999999977648,
+          "p95": 2491.60000000149,
+          "max": 2491.60000000149
+        }
+      },
+      "samples": [
+        {
+          "kind": "cold0",
+          "uiReadyMarkMs": 2365.5,
+          "observedReadyMs": 2901.199999999255,
+          "heapHighWaterBytes": 8272478,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 5.100000001490116,
+            "model/journal-runtime.mjs:selectedSource": 1150.2999999970198,
+            "model/journal-runtime.mjs:readIndexed": 1164.3999999985099,
+            "model/journal-runtime.mjs:openIndexedWriter": 2.599999997764826,
+            "model/journal-database.mjs:openDatabase": 1186.6000000014901,
+            "model/workout-drafts.mjs:openDrafts": 22.799999997019768,
+            "model/drive-sync.mjs:openDriveBackup": 35.399999998509884,
+            "app.js:main": 120.5,
+            "app.js:render": 126.60000000149012
+          },
+          "nativeRequests": 270,
+          "longTaskCount": 6,
+          "maxLongTaskMs": 519
+        },
+        {
+          "kind": "warm0",
+          "uiReadyMarkMs": 2491.60000000149,
+          "observedReadyMs": 3097.300000000745,
+          "heapHighWaterBytes": 8185173,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 5.699999999254942,
+            "model/journal-runtime.mjs:selectedSource": 1117.300000000745,
+            "model/journal-runtime.mjs:readIndexed": 1132.4000000022352,
+            "model/journal-runtime.mjs:openIndexedWriter": 3.600000001490116,
+            "model/journal-database.mjs:openDatabase": 1158.0999999977648,
+            "model/workout-drafts.mjs:openDrafts": 3.800000000745058,
+            "model/drive-sync.mjs:openDriveBackup": 10.400000002235174,
+            "app.js:main": 33.69999999925494,
+            "app.js:render": 44.5
+          },
+          "nativeRequests": 270,
+          "longTaskCount": 5,
+          "maxLongTaskMs": 364
+        },
+        {
+          "kind": "cold1",
+          "uiReadyMarkMs": 3386.699999999255,
+          "observedReadyMs": 3871.2999999970198,
+          "heapHighWaterBytes": 7974534,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 7.600000001490116,
+            "model/journal-runtime.mjs:selectedSource": 2317.10000000149,
+            "model/journal-runtime.mjs:readIndexed": 2334.699999999255,
+            "model/journal-runtime.mjs:openIndexedWriter": 0.9000000022351742,
+            "model/journal-database.mjs:openDatabase": 2360.699999999255,
+            "model/workout-drafts.mjs:openDrafts": 5.100000001490116,
+            "model/drive-sync.mjs:openDriveBackup": 11.399999998509884,
+            "app.js:main": 81.30000000074506,
+            "app.js:render": 93.69999999925494
+          },
+          "nativeRequests": 270,
+          "longTaskCount": 7,
+          "maxLongTaskMs": 376
+        },
+        {
+          "kind": "warm1",
+          "uiReadyMarkMs": 1440.8999999985099,
+          "observedReadyMs": 1820.0999999977648,
+          "heapHighWaterBytes": 8133141,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 4.400000002235174,
+            "model/journal-runtime.mjs:selectedSource": 822.0999999977648,
+            "model/journal-runtime.mjs:readIndexed": 831.6999999992549,
+            "model/journal-runtime.mjs:openIndexedWriter": 2.800000000745058,
+            "model/journal-database.mjs:openDatabase": 851.8999999985099,
+            "model/workout-drafts.mjs:openDrafts": 14.800000000745058,
+            "model/drive-sync.mjs:openDriveBackup": 8.399999998509884,
+            "app.js:main": 26.600000001490116,
+            "app.js:render": 31.800000000745058
+          },
+          "nativeRequests": 270,
+          "longTaskCount": 3,
+          "maxLongTaskMs": 226
+        },
+        {
+          "kind": "cold2",
+          "uiReadyMarkMs": 1752.5999999977648,
+          "observedReadyMs": 2097.300000000745,
+          "heapHighWaterBytes": 7936546,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 10.800000000745058,
+            "model/journal-runtime.mjs:selectedSource": 919.8000000007451,
+            "model/journal-runtime.mjs:readIndexed": 941.5,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.6000000014901161,
+            "model/journal-database.mjs:openDatabase": 970.7000000029802,
+            "model/workout-drafts.mjs:openDrafts": 4.900000002235174,
+            "model/drive-sync.mjs:openDriveBackup": 15.300000000745058,
+            "app.js:main": 27.800000000745058,
+            "app.js:render": 37.099999997764826
+          },
+          "nativeRequests": 270,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 209
+        },
+        {
+          "kind": "warm2",
+          "uiReadyMarkMs": 1649.0999999977648,
+          "observedReadyMs": 1957.5999999977648,
+          "heapHighWaterBytes": 7759326,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 5,
+            "model/journal-runtime.mjs:selectedSource": 997.5,
+            "model/journal-runtime.mjs:readIndexed": 1010.5999999977648,
+            "model/journal-runtime.mjs:openIndexedWriter": 6.100000001490116,
+            "model/journal-database.mjs:openDatabase": 1042.3999999985099,
+            "model/workout-drafts.mjs:openDrafts": 6.400000002235174,
+            "model/drive-sync.mjs:openDriveBackup": 8.899999998509884,
+            "app.js:main": 22.5,
+            "app.js:render": 27
+          },
+          "nativeRequests": 270,
+          "longTaskCount": 5,
+          "maxLongTaskMs": 351
+        }
+      ]
+    },
+    "history40-escaped16": {
+      "fixture": {
+        "sha256": "438fae2d14fb6b32202cd0c19187b197716da8ba85cd27546857ad940ad9fd77",
+        "databaseVersion": 2,
+        "counts": {
+          "backups": 2,
+          "changes": 0,
+          "entries": 350,
+          "exercises": 37,
+          "journalArchives": 2,
+          "journalCheckpoints": 1,
+          "journalIndex": 1916,
+          "journalMetadata": 3,
+          "journalObjects": 948,
+          "journalResults": 350,
+          "journalSessions": 40,
+          "journalSnapshots": 40,
+          "journalState": 1,
+          "meta": 3,
+          "notes": 37,
+          "planVersions": 6,
+          "plans": 4,
+          "sessions": 40,
+          "sets": 1080
+        }
+      },
+      "summary": {
+        "uiReadyMarkMs": {
+          "n": 6,
+          "median": 1612.5499999970198,
+          "p95": 1760.6999999955297,
+          "max": 1760.6999999955297
+        },
+        "observedReadyMs": {
+          "n": 6,
+          "median": 1937.3999999985099,
+          "p95": 2133.1999999955297,
+          "max": 2133.1999999955297
+        },
+        "heapHighWaterBytes": {
+          "n": 6,
+          "median": 7739477.0,
+          "p95": 7990317,
+          "max": 7990317
+        }
+      },
+      "coldWarmReadyMs": {
+        "cold": {
+          "n": 3,
+          "median": 1743.3999999985099,
+          "p95": 1760.6999999955297,
+          "max": 1760.6999999955297
+        },
+        "warm": {
+          "n": 3,
+          "median": 1517.3000000044703,
+          "p95": 1597.7999999970198,
+          "max": 1597.7999999970198
+        }
+      },
+      "samples": [
+        {
+          "kind": "cold0",
+          "uiReadyMarkMs": 1760.6999999955297,
+          "observedReadyMs": 2133.1999999955297,
+          "heapHighWaterBytes": 7688837,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 10.699999995529652,
+            "model/journal-runtime.mjs:selectedSource": 1013.3999999985099,
+            "model/journal-runtime.mjs:readIndexed": 1035.0999999940395,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.1000000014901161,
+            "model/journal-database.mjs:openDatabase": 1055.3000000044703,
+            "model/workout-drafts.mjs:openDrafts": 6,
+            "model/drive-sync.mjs:openDriveBackup": 9.200000002980232,
+            "app.js:main": 27.5,
+            "app.js:render": 35.899999998509884
+          },
+          "nativeRequests": 267,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 250
+        },
+        {
+          "kind": "warm0",
+          "uiReadyMarkMs": 1150.6000000014901,
+          "observedReadyMs": 1596.3999999985099,
+          "heapHighWaterBytes": 7990317,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 4.700000002980232,
+            "model/journal-runtime.mjs:selectedSource": 650.2999999970198,
+            "model/journal-runtime.mjs:readIndexed": 659.1000000014901,
+            "model/journal-runtime.mjs:openIndexedWriter": 3.2999999970197678,
+            "model/journal-database.mjs:openDatabase": 696.1999999955297,
+            "model/workout-drafts.mjs:openDrafts": 14,
+            "model/drive-sync.mjs:openDriveBackup": 12.600000001490116,
+            "app.js:main": 16.799999997019768,
+            "app.js:render": 21.600000001490116
+          },
+          "nativeRequests": 267,
+          "longTaskCount": 3,
+          "maxLongTaskMs": 205
+        },
+        {
+          "kind": "cold1",
+          "uiReadyMarkMs": 1627.2999999970198,
+          "observedReadyMs": 1949.5,
+          "heapHighWaterBytes": 7939029,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 15.899999998509884,
+            "model/journal-runtime.mjs:selectedSource": 876,
+            "model/journal-runtime.mjs:readIndexed": 904,
+            "model/journal-runtime.mjs:openIndexedWriter": 2.2999999970197678,
+            "model/journal-database.mjs:openDatabase": 920.5999999940395,
+            "model/workout-drafts.mjs:openDrafts": 4.100000001490116,
+            "model/drive-sync.mjs:openDriveBackup": 16.30000000447035,
+            "app.js:main": 28.19999999552965,
+            "app.js:render": 39.30000000447035
+          },
+          "nativeRequests": 267,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 266
+        },
+        {
+          "kind": "warm1",
+          "uiReadyMarkMs": 1597.7999999970198,
+          "observedReadyMs": 1925.2999999970198,
+          "heapHighWaterBytes": 7757673,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 5.299999997019768,
+            "model/journal-runtime.mjs:selectedSource": 999.8999999985099,
+            "model/journal-runtime.mjs:readIndexed": 1013.8999999985099,
+            "model/journal-runtime.mjs:openIndexedWriter": 5.100000001490116,
+            "model/journal-database.mjs:openDatabase": 1031.3999999985099,
+            "model/workout-drafts.mjs:openDrafts": 6.699999995529652,
+            "model/drive-sync.mjs:openDriveBackup": 8.5,
+            "app.js:main": 28.100000001490116,
+            "app.js:render": 33
+          },
+          "nativeRequests": 267,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 247
+        },
+        {
+          "kind": "cold2",
+          "uiReadyMarkMs": 1743.3999999985099,
+          "observedReadyMs": 2114.89999999851,
+          "heapHighWaterBytes": 7400153,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 3.399999998509884,
+            "model/journal-runtime.mjs:selectedSource": 991.3000000044703,
+            "model/journal-runtime.mjs:readIndexed": 1003.2000000029802,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.7999999970197678,
+            "model/journal-database.mjs:openDatabase": 1020.1999999955297,
+            "model/workout-drafts.mjs:openDrafts": 9.700000002980232,
+            "model/drive-sync.mjs:openDriveBackup": 8.799999997019768,
+            "app.js:main": 27.799999997019768,
+            "app.js:render": 37.399999998509884
+          },
+          "nativeRequests": 267,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 265
+        },
+        {
+          "kind": "warm2",
+          "uiReadyMarkMs": 1517.3000000044703,
+          "observedReadyMs": 1885,
+          "heapHighWaterBytes": 7721281,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 6.300000004470348,
+            "model/journal-runtime.mjs:selectedSource": 945.5,
+            "model/journal-runtime.mjs:readIndexed": 957,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.7999999970197678,
+            "model/journal-database.mjs:openDatabase": 977.7000000029802,
+            "model/workout-drafts.mjs:openDrafts": 5.200000002980232,
+            "model/drive-sync.mjs:openDriveBackup": 6.300000004470348,
+            "app.js:main": 19.900000005960464,
+            "app.js:render": 26
+          },
+          "nativeRequests": 267,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 286
+        }
+      ]
+    },
+    "history400-raw4": {
+      "fixture": {
+        "sha256": "f55358bf1212585371cee33a193ac75fe8e58fb897fcec4a628ffd4f6d53b55c",
+        "databaseVersion": 2,
+        "counts": {
+          "backups": 0,
+          "changes": 0,
+          "entries": 0,
+          "exercises": 34,
+          "journalArchives": 2,
+          "journalCheckpoints": 1,
+          "journalIndex": 18480,
+          "journalMetadata": 3,
+          "journalObjects": 8690,
+          "journalResults": 3500,
+          "journalSessions": 400,
+          "journalSnapshots": 400,
+          "journalState": 1,
+          "meta": 2,
+          "notes": 34,
+          "planVersions": 4,
+          "plans": 4,
+          "sessions": 0,
+          "sets": 0
+        }
+      },
+      "summary": {
+        "uiReadyMarkMs": {
+          "n": 6,
+          "median": 3815.849999997765,
+          "p95": 8802.29999999702,
+          "max": 8802.29999999702
+        },
+        "observedReadyMs": {
+          "n": 6,
+          "median": 4568.949999999255,
+          "p95": 9363.60000000149,
+          "max": 9363.60000000149
+        },
+        "heapHighWaterBytes": {
+          "n": 6,
+          "median": 7659139.0,
+          "p95": 7950957,
+          "max": 7950957
+        }
+      },
+      "coldWarmReadyMs": {
+        "cold": {
+          "n": 3,
+          "median": 2910.6999999955297,
+          "p95": 5506.60000000149,
+          "max": 5506.60000000149
+        },
+        "warm": {
+          "n": 3,
+          "median": 4721,
+          "p95": 8802.29999999702,
+          "max": 8802.29999999702
+        }
+      },
+      "samples": [
+        {
+          "kind": "cold0",
+          "uiReadyMarkMs": 1427.6000000014901,
+          "observedReadyMs": 1753.1000000014901,
+          "heapHighWaterBytes": 7296121,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 0.7999999970197678,
+            "model/journal-runtime.mjs:selectedSource": 873,
+            "model/journal-runtime.mjs:readIndexed": 874.7999999970198,
+            "model/journal-runtime.mjs:openIndexedWriter": 0.5,
+            "model/journal-database.mjs:openDatabase": 895.5,
+            "model/workout-drafts.mjs:openDrafts": 3.899999998509884,
+            "model/drive-sync.mjs:openDriveBackup": 6.799999997019768,
+            "app.js:main": 14.300000004470348,
+            "app.js:render": 19.80000000447035
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 3,
+          "maxLongTaskMs": 186
+        },
+        {
+          "kind": "warm0",
+          "uiReadyMarkMs": 1601.7999999970198,
+          "observedReadyMs": 1881.0999999940395,
+          "heapHighWaterBytes": 7950957,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 6.5,
+            "model/journal-runtime.mjs:selectedSource": 984.5,
+            "model/journal-runtime.mjs:readIndexed": 997.8000000044703,
+            "model/journal-runtime.mjs:openIndexedWriter": 2.1999999955296516,
+            "model/journal-database.mjs:openDatabase": 1013.7999999970198,
+            "model/workout-drafts.mjs:openDrafts": 5.5,
+            "model/drive-sync.mjs:openDriveBackup": 14.699999995529652,
+            "app.js:main": 30.899999998509884,
+            "app.js:render": 41.899999998509884
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 252
+        },
+        {
+          "kind": "cold1",
+          "uiReadyMarkMs": 2910.6999999955297,
+          "observedReadyMs": 3572.39999999851,
+          "heapHighWaterBytes": 7626529,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 4.700000002980232,
+            "model/journal-runtime.mjs:selectedSource": 1701.6999999955297,
+            "model/journal-runtime.mjs:readIndexed": 1724,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.1000000014901161,
+            "model/journal-database.mjs:openDatabase": 1744.8999999985099,
+            "model/workout-drafts.mjs:openDrafts": 5.200000002980232,
+            "model/drive-sync.mjs:openDriveBackup": 9.699999995529652,
+            "app.js:main": 13.100000001490116,
+            "app.js:render": 31.899999998509884
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 278
+        },
+        {
+          "kind": "warm1",
+          "uiReadyMarkMs": 8802.29999999702,
+          "observedReadyMs": 9363.60000000149,
+          "heapHighWaterBytes": 7716325,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 5.5,
+            "model/journal-runtime.mjs:selectedSource": 2688.2000000029802,
+            "model/journal-runtime.mjs:readIndexed": 2706.2999999970198,
+            "model/journal-runtime.mjs:openIndexedWriter": 17.099999994039536,
+            "model/journal-database.mjs:openDatabase": 2745.7000000029802,
+            "model/workout-drafts.mjs:openDrafts": 5.600000001490116,
+            "model/drive-sync.mjs:openDriveBackup": 2682.3000000044703,
+            "app.js:main": 54.29999999701977,
+            "app.js:render": 68
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 12,
+          "maxLongTaskMs": 2339
+        },
+        {
+          "kind": "cold2",
+          "uiReadyMarkMs": 5506.60000000149,
+          "observedReadyMs": 5942.5,
+          "heapHighWaterBytes": 7332749,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 11.5,
+            "model/journal-runtime.mjs:selectedSource": 4080.7999999970198,
+            "model/journal-runtime.mjs:readIndexed": 4104,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.7000000029802322,
+            "model/journal-database.mjs:openDatabase": 4135.89999999851,
+            "model/workout-drafts.mjs:openDrafts": 7.699999995529652,
+            "model/drive-sync.mjs:openDriveBackup": 12.899999998509884,
+            "app.js:main": 36.79999999701977,
+            "app.js:render": 54
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 9,
+          "maxLongTaskMs": 450
+        },
+        {
+          "kind": "warm2",
+          "uiReadyMarkMs": 4721,
+          "observedReadyMs": 5565.5,
+          "heapHighWaterBytes": 7691749,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 41.5,
+            "model/journal-runtime.mjs:selectedSource": 3233.2999999970198,
+            "model/journal-runtime.mjs:readIndexed": 3283,
+            "model/journal-runtime.mjs:openIndexedWriter": 8.399999998509884,
+            "model/journal-database.mjs:openDatabase": 3347.10000000149,
+            "model/workout-drafts.mjs:openDrafts": 18.200000002980232,
+            "model/drive-sync.mjs:openDriveBackup": 10.600000001490116,
+            "app.js:main": 26.200000002980232,
+            "app.js:render": 54
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 8,
+          "maxLongTaskMs": 722
+        }
+      ]
+    },
+    "history400-escaped16": {
+      "fixture": {
+        "sha256": "04372187accbbe8dbd87b37cfa43d1a920122c4b1ac07d26a5f428fa349b0e88",
+        "databaseVersion": 2,
+        "counts": {
+          "backups": 0,
+          "changes": 0,
+          "entries": 0,
+          "exercises": 34,
+          "journalArchives": 2,
+          "journalCheckpoints": 1,
+          "journalIndex": 18480,
+          "journalMetadata": 3,
+          "journalObjects": 8690,
+          "journalResults": 3500,
+          "journalSessions": 400,
+          "journalSnapshots": 400,
+          "journalState": 1,
+          "meta": 2,
+          "notes": 34,
+          "planVersions": 4,
+          "plans": 4,
+          "sessions": 0,
+          "sets": 0
+        }
+      },
+      "summary": {
+        "uiReadyMarkMs": {
+          "n": 6,
+          "median": 2361.0,
+          "p95": 3347.10000000149,
+          "max": 3347.10000000149
+        },
+        "observedReadyMs": {
+          "n": 6,
+          "median": 3134.150000002235,
+          "p95": 3916.5,
+          "max": 3916.5
+        },
+        "heapHighWaterBytes": {
+          "n": 6,
+          "median": 7643636.0,
+          "p95": 7714414,
+          "max": 7714414
+        }
+      },
+      "coldWarmReadyMs": {
+        "cold": {
+          "n": 3,
+          "median": 2530.7000000029802,
+          "p95": 3113.8000000044703,
+          "max": 3113.8000000044703
+        },
+        "warm": {
+          "n": 3,
+          "median": 2180.2999999970198,
+          "p95": 3347.10000000149,
+          "max": 3347.10000000149
+        }
+      },
+      "samples": [
+        {
+          "kind": "cold0",
+          "uiReadyMarkMs": 2191.2999999970198,
+          "observedReadyMs": 2471.1999999955297,
+          "heapHighWaterBytes": 6974354,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 1,
+            "model/journal-runtime.mjs:selectedSource": 1318,
+            "model/journal-runtime.mjs:readIndexed": 1330,
+            "model/journal-runtime.mjs:openIndexedWriter": 2,
+            "model/journal-database.mjs:openDatabase": 1376.5,
+            "model/workout-drafts.mjs:openDrafts": 4.799999997019768,
+            "model/drive-sync.mjs:openDriveBackup": 9.5,
+            "app.js:main": 19,
+            "app.js:render": 27.100000001490116
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 3,
+          "maxLongTaskMs": 243
+        },
+        {
+          "kind": "warm0",
+          "uiReadyMarkMs": 2180.2999999970198,
+          "observedReadyMs": 2482.89999999851,
+          "heapHighWaterBytes": 7657934,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 3.399999998509884,
+            "model/journal-runtime.mjs:selectedSource": 1587.1000000014901,
+            "model/journal-runtime.mjs:readIndexed": 1598.2000000029802,
+            "model/journal-runtime.mjs:openIndexedWriter": 11.299999997019768,
+            "model/journal-database.mjs:openDatabase": 1642.3000000044703,
+            "model/workout-drafts.mjs:openDrafts": 3.3000000044703484,
+            "model/drive-sync.mjs:openDriveBackup": 7.199999995529652,
+            "app.js:main": 15.700000002980232,
+            "app.js:render": 17.5
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 5,
+          "maxLongTaskMs": 356
+        },
+        {
+          "kind": "cold1",
+          "uiReadyMarkMs": 2530.7000000029802,
+          "observedReadyMs": 2803.8000000044703,
+          "heapHighWaterBytes": 7629338,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 5.600000001490116,
+            "model/journal-runtime.mjs:selectedSource": 1860.7000000029802,
+            "model/journal-runtime.mjs:readIndexed": 1880.9000000059605,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.8999999985098839,
+            "model/journal-database.mjs:openDatabase": 1899.5999999940395,
+            "model/workout-drafts.mjs:openDrafts": 9.099999994039536,
+            "model/drive-sync.mjs:openDriveBackup": 15,
+            "app.js:main": 26.5,
+            "app.js:render": 39.100000001490116
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 2,
+          "maxLongTaskMs": 247
+        },
+        {
+          "kind": "warm1",
+          "uiReadyMarkMs": 3347.10000000149,
+          "observedReadyMs": 3916.5,
+          "heapHighWaterBytes": 7714414,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 9.899999998509884,
+            "model/journal-runtime.mjs:selectedSource": 2272.39999999851,
+            "model/journal-runtime.mjs:readIndexed": 2302.10000000149,
+            "model/journal-runtime.mjs:openIndexedWriter": 2.899999998509884,
+            "model/journal-database.mjs:openDatabase": 2346.7999999970198,
+            "model/workout-drafts.mjs:openDrafts": 16.299999997019768,
+            "model/drive-sync.mjs:openDriveBackup": 24.200000002980232,
+            "app.js:main": 51.69999999552965,
+            "app.js:render": 59.399999998509884
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 7,
+          "maxLongTaskMs": 372
+        },
+        {
+          "kind": "cold2",
+          "uiReadyMarkMs": 3113.8000000044703,
+          "observedReadyMs": 3464.5,
+          "heapHighWaterBytes": 6765714,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 10.699999995529652,
+            "model/journal-runtime.mjs:selectedSource": 1969.2000000029802,
+            "model/journal-runtime.mjs:readIndexed": 2016.7000000029802,
+            "model/journal-runtime.mjs:openIndexedWriter": 1.8999999985098839,
+            "model/journal-database.mjs:openDatabase": 2060.60000000149,
+            "model/workout-drafts.mjs:openDrafts": 4.299999997019768,
+            "model/drive-sync.mjs:openDriveBackup": 27.5,
+            "app.js:main": 51.29999999701977,
+            "app.js:render": 70.5
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 5,
+          "maxLongTaskMs": 397
+        },
+        {
+          "kind": "warm2",
+          "uiReadyMarkMs": 1855.0999999940395,
+          "observedReadyMs": 3775.6999999955297,
+          "heapHighWaterBytes": 7684806,
+          "spansInclusiveMs": {
+            "model/journal-runtime.mjs:reader": 4.299999997019768,
+            "model/journal-runtime.mjs:selectedSource": 1219.2000000029802,
+            "model/journal-runtime.mjs:readIndexed": 1229.7999999970198,
+            "model/journal-runtime.mjs:openIndexedWriter": 4.299999997019768,
+            "model/journal-database.mjs:openDatabase": 1249.4000000059605,
+            "model/workout-drafts.mjs:openDrafts": 6.5,
+            "model/drive-sync.mjs:openDriveBackup": 7.300000004470348,
+            "app.js:main": 18.600000001490116,
+            "app.js:render": 24.69999999552965
+          },
+          "nativeRequests": 291,
+          "longTaskCount": 4,
+          "maxLongTaskMs": 227
+        }
+      ]
+    }
+  }
+}
