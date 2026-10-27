@@ -113,12 +113,21 @@ export function project(data,base) {
   });
   const resultRecords=[],resultReferences=[];
   for(const r of base.resultRecords) {
-    const e=r.data,snap=snaps.get(e.sessionId);
-    if(!snap){check(!e.journalSnapshotId,'result snapshot missing');resultRecords.push(r);continue;}
+    const projected=projectEntry(r,snaps.get(r.data.sessionId));
+    resultRecords.push(...projected.resultRecords);resultReferences.push(...projected.resultReferences);
+  }
+  const sessionSnapshots=Object.isFrozen(j.sessionSnapshots)&&immutableJSON(j.sessionSnapshots)?j.sessionSnapshots:structuredClone(j.sessionSnapshots);
+  return {...base,model,sessionSnapshots,sessionRecords,resultRecords,resultReferences};
+}
+/** Same result boundary for full backups and incremental commands. The caller
+ * validates the immutable snapshot and session relation before using it. */
+export function projectEntry(r,snap) {
+    const e=r.data,resultRecords=[],resultReferences=[];
+    if(!snap){check(!e.journalSnapshotId,'result snapshot missing');return {resultRecords:[r],resultReferences};}
     check(e.journalSnapshotId===snap.id && Array.isArray(e.series) && e.series.length,'native result lost its series');
     const metadata={...e};delete metadata.series;if(structuredSnapshot(snap))delete metadata.performance;
     check(!structuredSnapshot(snap)||e.performance,'V2 result requires structured performance');
-    if(structuredSnapshot(snap)&&e.performance){const refs=validatePerformance(e.performance,snap,e);resultReferences.push(...refs);e.performance.rows.forEach((row,order)=>resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:2,data:{...row,order,loadConvention:e.performance.loadConvention,entryId:e.id,entryMetadata:metadata}}));continue;}
+    if(structuredSnapshot(snap)&&e.performance){const refs=validatePerformance(e.performance,snap,e);resultReferences.push(...refs);e.performance.rows.forEach((row,order)=>resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:2,data:{...row,order,loadConvention:e.performance.loadConvention,entryId:e.id,entryMetadata:metadata}}));return {resultRecords,resultReferences};}
     const references=createResultReferences(snap,e.series.map(row=>({resultId:row.id,positionId:e.journalPositionId,setId:row.setId,side:null,groupId:null,round:null})));
     e.series.forEach((row,order)=>{
       check(!Object.hasOwn(row,'segments') && !Object.hasOwn(row,'side') && !Object.hasOwn(row,'groupId'),'unsupported performance structure');
@@ -127,9 +136,7 @@ export function project(data,base) {
       check(reference.exerciseId===e.exerciseId && reference.variantId===e.journalVariantId,'native variant mismatch');
       resultReferences.push(reference);resultRecords.push({id:row.id,sessionId:e.sessionId,binding:'snapshot',payloadVersion:1,data:{...row,order,entryId:e.id,entryMetadata:metadata}});
     });
-  }
-  const sessionSnapshots=Object.isFrozen(j.sessionSnapshots)&&immutableJSON(j.sessionSnapshots)?j.sessionSnapshots:structuredClone(j.sessionSnapshots);
-  return {...base,model,sessionSnapshots,sessionRecords,resultRecords,resultReferences};
+    return {resultRecords,resultReferences};
 }
 /** Preview only a context whose actual source parameters still match. */
 export function previewExercises(data,type) {

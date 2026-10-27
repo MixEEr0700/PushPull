@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
-import {createProtocol,materialize,objectRecord,readObject} from '../model/journal-protocol.mjs';
-import {editIndex,auditIndex,indexKey,hashJSON} from '../model/journal-index.mjs';
+import {createProtocol,materialize,objectRecord,readObject,protocolBudget} from '../model/journal-protocol.mjs';
+import {editIndex,auditIndex,indexKey,hashJSON,sha,verifyNode,buildIndex} from '../model/journal-index.mjs';
 import {freeze} from '../model/backup-json.mjs';
 import {createLegacyModelFromSource} from '../model/legacy-model.mjs';
 import {nativeData,AT} from './fixtures/backup-v4-fixture.mjs';
@@ -49,9 +49,10 @@ test('content and index corruption cannot be hidden behind unchanged IDs, counts
  await bad(b=>{b.records.journalObjects[0].json=b.records.journalObjects[0].json.replace('pushpull','changed');});
  await bad(b=>{b.records.journalResults[0].ref=b.records.journalSessions[0].ref;});
  await bad(b=>{b.records.journalResults.pop();});
- await bad(b=>{b.records.journalIndex.find(n=>n.id===b.state.root).left=b.state.root;});
+ await bad(b=>{b.records.journalIndex.find(n=>n.id===b.state.indexRoot).left=b.state.indexRoot;});
  await bad(b=>{b.records.journalObjects.pop();});
  await bad(b=>{b.records.journalSessions[0].position=999;});
+ await bad(b=>{b.state.ownerId='corrupt metadata without changing root';});
 });
 test('persistent AVL updates authenticate all leaves after adversarial insertion order and corrections',async()=>{
  let root=null;const nodes=new Map(),leaves=new Map();
@@ -77,4 +78,44 @@ test('limits, cancellation, malformed JSON and unknown nonportable fields fail w
  const row=await objectRecord({unicode:'Ł😀\ud800'});assert.deepEqual(await readObject(row),{unicode:'Ł😀\ud800'});
  const invalid={...row,json:'{"a":1,"a":2}'};invalid.id=await hashJSON({unused:1});await assert.rejects(readObject(invalid));
  assert.equal(JSON.stringify(source),before);
+});
+test('materialization and SHA readers detach mutable callers before the first await',async()=>{
+ const source=fixture(false),bundle=structuredClone(await createProtocol(source)),pending=materialize(bundle);
+ bundle.records.journalObjects[0].json='"changed after call"';bundle.state.root='0'.repeat(64);
+ assert.equal(JSON.stringify(await pending),JSON.stringify(source));
+ const object={...await objectRecord({value:'before'})},read=readObject(object);object.json='{"value":"after!"}';
+ assert.deepEqual(await read,{value:'before'});
+ const tree=await buildIndex([['before',await hashJSON(1)]]),node={...tree.nodes.get(tree.root)},verified=verifyNode(node);
+ node.key='changed after SHA began';assert.equal((await verified).key,'before');
+});
+test('only a fully verified immutable bundle can reuse proofs and reduced limits still apply',async()=>{
+ const bundle=await createProtocol(fixture(false));assert.throws(()=>protocolBudget(bundle),/verified/);
+ const first=await materialize(bundle),budget=protocolBudget(bundle);assert.equal(await materialize(bundle),first);
+ await assert.rejects(materialize(bundle,{limits:{totalBytes:budget.bytes-1}}),/limit/);
+ const copy=structuredClone(bundle);copy.records.journalObjects[0].json+=' ';freeze(copy);
+ assert.throws(()=>protocolBudget(copy),/verified/);await assert.rejects(materialize(copy));
+ const cancelled=new AbortController();cancelled.abort();await assert.rejects(materialize(bundle,{signal:cancelled.signal}),{name:'AbortError'});
+});
+test('UTF-8 wire validation rejects surrogate replacement collisions and bounds encoded allocations',async()=>{
+ const row=await objectRecord('\ufffd'),bad={...row,json:'"'+String.fromCharCode(0xd800)+'"'};
+ // Native UTF-8 conversion alone cannot distinguish these two wire strings.
+ assert.deepEqual(new TextEncoder().encode(row.json),new TextEncoder().encode(bad.json));
+ await assert.rejects(readObject(bad),/UTF-8/);
+ await assert.rejects(objectRecord('Ł😀'.repeat(100),{objectBytes:100}),/size/);
+ const valid=await objectRecord('\ud800');assert.equal(await readObject(valid),'\ud800');
+});
+test('legacy optional journal values retain their exact old-reader meaning',async()=>{
+ for(const value of [null,false,0,'']){
+  const source=fixture(false);source.archives=[];source.data.trainingJournal=value;
+  assert.equal(JSON.stringify(await materialize(await createProtocol(source))),JSON.stringify(source));
+ }
+});
+test('sealed root binds metadata and the exact complete checkpoint set',async()=>{
+ const source=fixture(false);source.archives=[];
+ const checkpoint={id:'recovery:test',protocol:2,raw:'{"original":true}'};checkpoint.sha256=await sha(checkpoint.raw);
+ const bundle=await createProtocol(source,{checkpoints:[checkpoint]});assert.equal(JSON.stringify(await materialize(bundle)),JSON.stringify(source));
+ const missing=structuredClone(bundle);missing.records.journalCheckpoints=[];await assert.rejects(materialize(missing),/completeness/);
+ const tampered=structuredClone(bundle);tampered.records.journalCheckpoints[0].raw='{"original":false}';tampered.records.journalCheckpoints[0].sha256=await sha(tampered.records.journalCheckpoints[0].raw);
+ await assert.rejects(materialize(tampered),/binding/);
+ tampered.state.checkpointRefs[0].sha256=await hashJSON(tampered.records.journalCheckpoints[0]);await assert.rejects(materialize(tampered),/state SHA/);
 });

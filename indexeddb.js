@@ -457,5 +457,16 @@ const PushPullDB = (() => {
       close(){channel?.close();db?.close();window.removeEventListener('storage',storageListener);}
     };
   }
-  return {open,parseBackup,async parseModelBackup(text){return (await modelAPI()).parseModelBackup(text)},NAME,VERSION,TABLES};
+  // Read-only oracle for the separately staged v2 converter. It uses the same
+  // complete row/digest/model validators as a normal v1 startup.
+  async function verifyEvidence(evidence) {
+    const state=evidence.meta?.find(row=>row.key==='state'),model=evidence.meta?.find(row=>row.key===MODEL_KEY);
+    if(!state?.verified||!state.migration?.complete)throw Error('Niepotwierdzony checkpoint v1.');
+    const value=verifyRows(state,Object.fromEntries(TABLES.map(table=>[table,evidence[table]])));
+    if(await digest(value)!==state.digest)throw Error('Integralność checkpointu v1.');
+    if(value.data.trainingJournal&&!model)throw Error('Brak pełnego modelu checkpointu v1.');
+    if(model)await (await modelAPI()).verifyLegacyModel(model,value,state.revision);
+    return {format:'pushpull-backup',version:2,...value,archives:clone(validateArchives(evidence.backups))};
+  }
+  return {open,parseBackup,verifyEvidence,async parseModelBackup(text){return (await modelAPI()).parseModelBackup(text)},NAME,VERSION,TABLES};
 })();
