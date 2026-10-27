@@ -146,6 +146,8 @@ function on(event,handler){
    const pending=trainingWriteFeedback(e);if(pending)trainingWrite=pending;
    actions=actions.then(async()=>{
     try{
+     // A previous success must never acknowledge a newly queued data operation.
+     if(event==='click'&&e.target.closest('[data-plan-save],[data-plan-activate],[data-switch-activate],[data-enable-journal],[data-restore-confirm],[data-act="export"],[data-export-v4],[data-export-v5],[data-backup-export]')||event==='change'&&e.target.matches('#importFile'))document.querySelector('.toast')?.remove();
      if(pending){await feedbackFrame();if(!e.target.isConnected)return;}
      const fullOperation=event==='click'&&e.target.closest('[data-act="export"],[data-export-v4],[data-export-v5],[data-plan-save],[data-backup-export],[data-load-backups],[data-drive-action="upload"],[data-drive-action="restore"],[data-drive-action="preview"],[data-restore-confirm]')||event==='change'&&e.target.matches('#importFile');
      if(fullOperation&&!recoveryError&&database.archivesDeferred&&!await requireFullData())return;

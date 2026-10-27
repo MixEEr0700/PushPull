@@ -91,3 +91,13 @@ class LazyData(BrowserHarness):
         self.page.evaluate('__releaseConfig()')
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
         self.assertFalse(self.alerts,self.alerts)
+
+    def test_previous_activation_success_cannot_confirm_a_pending_activation(self):
+        self.prepare();self.plans('v2-owner-2026-10-22')
+        self.page.evaluate("""()=>{const old=document.createElement('div');old.className='toast';old.textContent='Plan aktywny dla przyszłych treningów';document.body.append(old);const original=__fastDB.ensureFull;__fastDB.ensureFull=async()=>{await new Promise(r=>window.__releaseActivation=r);return original()}}""")
+        self.page.locator('[data-plan-activate]').click();self.page.wait_for_function('!!window.__releaseActivation')
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_have_count(0)
+        self.assertNotEqual(self.state()['trainingJournal']['activePlanVersionId'],'v2-owner-2026-10-22')
+        self.page.evaluate('__releaseActivation()')
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible(timeout=60000)
+        self.assertEqual(self.state()['trainingJournal']['activePlanVersionId'],'v2-owner-2026-10-22')

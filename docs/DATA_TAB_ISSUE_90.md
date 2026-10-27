@@ -119,3 +119,14 @@ Zachowano wszystkie wcześniejsze asercje integralności. Poprawiony scenariusz
 na CPU ×4: 3/3 PASS (15,768 s). Stary test również przeszedł lokalnie 3/3,
 więc pojedynczego null z CI nie odtworzono deterministycznie; usunięto
 konkretną lukę synchronizacji bez zmiany produkcyjnego mechanizmu bazy.
+
+CI `40530418928` ujawniło jeszcze jeden niesynchronizowany odczyt podczas
+kolejnej aktywacji w teście aktualizacji PWA. Poprzedni komunikat sukcesu
+pozostawał widoczny, więc nie potwierdzał nowego zapisu. Niezależny test
+z zatrzymanym audytem odtworzył rzeczywisty błąd UI: stary komunikat nadal
+był widoczny przed nowym zapisem (FAIL). Nowa operacja danych usuwa stare
+powiadomienie przed pierwszym await; nowe potwierdzenie pojawia się wyłącznie
+po zakończeniu jej istniejącego zapisu. Nie zmieniono asercji testu PWA ani
+protokołu zapisu. Nowe testy lokalne: **8/8 PASS** (21,959 s); niezmieniony
+scenariusz aktualizacji PWA: **PASS** (36,696 s). Zmiana dotyczy prezentacji
+potwierdzeń, nie przetwarzania historii ani archiwów.
