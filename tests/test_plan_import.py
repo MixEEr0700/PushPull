@@ -102,9 +102,18 @@ class PlanImport(BrowserHarness):
         self.page.locator('#planFile').set_input_files({'name':'bad.json','mimeType':'application/json','buffer':json.dumps(bad).encode()})
         expect(self.page.locator('[data-plan-error]')).to_be_visible();self.assertEqual(self.records(),before)
         self.preview()
-        self.page.evaluate("""()=>{window.__put=IDBObjectStore.prototype.put;window.__add=IDBObjectStore.prototype.add;for(const key of ['put','add']){const original=IDBObjectStore.prototype[key];IDBObjectStore.prototype[key]=function(v){if(this.name==='journalObjects'&&v.json?.includes('"TEST-1"'))this.transaction.abort();return original.call(this,v)}}}""")
-        self.page.locator('[data-plan-save]').click();expect(self.page.locator('[data-plan-save]')).to_be_visible()
-        self.assertEqual(self.state()['sessions'],legacy.FIXTURE['sessions']);self.assertNotIn('trainingJournal',self.state())
+        self.page.evaluate("""()=>{window.__planAbort=false;window.__put=IDBObjectStore.prototype.put;window.__add=IDBObjectStore.prototype.add;for(const key of ['put','add']){const original=IDBObjectStore.prototype[key];IDBObjectStore.prototype[key]=function(v){if(this.name==='journalObjects'&&v.json?.includes('"TEST-1"')){window.__planAbort=true;this.transaction.abort();}return original.call(this,v)}}}""")
+        # The save button is also visible while the async audit/preimage is running.
+        # Observe the injected abort reaching the UI before reading the stable DB
+        # or removing the fault injector; a concurrent reader may fail closed.
+        with self.page.expect_event('dialog') as failure:
+            self.page.locator('[data-plan-save]').click()
+        self.assertEqual(failure.value.type,'alert')
+        self.assertIn('Operacja przerwana',failure.value.message)
+        self.assertTrue(self.page.evaluate('window.__planAbort'))
+        expect(self.page.locator('[data-plan-save]')).to_be_visible()
+        after_failure=self.state()
+        self.assertEqual(after_failure['sessions'],legacy.FIXTURE['sessions']);self.assertNotIn('trainingJournal',after_failure)
         self.page.evaluate('()=>{IDBObjectStore.prototype.put=window.__put;IDBObjectStore.prototype.add=window.__add}')
         self.store();self.assertEqual(len(self.state()['trainingJournal']['importedPlans']),1)
 

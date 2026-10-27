@@ -108,3 +108,14 @@ sprawdzono lokalnie, w tym trzy poprzednio nieudane scenariusze na CPU ×4:
 **3/3 PASS** (87,498 s). Nowych testów jest łącznie siedem. Pełny CI nowego
 SHA podano w PR. Te poprawki nie zmieniają zmierzonej ścieżki wejścia Dane
 ani zwykłego eksportu; zachowano manifest dokładnego artefaktu pomiarowego.
+
+Kolejny CI `40504980771`: Node/build PASS, jeden błąd testu awarii importu
+(`state()` zwrócił null podczas operacji). Test traktował widoczny również
+podczas zapisu przycisk jako potwierdzenie zakończenia i czytał bazę dwa razy.
+Teraz oczekuje rzeczywistego alertu błędu, wymaga dowodu uruchomienia
+wstrzykniętego abortu, następnie w jednym odczycie sprawdza zachowanie sesji
+i brak aktywowanego planu; retry nadal musi zapisać dokładnie jeden plan.
+Zachowano wszystkie wcześniejsze asercje integralności. Poprawiony scenariusz
+na CPU ×4: 3/3 PASS (15,768 s). Stary test również przeszedł lokalnie 3/3,
+więc pojedynczego null z CI nie odtworzono deterministycznie; usunięto
+konkretną lukę synchronizacji bez zmiany produkcyjnego mechanizmu bazy.
