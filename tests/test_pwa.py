@@ -822,7 +822,7 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True)
         self.page.locator('[data-draft-resume]').click();form=self.page.locator('.performanceForm')
         expect(form.get_by_label('Ciężar (kg)',exact=True)).to_be_visible()
-        expect(form.locator('[data-rich-action=side-mode][data-row="0"]')).to_have_attribute('aria-pressed','true')
+        expect(form.locator('[data-rich-action=side-mode][data-row="0"]')).to_have_text('Scal L/P')
         expect(form.locator('[data-row="0"][data-field=kg]')).to_have_value('40')
         expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('35')
         form.locator('[data-row="0"][data-field=kg]').fill('41')

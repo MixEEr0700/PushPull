@@ -7,6 +7,8 @@ const PREFIX='pushpull_workout_draft_v1:';
 const key=(sid,eid)=>JSON.stringify([sid,eid]);
 const same=(a,b)=>canonical(a)===canonical(b);
 const clone=structuredClone;
+// Local empty editor is recoverable, but not a valid v6 result-evidence value.
+const recoverable=(kind,value)=>editorValueValid(kind,value)||kind==='v2'&&value?.performance?.version===2&&Array.isArray(value.performance.rows)&&value.performance.rows.length===0;
 export function editorValueValid(kind,value){
  if(kind==='legacy')return value && typeof value.kg==='string' && typeof value.reps==='string' && Array.isArray(value.series) && value.series.length>0 && value.series.every(r=>typeof r.kg==='string'&&typeof r.reps==='string');
  return kind==='v2' && value?.performance?.version===2 && Array.isArray(value.performance.rows) && value.performance.rows.length>0 && value.performance.rows.every(r=>typeof r.id==='string'&&Array.isArray(r.segments)&&r.segments.length>0&&r.segments.every(s=>typeof s.id==='string'&&typeof s.kg==='string'&&typeof s.reps==='string'));
@@ -24,7 +26,7 @@ export async function openDrafts(database){
  async function reload(){
   readError=null;let saved=[];try{saved=await database.readDrafts();}catch(e){storageError=e;readError=e;}
   const merged=new Map();
-  for(const r of [...saved,...buffered()]){
+  for(const r of [...saved,...buffered(),...[...active.values()].map(s=>s.record).filter(Boolean)]){
    if(!r || typeof r.id!=='string')continue;
    const old=merged.get(r.id);
    if(!old || r.sequence>old.sequence)merged.set(r.id,r);
@@ -56,7 +58,7 @@ export async function openDrafts(database){
   // Read active capture memory directly, never the merged recovery view.
   readEvidence(){return [...active.values()].map(s=>({source:'editor-memory',record:clone(s.record),binding:clone(s.binding),durableToken:s.durableToken,parent:clone(s.parent)}));},
   reset(){active.clear();restored.clear();return reload();},
-  compatible(record,binding){return record?.version===1&&typeof record.id==='string'&&record.key==='workout-draft:'+record.id&&typeof record.token==='string'&&Number.isSafeInteger(record.sequence)&&record.sequence>0&&same(record.context,binding.context)&&same(record.baseline,binding.baseline)&&editorValueValid(record.kind,record.value);},
+  compatible(record,binding){return record?.version===1&&typeof record.id==='string'&&record.key==='workout-draft:'+record.id&&typeof record.token==='string'&&Number.isSafeInteger(record.sequence)&&record.sequence>0&&same(record.context,binding.context)&&same(record.baseline,binding.baseline)&&recoverable(record.kind,record.value);},
   take(sessionId,exerciseId){const k=key(sessionId,exerciseId),value=restored.get(k);restored.delete(k);return value&&clone(value);},
   resume(record,binding){
    if(!api.compatible(record,binding))throw Error('Szkic nie odpowiada obecnej sesji lub wynikowi. Pobierz go do odzyskania; nie nadpisano danych.');
@@ -96,7 +98,7 @@ export async function openDrafts(database){
    if(ticket?.parent)await remove(ticket.parent);}catch(e){storageError=e;changed();return;}
    if(state.record?.token===ticket?.record?.token){active.delete(k);restored.delete(k);}changed();
   },
-  async discard(record){await queue;await remove(record);for(const [k,s] of active)if(s.record?.id===record.id||s.parent?.id===record.id){active.delete(k);restored.delete(k);}changed();},
+  async discard(record){await queue;if(!await remove(record))throw Error('Szkic zmienił się w innej karcie. Zachowano nowszą wersję.');for(const [k,s] of active)if(s.record?.id===record.id||s.parent?.id===record.id){active.delete(k);restored.delete(k);}changed();},
   flush(){return queue;}
  };
  await reload();return api;

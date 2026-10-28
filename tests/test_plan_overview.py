@@ -54,7 +54,7 @@ class PlanOverview(BrowserHarness):
         expect(self.page.get_by_text('Data zmieniona',exact=True)).to_be_visible()
         self.page.locator('[data-expand="PULL-A-1"]').click();open_result_panel(self.page)
         f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click()
-        f.locator('[data-rich-action=side-mode][data-row="0"]').click();f.locator('[data-row="0"][data-field=kg]').fill('5');self.save(f)
+        f.locator('[data-row="0"][data-field=kg]').fill('5');self.save(f) # L/P are independent by default
         self.weekly('v2-owner-2026-10-22');self.metric('tonnage','550kg')
         expect(self.page.locator('[data-week="2026-W42"]')).to_contain_text('550')
         self.page.locator('[data-weekly-metric=workouts]').click();expect(self.page.locator('[data-week="2026-W42"]')).to_contain_text('1 treningów')

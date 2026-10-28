@@ -107,7 +107,7 @@ test('side linking is recoverable editor state; old asymmetric results and draft
  const editor=await import('../model/performance-editor.mjs');
  const ex=views(buildPlan('owner'),PLAN_ID,'PULL A',{}).find(e=>e.id==='PULL-A-1');
  editor.editor(ex,'test-side-state',null,null);
- const fresh=editor.state(ex.id,'test-side-state');assert.equal(fresh.sidePairs.length,3);assert.ok(fresh.sidePairs.every(p=>p.linked));
+ const fresh=editor.state(ex.id,'test-side-state');assert.equal(fresh.sidePairs.length,3);assert.ok(fresh.sidePairs.every(p=>!p.linked));
  fresh.sidePairs[1].linked=false;editor.restore(ex.id,'test-side-state',fresh);editor.editor(ex,'test-side-state',null,null);
  assert.deepEqual(editor.state(ex.id,'test-side-state'),fresh,'separate mode persists even with equal or empty values');
  const old=structuredClone(fresh);delete old.sidePairs;old.performance.rows[0].segments[0].kg='40';old.performance.rows[1].segments[0].kg='35';

@@ -91,3 +91,11 @@ export function resultChangeLabel(age){
  const noun=age===1?'sesję':age%10>=2&&age%10<=4&&(age%100<12||age%100>14)?'sesje':'sesji';
  return `Ostatnia zmiana: ${age} ${noun} temu`;
 }
+
+export const sameResult=(a,b)=>canonical(a)===canonical(b);
+/** Display equality ignores identities, preserves every other legacy extension. */
+export function identicalSeries(rows){
+ if(!rows.length)return false;
+ const signature=r=>{const {id,setId,kg,reps,...meaning}=r;return canonical([Number(kg),Number(reps),meaning]);};
+ return rows.every(r=>/^\d+(\.\d+)?$/.test(String(r.kg??''))&&/^[1-9]\d*$/.test(String(r.reps??''))&&Number.isFinite(Number(r.kg))&&signature(r)===signature(rows[0]));
+}

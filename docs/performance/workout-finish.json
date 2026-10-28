@@ -1,0 +1,2650 @@
+{
+  "syntheticOnly": true,
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "cpuThrottle": 4.0,
+  "repeats": 3,
+  "cases": {
+    "small-saved3": {
+      "before": [
+        {
+          "clickToStrictCompleteMs": 116.10000000009313,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 3470.600000000093,
+              "eventTimeStamp": 3470.600000000093,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3390.100000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 3418
+            },
+            {
+              "name": "transaction-open",
+              "at": 3439
+            },
+            {
+              "name": "cas",
+              "at": 3439.7000000001863
+            },
+            {
+              "name": "write-objects",
+              "at": 3455.100000000093
+            },
+            {
+              "name": "write-result-root",
+              "at": 3462.7000000001863
+            },
+            {
+              "name": "readback",
+              "at": 3462.9000000003725
+            },
+            {
+              "name": "strict-complete",
+              "at": 3470.600000000093,
+              "eventTimeStamp": 3470.600000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3470.600000000093
+            }
+          ],
+          "appMarks": [],
+          "panelOpenMs": null,
+          "heapBytes": 35425508,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "active": null,
+            "sessions": 5,
+            "entries": 38,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa"
+        },
+        {
+          "clickToStrictCompleteMs": 132.5,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4077,
+              "eventTimeStamp": 4076.2999999998137,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3980.600000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 4014.100000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 4035.7999999998137
+            },
+            {
+              "name": "cas",
+              "at": 4035.899999999907
+            },
+            {
+              "name": "write-objects",
+              "at": 4060.399999999907
+            },
+            {
+              "name": "write-result-root",
+              "at": 4067
+            },
+            {
+              "name": "readback",
+              "at": 4067.5
+            },
+            {
+              "name": "strict-complete",
+              "at": 4077,
+              "eventTimeStamp": 4076.2999999998137,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4077.100000000093
+            }
+          ],
+          "appMarks": [],
+          "panelOpenMs": null,
+          "heapBytes": 30401271,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "active": null,
+            "sessions": 5,
+            "entries": 38,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa"
+        },
+        {
+          "clickToStrictCompleteMs": 120.5,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 3716.1999999997206,
+              "eventTimeStamp": 3716.1999999997206,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3631
+            },
+            {
+              "name": "index-prepare",
+              "at": 3660.5
+            },
+            {
+              "name": "transaction-open",
+              "at": 3679.7999999998137
+            },
+            {
+              "name": "cas",
+              "at": 3680.0999999996275
+            },
+            {
+              "name": "write-objects",
+              "at": 3697
+            },
+            {
+              "name": "write-result-root",
+              "at": 3705.399999999907
+            },
+            {
+              "name": "readback",
+              "at": 3705.5999999996275
+            },
+            {
+              "name": "strict-complete",
+              "at": 3716.1999999997206,
+              "eventTimeStamp": 3716.1999999997206,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3716.1999999997206
+            }
+          ],
+          "appMarks": [],
+          "panelOpenMs": null,
+          "heapBytes": 61206744,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "active": null,
+            "sessions": 5,
+            "entries": 38,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa"
+        }
+      ],
+      "after": [
+        {
+          "clickToStrictCompleteMs": 111.70000000018626,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 3879,
+              "eventTimeStamp": 3879,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3804.1999999997206
+            },
+            {
+              "name": "index-prepare",
+              "at": 3832.399999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 3849
+            },
+            {
+              "name": "cas",
+              "at": 3849.2999999998137
+            },
+            {
+              "name": "write-objects",
+              "at": 3862.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 3866.399999999907
+            },
+            {
+              "name": "readback",
+              "at": 3867.100000000093
+            },
+            {
+              "name": "strict-complete",
+              "at": 3879,
+              "eventTimeStamp": 3879,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3879
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-start",
+              "at": 3795.399999999907
+            },
+            {
+              "name": "pushpull-finish-drafts-start",
+              "at": 3795.399999999907
+            },
+            {
+              "name": "pushpull-finish-drafts-ready",
+              "at": 3796.7999999998137
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 3804
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 3885.1999999997206
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 3894.100000000093
+            }
+          ],
+          "panelOpenMs": null,
+          "finalDOMReadyAt": 3894.1999999997206,
+          "heapBytes": 32175761,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 5,
+            "entries": 38,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa"
+        },
+        {
+          "clickToStrictCompleteMs": 113.20000000018626,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 3882.2999999998137,
+              "eventTimeStamp": 3882.2999999998137,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3803.7999999998137
+            },
+            {
+              "name": "index-prepare",
+              "at": 3832.0999999996275
+            },
+            {
+              "name": "transaction-open",
+              "at": 3853.0999999996275
+            },
+            {
+              "name": "cas",
+              "at": 3853.0999999996275
+            },
+            {
+              "name": "write-objects",
+              "at": 3868
+            },
+            {
+              "name": "write-result-root",
+              "at": 3874.7999999998137
+            },
+            {
+              "name": "readback",
+              "at": 3875.399999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 3882.2999999998137,
+              "eventTimeStamp": 3882.2999999998137,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3882.2999999998137
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-start",
+              "at": 3796.5999999996275
+            },
+            {
+              "name": "pushpull-finish-drafts-start",
+              "at": 3797.399999999907
+            },
+            {
+              "name": "pushpull-finish-drafts-ready",
+              "at": 3799
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 3802.899999999907
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 3889
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 3899.1999999997206
+            }
+          ],
+          "panelOpenMs": null,
+          "finalDOMReadyAt": 3899.5,
+          "heapBytes": 31860930,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 5,
+            "entries": 38,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa"
+        },
+        {
+          "clickToStrictCompleteMs": 101.79999999981374,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 3473.5,
+              "eventTimeStamp": 3473.5,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3405.399999999907
+            },
+            {
+              "name": "index-prepare",
+              "at": 3430.399999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 3447.7000000001863
+            },
+            {
+              "name": "cas",
+              "at": 3447.8000000002794
+            },
+            {
+              "name": "write-objects",
+              "at": 3459.399999999907
+            },
+            {
+              "name": "write-result-root",
+              "at": 3464
+            },
+            {
+              "name": "readback",
+              "at": 3465
+            },
+            {
+              "name": "strict-complete",
+              "at": 3473.5,
+              "eventTimeStamp": 3473.5,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3473.5
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-start",
+              "at": 3397.5
+            },
+            {
+              "name": "pushpull-finish-drafts-start",
+              "at": 3397.5
+            },
+            {
+              "name": "pushpull-finish-drafts-ready",
+              "at": 3399.7000000001863
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 3405.2000000001863
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 3478.5
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 3486.5
+            }
+          ],
+          "panelOpenMs": null,
+          "finalDOMReadyAt": 3487,
+          "heapBytes": 36199926,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 5,
+            "entries": 38,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa"
+        }
+      ],
+      "beforeStats": {
+        "medianMs": 120.5,
+        "p95Ms": 132.5,
+        "n": 3
+      },
+      "afterStats": {
+        "medianMs": 111.70000000018626,
+        "p95Ms": 113.20000000018626,
+        "n": 3
+      }
+    },
+    "history40-raw4-saved3": {
+      "before": [
+        {
+          "clickToStrictCompleteMs": 131.8000000002794,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 12855.200000000186,
+              "eventTimeStamp": 12855,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 12753.700000000186
+            },
+            {
+              "name": "index-prepare",
+              "at": 12790.700000000186
+            },
+            {
+              "name": "transaction-open",
+              "at": 12815.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 12815.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 12838
+            },
+            {
+              "name": "write-result-root",
+              "at": 12844.30000000028
+            },
+            {
+              "name": "readback",
+              "at": 12845.30000000028
+            },
+            {
+              "name": "strict-complete",
+              "at": 12855.200000000186,
+              "eventTimeStamp": 12855,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 12855.200000000186
+            }
+          ],
+          "appMarks": [],
+          "panelOpenMs": null,
+          "heapBytes": 513889812,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "active": null,
+            "sessions": 41,
+            "entries": 353,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4"
+        },
+        {
+          "clickToStrictCompleteMs": 121.59999999962747,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 13670.299999999814,
+              "eventTimeStamp": 13670.299999999814,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 13582.5
+            },
+            {
+              "name": "index-prepare",
+              "at": 13612
+            },
+            {
+              "name": "transaction-open",
+              "at": 13635.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 13635.700000000186
+            },
+            {
+              "name": "write-objects",
+              "at": 13654.399999999907
+            },
+            {
+              "name": "write-result-root",
+              "at": 13661.299999999814
+            },
+            {
+              "name": "readback",
+              "at": 13661.5
+            },
+            {
+              "name": "strict-complete",
+              "at": 13670.299999999814,
+              "eventTimeStamp": 13670.299999999814,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 13670.299999999814
+            }
+          ],
+          "appMarks": [],
+          "panelOpenMs": null,
+          "heapBytes": 543707025,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "active": null,
+            "sessions": 41,
+            "entries": 353,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4"
+        },
+        {
+          "clickToStrictCompleteMs": 148.20000000018626,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 13840.100000000093,
+              "eventTimeStamp": 13840.100000000093,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 13731.5
+            },
+            {
+              "name": "index-prepare",
+              "at": 13774.19999999972
+            },
+            {
+              "name": "transaction-open",
+              "at": 13802.5
+            },
+            {
+              "name": "cas",
+              "at": 13802.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 13820.899999999907
+            },
+            {
+              "name": "write-result-root",
+              "at": 13827.69999999972
+            },
+            {
+              "name": "readback",
+              "at": 13828
+            },
+            {
+              "name": "strict-complete",
+              "at": 13840.100000000093,
+              "eventTimeStamp": 13840.100000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 13840.100000000093
+            }
+          ],
+          "appMarks": [],
+          "panelOpenMs": null,
+          "heapBytes": 563065025,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "active": null,
+            "sessions": 41,
+            "entries": 353,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4"
+        }
+      ],
+      "after": [
+        {
+          "clickToStrictCompleteMs": 135.8000000002794,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 13368.899999999907,
+              "eventTimeStamp": 13368.899999999907,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 13276.899999999907
+            },
+            {
+              "name": "index-prepare",
+              "at": 13312.899999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 13337.099999999627
+            },
+            {
+              "name": "cas",
+              "at": 13337.5
+            },
+            {
+              "name": "write-objects",
+              "at": 13354.799999999814
+            },
+            {
+              "name": "write-result-root",
+              "at": 13360.899999999907
+            },
+            {
+              "name": "readback",
+              "at": 13360.899999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 13368.899999999907,
+              "eventTimeStamp": 13368.899999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 13368.899999999907
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-start",
+              "at": 13262.599999999627
+            },
+            {
+              "name": "pushpull-finish-drafts-start",
+              "at": 13262.599999999627
+            },
+            {
+              "name": "pushpull-finish-drafts-ready",
+              "at": 13265.399999999907
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 13276
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 13373.899999999907
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 13382.19999999972
+            }
+          ],
+          "panelOpenMs": null,
+          "finalDOMReadyAt": 13382.299999999814,
+          "heapBytes": 520188435,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 41,
+            "entries": 353,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4"
+        },
+        {
+          "clickToStrictCompleteMs": 149.3000000002794,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 14059.700000000186,
+              "eventTimeStamp": 14059.700000000186,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 13947.600000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 13998.600000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 14029.200000000186
+            },
+            {
+              "name": "cas",
+              "at": 14029.299999999814
+            },
+            {
+              "name": "write-objects",
+              "at": 14044.799999999814
+            },
+            {
+              "name": "write-result-root",
+              "at": 14051.100000000093
+            },
+            {
+              "name": "readback",
+              "at": 14051.700000000186
+            },
+            {
+              "name": "strict-complete",
+              "at": 14059.700000000186,
+              "eventTimeStamp": 14059.700000000186,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 14059.700000000186
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-start",
+              "at": 13936.600000000093
+            },
+            {
+              "name": "pushpull-finish-drafts-start",
+              "at": 13937
+            },
+            {
+              "name": "pushpull-finish-drafts-ready",
+              "at": 13939.399999999907
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 13946.299999999814
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 14065.100000000093
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 14072.799999999814
+            }
+          ],
+          "panelOpenMs": null,
+          "finalDOMReadyAt": 14073,
+          "heapBytes": 520413562,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 41,
+            "entries": 353,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4"
+        },
+        {
+          "clickToStrictCompleteMs": 136.20000000018626,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 13510.200000000186,
+              "eventTimeStamp": 13510.200000000186,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 13415.80000000028
+            },
+            {
+              "name": "index-prepare",
+              "at": 13445.100000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 13469.30000000028
+            },
+            {
+              "name": "cas",
+              "at": 13469.399999999907
+            },
+            {
+              "name": "write-objects",
+              "at": 13492.80000000028
+            },
+            {
+              "name": "write-result-root",
+              "at": 13499.5
+            },
+            {
+              "name": "readback",
+              "at": 13499.5
+            },
+            {
+              "name": "strict-complete",
+              "at": 13510.200000000186,
+              "eventTimeStamp": 13510.200000000186,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 13510.200000000186
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-start",
+              "at": 13400.600000000093
+            },
+            {
+              "name": "pushpull-finish-drafts-start",
+              "at": 13400.600000000093
+            },
+            {
+              "name": "pushpull-finish-drafts-ready",
+              "at": 13402.600000000093
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 13414.899999999907
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 13512.200000000186
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 13522.600000000093
+            }
+          ],
+          "panelOpenMs": null,
+          "finalDOMReadyAt": 13522.600000000093,
+          "heapBytes": 519959982,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 41,
+            "entries": 353,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4"
+        }
+      ],
+      "beforeStats": {
+        "medianMs": 131.8000000002794,
+        "p95Ms": 148.20000000018626,
+        "n": 3
+      },
+      "afterStats": {
+        "medianMs": 136.20000000018626,
+        "p95Ms": 149.3000000002794,
+        "n": 3
+      }
+    },
+    "small-drafts3": {
+      "after": [
+        {
+          "clickToStrictCompleteMs": 415.89999999990687,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 3635,
+              "eventTimeStamp": 3635,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 3707,
+              "eventTimeStamp": 3707,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 3788.8000000002794,
+              "eventTimeStamp": 3788.8000000002794,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 3863.8000000002794,
+              "eventTimeStamp": 3863.8000000002794,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3489.2000000001863
+            },
+            {
+              "name": "index-prepare",
+              "at": 3568.3000000002794
+            },
+            {
+              "name": "transaction-open",
+              "at": 3598.5
+            },
+            {
+              "name": "cas",
+              "at": 3598.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 3618.4000000003725
+            },
+            {
+              "name": "write-result-root",
+              "at": 3625.600000000093
+            },
+            {
+              "name": "readback",
+              "at": 3625.600000000093
+            },
+            {
+              "name": "strict-complete",
+              "at": 3635,
+              "eventTimeStamp": 3635,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3635
+            },
+            {
+              "name": "detach-validate",
+              "at": 3636.2000000001863
+            },
+            {
+              "name": "index-prepare",
+              "at": 3651.7000000001863
+            },
+            {
+              "name": "transaction-open",
+              "at": 3673
+            },
+            {
+              "name": "cas",
+              "at": 3673.100000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 3692.4000000003725
+            },
+            {
+              "name": "write-result-root",
+              "at": 3698.600000000093
+            },
+            {
+              "name": "readback",
+              "at": 3698.7000000001863
+            },
+            {
+              "name": "strict-complete",
+              "at": 3707,
+              "eventTimeStamp": 3707,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3707.100000000093
+            },
+            {
+              "name": "detach-validate",
+              "at": 3708.5
+            },
+            {
+              "name": "index-prepare",
+              "at": 3734.9000000003725
+            },
+            {
+              "name": "transaction-open",
+              "at": 3753.9000000003725
+            },
+            {
+              "name": "cas",
+              "at": 3754.4000000003725
+            },
+            {
+              "name": "write-objects",
+              "at": 3773
+            },
+            {
+              "name": "write-result-root",
+              "at": 3780.2000000001863
+            },
+            {
+              "name": "readback",
+              "at": 3780.3000000002794
+            },
+            {
+              "name": "strict-complete",
+              "at": 3788.8000000002794,
+              "eventTimeStamp": 3788.8000000002794,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3788.8000000002794
+            },
+            {
+              "name": "detach-validate",
+              "at": 3793.8000000002794
+            },
+            {
+              "name": "index-prepare",
+              "at": 3813.7000000001863
+            },
+            {
+              "name": "transaction-open",
+              "at": 3835.100000000093
+            },
+            {
+              "name": "cas",
+              "at": 3835.100000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 3849
+            },
+            {
+              "name": "write-result-root",
+              "at": 3855.2000000001863
+            },
+            {
+              "name": "readback",
+              "at": 3855.4000000003725
+            },
+            {
+              "name": "strict-complete",
+              "at": 3863.8000000002794,
+              "eventTimeStamp": 3863.8000000002794,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3863.8000000002794
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 3910.600000000093,
+              "eventTimeStamp": 3909.5,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 3912.7000000001863,
+              "eventTimeStamp": 3911.5,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 3922.2000000001863,
+              "eventTimeStamp": 3913.9000000003725,
+              "durability": "strict"
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-validation-start",
+              "at": 3478.8000000002794
+            },
+            {
+              "name": "pushpull-finish-validation-end",
+              "at": 3485.4000000003725
+            },
+            {
+              "name": "pushpull-finish-results-start",
+              "at": 3485.4000000003725
+            },
+            {
+              "name": "pushpull-finish-results-durable",
+              "at": 3789.600000000093
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 3793.7000000001863
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 3869.9000000003725
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 3883.5
+            }
+          ],
+          "panelOpenMs": 63,
+          "finalDOMReadyAt": 3922.2000000001863,
+          "heapBytes": 32133898,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 5,
+            "entries": 38,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa"
+        },
+        {
+          "clickToStrictCompleteMs": 490.09999999962747,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 3678.3000000002794,
+              "eventTimeStamp": 3678.3000000002794,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 3777.8000000002794,
+              "eventTimeStamp": 3777.8000000002794,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 3866.899999999907,
+              "eventTimeStamp": 3866.899999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 3969.399999999907,
+              "eventTimeStamp": 3969.3000000002794,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3520.7000000001863
+            },
+            {
+              "name": "index-prepare",
+              "at": 3597.3000000002794
+            },
+            {
+              "name": "transaction-open",
+              "at": 3636
+            },
+            {
+              "name": "cas",
+              "at": 3636.100000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 3659.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 3668.399999999907
+            },
+            {
+              "name": "readback",
+              "at": 3668.899999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 3678.3000000002794,
+              "eventTimeStamp": 3678.3000000002794,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3678.3000000002794
+            },
+            {
+              "name": "detach-validate",
+              "at": 3680.2000000001863
+            },
+            {
+              "name": "index-prepare",
+              "at": 3703.8000000002794
+            },
+            {
+              "name": "transaction-open",
+              "at": 3738
+            },
+            {
+              "name": "cas",
+              "at": 3738.8000000002794
+            },
+            {
+              "name": "write-objects",
+              "at": 3760
+            },
+            {
+              "name": "write-result-root",
+              "at": 3766.2000000001863
+            },
+            {
+              "name": "readback",
+              "at": 3766.2000000001863
+            },
+            {
+              "name": "strict-complete",
+              "at": 3777.8000000002794,
+              "eventTimeStamp": 3777.8000000002794,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3777.8000000002794
+            },
+            {
+              "name": "detach-validate",
+              "at": 3779.600000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 3803.2000000001863
+            },
+            {
+              "name": "transaction-open",
+              "at": 3824.7000000001863
+            },
+            {
+              "name": "cas",
+              "at": 3824.8000000002794
+            },
+            {
+              "name": "write-objects",
+              "at": 3849.8000000002794
+            },
+            {
+              "name": "write-result-root",
+              "at": 3856.399999999907
+            },
+            {
+              "name": "readback",
+              "at": 3858.2000000001863
+            },
+            {
+              "name": "strict-complete",
+              "at": 3866.899999999907,
+              "eventTimeStamp": 3866.899999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3866.899999999907
+            },
+            {
+              "name": "detach-validate",
+              "at": 3875.8000000002794
+            },
+            {
+              "name": "index-prepare",
+              "at": 3909.8000000002794
+            },
+            {
+              "name": "transaction-open",
+              "at": 3933.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 3933.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 3952
+            },
+            {
+              "name": "write-result-root",
+              "at": 3959.7000000001863
+            },
+            {
+              "name": "readback",
+              "at": 3960.399999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 3969.399999999907,
+              "eventTimeStamp": 3969.3000000002794,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3969.399999999907
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 4020.3000000002794,
+              "eventTimeStamp": 4019.2000000001863,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 4022.7000000001863,
+              "eventTimeStamp": 4022.600000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 4030.7000000001863,
+              "eventTimeStamp": 4024.7000000001863,
+              "durability": "strict"
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-validation-start",
+              "at": 3510.7000000001863
+            },
+            {
+              "name": "pushpull-finish-validation-end",
+              "at": 3518.8000000002794
+            },
+            {
+              "name": "pushpull-finish-results-start",
+              "at": 3518.8000000002794
+            },
+            {
+              "name": "pushpull-finish-results-durable",
+              "at": 3868.100000000093
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 3874.5
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 3975.8000000002794
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 3988.5
+            }
+          ],
+          "panelOpenMs": 57.39999999990687,
+          "finalDOMReadyAt": 4030.600000000093,
+          "heapBytes": 32117372,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 5,
+            "entries": 38,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa"
+        },
+        {
+          "clickToStrictCompleteMs": 356.1999999997206,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 3641.899999999907,
+              "eventTimeStamp": 3641.899999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 3704.1999999997206,
+              "eventTimeStamp": 3704.1999999997206,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 3769.1999999997206,
+              "eventTimeStamp": 3769.1999999997206,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 3842.1999999997206,
+              "eventTimeStamp": 3842.1999999997206,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3522.2999999998137
+            },
+            {
+              "name": "index-prepare",
+              "at": 3585.5
+            },
+            {
+              "name": "transaction-open",
+              "at": 3613.5999999996275
+            },
+            {
+              "name": "cas",
+              "at": 3613.899999999907
+            },
+            {
+              "name": "write-objects",
+              "at": 3629.7999999998137
+            },
+            {
+              "name": "write-result-root",
+              "at": 3635.6999999997206
+            },
+            {
+              "name": "readback",
+              "at": 3636
+            },
+            {
+              "name": "strict-complete",
+              "at": 3641.899999999907,
+              "eventTimeStamp": 3641.899999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3641.899999999907
+            },
+            {
+              "name": "detach-validate",
+              "at": 3642.6999999997206
+            },
+            {
+              "name": "index-prepare",
+              "at": 3658.1999999997206
+            },
+            {
+              "name": "transaction-open",
+              "at": 3679.1999999997206
+            },
+            {
+              "name": "cas",
+              "at": 3679.1999999997206
+            },
+            {
+              "name": "write-objects",
+              "at": 3693.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 3698.5999999996275
+            },
+            {
+              "name": "readback",
+              "at": 3698.6999999997206
+            },
+            {
+              "name": "strict-complete",
+              "at": 3704.1999999997206,
+              "eventTimeStamp": 3704.1999999997206,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3704.1999999997206
+            },
+            {
+              "name": "detach-validate",
+              "at": 3706
+            },
+            {
+              "name": "index-prepare",
+              "at": 3725.6999999997206
+            },
+            {
+              "name": "transaction-open",
+              "at": 3742.0999999996275
+            },
+            {
+              "name": "cas",
+              "at": 3742.1999999997206
+            },
+            {
+              "name": "write-objects",
+              "at": 3758.0999999996275
+            },
+            {
+              "name": "write-result-root",
+              "at": 3763.5999999996275
+            },
+            {
+              "name": "readback",
+              "at": 3763.6999999997206
+            },
+            {
+              "name": "strict-complete",
+              "at": 3769.1999999997206,
+              "eventTimeStamp": 3769.1999999997206,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3769.1999999997206
+            },
+            {
+              "name": "detach-validate",
+              "at": 3776
+            },
+            {
+              "name": "index-prepare",
+              "at": 3800.7999999998137
+            },
+            {
+              "name": "transaction-open",
+              "at": 3820.1999999997206
+            },
+            {
+              "name": "cas",
+              "at": 3820.1999999997206
+            },
+            {
+              "name": "write-objects",
+              "at": 3832
+            },
+            {
+              "name": "write-result-root",
+              "at": 3836.2999999998137
+            },
+            {
+              "name": "readback",
+              "at": 3836.399999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 3842.1999999997206,
+              "eventTimeStamp": 3842.1999999997206,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3842.1999999997206
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 3884.2999999998137,
+              "eventTimeStamp": 3883.399999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 3885.6999999997206,
+              "eventTimeStamp": 3885.1999999997206,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 3895.7999999998137,
+              "eventTimeStamp": 3887.0999999996275,
+              "durability": "strict"
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-validation-start",
+              "at": 3513.2999999998137
+            },
+            {
+              "name": "pushpull-finish-validation-end",
+              "at": 3520.5999999996275
+            },
+            {
+              "name": "pushpull-finish-results-start",
+              "at": 3520.5999999996275
+            },
+            {
+              "name": "pushpull-finish-results-durable",
+              "at": 3770.0999999996275
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 3774.899999999907
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 3847.7999999998137
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 3860
+            }
+          ],
+          "panelOpenMs": 56,
+          "finalDOMReadyAt": 3894.899999999907,
+          "heapBytes": 32372293,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 5,
+            "entries": 38,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa"
+        }
+      ],
+      "afterStats": {
+        "medianMs": 415.89999999990687,
+        "p95Ms": 490.09999999962747,
+        "n": 3
+      }
+    },
+    "history40-raw4-drafts3": {
+      "after": [
+        {
+          "clickToStrictCompleteMs": 480.59999999962747,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 12599.799999999814,
+              "eventTimeStamp": 12599.799999999814,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 12678,
+              "eventTimeStamp": 12678,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 12782.899999999907,
+              "eventTimeStamp": 12782.899999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 12869.799999999814,
+              "eventTimeStamp": 12869.799999999814,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 12429.799999999814
+            },
+            {
+              "name": "index-prepare",
+              "at": 12516.399999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 12562.899999999907
+            },
+            {
+              "name": "cas",
+              "at": 12563.399999999907
+            },
+            {
+              "name": "write-objects",
+              "at": 12584
+            },
+            {
+              "name": "write-result-root",
+              "at": 12591.5
+            },
+            {
+              "name": "readback",
+              "at": 12591.5
+            },
+            {
+              "name": "strict-complete",
+              "at": 12599.799999999814,
+              "eventTimeStamp": 12599.799999999814,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 12599.799999999814
+            },
+            {
+              "name": "detach-validate",
+              "at": 12601.5
+            },
+            {
+              "name": "index-prepare",
+              "at": 12624.100000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 12648.100000000093
+            },
+            {
+              "name": "cas",
+              "at": 12648.100000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 12665.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 12670.899999999907
+            },
+            {
+              "name": "readback",
+              "at": 12670.899999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 12678,
+              "eventTimeStamp": 12678,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 12678
+            },
+            {
+              "name": "detach-validate",
+              "at": 12678.799999999814
+            },
+            {
+              "name": "index-prepare",
+              "at": 12711.600000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 12746.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 12746.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 12767.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 12773.700000000186
+            },
+            {
+              "name": "readback",
+              "at": 12773.700000000186
+            },
+            {
+              "name": "strict-complete",
+              "at": 12782.899999999907,
+              "eventTimeStamp": 12782.899999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 12782.899999999907
+            },
+            {
+              "name": "detach-validate",
+              "at": 12789.799999999814
+            },
+            {
+              "name": "index-prepare",
+              "at": 12820.600000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 12841
+            },
+            {
+              "name": "cas",
+              "at": 12841.100000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 12856.700000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 12862.5
+            },
+            {
+              "name": "readback",
+              "at": 12862.600000000093
+            },
+            {
+              "name": "strict-complete",
+              "at": 12869.799999999814,
+              "eventTimeStamp": 12869.799999999814,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 12869.799999999814
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 12913.299999999814,
+              "eventTimeStamp": 12912.200000000186,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 12915.5,
+              "eventTimeStamp": 12915.100000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 12924,
+              "eventTimeStamp": 12916.899999999907,
+              "durability": "strict"
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-validation-start",
+              "at": 12421.399999999907
+            },
+            {
+              "name": "pushpull-finish-validation-end",
+              "at": 12426.799999999814
+            },
+            {
+              "name": "pushpull-finish-results-start",
+              "at": 12426.799999999814
+            },
+            {
+              "name": "pushpull-finish-results-durable",
+              "at": 12784
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 12788.899999999907
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 12875.100000000093
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 12885.700000000186
+            }
+          ],
+          "panelOpenMs": 62.6999999997206,
+          "finalDOMReadyAt": 12923.700000000186,
+          "heapBytes": 519938039,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 41,
+            "entries": 353,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4"
+        },
+        {
+          "clickToStrictCompleteMs": 571.0999999996275,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 13124.400000000373,
+              "eventTimeStamp": 13124.400000000373,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 13230.600000000093,
+              "eventTimeStamp": 13230.600000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 13350.600000000093,
+              "eventTimeStamp": 13350.5,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 13458,
+              "eventTimeStamp": 13458,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 12929.30000000028
+            },
+            {
+              "name": "index-prepare",
+              "at": 13036.80000000028
+            },
+            {
+              "name": "transaction-open",
+              "at": 13085.700000000186
+            },
+            {
+              "name": "cas",
+              "at": 13085.80000000028
+            },
+            {
+              "name": "write-objects",
+              "at": 13104
+            },
+            {
+              "name": "write-result-root",
+              "at": 13113.600000000093
+            },
+            {
+              "name": "readback",
+              "at": 13114.5
+            },
+            {
+              "name": "strict-complete",
+              "at": 13124.400000000373,
+              "eventTimeStamp": 13124.400000000373,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 13124.400000000373
+            },
+            {
+              "name": "detach-validate",
+              "at": 13125.900000000373
+            },
+            {
+              "name": "index-prepare",
+              "at": 13158.100000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 13188.30000000028
+            },
+            {
+              "name": "cas",
+              "at": 13188.900000000373
+            },
+            {
+              "name": "write-objects",
+              "at": 13213.80000000028
+            },
+            {
+              "name": "write-result-root",
+              "at": 13221.900000000373
+            },
+            {
+              "name": "readback",
+              "at": 13221.900000000373
+            },
+            {
+              "name": "strict-complete",
+              "at": 13230.600000000093,
+              "eventTimeStamp": 13230.600000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 13230.600000000093
+            },
+            {
+              "name": "detach-validate",
+              "at": 13231.5
+            },
+            {
+              "name": "index-prepare",
+              "at": 13274.100000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 13305.5
+            },
+            {
+              "name": "cas",
+              "at": 13305.80000000028
+            },
+            {
+              "name": "write-objects",
+              "at": 13331.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 13340.100000000093
+            },
+            {
+              "name": "readback",
+              "at": 13340.200000000186
+            },
+            {
+              "name": "strict-complete",
+              "at": 13350.600000000093,
+              "eventTimeStamp": 13350.5,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 13350.600000000093
+            },
+            {
+              "name": "detach-validate",
+              "at": 13358.80000000028
+            },
+            {
+              "name": "index-prepare",
+              "at": 13394.80000000028
+            },
+            {
+              "name": "transaction-open",
+              "at": 13420.700000000186
+            },
+            {
+              "name": "cas",
+              "at": 13420.700000000186
+            },
+            {
+              "name": "write-objects",
+              "at": 13441.200000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 13448.200000000186
+            },
+            {
+              "name": "readback",
+              "at": 13448.30000000028
+            },
+            {
+              "name": "strict-complete",
+              "at": 13458,
+              "eventTimeStamp": 13458,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 13458
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 13505.600000000093,
+              "eventTimeStamp": 13503.900000000373,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 13507.700000000186,
+              "eventTimeStamp": 13506.400000000373,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 13518.600000000093,
+              "eventTimeStamp": 13509.80000000028,
+              "durability": "strict"
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-validation-start",
+              "at": 12919.5
+            },
+            {
+              "name": "pushpull-finish-validation-end",
+              "at": 12927.900000000373
+            },
+            {
+              "name": "pushpull-finish-results-start",
+              "at": 12928
+            },
+            {
+              "name": "pushpull-finish-results-durable",
+              "at": 13351.5
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 13357.80000000028
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 13463.600000000093
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 13476.100000000093
+            }
+          ],
+          "panelOpenMs": 53.5,
+          "finalDOMReadyAt": 13517.5,
+          "heapBytes": 519988792,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 41,
+            "entries": 353,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4"
+        },
+        {
+          "clickToStrictCompleteMs": 529.6000000000931,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 12791.399999999907,
+              "eventTimeStamp": 12791.30000000028,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 12886.100000000093,
+              "eventTimeStamp": 12886.100000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 12993.80000000028,
+              "eventTimeStamp": 12993.80000000028,
+              "durability": "strict"
+            },
+            {
+              "name": "strict-complete",
+              "at": 13086.80000000028,
+              "eventTimeStamp": 13086.80000000028,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 12598.80000000028
+            },
+            {
+              "name": "index-prepare",
+              "at": 12702.5
+            },
+            {
+              "name": "transaction-open",
+              "at": 12749.399999999907
+            },
+            {
+              "name": "cas",
+              "at": 12750.30000000028
+            },
+            {
+              "name": "write-objects",
+              "at": 12773.700000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 12781.899999999907
+            },
+            {
+              "name": "readback",
+              "at": 12782.200000000186
+            },
+            {
+              "name": "strict-complete",
+              "at": 12791.399999999907,
+              "eventTimeStamp": 12791.30000000028,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 12791.399999999907
+            },
+            {
+              "name": "detach-validate",
+              "at": 12792.899999999907
+            },
+            {
+              "name": "index-prepare",
+              "at": 12821
+            },
+            {
+              "name": "transaction-open",
+              "at": 12846.700000000186
+            },
+            {
+              "name": "cas",
+              "at": 12847.30000000028
+            },
+            {
+              "name": "write-objects",
+              "at": 12870
+            },
+            {
+              "name": "write-result-root",
+              "at": 12876.80000000028
+            },
+            {
+              "name": "readback",
+              "at": 12876.80000000028
+            },
+            {
+              "name": "strict-complete",
+              "at": 12886.100000000093,
+              "eventTimeStamp": 12886.100000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 12886.100000000093
+            },
+            {
+              "name": "detach-validate",
+              "at": 12887.30000000028
+            },
+            {
+              "name": "index-prepare",
+              "at": 12929.399999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 12957.100000000093
+            },
+            {
+              "name": "cas",
+              "at": 12957.200000000186
+            },
+            {
+              "name": "write-objects",
+              "at": 12976.700000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 12984.80000000028
+            },
+            {
+              "name": "readback",
+              "at": 12985
+            },
+            {
+              "name": "strict-complete",
+              "at": 12993.80000000028,
+              "eventTimeStamp": 12993.80000000028,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 12993.80000000028
+            },
+            {
+              "name": "detach-validate",
+              "at": 13000.80000000028
+            },
+            {
+              "name": "index-prepare",
+              "at": 13033
+            },
+            {
+              "name": "transaction-open",
+              "at": 13056.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 13056.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 13072.899999999907
+            },
+            {
+              "name": "write-result-root",
+              "at": 13078.100000000093
+            },
+            {
+              "name": "readback",
+              "at": 13079
+            },
+            {
+              "name": "strict-complete",
+              "at": 13086.80000000028,
+              "eventTimeStamp": 13086.80000000028,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 13086.80000000028
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 13130.80000000028,
+              "eventTimeStamp": 13130,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 13132.600000000093,
+              "eventTimeStamp": 13132,
+              "durability": "strict"
+            },
+            {
+              "name": "draft-cleanup-complete",
+              "at": 13142.700000000186,
+              "eventTimeStamp": 13134.600000000093,
+              "durability": "strict"
+            }
+          ],
+          "appMarks": [
+            {
+              "name": "pushpull-finish-validation-start",
+              "at": 12589.399999999907
+            },
+            {
+              "name": "pushpull-finish-validation-end",
+              "at": 12596.700000000186
+            },
+            {
+              "name": "pushpull-finish-results-start",
+              "at": 12596.80000000028
+            },
+            {
+              "name": "pushpull-finish-results-durable",
+              "at": 12995.100000000093
+            },
+            {
+              "name": "pushpull-finish-session-start",
+              "at": 12999.899999999907
+            },
+            {
+              "name": "pushpull-finish-session-durable",
+              "at": 13092.200000000186
+            },
+            {
+              "name": "pushpull-finish-ui-ready",
+              "at": 13104.200000000186
+            }
+          ],
+          "panelOpenMs": 54.799999999813735,
+          "finalDOMReadyAt": 13142.30000000028,
+          "heapBytes": 519513737,
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": null,
+            "sessions": 41,
+            "entries": 353,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4"
+        }
+      ],
+      "afterStats": {
+        "medianMs": 529.6000000000931,
+        "p95Ms": 571.0999999996275,
+        "n": 3
+      }
+    }
+  },
+  "before": {
+    "ref": "de84e6361ad18baeb17a1b51c7fae88b92fd7390",
+    "runtimeSHA256": {
+      "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+      "style.css": "f0f0fc5f96b9c48cb9648921669b6ea01176d83ac5ca49ffd1588bd15912da77",
+      "app.js": "cdc5a5f3bfe41ed09a4a704c9e9a248f4ee01d700ca62e203bfae20997668af3",
+      "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+      "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+      "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+      "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+      "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+      "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+      "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+      "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+      "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+      "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+      "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+      "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+      "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+      "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+      "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+      "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+      "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+      "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+      "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+      "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+      "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+      "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+      "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+      "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+      "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+      "model/v2-plan.mjs": "5616c979c935387e2c5cc8ecdb7c1a1e3aa5f0b66d37112a7e47b62b4fca26d0",
+      "model/performance.mjs": "fbccd5556e0e1c2e6bbab86ba6aee7aa04ce049fa3a23c7309436f86cec74073",
+      "model/performance-editor.mjs": "de54e5ead918efb62e36515867d7a689dab29b1575e035b3d95c5f5b3ea924b4",
+      "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+      "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+      "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+      "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+      "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+      "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+      "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+    },
+    "instrumentedRelease": {
+      "format": "pushpull-static-release",
+      "version": 1,
+      "release": "1474b7398ea0dc2dca557e4b",
+      "files": {
+        "app.js": "cdc5a5f3bfe41ed09a4a704c9e9a248f4ee01d700ca62e203bfae20997668af3",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+        "model/journal-idb.mjs": "5cff44a56ad629c2d0641d61dbcd3fb17da12a48fc8db1c3ef155a076738c556",
+        "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+        "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+        "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+        "model/journal-runtime.mjs": "8c14cbc70a677bb3f60f4a861e72f83675eaf1074f7fea9aa861df5ac893e4f8",
+        "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+        "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+        "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+        "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+        "model/performance-editor.mjs": "de54e5ead918efb62e36515867d7a689dab29b1575e035b3d95c5f5b3ea924b4",
+        "model/performance.mjs": "fbccd5556e0e1c2e6bbab86ba6aee7aa04ce049fa3a23c7309436f86cec74073",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5616c979c935387e2c5cc8ecdb7c1a1e3aa5f0b66d37112a7e47b62b4fca26d0",
+        "model/workout-drafts.mjs": "f9662f7819775db73924feb481718c0e12374360f38da79eb9d717e425045935",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "style.css": "f0f0fc5f96b9c48cb9648921669b6ea01176d83ac5ca49ffd1588bd15912da77",
+        "sw.js": "881b7d9f7cd4d367c200d3f03fa19b3218914b445d297dd01b696fd3ba04d959"
+      }
+    }
+  },
+  "reusedBeforeReport": "/workspace/finish-measurements/report.json",
+  "after": {
+    "ref": "working",
+    "runtimeSHA256": {
+      "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+      "style.css": "f0f0fc5f96b9c48cb9648921669b6ea01176d83ac5ca49ffd1588bd15912da77",
+      "app.js": "707b7dc3cd21b60d8d5fb69d0540abb7ab91426c78bbdb271aaa2a09151b8f10",
+      "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+      "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+      "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+      "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+      "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+      "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+      "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+      "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+      "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+      "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+      "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+      "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+      "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+      "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+      "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+      "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+      "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+      "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+      "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+      "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+      "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+      "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+      "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+      "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+      "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+      "model/v2-plan.mjs": "5616c979c935387e2c5cc8ecdb7c1a1e3aa5f0b66d37112a7e47b62b4fca26d0",
+      "model/performance.mjs": "342f676d70386f0064f737c8d1bfae0942c773ef3e3481ef4e15dd4e11956834",
+      "model/performance-editor.mjs": "c4da3e1f51aac23f8e3c70a777b061b39d752a44516e0f36d9c68d63115055c6",
+      "model/workout-drafts.mjs": "7273b74d630bad99c1ce649da8c5acfb8fe7b79efcf137b9ffe33a48928f1a61",
+      "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+      "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+      "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+      "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+      "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+      "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+    },
+    "instrumentedRelease": {
+      "format": "pushpull-static-release",
+      "version": 1,
+      "release": "82ea5b2e90b251108e5bbfd3",
+      "files": {
+        "app.js": "707b7dc3cd21b60d8d5fb69d0540abb7ab91426c78bbdb271aaa2a09151b8f10",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+        "model/journal-idb.mjs": "5cff44a56ad629c2d0641d61dbcd3fb17da12a48fc8db1c3ef155a076738c556",
+        "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+        "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+        "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+        "model/journal-runtime.mjs": "8c14cbc70a677bb3f60f4a861e72f83675eaf1074f7fea9aa861df5ac893e4f8",
+        "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+        "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+        "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+        "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+        "model/performance-editor.mjs": "c4da3e1f51aac23f8e3c70a777b061b39d752a44516e0f36d9c68d63115055c6",
+        "model/performance.mjs": "342f676d70386f0064f737c8d1bfae0942c773ef3e3481ef4e15dd4e11956834",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5616c979c935387e2c5cc8ecdb7c1a1e3aa5f0b66d37112a7e47b62b4fca26d0",
+        "model/workout-drafts.mjs": "7273b74d630bad99c1ce649da8c5acfb8fe7b79efcf137b9ffe33a48928f1a61",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "style.css": "f0f0fc5f96b9c48cb9648921669b6ea01176d83ac5ca49ffd1588bd15912da77",
+        "sw.js": "3880d231677a54f179a77bfb4f140dee672b10ec414342144d47993c29c5098d"
+      }
+    },
+    "subsequentUnmeasuredEdit": {
+      "scope": "Discard-confirmation wording and removal of redundant initial L/P quick-input prompt. Neither measured finish nor the bilateral quick-input preparation is changed.",
+      "assets": {
+        "app.js": {
+          "measuredSHA256": "707b7dc3cd21b60d8d5fb69d0540abb7ab91426c78bbdb271aaa2a09151b8f10",
+          "reviewSHA256": "6aafc643ac2a51b14104632fb8db36c76b5617e4a49b2c6f0d5c14e0fb5dcf60"
+        },
+        "model/performance-editor.mjs": {
+          "measuredSHA256": "c4da3e1f51aac23f8e3c70a777b061b39d752a44516e0f36d9c68d63115055c6",
+          "reviewSHA256": "38da35cf4b420eece3ffd6d885dec3666f6f42a903a0ee72a8134ed1636b1ff7"
+        }
+      }
+    }
+  }
+}

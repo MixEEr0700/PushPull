@@ -64,7 +64,7 @@ class Compact95(BrowserHarness):
             self.assertGreaterEqual(card.locator('.num').evaluate('(e)=>parseFloat(getComputedStyle(e).fontSize)'),20)
             card.locator('[data-expand]').click();f=self.form()
             expect(card.locator('.panel h3')).to_have_count(0)
-            open_notes(card);expect(card.locator('.exercise-notes h3')).to_have_text('Notatki')
+            open_notes(card);expect(card.locator('.exercise-notes h3')).to_have_count(0)
             expect(card.locator('[data-instructions]')).to_have_count(0)
             expect(card.locator('.exercise-notes')).not_to_contain_text('Instrukcja trenera Ł 😀')
             expect(card.locator('[data-instructions]').locator('textarea,input,[contenteditable]')).to_have_count(0)

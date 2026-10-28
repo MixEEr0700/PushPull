@@ -76,7 +76,6 @@ class WorkoutDrafts(BrowserHarness):
         self.save_form(form);self.page.locator('[data-act=finish]').click()
         form=self.open_result('PULL A','PULL-A-1')
         form.locator('[data-quick=kg]').fill('40');form.locator('[data-quick=reps]').fill('9')
-        form.locator('[data-rich-action=side-mode][data-row="0"]').click()
         form.locator('[data-row="1"][data-field=kg]').fill('35');self.persisted(form)
         sides=self.drafts()[0]
         self.page.reload();self.ready();form=self.resume('PULL-A-1')
