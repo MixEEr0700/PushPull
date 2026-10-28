@@ -1,5 +1,5 @@
 """Unified plans + real local workouts; all plans/data synthetic, Google simulated."""
-from test_browser import confirm_restore
+from test_browser import confirm_restore,open_result_panel
 from pathlib import Path
 import json
 from playwright.sync_api import expect
@@ -52,7 +52,7 @@ class PlanOverview(BrowserHarness):
         self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click()
         self.page.locator('#historicalDate [name=date]').fill('2026-10-12');self.page.locator('#historicalDate button').click()
         expect(self.page.get_by_text('Data zmieniona',exact=True)).to_be_visible()
-        self.page.locator('[data-expand="PULL-A-1"]').click();self.page.locator('[data-panel=historicalResult]').click()
+        self.page.locator('[data-expand="PULL-A-1"]').click();open_result_panel(self.page)
         f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click()
         f.locator('[data-rich-action=side-mode][data-row="0"]').click();f.locator('[data-row="0"][data-field=kg]').fill('5');self.save(f)
         self.weekly('v2-owner-2026-10-22');self.metric('tonnage','550kg')

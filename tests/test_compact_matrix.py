@@ -72,10 +72,10 @@ class CompactMatrix(BrowserHarness):
             self.page.set_viewport_size({'width':width,'height':844})
             card=self.page.locator('.exercise-card').first
             if card.locator('[data-expand]').get_attribute('aria-expanded')=='true':card.locator('[data-expand]').click()
-            expect(card.locator('.detail').first).not_to_be_visible()
+            expect(card.locator('.detail').first).to_be_visible()
             card.locator('[data-expand]').click();expect(card.locator('.performanceForm')).to_be_visible()
             self.assertEqual(card.locator('[data-quick]').evaluate_all('(els)=>els.map(e=>e.dataset.quick)'),['reps','kg'])
-            coach=card.locator('[data-instructions=coach]');coach.locator('summary').click()
+            coach=card.locator('[data-instructions=coach]')
             expect(coach.locator('p')).to_have_text('Oryginalna instrukcja testowa trenera')
             expect(coach.locator('textarea,input')).to_have_count(0)
             expect(card.locator('[data-personal-note] textarea')).not_to_be_visible()

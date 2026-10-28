@@ -58,3 +58,4 @@ Raport zakładki Dane: [Issue #90](docs/DATA_TAB_ISSUE_90.md).
 
 - [Compact Matrix v0.4 — etap F, testy i ograniczenia](docs/COMPACT_MATRIX_STAGE_F.md)
 - [Uproszczenie Dane — etap G, bezpieczeństwo i pomiary](docs/SIMPLE_DATA_STAGE_G.md)
+- [Compact Matrix v0.4 — szlif kart, Issue #95](docs/COMPACT_MATRIX_ISSUE_95.md)

@@ -1,5 +1,5 @@
 """V2 in the existing phone journal, using only synthetic history."""
-from test_browser import confirm_restore
+from test_browser import confirm_restore,open_result_panel
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -33,7 +33,7 @@ class V2Training(BrowserHarness):
         self.page.locator('[data-type="'+type+'"]').click()
         self.page.locator('[data-act=start]').click()
         self.page.locator('[data-expand="'+id+'"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         form=self.page.locator('.performanceForm').first
         form.locator('[data-rich-action=toggle]').click()
         return form
@@ -51,7 +51,7 @@ class V2Training(BrowserHarness):
         self.page.locator('[data-tab=calendar]').click()
         self.page.locator(f'[data-act=openSession][data-id="{sid}"]').click()
         if self.page.locator(f'[data-expand="{id}"]').get_attribute('aria-expanded')!='true':self.page.locator(f'[data-expand="{id}"]').click()
-        self.page.locator('[data-panel=historicalResult]').click()
+        open_result_panel(self.page)
         form=self.page.locator('.performanceForm').first
         form.locator('[data-rich-action=toggle]').click()
         return form
@@ -131,7 +131,7 @@ class V2Training(BrowserHarness):
         self.fill_rows(form,'50','8');self.save_form(form)
         # A/B are independent cards with the original IDs and shared group/rundown.
         self.page.locator('[data-expand="PULL-B-6-SHRUGS"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         form=self.page.locator('.performanceForm');form.locator('[data-rich-action=toggle]').click()
         self.fill_rows(form,'15','10');self.save_form(form)
         saved=self.state();sid=saved['activeId']

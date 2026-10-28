@@ -5,7 +5,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from playwright.sync_api import expect
-from test_browser import BrowserHarness, KEY, ROOT, QuietServer
+from test_browser import BrowserHarness, KEY, ROOT, QuietServer,open_result_panel
 
 OWNER='pushpull_indexeddb_owner'
 FIXTURE=json.loads((ROOT/'tests/fixtures/v1.json').read_text())
@@ -117,7 +117,7 @@ class IndexedDBMigration(BrowserHarness):
     def test_success_waits_for_transaction_complete(self):
         self.prepare();self.ready()
         self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         self.page.locator('[data-main=kg]').fill('110')
         self.page.locator('[data-main=reps]').fill('10')
         self.page.evaluate(PAUSE)
@@ -312,7 +312,7 @@ class IndexedDBMigration(BrowserHarness):
         self.prepare();self.ready()
         before=self.state()
         self.page.locator('[data-expand="PUSH-A-1"]').click()
-        self.page.locator('[data-panel=result]').click()
+        open_result_panel(self.page)
         self.page.locator('[data-main=kg]').fill('110')
         self.page.evaluate(PAUSE)
         self.page.locator('.seriesResultForm [type=submit]').click()

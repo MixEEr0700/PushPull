@@ -6,7 +6,7 @@ from urllib.parse import urlsplit, parse_qs
 from pathlib import Path
 import subprocess
 from playwright.sync_api import expect
-from test_browser import BrowserHarness, confirm_restore
+from test_browser import BrowserHarness, confirm_restore,open_result_panel
 import test_plan_import as imports
 import test_indexeddb as legacy
 import test_v2_training as training
@@ -89,7 +89,7 @@ class ManualDriveFlow(BrowserHarness):
     def test_issue52_repeated_large_v3_uploads_keep_local_state_and_previous_copies(self):
         mock=MockGoogle();mock.install(self.context);self.activate()
         form=self.open_result('PUSH A','PUSH-A-1');self.fill_rows(form,'80','8');self.save_form(form)
-        self.page.locator('[data-panel=result]').click();self.page.locator('[data-quick=kg]').fill('81.25')
+        open_result_panel(self.page);self.page.locator('[data-quick=kg]').fill('81.25')
         expect(self.page.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value;v.extension.large='x'.repeat(1024*1024);await d.commit(v)}finally{d.close()}}""")
         self.page.reload();self.ready();self.configure()
@@ -151,11 +151,11 @@ class ManualDriveFlow(BrowserHarness):
         self.assertEqual(self.page.evaluate('window.__requestedScope'),'https://www.googleapis.com/auth/drive.appdata')
         self.page.locator('[data-tab=training]').click()
         form=self.open_result('PULL B','PULL-B-6-SKI');self.fill_rows(form,'20','8')
-        self.page.locator('[data-expand="PULL-B-6-SHRUGS"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-expand="PULL-B-6-SHRUGS"]').click();open_result_panel(self.page)
         form_b=self.page.locator('.performanceForm');form_b.locator('[data-rich-action=toggle]').click()
         self.fill_rows(form_b,'13.125','10')
         expect(form_b.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
-        self.page.locator('[data-expand="PULL-B-6-SKI"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-expand="PULL-B-6-SKI"]').click();open_result_panel(self.page)
         self.save_form(self.page.locator('.performanceForm'));saved=self.state()
         self.assertEqual(saved['entries'][-1]['exerciseId'],'PULL-B-6-SKI')
         self.assertEqual(mock.posts,0)
@@ -300,7 +300,7 @@ class ManualDriveFlow(BrowserHarness):
         before=self.state();mock.error=401;self.page.locator('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('Autoryzacja Google wygasła')
         expect(self.page.locator('[data-drive-action=connect]')).to_be_visible()
-        self.page.locator('[data-tab=training]').click();self.page.locator('[data-expand="PUSH-A-1"]').click();self.page.locator('[data-panel=result]').click()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-expand="PUSH-A-1"]').click();open_result_panel(self.page)
         form=self.page.locator('.seriesResultForm');form.locator('[data-main=kg]').fill('77');form.locator('[data-main=reps]').fill('9')
         form.locator('[type=submit]').click();expect(self.page.locator('.seriesResultForm')).to_have_count(0)
         saved=self.state();self.assertEqual(len(saved['entries']),len(before['entries']));self.assertEqual(saved['entries'][-1]['id'],before['entries'][-1]['id'])

@@ -9,13 +9,20 @@ export function discard(id,sid){drafts.delete(key(id,sid));}
 export function editor(ex,sid,entry,last){
  const k=key(ex.id,sid);let d=drafts.get(k);
  if(!d){
-  const performance=entry?.performance?structuredClone(entry.performance):newPerformance(ex,last?.performance);
+  const performance=entry?.performance?structuredClone(entry.performance):prefill(ex,last?.performance);
   const first=performance.rows[0].segments[0];
   const custom=performance.rows.some(r=>r.segments.some(s=>s.kg!==first.kg||s.reps!==first.reps));
   d={ex,performance,open:false,custom};drafts.set(k,d);
  }
  d.ex=ex;preparePairs(d);
- return `<div class="panel"><h3>${esc(ex.name)}</h3><form class="performanceForm" novalidate data-id="${ex.id}" data-session="${sid}">${contents(d)}<button class="btn primary wide spaced" type="submit">${entry?'Zapisz korektę':'Zapisz wynik'}</button></form></div>`;
+ return `<div class="panel result-panel"><form class="performanceForm" novalidate data-id="${ex.id}" data-session="${sid}">${contents(d,entry?'Zapisz korektę':'Zapisz wynik')}</form></div>`;
+}
+// A comparable saved result is an editor seed, not a new planned result.
+// Retain removed/added rows and all segments; only fresh result identities change.
+function prefill(ex,previous){
+ if(!previous?.rows?.length||previous.loadConvention.unit!==ex.loadConvention.unit||ex.loadConvention.basis!==null&&previous.loadConvention.basis!==ex.loadConvention.basis)return newPerformance(ex);
+ if(previous.rows.some(r=>r.setId!==null&&!ex.targets.some(t=>t.id===r.setId)))return newPerformance(ex);
+ const p=structuredClone(previous);for(const row of p.rows){row.id=crypto.randomUUID();for(const s of row.segments)s.id=crypto.randomUUID();}return p;
 }
 // Pairing is editor state, never a new workout/result field. Prescribed rows
 // match by stable set/group/round. Unprescribed ambiguous old rows stay separate.
@@ -38,17 +45,32 @@ function preparePairs(d){
 const pairFor=(d,row)=>d.sidePairs.find(p=>p.leftId===row.id||p.rightId===row.id);
 const otherSide=(d,row)=>{const p=pairFor(d,row);return p&&d.performance.rows.find(r=>r.id===(row.side==='left'?p.rightId:p.leftId));};
 function copySegments(from,to){to.segments=from.segments.map((s,i)=>({...s,id:to.segments[i]?.id??crypto.randomUUID()}));}
-function contents(d){const ex=d.ex,p=d.performance;return `<p class="hint">${esc(p.loadConvention.description)}. Tonaż: suma zapisanych kg × powtórzenia; bez mnożenia przez dwa.</p>${ex.loadConvention.basis===null?`<label>Znaczenie ciężaru<select data-load-basis><option value="">Nieokreślone</option>${[['per-implement','Jeden hantel'],['machine-indication','Wskazanie urządzenia'],['combined','Łącznie']].map(([v,l])=>`<option value="${v}" ${p.loadConvention.basis===v?'selected':''}>${l}</option>`).join('')}</select></label>`:''}<div class="grid2"><label>Powtórzenia<input data-quick="reps" inputmode="numeric" aria-label="Szybkie powtórzenia"></label><label>Ciężar (kg)<input data-quick="kg" inputmode="decimal" aria-label="Ciężar (kg)"></label></div><p class="hint">Szybki wpis uzupełnia główne segmenty wszystkich serii. ${p.rows.some(r=>r.side!==null)?'Domyślnie uzupełnia obie strony L/P; osobne wartości zastępuje dopiero po potwierdzeniu. ':''}Back-off i drop poprawisz poniżej.</p><button type="button" class="btn wide" data-rich-action="toggle">✎ ${d.open?'Zwiń':'Edytuj'} serie</button><div data-rich-details ${d.open?'':'hidden'}>${details(d)}</div><p class="series-total">Tonaż: <strong>${flatten(p).reduce((n,s)=>n+(Number(s.kg.replace(',','.'))||0)*(Number(s.reps)||0),0).toLocaleString('pl-PL')} kg</strong></p>`;}
-function details(d){const ex=d.ex,p=d.performance;return `${ex.sideMode==='optional'&&p.rows.every(r=>r.side===null)?'<button type="button" class="btn spaced" data-rich-action="sides">Rozdziel L/P i skopiuj wartości</button>':''}${p.rows.map((row,i)=>rowHTML(d,row,i)).join('')}${!ex.group?'<button type="button" class="btn wide spaced" data-rich-action="add-set">＋ Dodaj serię bez określonego celu</button>':''}`;}
-function rowHTML(d,row,i){const t=d.ex.targets.find(t=>t.id===row.setId);const side=row.side==='left'?'Lewa':row.side==='right'?'Prawa':'';return `<div class="spaced"><b>${row.round?'Runda '+row.round:'Seria '+(t?t.order+1:i+1)} ${side}${t?.role==='backoff'?' · back-off':''}</b><div class="hint">${t?`${rangeText(t.reps)} powt. · RIR ${rangeText(t.rir)} · tempo ${tempoText(t.tempo)}${t.drop?' · dropset':''}`:'Cel nieokreślony'}</div>${row.segments.map((s,j)=>`<div class="grid2"><label>Powtórzenia<input data-row="${i}" data-segment="${j}" data-field="reps" aria-label="Powtórzenia ${i+1}.${j+1}" inputmode="numeric" value="${esc(s.reps)}" required></label><label>${t?.drop?'Segment '+(j+1)+' · ':''}kg<input data-row="${i}" data-segment="${j}" data-field="kg" aria-label="Ciężar ${i+1}.${j+1}" inputmode="decimal" value="${esc(s.kg)}" required></label></div>${t?.drop?`<button type="button" class="btn" data-rich-action="remove-segment" data-row="${i}" data-segment="${j}">− Segment ${j+1}</button>`:''}`).join('')}${t?.drop?`<button type="button" class="btn" data-rich-action="add-segment" data-row="${i}">＋ Segment</button>`:''}${row.side?`${pairFor(d,row)&&row.side==='left'?`<button type="button" class="btn spaced" data-rich-action="side-mode" data-row="${i}" aria-pressed="${!pairFor(d,row).linked}">${pairFor(d,row).linked?'Razem L/P · Edytuj osobno':'Osobno L/P · Połącz L → P'}</button>`:''}<button type="button" class="btn spaced" data-rich-action="copy" data-row="${i}">Kopiuj ${side==='Lewa'?'L → P':'P → L'}</button>`:''}${!d.ex.group?`<button type="button" class="btn spaced" data-rich-action="remove-set" data-row="${i}">− Seria ${i+1}</button>`:''}</div>`;}
-function refresh(form,d){const submit=form.querySelector('[type=submit]').outerHTML;form.innerHTML=contents(d)+submit;}
+/** Display only: compress equal prescriptions, retaining every differing target. */
+export function parameters(ex){
+ if(!ex.targets)return `${ex.sets} × ${ex.target} | tempo ${String(ex.tempo).replace(/\s+(?=\d)/g,'')} | RIR ${ex.rir}`;
+ const groups=[];
+ for(const t of ex.targets){
+  const text=`${t.role==='backoff'?'back-off ':''}${rangeText(t.reps)}${t.drop?' drop':''} | tempo ${tempoText(t.tempo).replace(/ /g,'')} | RIR ${rangeText(t.rir)}`;
+  const last=groups.at(-1);if(last?.text===text)last.count++;else groups.push({text,count:1});
+ }
+ return groups.map(g=>`${g.count} × ${g.text}`).join(' / ')||'Liczba serii nieokreślona';
+}
+function contents(d,submit){const ex=d.ex,p=d.performance,first=p.rows[0]?.segments[0];return `${ex.loadConvention.basis===null?`<label>Znaczenie ciężaru<select data-load-basis><option value="">Nieokreślone</option>${[['per-implement','Jeden hantel'],['machine-indication','Wskazanie urządzenia'],['combined','Łącznie']].map(([v,l])=>`<option value="${v}" ${p.loadConvention.basis===v?'selected':''}>${l}</option>`).join('')}</select></label>`:''}<div class="grid2 quick-result"><input data-quick="reps" inputmode="numeric" aria-label="Szybkie powtórzenia" placeholder="powtórzenia" value="${esc(first?.reps)}"><input data-quick="kg" inputmode="decimal" aria-label="Ciężar (kg)" placeholder="kg" value="${esc(first?.kg)}"></div><div class="result-buttons"><button class="btn primary" type="submit">${esc(submit)}</button><button type="button" class="btn" data-rich-action="toggle">✎ ${d.open?'Zwiń':'Edytuj'} serie</button></div><div data-rich-details ${d.open?'':'hidden'}><p class="hint">${esc(p.loadConvention.description)}. Szybki wpis zmienia główne segmenty; osobne poprawki wymagają potwierdzenia.</p>${details(d)}</div><p class="series-total sr-only">Tonaż: <strong>${flatten(p).reduce((n,s)=>n+(Number(s.kg.replace(',','.'))||0)*(Number(s.reps)||0),0).toLocaleString('pl-PL')} kg</strong></p>`;}
+function details(d){const ex=d.ex,p=d.performance;return `${ex.sideMode==='optional'&&p.rows.every(r=>r.side===null)?'<button type="button" class="btn spaced" data-rich-action="sides">Rozdziel L/P i skopiuj wartości</button>':''}${p.rows.map((row,i)=>rowHTML(d,row,i)).join('')}${!ex.group?'<button type="button" class="btn wide spaced" data-rich-action="add-set">＋ Dodaj serię</button>':''}`;}
+function rowHTML(d,row,i){
+ const t=d.ex.targets.find(t=>t.id===row.setId),side=row.side==='left'?'Lewa':row.side==='right'?'Prawa':'';
+ const special=side||t?.role==='backoff'||t?.drop||row.round;
+ return `<div class="individual-set spaced">${special?`<b>${row.round?'Runda '+row.round:'Seria '+(t?t.order+1:i+1)} ${side}${t?.role==='backoff'?' · back-off':''}</b><div class="hint">${t?`${rangeText(t.reps)} powt. · RIR ${rangeText(t.rir)} · tempo ${tempoText(t.tempo)}${t.drop?' · dropset':''}`:'Cel nieokreślony'}</div>`:''}${row.segments.map((s,j)=>`<div class="individual-line"><span aria-hidden="true">${i+1}${t?.drop?'.'+(j+1):''}</span><input data-row="${i}" data-segment="${j}" data-field="reps" aria-label="Powtórzenia ${i+1}.${j+1}" inputmode="numeric" value="${esc(s.reps)}" required><input data-row="${i}" data-segment="${j}" data-field="kg" aria-label="Ciężar ${i+1}.${j+1}" inputmode="decimal" value="${esc(s.kg)}" required>${t?.drop?`<button type="button" class="btn" data-rich-action="remove-segment" data-row="${i}" data-segment="${j}" aria-label="Usuń segment ${i+1}.${j+1}">−</button>`:!d.ex.group?`<button type="button" class="btn" data-rich-action="remove-set" data-row="${i}" aria-label="Usuń serię ${i+1}">−</button>`:''}</div>`).join('')}${t?.drop?`<button type="button" class="btn" data-rich-action="add-segment" data-row="${i}">＋ Segment</button>`:''}${row.side?`${pairFor(d,row)&&row.side==='left'?`<button type="button" class="btn spaced" data-rich-action="side-mode" data-row="${i}" aria-pressed="${!pairFor(d,row).linked}">${pairFor(d,row).linked?'Razem L/P · Edytuj osobno':'Osobno L/P · Połącz L → P'}</button>`:''}<button type="button" class="btn spaced" data-rich-action="copy" data-row="${i}">Kopiuj ${side==='Lewa'?'L → P':'P → L'}</button>`:''}${t?.drop&&!d.ex.group?`<button type="button" class="btn spaced" data-rich-action="remove-set" data-row="${i}">− Seria ${i+1}</button>`:''}</div>`;
+}
+function refresh(form,d){const submit=form.querySelector('[type=submit]').textContent;form.innerHTML=contents(d,submit);}
 export function input(event){if(event.target.matches('[data-load-basis]')){change(event);return;}const form=event.target.closest('.performanceForm');if(!form)return;const d=drafts.get(key(form.dataset.id,form.dataset.session)),el=event.target;
- if(el.dataset.quick){const field=el.dataset.quick;if((d.custom||d.sidePairs.some(p=>!p.linked)&&d.quickInput!==el)&&!confirm('Zastąpić wpisane wartości głównych segmentów? Pozostałe segmenty pozostaną bez zmian.')){el.value='';return;}d.custom=false;d.quickInput=el;d.performance.rows.forEach(r=>r.segments[0][field]=el.value);form.querySelector('[data-rich-details]').innerHTML=details(d);}
+ if(el.dataset.quick){const field=el.dataset.quick;if((d.custom||d.sidePairs.some(p=>!p.linked))&&d.quickInput!==el&&!confirm('Zastąpić wpisane wartości głównych segmentów? Pozostałe segmenty pozostaną bez zmian.')){el.value=d.performance.rows[0]?.segments[0]?.[field]??'';return;}d.quickInput=el;d.performance.rows.forEach(r=>r.segments[0][field]=el.value);d.custom=d.performance.rows.some(r=>!equalSides(r,d.performance.rows[0]));form.querySelector('[data-rich-details]').innerHTML=details(d);}
  else if(el.dataset.row!==undefined){
+  d.quickInput=null;
   const row=d.performance.rows[+el.dataset.row],segment=+el.dataset.segment,field=el.dataset.field;
   row.segments[segment][field]=el.value;
   if(pairFor(d,row)?.linked){const other=otherSide(d,row);other.segments[segment][field]=el.value;const input=form.querySelector(`[data-row="${d.performance.rows.indexOf(other)}"][data-segment="${segment}"][data-field="${field}"]`);if(input)input.value=el.value;}
-  d.custom=true;
+  d.custom=true;for(const field of ['reps','kg'])form.querySelector(`[data-quick="${field}"]`).value=d.performance.rows[0]?.segments[0]?.[field]??'';
  }
  form.querySelector('.series-total strong').textContent=flatten(d.performance).reduce((n,s)=>n+(Number(s.kg.replace(',','.'))||0)*(Number(s.reps)||0),0).toLocaleString('pl-PL')+' kg';
 }
@@ -96,15 +118,15 @@ export function summary(e,targets=[],asSets=false){
  groups.sort((a,b)=>(a.target?.order??Infinity)-(b.target?.order??Infinity)||a.index-b.index);
  const complete=r=>Array.isArray(r.segments)&&r.segments.length>0&&r.segments.every(s=>/^\d+(\.\d+)?$/.test(s.kg??'')&&/^[1-9]\d*$/.test(s.reps??''));
  const equal=g=>g.members.length===2&&equalSides(...g.members),unpaired=g=>g.members.length===1&&g.members[0].side!==null;
- const special=g=>g.target?.role==='backoff'||g.target?.drop||g.members.some(r=>r.segments?.length!==1||r.round&&!asSets);
- if(groups.length&&groups.every(g=>!unpaired(g)&&!special(g)&&g.members.every(complete)&&(g.members.length===1||equal(g)))&&groups.every(g=>equalSides(g.members[0],groups[0].members[0])&&g.members[0].groupId===groups[0].members[0].groupId)){
-  const s=groups[0].members[0].segments[0];return `<span class="detail last-result">${esc(s.reps)} × ${esc(s.kg)} kg</span>`;
+ const special=g=>g.members.some(r=>r.round&&!asSets);
+ if(groups.length&&groups.every(g=>!unpaired(g)&&!special(g)&&g.members.every(complete)&&(g.members.length===1||equal(g)))&&groups.every(g=>equalSides(g.members[0],groups[0].members[0])&&g.members.length===groups[0].members.length&&g.members[0].side===groups[0].members[0].side&&g.target?.role===groups[0].target?.role&&!!g.target?.drop===!!groups[0].target?.drop&&g.members[0].groupId===groups[0].members[0].groupId)){
+  const g=groups[0],segments=g.members[0].segments;return `<span class="detail last-result">${g.target?.role==='backoff'?'back-off: ':''}${g.target?.drop?'dropset: ':''}${g.members.length===2?'L/P ':''}${segments.map(s=>`${esc(s.reps)} × ${esc(s.kg)} kg`).join(' → ')}</span>`;
  }
  const value=r=>(r.segments??[]).map(s=>`${esc(s.reps||'?')} × ${esc(s.kg||'?')} kg`).join(' → ')||'Brak pełnych danych';
  let extra=Math.max(0,...groups.filter(g=>g.target).map(g=>g.target.order+1));
  return `<span class="last-series">${groups.map(g=>{
   const r=g.members[0],label=r.round&&!asSets?'Runda '+r.round:'Seria '+(g.target?g.target.order+1:++extra),side=x=>x.side==='left'?'L':x.side==='right'?'P':'';
-  const result=equal(g)?value(r):g.members.map(x=>`${side(x)?side(x)+' ':''}${value(x)}`).join(' · ');
+  const result=equal(g)?'L/P '+value(r):g.members.map(x=>`${side(x)?side(x)+' ':''}${value(x)}`).join(' · ');
   return `<span class="last-series-row"><span class="${g.target?.role==='backoff'||g.target?.drop||r.round&&!asSets?'set-kind':'sr-only'}">${esc(label)}${g.target?.role==='backoff'?' · back-off':''}${g.target?.drop?' · dropset':''}: </span>${result}${unpaired(g)?' · para L/P nieustalona':''}${g.members.every(complete)?'':' · niepełny wynik'}</span>`;
  }).join('')}</span>`;
 }
