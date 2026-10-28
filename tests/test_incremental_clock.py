@@ -7,6 +7,9 @@ from measure_incremental_write import instrument_v2,instrument_runtime
 from measure_ui_response import UI_PROBE
 
 class IncrementalClock(BrowserHarness):
+    # Native Event.timeStamp must share the real performance.now() clock.
+    # Playwright's rounded mocked page clock can differ by 1 ms.
+    mock_clock = False
     def test_native_clock_precedes_slow_publication_and_later_completion_listener(self):
         code=instrument_v2((ROOT/'model/journal-idb.mjs').read_text())
         self.page.route('**/model/journal-idb.mjs',lambda route:route.fulfill(body=code,content_type='text/javascript'))

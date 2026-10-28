@@ -8,7 +8,7 @@ const key=(sid,eid)=>JSON.stringify([sid,eid]);
 const same=(a,b)=>canonical(a)===canonical(b);
 const clone=structuredClone;
 // Local empty editor is recoverable, but not a valid v6 result-evidence value.
-const recoverable=(kind,value)=>editorValueValid(kind,value)||kind==='v2'&&value?.performance?.version===2&&Array.isArray(value.performance.rows)&&value.performance.rows.length===0;
+const recoverable=(kind,value)=>editorValueValid(kind,value)||kind==='legacy'&&typeof value?.kg==='string'&&typeof value.reps==='string'&&Array.isArray(value.series)&&value.series.length===0||kind==='v2'&&value?.performance?.version===2&&Array.isArray(value.performance.rows)&&value.performance.rows.length===0;
 export function editorValueValid(kind,value){
  if(kind==='legacy')return value && typeof value.kg==='string' && typeof value.reps==='string' && Array.isArray(value.series) && value.series.length>0 && value.series.every(r=>typeof r.kg==='string'&&typeof r.reps==='string');
  return kind==='v2' && value?.performance?.version===2 && Array.isArray(value.performance.rows) && value.performance.rows.length>0 && value.performance.rows.every(r=>typeof r.id==='string'&&Array.isArray(r.segments)&&r.segments.length>0&&r.segments.every(s=>typeof s.id==='string'&&typeof s.kg==='string'&&typeof s.reps==='string'));

@@ -1,0 +1,3455 @@
+{
+  "syntheticOnly": true,
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "cpuThrottle": 4.0,
+  "repeats": 3,
+  "width": 390,
+  "cases": {
+    "small-plain": {
+      "before": [
+        {
+          "editorDOMMs": 9.5,
+          "detailsHeightPx": 218,
+          "detailsElements": 19,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 48573026,
+          "clickToStrictCompleteMs": 281.10000000009313,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4899.9000000003725,
+              "eventTimeStamp": 4899.9000000003725,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4668.800000000279
+            },
+            {
+              "name": "index-prepare",
+              "at": 4781.600000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 4837.5
+            },
+            {
+              "name": "cas",
+              "at": 4837.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 4874.300000000279
+            },
+            {
+              "name": "write-result-root",
+              "at": 4886.9000000003725
+            },
+            {
+              "name": "readback",
+              "at": 4887
+            },
+            {
+              "name": "strict-complete",
+              "at": 4899.9000000003725,
+              "eventTimeStamp": 4899.9000000003725,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4899.9000000003725
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "29c711f8-1426-4cc9-b85d-d606777b7897",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 4.399999999906868,
+          "detailsHeightPx": 218,
+          "detailsElements": 19,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 48548354,
+          "clickToStrictCompleteMs": 293.70000000018626,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 5337.0999999996275,
+              "eventTimeStamp": 5336.899999999907,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 5095.699999999721
+            },
+            {
+              "name": "index-prepare",
+              "at": 5196.0999999996275
+            },
+            {
+              "name": "transaction-open",
+              "at": 5258.399999999907
+            },
+            {
+              "name": "cas",
+              "at": 5259
+            },
+            {
+              "name": "write-objects",
+              "at": 5304.399999999907
+            },
+            {
+              "name": "write-result-root",
+              "at": 5320.5
+            },
+            {
+              "name": "readback",
+              "at": 5320.699999999721
+            },
+            {
+              "name": "strict-complete",
+              "at": 5337.0999999996275,
+              "eventTimeStamp": 5336.899999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 5337.0999999996275
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "a2101878-a19f-4dfb-aa39-60671ab43ffb",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 3.1000000000931323,
+          "detailsHeightPx": 218,
+          "detailsElements": 19,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 48614006,
+          "clickToStrictCompleteMs": 207.39999999990687,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 3880,
+              "eventTimeStamp": 3880,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 3710.2999999998137
+            },
+            {
+              "name": "index-prepare",
+              "at": 3800.7999999998137
+            },
+            {
+              "name": "transaction-open",
+              "at": 3840.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 3840.7000000001863
+            },
+            {
+              "name": "write-objects",
+              "at": 3862.2999999998137
+            },
+            {
+              "name": "write-result-root",
+              "at": 3869.600000000093
+            },
+            {
+              "name": "readback",
+              "at": 3870.399999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 3880,
+              "eventTimeStamp": 3880,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 3880
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "84fb8884-1771-481f-a01d-f138a9845447",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "after": [
+        {
+          "editorDOMMs": 5.699999999720603,
+          "detailsHeightPx": 206,
+          "detailsElements": 25,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 48410699,
+          "clickToStrictCompleteMs": 226.79999999981374,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4455.100000000093,
+              "eventTimeStamp": 4455.100000000093,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4268.100000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 4360.200000000186
+            },
+            {
+              "name": "transaction-open",
+              "at": 4411.800000000279
+            },
+            {
+              "name": "cas",
+              "at": 4411.9000000003725
+            },
+            {
+              "name": "write-objects",
+              "at": 4436
+            },
+            {
+              "name": "write-result-root",
+              "at": 4444.5
+            },
+            {
+              "name": "readback",
+              "at": 4444.5
+            },
+            {
+              "name": "strict-complete",
+              "at": 4455.100000000093,
+              "eventTimeStamp": 4455.100000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4455.200000000186
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "f963a063-0e44-455b-bbdb-ca178f2cca67",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 3.6000000000931323,
+          "detailsHeightPx": 206,
+          "detailsElements": 25,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 48857759,
+          "clickToStrictCompleteMs": 332.29999999981374,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4788.699999999721,
+              "eventTimeStamp": 4788.699999999721,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4525.5
+            },
+            {
+              "name": "index-prepare",
+              "at": 4643.199999999721
+            },
+            {
+              "name": "transaction-open",
+              "at": 4718.399999999907
+            },
+            {
+              "name": "cas",
+              "at": 4718.799999999814
+            },
+            {
+              "name": "write-objects",
+              "at": 4753.199999999721
+            },
+            {
+              "name": "write-result-root",
+              "at": 4772.199999999721
+            },
+            {
+              "name": "readback",
+              "at": 4772.799999999814
+            },
+            {
+              "name": "strict-complete",
+              "at": 4788.699999999721,
+              "eventTimeStamp": 4788.699999999721,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4788.699999999721
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "57dfb88d-8c97-4f82-bfc3-ef7bfed91eaa",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 4,
+          "detailsHeightPx": 206,
+          "detailsElements": 25,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 48626275,
+          "clickToStrictCompleteMs": 259.79999999981374,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4757.399999999907,
+              "eventTimeStamp": 4757.399999999907,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4537.700000000186
+            },
+            {
+              "name": "index-prepare",
+              "at": 4652.5
+            },
+            {
+              "name": "transaction-open",
+              "at": 4702.399999999907
+            },
+            {
+              "name": "cas",
+              "at": 4702.700000000186
+            },
+            {
+              "name": "write-objects",
+              "at": 4735
+            },
+            {
+              "name": "write-result-root",
+              "at": 4744
+            },
+            {
+              "name": "readback",
+              "at": 4744.100000000093
+            },
+            {
+              "name": "strict-complete",
+              "at": 4757.399999999907,
+              "eventTimeStamp": 4757.399999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4757.399999999907
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "39a6ab92-e769-4427-90f8-e532e4a463fc",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "beforeStats": {
+        "clickToStrictCompleteMs": {
+          "median": 281.10000000009313,
+          "p95": 293.70000000018626,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 4.399999999906868,
+          "p95": 9.5,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 218,
+          "p95": 218,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 19,
+          "p95": 19,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 6,
+          "p95": 6,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 48573026,
+          "p95": 48614006,
+          "n": 3
+        }
+      },
+      "afterStats": {
+        "clickToStrictCompleteMs": {
+          "median": 259.79999999981374,
+          "p95": 332.29999999981374,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 4,
+          "p95": 5.699999999720603,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 206,
+          "p95": 206,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 25,
+          "p95": 25,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 6,
+          "p95": 6,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 48626275,
+          "p95": 48857759,
+          "n": 3
+        }
+      }
+    },
+    "small-drop": {
+      "before": [
+        {
+          "editorDOMMs": 4.600000000093132,
+          "detailsHeightPx": 687.78125,
+          "detailsElements": 46,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 49305601,
+          "clickToStrictCompleteMs": 213.3000000002794,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4268.800000000279,
+              "eventTimeStamp": 4268.800000000279,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4100.9000000003725
+            },
+            {
+              "name": "index-prepare",
+              "at": 4180.300000000279
+            },
+            {
+              "name": "transaction-open",
+              "at": 4219.5
+            },
+            {
+              "name": "cas",
+              "at": 4219.5
+            },
+            {
+              "name": "write-objects",
+              "at": 4246.800000000279
+            },
+            {
+              "name": "write-result-root",
+              "at": 4257.4000000003725
+            },
+            {
+              "name": "readback",
+              "at": 4258.200000000186
+            },
+            {
+              "name": "strict-complete",
+              "at": 4268.800000000279,
+              "eventTimeStamp": 4268.800000000279,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4268.800000000279
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "9666fa62-e63f-406d-b028-cb39755b07d0",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 4.100000000093132,
+          "detailsHeightPx": 687.78125,
+          "detailsElements": 46,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 49466883,
+          "clickToStrictCompleteMs": 208.60000000009313,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4455.5,
+              "eventTimeStamp": 4455.5,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4287.5
+            },
+            {
+              "name": "index-prepare",
+              "at": 4371.5
+            },
+            {
+              "name": "transaction-open",
+              "at": 4401.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 4401.700000000186
+            },
+            {
+              "name": "write-objects",
+              "at": 4432.600000000093
+            },
+            {
+              "name": "write-result-root",
+              "at": 4443.700000000186
+            },
+            {
+              "name": "readback",
+              "at": 4444.600000000093
+            },
+            {
+              "name": "strict-complete",
+              "at": 4455.5,
+              "eventTimeStamp": 4455.5,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4456.5
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "32775de0-b15a-46bd-be05-f49da9f52313",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 3.8999999999068677,
+          "detailsHeightPx": 687.78125,
+          "detailsElements": 46,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 49294375,
+          "clickToStrictCompleteMs": 213.29999999981374,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4663.4000000003725,
+              "eventTimeStamp": 4662.700000000186,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4481.300000000279
+            },
+            {
+              "name": "index-prepare",
+              "at": 4559.600000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 4596.5
+            },
+            {
+              "name": "cas",
+              "at": 4596.9000000003725
+            },
+            {
+              "name": "write-objects",
+              "at": 4626.600000000093
+            },
+            {
+              "name": "write-result-root",
+              "at": 4649.700000000186
+            },
+            {
+              "name": "readback",
+              "at": 4649.800000000279
+            },
+            {
+              "name": "strict-complete",
+              "at": 4663.4000000003725,
+              "eventTimeStamp": 4662.700000000186,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4663.4000000003725
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "64db0280-fbe7-4edb-95fc-de6c7779d0e5",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "after": [
+        {
+          "editorDOMMs": 3.5,
+          "detailsHeightPx": 494,
+          "detailsElements": 49,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 49281424,
+          "clickToStrictCompleteMs": 272,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 5237.100000000093,
+              "eventTimeStamp": 5237.100000000093,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 5031.100000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 5129.899999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 5175.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 5175.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 5207.700000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 5220.200000000186
+            },
+            {
+              "name": "readback",
+              "at": 5221.5
+            },
+            {
+              "name": "strict-complete",
+              "at": 5237.100000000093,
+              "eventTimeStamp": 5237.100000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 5237.399999999907
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "e1affd3e-595b-4acc-b2b5-6bac515f55e0",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 5.800000000279397,
+          "detailsHeightPx": 494,
+          "detailsElements": 49,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 49461824,
+          "clickToStrictCompleteMs": 233.6999999997206,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4970.899999999907,
+              "eventTimeStamp": 4970.799999999814,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4801.199999999721
+            },
+            {
+              "name": "index-prepare",
+              "at": 4893.100000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 4928.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 4928.699999999721
+            },
+            {
+              "name": "write-objects",
+              "at": 4951.100000000093
+            },
+            {
+              "name": "write-result-root",
+              "at": 4961.199999999721
+            },
+            {
+              "name": "readback",
+              "at": 4961.299999999814
+            },
+            {
+              "name": "strict-complete",
+              "at": 4970.899999999907,
+              "eventTimeStamp": 4970.799999999814,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4970.899999999907
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "fe9967cb-eef3-498a-908f-44b575a23b77",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 6.7999999998137355,
+          "detailsHeightPx": 494,
+          "detailsElements": 49,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 49565034,
+          "clickToStrictCompleteMs": 278.39999999990687,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4722.5,
+              "eventTimeStamp": 4722.300000000279,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4499.600000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 4610.200000000186
+            },
+            {
+              "name": "transaction-open",
+              "at": 4664.700000000186
+            },
+            {
+              "name": "cas",
+              "at": 4665.5
+            },
+            {
+              "name": "write-objects",
+              "at": 4698.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 4709.5
+            },
+            {
+              "name": "readback",
+              "at": 4709.5
+            },
+            {
+              "name": "strict-complete",
+              "at": 4722.5,
+              "eventTimeStamp": 4722.300000000279,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4722.5
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "b2e78aa2-9936-4b3c-b0cb-166398b21acb",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "beforeStats": {
+        "clickToStrictCompleteMs": {
+          "median": 213.29999999981374,
+          "p95": 213.3000000002794,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 4.100000000093132,
+          "p95": 4.600000000093132,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 687.78125,
+          "p95": 687.78125,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 46,
+          "p95": 46,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 12,
+          "p95": 12,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 49305601,
+          "p95": 49466883,
+          "n": 3
+        }
+      },
+      "afterStats": {
+        "clickToStrictCompleteMs": {
+          "median": 272,
+          "p95": 278.39999999990687,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 5.800000000279397,
+          "p95": 6.7999999998137355,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 494,
+          "p95": 494,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 49,
+          "p95": 49,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 12,
+          "p95": 12,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 49461824,
+          "p95": 49565034,
+          "n": 3
+        }
+      }
+    },
+    "small-lp": {
+      "before": [
+        {
+          "editorDOMMs": 4.7999999998137355,
+          "detailsHeightPx": 1265.5625,
+          "detailsElements": 73,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 49788337,
+          "clickToStrictCompleteMs": 420.89999999990687,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 5053.700000000186,
+              "eventTimeStamp": 5053.600000000093,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4684.799999999814
+            },
+            {
+              "name": "index-prepare",
+              "at": 4845
+            },
+            {
+              "name": "transaction-open",
+              "at": 4959.899999999907
+            },
+            {
+              "name": "cas",
+              "at": 4960.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 5005.100000000093
+            },
+            {
+              "name": "write-result-root",
+              "at": 5033.299999999814
+            },
+            {
+              "name": "readback",
+              "at": 5033.399999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 5053.700000000186,
+              "eventTimeStamp": 5053.600000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 5053.700000000186
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "f05be94a-6967-440d-b88c-96d0c72e033a",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 5.899999999906868,
+          "detailsHeightPx": 1265.5625,
+          "detailsElements": 73,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 49995327,
+          "clickToStrictCompleteMs": 225,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4440,
+              "eventTimeStamp": 4440,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4255.600000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 4344.100000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 4390.5
+            },
+            {
+              "name": "cas",
+              "at": 4390.5
+            },
+            {
+              "name": "write-objects",
+              "at": 4417.700000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 4425.5
+            },
+            {
+              "name": "readback",
+              "at": 4426.299999999814
+            },
+            {
+              "name": "strict-complete",
+              "at": 4440,
+              "eventTimeStamp": 4440,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4440
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "8506933c-d4af-40f6-b58b-21bf4650984a",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 4.5,
+          "detailsHeightPx": 1265.5625,
+          "detailsElements": 73,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 49802465,
+          "clickToStrictCompleteMs": 269.5,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4569.5999999996275,
+              "eventTimeStamp": 4568.699999999721,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4356.5
+            },
+            {
+              "name": "index-prepare",
+              "at": 4460.199999999721
+            },
+            {
+              "name": "transaction-open",
+              "at": 4508.5999999996275
+            },
+            {
+              "name": "cas",
+              "at": 4509.5999999996275
+            },
+            {
+              "name": "write-objects",
+              "at": 4537.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 4550
+            },
+            {
+              "name": "readback",
+              "at": 4551.399999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 4569.5999999996275,
+              "eventTimeStamp": 4568.699999999721,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4569.5999999996275
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "0d403fe5-9315-4438-854a-b7181a91f4e1",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "after": [
+        {
+          "editorDOMMs": 5.2999999998137355,
+          "detailsHeightPx": 206,
+          "detailsElements": 28,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 49454581,
+          "clickToStrictCompleteMs": 237.79999999981374,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4223,
+              "eventTimeStamp": 4222.899999999907,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4031.100000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 4117
+            },
+            {
+              "name": "transaction-open",
+              "at": 4156.700000000186
+            },
+            {
+              "name": "cas",
+              "at": 4156.799999999814
+            },
+            {
+              "name": "write-objects",
+              "at": 4191.700000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 4209.100000000093
+            },
+            {
+              "name": "readback",
+              "at": 4209.700000000186
+            },
+            {
+              "name": "strict-complete",
+              "at": 4223,
+              "eventTimeStamp": 4222.899999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4223
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "e7e25ae1-907d-4ff4-8c15-bb655b4a6047",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 6.099999999627471,
+          "detailsHeightPx": 206,
+          "detailsElements": 28,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 49310577,
+          "clickToStrictCompleteMs": 251.89999999990687,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4739.5,
+              "eventTimeStamp": 4739.399999999907,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4529
+            },
+            {
+              "name": "index-prepare",
+              "at": 4631.899999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 4684.199999999721
+            },
+            {
+              "name": "cas",
+              "at": 4684.299999999814
+            },
+            {
+              "name": "write-objects",
+              "at": 4717.299999999814
+            },
+            {
+              "name": "write-result-root",
+              "at": 4728
+            },
+            {
+              "name": "readback",
+              "at": 4728.0999999996275
+            },
+            {
+              "name": "strict-complete",
+              "at": 4739.5,
+              "eventTimeStamp": 4739.399999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4739.5
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "8424f5e9-cdc2-4786-b6e7-de2efceebf21",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 5.699999999720603,
+          "detailsHeightPx": 206,
+          "detailsElements": 28,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 49504657,
+          "clickToStrictCompleteMs": 288.29999999981374,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 4413.5,
+              "eventTimeStamp": 4413.5,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 4183.100000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 4297.200000000186
+            },
+            {
+              "name": "transaction-open",
+              "at": 4346.700000000186
+            },
+            {
+              "name": "cas",
+              "at": 4347.399999999907
+            },
+            {
+              "name": "write-objects",
+              "at": 4383.300000000279
+            },
+            {
+              "name": "write-result-root",
+              "at": 4398.800000000279
+            },
+            {
+              "name": "readback",
+              "at": 4398.899999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 4413.5,
+              "eventTimeStamp": 4413.5,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 4413.5
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "22b62fc8-9d26-4ce2-8f94-e65cd813c858",
+            "sessions": 5,
+            "entries": 36,
+            "drafts": 0
+          },
+          "fixtureSHA256": "c57cc8b09dbe5d1c06a7b64808ec477305e979cd36636f6837283cfb29e92faa",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "beforeStats": {
+        "clickToStrictCompleteMs": {
+          "median": 269.5,
+          "p95": 420.89999999990687,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 4.7999999998137355,
+          "p95": 5.899999999906868,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 1265.5625,
+          "p95": 1265.5625,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 73,
+          "p95": 73,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 12,
+          "p95": 12,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 49802465,
+          "p95": 49995327,
+          "n": 3
+        }
+      },
+      "afterStats": {
+        "clickToStrictCompleteMs": {
+          "median": 251.89999999990687,
+          "p95": 288.29999999981374,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 5.699999999720603,
+          "p95": 6.099999999627471,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 206,
+          "p95": 206,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 28,
+          "p95": 28,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 6,
+          "p95": 6,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 49454581,
+          "p95": 49504657,
+          "n": 3
+        }
+      }
+    },
+    "history40-raw4-plain": {
+      "before": [
+        {
+          "editorDOMMs": 3.3999999999068677,
+          "detailsHeightPx": 218,
+          "detailsElements": 19,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 558650227,
+          "clickToStrictCompleteMs": 329.20000000018626,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 16115.5,
+              "eventTimeStamp": 16115.399999999907,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 15829.69999999972
+            },
+            {
+              "name": "index-prepare",
+              "at": 15949.899999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 16050.19999999972
+            },
+            {
+              "name": "cas",
+              "at": 16051
+            },
+            {
+              "name": "write-objects",
+              "at": 16089.399999999907
+            },
+            {
+              "name": "write-result-root",
+              "at": 16101.19999999972
+            },
+            {
+              "name": "readback",
+              "at": 16102
+            },
+            {
+              "name": "strict-complete",
+              "at": 16115.5,
+              "eventTimeStamp": 16115.399999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 16115.5
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "247dbc8c-8e55-4d0b-8c1a-7740e011a5a2",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 8.700000000186265,
+          "detailsHeightPx": 218,
+          "detailsElements": 19,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 564480239,
+          "clickToStrictCompleteMs": 439.59999999962747,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 15928.399999999907,
+              "eventTimeStamp": 15928.19999999972,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 15578.399999999907
+            },
+            {
+              "name": "index-prepare",
+              "at": 15730.799999999814
+            },
+            {
+              "name": "transaction-open",
+              "at": 15855.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 15855.799999999814
+            },
+            {
+              "name": "write-objects",
+              "at": 15894.69999999972
+            },
+            {
+              "name": "write-result-root",
+              "at": 15907.899999999907
+            },
+            {
+              "name": "readback",
+              "at": 15909
+            },
+            {
+              "name": "strict-complete",
+              "at": 15928.399999999907,
+              "eventTimeStamp": 15928.19999999972,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 15928.399999999907
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "7ee5c247-a412-4f97-b6e5-0ef094ceb4dc",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 5,
+          "detailsHeightPx": 218,
+          "detailsElements": 19,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 532664669,
+          "clickToStrictCompleteMs": 342.39999999990687,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 15719.700000000186,
+              "eventTimeStamp": 15719.600000000093,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 15429
+            },
+            {
+              "name": "index-prepare",
+              "at": 15555.100000000093
+            },
+            {
+              "name": "transaction-open",
+              "at": 15647.899999999907
+            },
+            {
+              "name": "cas",
+              "at": 15648.799999999814
+            },
+            {
+              "name": "write-objects",
+              "at": 15686.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 15703.200000000186
+            },
+            {
+              "name": "readback",
+              "at": 15704.299999999814
+            },
+            {
+              "name": "strict-complete",
+              "at": 15719.700000000186,
+              "eventTimeStamp": 15719.600000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 15719.799999999814
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "0785b02b-b381-4eef-8903-e32f6b685ab1",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "after": [
+        {
+          "editorDOMMs": 5.100000000093132,
+          "detailsHeightPx": 206,
+          "detailsElements": 25,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 566123732,
+          "clickToStrictCompleteMs": 285.10000000009313,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 14852.80000000028,
+              "eventTimeStamp": 14852.80000000028,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 14607.400000000373
+            },
+            {
+              "name": "index-prepare",
+              "at": 14699.700000000186
+            },
+            {
+              "name": "transaction-open",
+              "at": 14790.700000000186
+            },
+            {
+              "name": "cas",
+              "at": 14790.80000000028
+            },
+            {
+              "name": "write-objects",
+              "at": 14827.200000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 14838.200000000186
+            },
+            {
+              "name": "readback",
+              "at": 14838.200000000186
+            },
+            {
+              "name": "strict-complete",
+              "at": 14852.80000000028,
+              "eventTimeStamp": 14852.80000000028,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 14852.80000000028
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "a944028d-cc0b-4baa-946f-6d8b53fa6b6f",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 4.7000000001862645,
+          "detailsHeightPx": 206,
+          "detailsElements": 25,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 575329564,
+          "clickToStrictCompleteMs": 263,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 15184.5,
+              "eventTimeStamp": 15184.5,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 14960.399999999907
+            },
+            {
+              "name": "index-prepare",
+              "at": 15061.399999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 15130.799999999814
+            },
+            {
+              "name": "cas",
+              "at": 15131.5
+            },
+            {
+              "name": "write-objects",
+              "at": 15156.899999999907
+            },
+            {
+              "name": "write-result-root",
+              "at": 15167.5
+            },
+            {
+              "name": "readback",
+              "at": 15169.100000000093
+            },
+            {
+              "name": "strict-complete",
+              "at": 15184.5,
+              "eventTimeStamp": 15184.5,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 15184.5
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "e4368784-2ee2-4a16-9761-88c12c476768",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 5.5,
+          "detailsHeightPx": 206,
+          "detailsElements": 25,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 275016969,
+          "clickToStrictCompleteMs": 270.89999999990687,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 15405.099999999627,
+              "eventTimeStamp": 15405.099999999627,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 15174.799999999814
+            },
+            {
+              "name": "index-prepare",
+              "at": 15277.399999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 15343.5
+            },
+            {
+              "name": "cas",
+              "at": 15344.299999999814
+            },
+            {
+              "name": "write-objects",
+              "at": 15378.799999999814
+            },
+            {
+              "name": "write-result-root",
+              "at": 15391.19999999972
+            },
+            {
+              "name": "readback",
+              "at": 15391.19999999972
+            },
+            {
+              "name": "strict-complete",
+              "at": 15405.099999999627,
+              "eventTimeStamp": 15405.099999999627,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 15405.099999999627
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "af9cc7f4-610f-4731-a93f-3afbab03faa1",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 3,
+            "tonnage": 720,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "beforeStats": {
+        "clickToStrictCompleteMs": {
+          "median": 342.39999999990687,
+          "p95": 439.59999999962747,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 5,
+          "p95": 8.700000000186265,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 218,
+          "p95": 218,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 19,
+          "p95": 19,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 6,
+          "p95": 6,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 558650227,
+          "p95": 564480239,
+          "n": 3
+        }
+      },
+      "afterStats": {
+        "clickToStrictCompleteMs": {
+          "median": 270.89999999990687,
+          "p95": 285.10000000009313,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 5.100000000093132,
+          "p95": 5.5,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 206,
+          "p95": 206,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 25,
+          "p95": 25,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 6,
+          "p95": 6,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 566123732,
+          "p95": 575329564,
+          "n": 3
+        }
+      }
+    },
+    "history40-raw4-drop": {
+      "before": [
+        {
+          "editorDOMMs": 5.800000000279397,
+          "detailsHeightPx": 687.78125,
+          "detailsElements": 46,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 559057338,
+          "clickToStrictCompleteMs": 337.1999999997206,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 18594.599999999627,
+              "eventTimeStamp": 18594.599999999627,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 18301.19999999972
+            },
+            {
+              "name": "index-prepare",
+              "at": 18424.69999999972
+            },
+            {
+              "name": "transaction-open",
+              "at": 18501.69999999972
+            },
+            {
+              "name": "cas",
+              "at": 18501.799999999814
+            },
+            {
+              "name": "write-objects",
+              "at": 18544.299999999814
+            },
+            {
+              "name": "write-result-root",
+              "at": 18567.099999999627
+            },
+            {
+              "name": "readback",
+              "at": 18567.099999999627
+            },
+            {
+              "name": "strict-complete",
+              "at": 18594.599999999627,
+              "eventTimeStamp": 18594.599999999627,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 18594.69999999972
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "2e82416b-5b41-452c-8af2-7d3a5756ab5d",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 4.2000000001862645,
+          "detailsHeightPx": 687.78125,
+          "detailsElements": 46,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 564501854,
+          "clickToStrictCompleteMs": 362,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 16608.799999999814,
+              "eventTimeStamp": 16608.799999999814,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 16315.19999999972
+            },
+            {
+              "name": "index-prepare",
+              "at": 16458.5
+            },
+            {
+              "name": "transaction-open",
+              "at": 16540.799999999814
+            },
+            {
+              "name": "cas",
+              "at": 16541.69999999972
+            },
+            {
+              "name": "write-objects",
+              "at": 16578.299999999814
+            },
+            {
+              "name": "write-result-root",
+              "at": 16587.69999999972
+            },
+            {
+              "name": "readback",
+              "at": 16587.69999999972
+            },
+            {
+              "name": "strict-complete",
+              "at": 16608.799999999814,
+              "eventTimeStamp": 16608.799999999814,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 16608.899999999907
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "889e81d6-2e9b-4347-9960-f1613cf2cf9d",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 5.599999999627471,
+          "detailsHeightPx": 687.78125,
+          "detailsElements": 46,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 579122702,
+          "clickToStrictCompleteMs": 314.29999999981374,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 17293.700000000186,
+              "eventTimeStamp": 17293.600000000093,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 17030.600000000093
+            },
+            {
+              "name": "index-prepare",
+              "at": 17169.5
+            },
+            {
+              "name": "transaction-open",
+              "at": 17230.700000000186
+            },
+            {
+              "name": "cas",
+              "at": 17230.700000000186
+            },
+            {
+              "name": "write-objects",
+              "at": 17268
+            },
+            {
+              "name": "write-result-root",
+              "at": 17279.400000000373
+            },
+            {
+              "name": "readback",
+              "at": 17280.200000000186
+            },
+            {
+              "name": "strict-complete",
+              "at": 17293.700000000186,
+              "eventTimeStamp": 17293.600000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 17293.900000000373
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "dc746e02-f4c6-486c-889f-f9a062d5f948",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "after": [
+        {
+          "editorDOMMs": 4.2000000001862645,
+          "detailsHeightPx": 494,
+          "detailsElements": 49,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 558533609,
+          "clickToStrictCompleteMs": 217.60000000009313,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 20350.700000000186,
+              "eventTimeStamp": 20350.700000000186,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 20177.899999999907
+            },
+            {
+              "name": "index-prepare",
+              "at": 20267.200000000186
+            },
+            {
+              "name": "transaction-open",
+              "at": 20304.80000000028
+            },
+            {
+              "name": "cas",
+              "at": 20304.899999999907
+            },
+            {
+              "name": "write-objects",
+              "at": 20329.200000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 20338
+            },
+            {
+              "name": "readback",
+              "at": 20338.100000000093
+            },
+            {
+              "name": "strict-complete",
+              "at": 20350.700000000186,
+              "eventTimeStamp": 20350.700000000186,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 20350.700000000186
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "dfe6e19c-8092-41b2-b335-99f827a4aec2",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 6,
+          "detailsHeightPx": 494,
+          "detailsElements": 49,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 558513699,
+          "clickToStrictCompleteMs": 397.70000000018626,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 17713.700000000186,
+              "eventTimeStamp": 17713.700000000186,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 17366.900000000373
+            },
+            {
+              "name": "index-prepare",
+              "at": 17508.900000000373
+            },
+            {
+              "name": "transaction-open",
+              "at": 17626.400000000373
+            },
+            {
+              "name": "cas",
+              "at": 17627.400000000373
+            },
+            {
+              "name": "write-objects",
+              "at": 17677.200000000186
+            },
+            {
+              "name": "write-result-root",
+              "at": 17694.700000000186
+            },
+            {
+              "name": "readback",
+              "at": 17695.30000000028
+            },
+            {
+              "name": "strict-complete",
+              "at": 17713.700000000186,
+              "eventTimeStamp": 17713.700000000186,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 17714.5
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "26b85a1a-0887-450b-a7e5-b3797be168b7",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 5.2000000001862645,
+          "detailsHeightPx": 494,
+          "detailsElements": 49,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 560431105,
+          "clickToStrictCompleteMs": 322.60000000009313,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 17448.700000000186,
+              "eventTimeStamp": 17448.600000000093,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 17179.30000000028
+            },
+            {
+              "name": "index-prepare",
+              "at": 17322.80000000028
+            },
+            {
+              "name": "transaction-open",
+              "at": 17377.600000000093
+            },
+            {
+              "name": "cas",
+              "at": 17378.100000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 17417.5
+            },
+            {
+              "name": "write-result-root",
+              "at": 17433.80000000028
+            },
+            {
+              "name": "readback",
+              "at": 17433.80000000028
+            },
+            {
+              "name": "strict-complete",
+              "at": 17448.700000000186,
+              "eventTimeStamp": 17448.600000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 17448.700000000186
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "45b38fd0-c674-47ea-941e-29e11fbca0d0",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 3,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              null,
+              null,
+              null
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "beforeStats": {
+        "clickToStrictCompleteMs": {
+          "median": 337.1999999997206,
+          "p95": 362,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 5.599999999627471,
+          "p95": 5.800000000279397,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 687.78125,
+          "p95": 687.78125,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 46,
+          "p95": 46,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 12,
+          "p95": 12,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 564501854,
+          "p95": 579122702,
+          "n": 3
+        }
+      },
+      "afterStats": {
+        "clickToStrictCompleteMs": {
+          "median": 322.60000000009313,
+          "p95": 397.70000000018626,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 5.2000000001862645,
+          "p95": 6,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 494,
+          "p95": 494,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 49,
+          "p95": 49,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 12,
+          "p95": 12,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 558533609,
+          "p95": 560431105,
+          "n": 3
+        }
+      }
+    },
+    "history40-raw4-lp": {
+      "before": [
+        {
+          "editorDOMMs": 4.7999999998137355,
+          "detailsHeightPx": 1265.5625,
+          "detailsElements": 73,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 559835962,
+          "clickToStrictCompleteMs": 352.20000000018626,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 16776.600000000093,
+              "eventTimeStamp": 16776.600000000093,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 16465.899999999907
+            },
+            {
+              "name": "index-prepare",
+              "at": 16626.5
+            },
+            {
+              "name": "transaction-open",
+              "at": 16710.399999999907
+            },
+            {
+              "name": "cas",
+              "at": 16710.600000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 16745.399999999907
+            },
+            {
+              "name": "write-result-root",
+              "at": 16757.299999999814
+            },
+            {
+              "name": "readback",
+              "at": 16757.299999999814
+            },
+            {
+              "name": "strict-complete",
+              "at": 16776.600000000093,
+              "eventTimeStamp": 16776.600000000093,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 16777
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "28c68205-58fe-41bf-b9eb-242bd122d8a6",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 4,
+          "detailsHeightPx": 1265.5625,
+          "detailsElements": 73,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 534336226,
+          "clickToStrictCompleteMs": 395.40000000037253,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 15276.799999999814,
+              "eventTimeStamp": 15276.700000000186,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 14925
+            },
+            {
+              "name": "index-prepare",
+              "at": 15062.899999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 15156.200000000186
+            },
+            {
+              "name": "cas",
+              "at": 15157.100000000093
+            },
+            {
+              "name": "write-objects",
+              "at": 15224.600000000093
+            },
+            {
+              "name": "write-result-root",
+              "at": 15258.100000000093
+            },
+            {
+              "name": "readback",
+              "at": 15258.200000000186
+            },
+            {
+              "name": "strict-complete",
+              "at": 15276.799999999814,
+              "eventTimeStamp": 15276.700000000186,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 15276.799999999814
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "adbe5272-dcc5-4e5e-a233-e29fdaab4408",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 6.5,
+          "detailsHeightPx": 1265.5625,
+          "detailsElements": 73,
+          "detailsInputs": 12,
+          "heapWithFixtureAndOracleBytes": 534384492,
+          "clickToStrictCompleteMs": 351.89999999990687,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 15210,
+              "eventTimeStamp": 15209.099999999627,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 14901.19999999972
+            },
+            {
+              "name": "index-prepare",
+              "at": 15063.899999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 15139.19999999972
+            },
+            {
+              "name": "cas",
+              "at": 15139.599999999627
+            },
+            {
+              "name": "write-objects",
+              "at": 15177.599999999627
+            },
+            {
+              "name": "write-result-root",
+              "at": 15191.5
+            },
+            {
+              "name": "readback",
+              "at": 15191.599999999627
+            },
+            {
+              "name": "strict-complete",
+              "at": 15210,
+              "eventTimeStamp": 15209.099999999627,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 15210
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "fe18ce2b-1081-43a1-a73d-4b075b40443b",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "after": [
+        {
+          "editorDOMMs": 5.7999999998137355,
+          "detailsHeightPx": 206,
+          "detailsElements": 28,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 533448326,
+          "clickToStrictCompleteMs": 329,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 15585.099999999627,
+              "eventTimeStamp": 15585.099999999627,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 15288.099999999627
+            },
+            {
+              "name": "index-prepare",
+              "at": 15445.69999999972
+            },
+            {
+              "name": "transaction-open",
+              "at": 15518.19999999972
+            },
+            {
+              "name": "cas",
+              "at": 15518.19999999972
+            },
+            {
+              "name": "write-objects",
+              "at": 15553.799999999814
+            },
+            {
+              "name": "write-result-root",
+              "at": 15569
+            },
+            {
+              "name": "readback",
+              "at": 15569.899999999907
+            },
+            {
+              "name": "strict-complete",
+              "at": 15585.099999999627,
+              "eventTimeStamp": 15585.099999999627,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 15585.399999999907
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "fe594100-9f90-42d3-8304-54af4b5a1d05",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 6.300000000279397,
+          "detailsHeightPx": 206,
+          "detailsElements": 28,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 276036676,
+          "clickToStrictCompleteMs": 371.39999999990687,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 16424.799999999814,
+              "eventTimeStamp": 16424.799999999814,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 16093.799999999814
+            },
+            {
+              "name": "index-prepare",
+              "at": 16258.19999999972
+            },
+            {
+              "name": "transaction-open",
+              "at": 16343.5
+            },
+            {
+              "name": "cas",
+              "at": 16343.69999999972
+            },
+            {
+              "name": "write-objects",
+              "at": 16382
+            },
+            {
+              "name": "write-result-root",
+              "at": 16400.399999999907
+            },
+            {
+              "name": "readback",
+              "at": 16400.5
+            },
+            {
+              "name": "strict-complete",
+              "at": 16424.799999999814,
+              "eventTimeStamp": 16424.799999999814,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 16424.899999999907
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "23354ff6-5bd0-43d1-8040-3fa5f5560127",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        },
+        {
+          "editorDOMMs": 6.099999999627471,
+          "detailsHeightPx": 206,
+          "detailsElements": 28,
+          "detailsInputs": 6,
+          "heapWithFixtureAndOracleBytes": 276033036,
+          "clickToStrictCompleteMs": 506.09999999962747,
+          "nativeStrict": [
+            {
+              "name": "strict-complete",
+              "at": 18102.5,
+              "eventTimeStamp": 18102.399999999907,
+              "durability": "strict"
+            }
+          ],
+          "writeMarks": [
+            {
+              "name": "detach-validate",
+              "at": 17648.899999999907
+            },
+            {
+              "name": "index-prepare",
+              "at": 17860.899999999907
+            },
+            {
+              "name": "transaction-open",
+              "at": 17999.899999999907
+            },
+            {
+              "name": "cas",
+              "at": 18000
+            },
+            {
+              "name": "write-objects",
+              "at": 18058.100000000093
+            },
+            {
+              "name": "write-result-root",
+              "at": 18077.700000000186
+            },
+            {
+              "name": "readback",
+              "at": 18078
+            },
+            {
+              "name": "strict-complete",
+              "at": 18102.5,
+              "eventTimeStamp": 18102.399999999907,
+              "durability": "strict"
+            },
+            {
+              "name": "publication",
+              "at": 18102.600000000093
+            }
+          ],
+          "oracle": {
+            "history": true,
+            "snapshots": true,
+            "model": true,
+            "archives": true,
+            "active": "2b42f81a-7eef-4404-bcdb-d8211a9ad39c",
+            "sessions": 41,
+            "entries": 351,
+            "drafts": 0
+          },
+          "fixtureSHA256": "389cbd621366aab78c60e49a20258e2f4c3b510734675878e7c4d873c0d1a9b4",
+          "resultOracle": {
+            "rows": 6,
+            "segments": 6,
+            "tonnage": 1440,
+            "sides": [
+              "left",
+              "right",
+              "left",
+              "right",
+              "left",
+              "right"
+            ],
+            "all24x10": true
+          }
+        }
+      ],
+      "beforeStats": {
+        "clickToStrictCompleteMs": {
+          "median": 352.20000000018626,
+          "p95": 395.40000000037253,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 4.7999999998137355,
+          "p95": 6.5,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 1265.5625,
+          "p95": 1265.5625,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 73,
+          "p95": 73,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 12,
+          "p95": 12,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 534384492,
+          "p95": 559835962,
+          "n": 3
+        }
+      },
+      "afterStats": {
+        "clickToStrictCompleteMs": {
+          "median": 371.39999999990687,
+          "p95": 506.09999999962747,
+          "n": 3
+        },
+        "editorDOMMs": {
+          "median": 6.099999999627471,
+          "p95": 6.300000000279397,
+          "n": 3
+        },
+        "detailsHeightPx": {
+          "median": 206,
+          "p95": 206,
+          "n": 3
+        },
+        "detailsElements": {
+          "median": 28,
+          "p95": 28,
+          "n": 3
+        },
+        "detailsInputs": {
+          "median": 6,
+          "p95": 6,
+          "n": 3
+        },
+        "heapWithFixtureAndOracleBytes": {
+          "median": 276036676,
+          "p95": 533448326,
+          "n": 3
+        }
+      }
+    }
+  },
+  "before": {
+    "ref": "42fc1010092c7adea0ad3520a493f7600d9b1bdc",
+    "runtimeSHA256": {
+      "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+      "style.css": "f0f0fc5f96b9c48cb9648921669b6ea01176d83ac5ca49ffd1588bd15912da77",
+      "app.js": "6aafc643ac2a51b14104632fb8db36c76b5617e4a49b2c6f0d5c14e0fb5dcf60",
+      "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+      "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+      "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+      "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+      "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+      "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+      "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+      "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+      "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+      "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+      "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+      "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+      "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+      "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+      "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+      "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+      "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+      "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+      "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+      "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+      "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+      "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+      "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+      "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+      "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+      "model/v2-plan.mjs": "5616c979c935387e2c5cc8ecdb7c1a1e3aa5f0b66d37112a7e47b62b4fca26d0",
+      "model/performance.mjs": "342f676d70386f0064f737c8d1bfae0942c773ef3e3481ef4e15dd4e11956834",
+      "model/performance-editor.mjs": "38da35cf4b420eece3ffd6d885dec3666f6f42a903a0ee72a8134ed1636b1ff7",
+      "model/workout-drafts.mjs": "7273b74d630bad99c1ce649da8c5acfb8fe7b79efcf137b9ffe33a48928f1a61",
+      "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+      "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+      "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+      "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+      "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+      "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+    },
+    "instrumentedRelease": {
+      "format": "pushpull-static-release",
+      "version": 1,
+      "release": "4759723ba705017a327d5ca2",
+      "files": {
+        "app.js": "6aafc643ac2a51b14104632fb8db36c76b5617e4a49b2c6f0d5c14e0fb5dcf60",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+        "model/journal-idb.mjs": "5cff44a56ad629c2d0641d61dbcd3fb17da12a48fc8db1c3ef155a076738c556",
+        "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+        "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+        "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+        "model/journal-runtime.mjs": "8c14cbc70a677bb3f60f4a861e72f83675eaf1074f7fea9aa861df5ac893e4f8",
+        "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+        "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+        "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+        "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+        "model/performance-editor.mjs": "38da35cf4b420eece3ffd6d885dec3666f6f42a903a0ee72a8134ed1636b1ff7",
+        "model/performance.mjs": "342f676d70386f0064f737c8d1bfae0942c773ef3e3481ef4e15dd4e11956834",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5616c979c935387e2c5cc8ecdb7c1a1e3aa5f0b66d37112a7e47b62b4fca26d0",
+        "model/workout-drafts.mjs": "7273b74d630bad99c1ce649da8c5acfb8fe7b79efcf137b9ffe33a48928f1a61",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "style.css": "f0f0fc5f96b9c48cb9648921669b6ea01176d83ac5ca49ffd1588bd15912da77",
+        "sw.js": "cfd7fd044bb74c0885233f1676b43bd233e693112d7aadc8ff2841db58db6f27"
+      }
+    },
+    "chromiumVersion": "154.0.8037.57"
+  },
+  "after": {
+    "ref": "working",
+    "runtimeSHA256": {
+      "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+      "style.css": "804c002c67e91b1dba95ff12fc1c286f6839df3bd35bd6c5f6119086de242167",
+      "app.js": "5b7eb12c903a2e192d365f62d21d916824ed0f7f6e6b351618c006387473628f",
+      "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+      "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+      "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+      "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+      "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+      "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+      "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+      "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+      "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+      "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+      "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+      "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+      "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+      "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+      "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+      "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+      "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+      "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+      "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+      "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+      "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+      "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+      "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+      "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+      "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+      "model/v2-plan.mjs": "5616c979c935387e2c5cc8ecdb7c1a1e3aa5f0b66d37112a7e47b62b4fca26d0",
+      "model/performance.mjs": "342f676d70386f0064f737c8d1bfae0942c773ef3e3481ef4e15dd4e11956834",
+      "model/performance-editor.mjs": "74665355669eef93e9e29a08d740192a3eb7a3ac3340ebadd2bdd278577c89e1",
+      "model/workout-drafts.mjs": "08842aeb4a6fc2829001bc3586f28b15f63971c146ebafa6748c2dd0e409bc32",
+      "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+      "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+      "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+      "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+      "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+      "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+    },
+    "instrumentedRelease": {
+      "format": "pushpull-static-release",
+      "version": 1,
+      "release": "d1fdf8f2958cb90606e60741",
+      "files": {
+        "app.js": "5b7eb12c903a2e192d365f62d21d916824ed0f7f6e6b351618c006387473628f",
+        "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+        "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+        "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+        "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+        "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+        "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+        "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+        "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+        "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+        "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+        "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+        "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+        "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+        "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+        "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+        "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+        "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+        "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+        "model/journal-idb.mjs": "5cff44a56ad629c2d0641d61dbcd3fb17da12a48fc8db1c3ef155a076738c556",
+        "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+        "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+        "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+        "model/journal-runtime.mjs": "8c14cbc70a677bb3f60f4a861e72f83675eaf1074f7fea9aa861df5ac893e4f8",
+        "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+        "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+        "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+        "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+        "model/performance-editor.mjs": "74665355669eef93e9e29a08d740192a3eb7a3ac3340ebadd2bdd278577c89e1",
+        "model/performance.mjs": "342f676d70386f0064f737c8d1bfae0942c773ef3e3481ef4e15dd4e11956834",
+        "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+        "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+        "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+        "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+        "model/v2-plan.mjs": "5616c979c935387e2c5cc8ecdb7c1a1e3aa5f0b66d37112a7e47b62b4fca26d0",
+        "model/workout-drafts.mjs": "08842aeb4a6fc2829001bc3586f28b15f63971c146ebafa6748c2dd0e409bc32",
+        "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+        "style.css": "804c002c67e91b1dba95ff12fc1c286f6839df3bd35bd6c5f6119086de242167",
+        "sw.js": "2817f3414a7abf035e27c34301783bb962784facd28c2d28e22cbbb575790788"
+      }
+    },
+    "chromiumVersion": "154.0.8037.57"
+  },
+  "finalizedAtUTC": "2026-10-28T15:55:54.945799+00:00",
+  "sourceHashCheck": "All measured production assets match the final working tree."
+}

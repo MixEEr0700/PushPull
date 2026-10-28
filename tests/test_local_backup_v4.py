@@ -25,6 +25,10 @@ class LocalBackupV4(BrowserHarness):
         self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.settings();before=self.records()
         self.page.evaluate('navigator.serviceWorker.ready')
+        # Earlier fixture reloads may race first activation. A controlled
+        # navigation after an active worker is a prerequisite for this offline
+        # test; ready alone does not guarantee control of the existing document.
+        self.page.reload()
         wait_for_service_worker_controller(self.page)
         self.context.set_offline(True);self.page.reload()
         expect(self.page.locator('[data-act=start]')).to_be_visible();self.settings()

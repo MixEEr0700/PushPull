@@ -103,3 +103,19 @@ button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-off
 .result-secondary .btn{width:100%;padding:9px 5px}
 .expanded>.idle-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
 .idle-controls .btn{width:100%;min-width:0}
+
+/* Issue #99: compact rows; source sides/segments remain separate records. */
+.compact-series{background:transparent;border:0;padding:0;margin:6px 0}
+.compact-set{margin:4px 0 10px;min-width:0}
+.compact-set .individual-line,.compact-series .series-line{margin:4px 0;min-height:44px}
+.compact-number{font-size:13px;font-weight:650;color:#aaa;text-align:center}
+.compact-set .drop-segment{margin-left:14px}
+.compact-set .compact-remove,.compact-series [data-series-remove]{height:44px;min-width:44px;display:grid;place-items:center;padding:8px;color:#a9b7af}
+.compact-add-segment{margin-left:28px;font-size:12px}
+.side-exception{margin:8px 0 12px;border-left:2px solid #96784a;padding-left:6px}
+.side-exception>summary{display:flex;align-items:center;gap:8px;min-height:44px;font-size:12px;overflow-wrap:anywhere}
+.side-exception>summary .compact-number{flex:0 0 22px}
+.side-exception .hint{margin:4px 0 8px}
+.exception-actions{display:flex;flex-wrap:wrap;gap:6px}
+.execution-choice{margin-top:8px;font-size:12px;color:#aaa}
+.execution-choice>summary{min-height:44px;display:flex;align-items:center}

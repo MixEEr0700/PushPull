@@ -1,6 +1,6 @@
 """Isolated real IndexedDB: pairs, finish orchestration, failure/restart and offline."""
 from playwright.sync_api import expect
-from test_browser import BrowserHarness,open_notes,wait_for_service_worker_controller
+from test_browser import BrowserHarness,open_notes,wait_for_service_worker_controller,seed_historical_editor
 import test_v2_training as v2
 
 class FinishPairs(BrowserHarness):
@@ -33,18 +33,18 @@ class FinishPairs(BrowserHarness):
         self.page.reload();self.ready();self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
         expect(f.locator('[data-side-pair]')).to_have_count(0)
         f.locator('[data-rich-action=add-set]').click();expect(f.locator('[data-side-pair]')).to_have_count(1)
-        self.fill(f);f.locator('[data-row="1"][data-field=kg]').fill('35')
+        self.fill(f);f=seed_historical_editor(self.page,"d.performance.rows[1].segments[0].kg='35'")
         expect(f.locator('[data-row="0"][data-field=kg]')).to_have_value('40')
-        f.locator('[data-rich-action=side-mode]').click();expect(f.locator('[data-merge-choice]')).to_be_visible()
+        expect(f.locator('[data-side-exception]')).to_be_visible()
         self.confirm=False;f.locator('[data-rich-action=merge-right]').click()
         expect(f.locator('[data-row="0"][data-field=kg]')).to_have_value('40')
         self.confirm=True;f.locator('[data-rich-action=merge-right]').click()
-        expect(f.locator('[data-rich-action=side-mode]')).to_have_text('Rozdziel L/P')
+        expect(f.locator('[data-common-pair=true][data-field=kg]')).to_have_value('35')
         expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         self.page.reload();self.ready();self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
-        expect(f.locator('[data-rich-action=side-mode]')).to_have_text('Rozdziel L/P')
+        expect(f.locator('[data-common-pair=true][data-field=kg]')).to_have_value('35')
         self.assertEqual(len(self.drafts()[0]['value']['performance']['rows']),2)
-        f.locator('[data-rich-action=side-mode]').click();expect(f.locator('[data-row="0"][data-field=kg]')).to_have_value('35')
+        expect(f.locator('[data-row="0"][data-field=kg]')).to_have_value('35')
         snapshot=self.drafts()[0]['value']['performance'];self.assertEqual(self.state(),before)
         self.page.reload();self.ready();self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
         expect(f.locator('[data-side-pair]')).to_have_count(1);self.save_form(f)

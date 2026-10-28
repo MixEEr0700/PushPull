@@ -49,6 +49,22 @@ def open_result_panel(scope):
         scope.locator('[data-panel=result],[data-panel=historicalResult]').click()
     expect(form).to_be_visible()
 
+def seed_historical_editor(page,patch):
+    """Synthetic PR98-era editor evidence; no user/history records are changed.
+
+    The current ordinary UI intentionally cannot split equal L/P pairs. Tests
+    of recovery seed the older asymmetric draft shape, then use real controls.
+    """
+    eid=page.evaluate("""async patch=>{const m=await import('./model/performance-editor.mjs'),f=document.querySelector('.performanceForm'),d=m.state(f.dataset.id,f.dataset.session);Function('d',patch)(d);m.restore(f.dataset.id,f.dataset.session,d);return f.dataset.id}""",patch)
+    toggle=page.locator('[data-expand="'+eid+'"]');toggle.click();toggle.click()
+    open_result_panel(page)
+    f=page.locator('.performanceForm')
+    if f.locator('[data-rich-details]').get_attribute('hidden') is not None:f.locator('[data-rich-action=toggle]').click()
+    # Capture the synthetic old shape through the real draft controller.
+    f.locator('[data-field=kg]').first.dispatch_event('input')
+    expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+    return f
+
 class QuietServer(http.server.SimpleHTTPRequestHandler):
     upgrade_latest = False
     runtime_ref = None
