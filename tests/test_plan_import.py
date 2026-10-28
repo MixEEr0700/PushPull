@@ -1,5 +1,5 @@
 """Synthetic data-only V3/V4 through the existing mobile UI; no owner plan."""
-from test_browser import seed_historical_editor,confirm_restore,open_result_panel
+from test_browser import add_drop,seed_historical_editor,confirm_restore,open_result_panel
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -121,7 +121,7 @@ class PlanImport(BrowserHarness):
         self.prepare();self.ready();self.preview();self.store();self.activate()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="TEST-B"]').click();self.page.locator('[data-act=start]').click()
-        f=self.form('TEST-4');self.fill(f);f.locator('[data-rich-action=add-segment]').click();self.fill(f)
+        f=self.form('TEST-4');self.fill(f);add_drop(f,0);self.fill(f)
         expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         self.page.reload();self.page.locator('[data-draft-resume]').first.click()
         expect(self.page.locator('.performanceForm input[data-field=kg]')).to_have_count(5)
@@ -212,7 +212,7 @@ class PlanImport(BrowserHarness):
         f.locator('[data-rich-action=sides]').click()
         for row in range(3):expect(f.locator(f'[data-row="{row}"][data-segment="0"][data-field=kg]')).to_have_value('20')
         f=seed_historical_editor(self.page,"d.performance.rows[3].segments[0].kg='19';d.performance.rows[5].segments[0].kg='19'")
-        f.locator('[data-rich-action=add-segment][data-row="0"]').click()
+        add_drop(f,0)
         f.locator('[data-row="0"][data-segment="2"][data-field=kg]').fill('5')
         f.locator('[data-row="0"][data-segment="2"][data-field=reps]').fill('15')
         f.locator('[data-row="2"][data-field=kg]').fill('12')

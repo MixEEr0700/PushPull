@@ -3,7 +3,7 @@ import json
 import os
 import signal
 from playwright.sync_api import expect
-from test_browser import BrowserHarness,open_result_panel,seed_historical_editor
+from test_browser import add_drop,BrowserHarness,open_result_panel,seed_historical_editor
 import test_v2_training as v2tests
 import test_indexeddb as legacy
 
@@ -60,7 +60,7 @@ class WorkoutDrafts(BrowserHarness):
 
     def test_drop_and_left_right_survive_renderer_crash_and_reload(self):
         self.activate();form=self.open_result('PUSH A','PUSH-A-5');self.fill_rows(form)
-        form.locator('[data-rich-action=add-segment][data-row="1"]').click()
+        add_drop(form,1)
         form.locator('[data-row="1"][data-segment="2"][data-field=kg]').fill('5')
         form.locator('[data-row="1"][data-segment="2"][data-field=reps]').fill('15');self.persisted(form)
         drop=self.drafts()[0]

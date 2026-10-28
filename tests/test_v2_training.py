@@ -1,5 +1,5 @@
 """V2 in the existing phone journal, using only synthetic history."""
-from test_browser import confirm_restore,open_result_panel,open_notes,seed_historical_editor
+from test_browser import add_drop,confirm_restore,open_result_panel,open_notes,seed_historical_editor
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -104,11 +104,11 @@ class V2Training(BrowserHarness):
     def test_drop_sides_and_two_round_group_mobile_corrections(self):
         self.activate()
         form=self.open_result('PUSH A','PUSH-A-5');self.fill_rows(form)
-        form.locator('[data-rich-action=add-segment][data-row="1"]').click()
+        add_drop(form,1)
         form.locator('[data-row="1"][data-segment="2"][data-field=kg]').fill('5')
         form.locator('[data-row="1"][data-segment="2"][data-field=reps]').fill('15')
         form.locator('[data-rich-action=remove-segment][data-row="1"][data-segment="2"]').click()
-        form.locator('[data-rich-action=add-segment][data-row="1"]').click()
+        add_drop(form,1)
         form.locator('[data-row="1"][data-segment="2"][data-field=kg]').fill('5')
         form.locator('[data-row="1"][data-segment="2"][data-field=reps]').fill('15')
         self.save_form(form)

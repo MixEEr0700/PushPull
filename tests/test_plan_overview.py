@@ -1,5 +1,5 @@
 """Unified plans + real local workouts; all plans/data synthetic, Google simulated."""
-from test_browser import confirm_restore,open_result_panel,seed_historical_editor
+from test_browser import add_drop,confirm_restore,open_result_panel,seed_historical_editor
 from pathlib import Path
 import json
 from playwright.sync_api import expect
@@ -69,7 +69,7 @@ class PlanOverview(BrowserHarness):
         self.preview();self.store();self.activate_plan();self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="TEST-B"]').click();self.page.locator('[data-act=start]').click()
         f=self.form('TEST-5');self.fill(f);self.save(f)
-        f=self.form('TEST-4');self.fill(f);f.locator('[data-rich-action=add-segment][data-row="0"]').click();self.fill(f)
+        f=self.form('TEST-4');self.fill(f);add_drop(f,0);self.fill(f)
         expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         before=self.state();self.preview(imports.v4());self.store();self.activate_plan()
         self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
