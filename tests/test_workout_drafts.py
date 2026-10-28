@@ -3,7 +3,7 @@ import json
 import os
 import signal
 from playwright.sync_api import expect
-from test_browser import BrowserHarness,open_result_panel
+from test_browser import BrowserHarness,open_result_panel,seed_historical_editor
 import test_v2_training as v2tests
 import test_indexeddb as legacy
 
@@ -76,6 +76,7 @@ class WorkoutDrafts(BrowserHarness):
         self.save_form(form);self.page.locator('[data-act=finish]').click()
         form=self.open_result('PULL A','PULL-A-1')
         form.locator('[data-quick=kg]').fill('40');form.locator('[data-quick=reps]').fill('9')
+        form=seed_historical_editor(self.page,"d.performance.rows[1].segments[0].kg='39'")
         form.locator('[data-row="1"][data-field=kg]').fill('35');self.persisted(form)
         sides=self.drafts()[0]
         self.page.reload();self.ready();form=self.resume('PULL-A-1')

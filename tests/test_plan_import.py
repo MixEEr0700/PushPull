@@ -1,5 +1,5 @@
 """Synthetic data-only V3/V4 through the existing mobile UI; no owner plan."""
-from test_browser import confirm_restore,open_result_panel
+from test_browser import seed_historical_editor,confirm_restore,open_result_panel
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -206,20 +206,20 @@ class PlanImport(BrowserHarness):
         self.page.locator('[data-type="TEST-B"]').click();self.page.locator('[data-act=start]').click()
         f=self.form('TEST-4');self.fill(f)
         original=self.page.evaluate('async()=> (await import("./model/performance-editor.mjs")).state("TEST-4",document.querySelector(".performanceForm").dataset.session).performance')
+        f.locator('.execution-choice summary').click()
         self.confirm=False;f.locator('[data-rich-action=sides]').click();self.confirm=True
         self.assertEqual(f.locator('[data-rich-action=side-mode]').count(),0)
         f.locator('[data-rich-action=sides]').click()
-        for row in range(6):expect(f.locator(f'[data-row="{row}"][data-segment="0"][data-field=kg]')).to_have_value('20')
-        f.locator('[data-rich-action=side-mode][data-row="0"]').click()
-        f.locator('[data-rich-action=side-mode][data-row="2"]').click()
+        for row in range(3):expect(f.locator(f'[data-row="{row}"][data-segment="0"][data-field=kg]')).to_have_value('20')
+        f=seed_historical_editor(self.page,"d.performance.rows[3].segments[0].kg='19';d.performance.rows[5].segments[0].kg='19'")
         f.locator('[data-rich-action=add-segment][data-row="0"]').click()
         f.locator('[data-row="0"][data-segment="2"][data-field=kg]').fill('5')
         f.locator('[data-row="0"][data-segment="2"][data-field=reps]').fill('15')
         f.locator('[data-row="2"][data-field=kg]').fill('12')
-        f.locator('[data-rich-action=side-mode][data-row="0"]').click()
-        f.locator('[data-rich-action=side-mode][data-row="2"]').click()
+        f.locator('[data-rich-action=merge-left][data-row="2"]').click()
+        f=seed_historical_editor(self.page,"d.performance.rows[3].segments.push({id:crypto.randomUUID(),kg:'5',reps:'15'})")
         expect(f.locator('[data-row="3"][data-segment="2"][data-field=kg]')).to_have_value('5')
-        expect(f.locator('[data-row="5"][data-field=kg]')).to_have_value('12')
+        self.assertEqual(self.page.evaluate("async()=>{const m=await import('./model/performance-editor.mjs'),f=document.querySelector('.performanceForm');return m.state(f.dataset.id,f.dataset.session).performance.rows[5].segments[0].kg}"),'12')
         expect(f.locator('[data-row="1"][data-field=kg]')).to_have_value('20')
         f.locator('[data-rich-action=remove-segment][data-row="0"][data-segment="2"]').click()
         expect(f.locator('[data-row="3"][data-segment="2"][data-field=kg]')).to_have_value('5')

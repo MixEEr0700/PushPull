@@ -60,3 +60,5 @@ Raport zakładki Dane: [Issue #90](docs/DATA_TAB_ISSUE_90.md).
 - [Uproszczenie Dane — etap G, bezpieczeństwo i pomiary](docs/SIMPLE_DATA_STAGE_G.md)
 - [Compact Matrix v0.4 — szlif kart, Issue #95](docs/COMPACT_MATRIX_ISSUE_95.md)
 - [Compact Matrix v0.4 — końcowy szlif i analiza wspólnych notatek](docs/COMPACT_MATRIX_FINAL_POLISH.md)
+
+- [Kompaktowy edytor serii — Issue #99: L/P, segmenty, testy i pomiary](docs/COMPACT_EDITOR_ISSUE_99.md)

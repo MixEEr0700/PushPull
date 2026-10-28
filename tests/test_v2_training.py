@@ -1,5 +1,5 @@
 """V2 in the existing phone journal, using only synthetic history."""
-from test_browser import confirm_restore,open_result_panel,open_notes
+from test_browser import confirm_restore,open_result_panel,open_notes,seed_historical_editor
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -119,7 +119,7 @@ class V2Training(BrowserHarness):
         form=self.open_result('PULL A','PULL-A-1')
         # Quick input fills both sides; asymmetric correction requires explicit separation.
         form.locator('[data-quick=kg]').fill('40');form.locator('[data-quick=reps]').fill('9')
-        expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('40')
+        form=seed_historical_editor(self.page,"d.performance.rows[1].segments[0].kg='39'")
         form.locator('[data-row="1"][data-field=kg]').fill('35')
         self.save_form(form)
         sides=self.state()['entries'][-1]
@@ -185,42 +185,35 @@ class V2Training(BrowserHarness):
         expect(form.get_by_label('Ciężar (kg)',exact=True)).to_be_visible()
         expect(form).not_to_contain_text('Szybki ciężar')
         form.locator('[data-quick=kg]').fill('40');form.locator('[data-quick=reps]').fill('9')
-        for row in range(6):
+        for row in [0,2,4]:
             expect(form.locator(f'[data-row="{row}"][data-field=kg]')).to_have_value('40')
             expect(form.locator(f'[data-row="{row}"][data-field=reps]')).to_have_value('9')
-        form.locator('[data-rich-action=side-mode][data-row="2"]').click()
+        # One shared row changes both actual records; old asymmetric evidence is
+        # injected separately, because the everyday UI no longer splits pairs.
         form.locator('[data-row="2"][data-field=kg]').fill('45')
         form.locator('[data-row="2"][data-field=reps]').fill('10')
-        form.locator('[data-rich-action=side-mode][data-row="2"]').click()
-        expect(form.locator('[data-row="3"][data-field=kg]')).to_have_value('45')
-        expect(form.locator('[data-row="2"][data-field=reps]')).to_have_value('10')
-        for row in [0,1,4,5]:expect(form.locator(f'[data-row="{row}"][data-field=kg]')).to_have_value('40')
-        form.locator('[data-row="3"][data-field=kg]').fill('37')
+        form=seed_historical_editor(self.page,"d.performance.rows[3].segments[0].kg='37';d.performance.rows[1].segments[0].kg='39'")
         expect(form.locator('[data-row="2"][data-field=kg]')).to_have_value('45')
-        # Default separation survives even while both sides are equal.
-        self.confirm=False;form.locator('[data-quick=kg]').fill('99');self.confirm=True
         expect(form.locator('[data-row="3"][data-field=kg]')).to_have_value('37')
+        expect(form.locator('[data-quick=kg]')).to_have_attribute('readonly','')
         expect(form.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         draft=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return (await db.readDrafts())[0]}finally{db.close()}}')
         self.assertEqual(self.state(),before)
         self.page.reload();self.ready();self.page.locator('[data-draft-resume]').click();form=self.page.locator('.performanceForm')
-        expect(form.locator('[data-rich-action=side-mode][data-row="0"]')).to_have_text('Scal L/P')
+        expect(form.locator('[data-side-exception]').first).to_be_visible()
         form.locator('[data-row="1"][data-field=kg]').fill('38')
         expect(form.locator('[data-row="0"][data-field=kg]')).to_have_value('40')
-        form.locator('[data-rich-action=side-mode][data-row="0"]').click()
         self.confirm=False;form.locator('[data-rich-action=merge-left][data-row="0"]').click()
         expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('38')
         self.confirm=True;form.locator('[data-rich-action=merge-left][data-row="0"]').click()
-        form.locator('[data-rich-action=side-mode][data-row="0"]').click() # reopen independent fields
-        expect(form.locator('[data-row="1"][data-field=kg]')).to_have_value('40')
-        form.locator('[data-rich-action=side-mode][data-row="4"]').click()
+        expect(form.locator('[data-row="0"][data-field=kg]')).to_have_value('40')
+        self.assertEqual(self.page.evaluate("async()=>{const m=await import('./model/performance-editor.mjs'),f=document.querySelector('.performanceForm');return m.state(f.dataset.id,f.dataset.session).performance.rows[1].segments[0].kg}"),'40')
         form.locator('[data-row="4"][data-field=kg]').fill('41')
-        form.locator('[data-rich-action=side-mode][data-row="4"]').click()
         expect(form.locator('[data-row="4"][data-field=kg]')).to_have_value('41')
         self.save_form(form);saved=self.state();sid=saved['activeId'];entry=saved['entries'][-1]
         self.assertEqual([r['id'] for r in entry['performance']['rows']],[r['id'] for r in draft['value']['performance']['rows']])
         form=self.history_edit(sid,'PULL-A-1')
-        expect(form.locator('[data-rich-action=side-mode][data-row="2"]')).to_have_text('Scal L/P')
+        expect(form.locator('[data-row="3"][data-field=kg]')).to_be_visible()
         expect(form.locator('[data-row="2"][data-field=kg]')).to_have_value('45')
         expect(form.locator('[data-row="3"][data-field=kg]')).to_have_value('37')
         form.locator('[data-row="3"][data-field=reps]').fill('7')
