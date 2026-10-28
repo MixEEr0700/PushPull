@@ -2,6 +2,20 @@ import {SLOTS,PLAN_ID} from './v2-plan-data.mjs';
 import {canonical,requireThat as check} from './backup-json.mjs';
 import {createModel,validateModel} from './training-model.mjs';
 export {SLOTS,PLAN_ID};
+/** Own notes only. An arbitrary historical ID cannot prove a plan binding.
+ * Keep the existing ID contract. Multiple variants of one exercise within a
+ * version cannot be distinguished by that contract: fail closed, retain data.
+ */
+export function userNoteBinding(model,versionId,exerciseId,variantId){
+ const positions=model?.positions.filter(p=>p.planVersionId===versionId&&p.exerciseId===exerciseId)??[];
+ if(!positions.some(p=>p.variantId===variantId))return null;
+ if(new Set(positions.map(p=>p.variantId)).size!==1)return null;
+ const version=model.planVersions.find(v=>v.id===versionId);if(!version)return null;
+ const id='user:'+versionId+':'+exerciseId;
+ const record=model.userNotes.find(n=>n.id===id);
+ const valid=record?.exerciseId===exerciseId&&record.origin==='user'&&record.sessionId===null;
+ return {id,context:version.executionVersion===2?versionId:variantId,text:valid?record.text:'',revision:valid?record.revision:0};
+}
 /** Presentation only: one shared slot number and A/B/C… for any group size. */
 export function groupMemberNumber(slot,index){
  let suffix='';for(let n=index+1;n>0;n=Math.floor((n-1)/26))suffix=String.fromCharCode(65+(n-1)%26)+suffix;
@@ -55,7 +69,7 @@ export function views(model,versionId,type,data){
  let number=0;const numbers=new Map();for(const p of positions){const g=model.groups.find(g=>g.positionIds.includes(p.id));if(!g||g.positionIds[0]===p.id)number++;numbers.set(p.id,g?groupMemberNumber(number,g.positionIds.indexOf(p.id)):number);}
  const one=p=>{
   const targets=model.sets.filter(s=>s.positionId===p.id).sort((a,b)=>a.order-b.order),group=model.groups.find(g=>g.positionIds.includes(p.id));
-  return {id:p.exerciseId,name:p.label,displayNumber:imported?numbers.get(p.id):p.slotOrder+1,sets:targets.length||'?',target:targets.map(t=>(t.role==='backoff'?'back-off ':'')+(t.reps? t.reps.min+'–'+t.reps.max:'nieokreślone')).join(' / ')||'nieokreślone',tempo:imported?[...new Set(targets.map(t=>tempoText(t.tempo)))].join(' / ')||'nieokreślone':tempoText(targets[0]?.tempo),rir:imported?[...new Set(targets.map(t=>rangeText(t.rir)))].join(' / ')||'nieokreślone':targets[0]?.rir?.min??'nieokreślone',initialKg:'',v2:true,imported,planLabel:version.label,planVersionId:versionId,journalVariantId:p.variantId,positionId:p.id,sideMode:p.sideMode,loadConvention:p.loadConvention,targets:targets.map(t=>({...t,drop:model.drops.some(d=>d.setId===t.id)})),group,notes:(data?.trainingJournal?.model.userNotes.find(n=>n.id==='user:'+versionId+':'+p.exerciseId&&n.exerciseId===p.exerciseId&&n.origin==='user'&&n.sessionId===null)??data?.trainingJournal?.model.userNotes.find(n=>n.exerciseId===p.exerciseId&&n.origin==='user'&&n.sessionId===null&&!data.trainingJournal.model.planVersions.some(v=>n.id==='user:'+v.id+':'+p.exerciseId)))?.text??'',sharedNotes:Object.values(data?.exercises??{}).flat().find(e=>e.id===p.exerciseId)?.notes??'',instructionSources:model.coachInstructions.filter(i=>i.planVersionId===versionId&&(i.positionId===p.id||i.positionId===null)),instructions:model.coachInstructions.filter(i=>i.planVersionId===versionId&&(i.positionId===p.id||i.positionId===null)).map(i=>i.text).join('\n')};
+  return {id:p.exerciseId,name:p.label,displayNumber:imported?numbers.get(p.id):p.slotOrder+1,sets:targets.length||'?',target:targets.map(t=>(t.role==='backoff'?'back-off ':'')+(t.reps? t.reps.min+'–'+t.reps.max:'nieokreślone')).join(' / ')||'nieokreślone',tempo:imported?[...new Set(targets.map(t=>tempoText(t.tempo)))].join(' / ')||'nieokreślone':tempoText(targets[0]?.tempo),rir:imported?[...new Set(targets.map(t=>rangeText(t.rir)))].join(' / ')||'nieokreślone':targets[0]?.rir?.min??'nieokreślone',initialKg:'',v2:true,imported,planLabel:version.label,planVersionId:versionId,journalVariantId:p.variantId,positionId:p.id,sideMode:p.sideMode,loadConvention:p.loadConvention,targets:targets.map(t=>({...t,drop:model.drops.some(d=>d.setId===t.id)})),group,notes:userNoteBinding(data?.trainingJournal?.model,versionId,p.exerciseId,p.variantId)?.text??'',sharedNotes:Object.values(data?.exercises??{}).flat().find(e=>e.id===p.exerciseId)?.notes??'',instructionSources:model.coachInstructions.filter(i=>i.planVersionId===versionId&&(i.positionId===p.id||i.positionId===null)),instructions:model.coachInstructions.filter(i=>i.planVersionId===versionId&&(i.positionId===p.id||i.positionId===null)).map(i=>i.text).join('\n')};
  };
  // One view per original position, including each independent group member.
  return positions.map(p=>{const view=one(p);if(!view.group||imported)return view;

@@ -1,4 +1,4 @@
-"""Final compact polish: isolated native data, notes safety fallback is explicit."""
+"""Final compact polish: isolated native data, own notes only, protected sources."""
 from pathlib import Path
 from playwright.sync_api import expect
 from test_browser import BrowserHarness,open_notes,ROOT
@@ -62,7 +62,8 @@ class CompactFinal(BrowserHarness):
         self.activate();self.page.locator('[data-act=start]').click();expect(self.page.locator('[data-act=finish]')).to_be_visible();self.card().locator('[data-expand]').click()
         before=self.state()['trainingJournal']['model'];open_notes(self.card())
         note=self.card().locator('[data-personal-note]');note.locator('summary').click()
-        expect(note.locator('[data-note-scope]')).to_be_visible()
+        expect(self.card().locator('[data-instructions],[data-note-scope]')).to_have_count(0)
+        expect(note.locator('textarea')).to_have_value('')
         text='Dopisek Ł 😀\n'+'Długi tekst '*40;note.locator('textarea').fill(text)
         self.card().locator('[data-note-toggle]').click();expect(self.card().locator('.exercise-notes')).not_to_be_visible()
         self.page.reload();self.ready();self.card().locator('[data-expand]').click()
@@ -74,7 +75,7 @@ class CompactFinal(BrowserHarness):
         self.assertEqual(after['trainingJournal']['model']['userNotes'][-1]['text'],text)
         self.page.reload();self.ready();self.card().locator('[data-expand]').click();open_notes(self.card())
         expect(self.card().locator('[data-personal-note] summary')).to_contain_text(text)
-        expect(self.card().locator('[data-instructions]').locator('textarea,input')).to_have_count(0)
+        expect(self.card().locator('[data-instructions]')).to_have_count(0)
         self.assertEqual(self.state(),after)
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.plans();self.page.locator('#planFile').set_input_files(ROOT/'tests/fixtures/plan-v3.json')
@@ -93,7 +94,7 @@ class CompactFinal(BrowserHarness):
         self.assertEqual([r for r in final['coachInstructions'] if r['planVersionId']=='v2-owner-2026-10-22'],before['coachInstructions'])
         self.assertEqual([n for n in final['userNotes'] if n['exerciseId']=='PUSH-A-1'],after['trainingJournal']['model']['userNotes'])
 
-    def test_four_buttons_stay_below_legacy_rows_and_source_edit_is_explicitly_separate(self):
+    def test_four_buttons_stay_below_legacy_rows(self):
         self.start();self.result('80','10');f=self.page.locator('.seriesResultForm')
         f.locator('[data-series-toggle]').click();f.locator('[data-series-index="2"][data-field=reps]').fill('9')
         self.assertLess(f.locator('.series-details').bounding_box()['y'],f.locator('.result-controls').bounding_box()['y'])

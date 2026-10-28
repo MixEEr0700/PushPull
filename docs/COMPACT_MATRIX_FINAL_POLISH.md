@@ -1,41 +1,35 @@
 # Compact Matrix v0.4 — końcowy szlif po PR #96
 
-Baza: `main`, `3d581cfccafc476a0e07135dd2f378f8c9f12b50` (scalony PR #96). Zakres: załączone polecenie właściciela z 28.10.2026. Bez Issue #94 i bez przebudowy aplikacji.
+Baza: `main`, `3d581cfccafc476a0e07135dd2f378f8c9f12b50` (scalony PR #96). Zakres: załączone polecenie oraz końcowe ustalenia właściciela w PR #97 z 28.10.2026, 09:30:43 UTC. Bez Issue #94 i bez przebudowy aplikacji.
 
 ## Zmiany UI
 
 - Numer 22 px na wypełnionym kwadracie `#176B45`, biały tekst; nazwa 20,5 px (około 14% więcej niż 18 px w PR #96), pogrubiona, bez obcinania. Parametry pochodzą z dotychczasowych widoków planu, kolor `#A9B7AF`.
 - Rzeczywiste wyniki `#39FF74`, 13 px / 600; wiek ostatniej zmiany pozostaje szary, mniejszy. Bez zmian kompresji równych serii, porządku 10/10/9, L/P, drop, back-off, rund i kontekstów.
 - Ikona notatnika jest osobnym przyciskiem obok chevrona, wyłącznie na rozwiniętej karcie. Brak zagnieżdżania przycisków. Otwiera/zamyka obszar Notatki bez zamykania ćwiczenia. Po uruchomieniu obszar jest schowany, także przy zachowanym szkicu. Jego zamknięcie nie kasuje tekstu. Stan widoku jest wyłącznie w pamięci i rozdziela właściciela, plan/wariant i ćwiczenie.
-- Usunięto codzienne oznaczenia autorstwa z obszaru Notatki. Dane źródłowe/proweniencja pozostają w bazie. Ograniczenie edycji jest wyjaśniane dopiero przy otwartym edytorze dopisku.
+- Obszar Notatki zawiera wyłącznie własny tekst `userNotes`. Nie renderuje instrukcji trenera, tekstów źródłowych, historycznych ani osobnego readonly. Pusta notatka: dyskretny plus, istniejąca: tekst z ołówkiem i pełna edycja. Dane źródłowe/proweniencja pozostają w bazie.
 - Kolejność aktywnego formularza: nagłówek → opcjonalne Notatki → dwa szybkie pola → opcjonalne serie → cztery dolne przyciski. Pierwszy rząd: Zapisz wynik / Edytuj serie lub Zapisz korektę / Zwiń serie. Drugi: Historia / Statystyki. Nie ma przycisków pomiędzy polami i seriami, drugiego formularza pod nimi ani powielonych kontrolek Historii/Statystyk. Po zatwierdzonym zapisie lub przejściu do historii/statystyk pozostają cztery akcje w dwóch rzędach, pod panelem. Edytuj serie otwiera dotychczasowy formularz i rozwija jego wiersze; nie zapisuje wyniku.
 - Usunięto instrukcje opisowe o szybkim wpisie i powielaniu segmentów. Zachowano obowiązkowy wybór znaczenia kg dla planów, gdzie jest nieustalone, oraz ostrzeżenia/confirmy/komunikaty walidacji.
 - Auto-wysokość notatki uwzględnia obramowanie `border-box`. Nowy test odtworzył niedoszacowanie o 2 px; poprawka usuwa różnicę między `scrollHeight` i `clientHeight`, bez wewnętrznego przewijania.
 
-## Jedno edytowalne pole notatek — NIE wdrożono dla połączonych źródeł V2
+## Uzupełnienie po decyzji właściciela w PR #97
 
-Zgodnie z wyraźnie dopuszczonym wariantem w poleceniu pozostawiono ochronę źródeł i wykonano pozostałe zmiany. Wspólny, zwijany obszar to nie to samo co jedno swobodnie edytowalne pole całej treści. Obecnie zalecenia są tylko do odczytu, a edycja zmienia wyłącznie dopisek. Nie deklarujemy spełnienia pełnego wymogu jednego pola.
+Decyzja 09:30:43 UTC zastępuje wcześniejszy pomysł wspólnej edycji źródeł. Nie wdrażamy nakładki ani nowego kontraktu. Zmieniono tylko projekcję/edycję własnej notatki i udostępniono ten sam edytor podczas przygotowania zapisanego planu.
 
-### Analiza istniejącego modelu
+### Własne notatki i kontekst
 
-- `coachInstructions`: `planVersionId`, opcjonalne `positionId`, `revision`, `text`, `confirmation`, `source`. Potwierdzenie trenerskie jest legalne tylko dla źródła `trainer` (walidacja w `model/training-model.mjs`). Występują instrukcje globalne planu i instrukcje pozycji. Mieszane teksty C1/C2/D2 mają źródło `owner`; nie wolno zgadywać autorstwa poszczególnych zdań.
-- `userNotes`: `exerciseId`, opcjonalne `sessionId`, `text`, `origin`, `revision`, `source`. Nie ma jawnego `planVersionId`; bieżący UI rozdziela ogólne wpisy wersji planów za pomocą dotychczasowych stabilnych ID `user:<planVersionId>:<exerciseId>`. Zachowuje dowolne starsze ID, a notatek sesyjnych nie pożycza jako ogólnych. Kolizja ID z innym kontekstem blokuje zapis.
-- Historyczne `exercises[].notes` pozostają tekstem bez rozstrzygniętej proweniencji. W V2 są udostępniane jako historyczna treść tylko do odczytu; starszy formularz tekstowy zachowuje swój dotychczasowy zapis. Oryginalne snapshoty sesji zawierają odrębny model źródłowy.
-- Niezatwierdzone własne dopiski: dotychczasowe rekordy localStorage `pushpull-note-ui-v1:` z bazą, tekstem, tokenem i osobnym zakresem karty. Różne źródła nie mają automatycznie wybieranego zwycięzcy. Restart, quota, kolizje i jawne anulowanie zachowują istniejące zasady z raportu F. To nadal osobny szkic UI z możliwością pobrania; nie rozszerzono kontraktu backupów ani kolektora v6.
+- `coachInstructions`, teksty `owner`, historyczne `exercises[].notes`, źródła, rewizje i snapshoty zachowują oryginalną zawartość. W treningu i kalendarzu nie są doklejane do Notatek. Dokumentacja źródłowa nadal pozostaje w podglądzie definicji planu i kopiach.
+- Własny zapis nadal korzysta z `userNotes` i istniejącego ID `user:<planVersionId>:<exerciseId>`, `origin:user`, `sessionId:null`. Odczyt sprawdza też właściwe ćwiczenie i obecność wariantu w tej wersji. Usunięto fallback po samym ID ćwiczenia: arbitralnie nazwany stary rekord nie dowodzi przypisania do bieżącej wersji. Rekordy te zostają zachowane, bez kopiowania, scalania ani migracji.
+- Jeżeli jedna wersja planu zawiera różne warianty tego samego ćwiczenia, obecny kontrakt nie rozróżnia ich w ID notatki. Edytor blokuje taki niejednoznaczny kontekst zamiast pożyczać tekst lub wprowadzać nową konwencję identyfikatorów. To jawne ograniczenie, nie migracja.
+- Legacy ze snapshotem obserwowanej wersji może zapisać własną notatkę dla tego kontekstu do istniejących `userNotes`; nie edytuje `legacyExercise` ani tekstu rejestru. Legacy bez wersji/snapshotu nie ma udowodnionego przypisania: widok informuje o braku kontekstu, nie pokazuje źródłowych tekstów i nie tworzy go automatycznie. Należy jawnie zapisać/aktywować plan albo użyć istniejącej opcji wersjonowania dla przyszłych sesji. Dawne teksty nadal są w danych/kopiach.
+- Zapis sprawdza ID, powiązania, bazowy tekst i rewizję. Kolizja z notatką sesyjną lub źródłową blokuje zapis. Potwierdzenie pojawia się po dotychczasowym zatwierdzonym commicie; CAS i walidacja bazy pozostają bez zmian.
+- Szkice nadal używają dotychczasowych tokenów, bazy, localStorage i pamięci edytora. Różne źródła nie mają automatycznie wybieranego zwycięzcy. Zachowano anulowanie, ochronę kolizji, pobieranie i zachowanie tekstu po błędzie. Dla kontekstu bez jednoznacznego powiązania istniejący szkic można pobrać bez przypisywania go do innej wersji. Nie rozszerzono kodeka/collectora v6; szkic UI nadal nie jest zatwierdzoną notatką w kopii wyników.
 
-### Dlaczego nie zapisujemy arbitralnie połączonego tekstu
+### Pierwsza notatka przy przygotowaniu planu
 
-1. Zapis całego pola do `coachInstructions.text` narusza źródło, jego proweniencję i rozdzielenie planu/sesji/użytkownika.
-2. Zapis połączonej treści do istniejącego `userNotes.text` bez odrębnego kontraktu widoku powoduje ponowne dołączanie instrukcji przy kolejnym otwarciu lub w starszym UI. Nie ma jawnej informacji, które źródła i rewizje zostały już użyte. Wykorzystanie wolnego tekstu `source.reference` jako ukrytego protokołu nadpisania nie rozwiązuje zgodności czytników ani obsługi zmienionych źródeł.
-3. Rozcinanie swobodnie zmienionego tekstu separatorami/po treści nie daje jednoznacznego odwzorowania na oryginalne rekordy. Identyczne fragmenty mogą pochodzić z różnych źródeł; automatyczne usuwanie duplikatów po wartości traci tę informację.
+Istniejący plik `pushpull-plan` v1 **nie zawiera `userNotes`**. Nie dodano do niego nowego pola ani nie interpretowano instrukcji jako notatki. Najmniejsza ścieżka: **Dane → Plany → import → Zapisz plan bez aktywacji → podgląd zapisanej wersji → rozwiń jednostkę → plus przy ćwiczeniu → zapisz Notatki**. Można ją wpisać przed pierwszym treningiem i przed aktywacją; trening korzysta potem z tego samego rekordu i ID. Sam podgląd nadal niczego nie zapisuje. Zapis notatki wymaga osobnego zatwierdzenia, nie aktywuje planu i nie zmienia rozpoczętej sesji.
 
-Nie wykonano migracji ani nie skopiowano tekstów do nowej reprezentacji. Źródła, ID, rewizje i powiązania pozostają bez zmian.
-
-### Rekomendowany osobny projekt
-
-Wersjonowana nakładka edycyjna, należąca do użytkownika, z jawnym zakresem `ownerId/exerciseId/planVersionId/sessionId` i referencjami do źródłowych ID, rewizji oraz SHA-256. Zapisuje pełny tekst jednego widoku, zachowując oryginalne instrukcje i stare notatki jako niezależne dowody. Pierwsza projekcja powstaje bez zapisu; zapis następuje dopiero po edycji i potwierdzeniu. Zmiana źródła wymaga jawnego uzgodnienia, bez automatycznego zastąpienia dopisków i bez wybierania zwycięzcy datą. Kontrola CAS obejmuje bazę widoku i referencje źródeł; preimage umożliwia powrót.
-
-Przed wdrożeniem należy zatwierdzić reprezentację, zgodność starych czytników i backup/restore, obsługę wielu kart, niekompletnego zapisu i zmienionego planu. To osobny etap zmieniający kontrakt notatek, nie kosmetyczna migracja wykonywana w tym PR. Nie rozpoczęto Issue #94.
+Wbudowany, jeszcze niezapisany V2 pozostaje podglądem bez inicjalizacji notatki. Dla niego zapis jest dostępny po jawnej aktywacji. Zapisany plan importowany umożliwia przygotowanie przed aktywacją. Eksport **pliku planu** pozostaje definicją i nie zawiera własnych notatek; zatwierdzone `userNotes` obejmuje istniejąca pełna kopia danych. Żadnych zmian formatów.
 
 ## Zachowane mechanizmy
 
@@ -43,9 +37,13 @@ Bez zmian w schemacie IndexedDB v2, modułach protokołu przyrostowego, CAS, rea
 
 ## Testy i pomiary
 
-Lokalny pełny Node: 219/219 PASS. Lokalna regresja tematyczna: 20 przypadków, 19 PASS i jeden błąd synchronizacji odczytu CSS nowego testu; po oczekiwaniu na koniec rozpoczęcia sesji i sprawdzaniu CSS z automatycznym ponowieniem cały nowy moduł 3/3 PASS. Nie zmieniono asercji danych; oczekiwane kolory i font są sprawdzane dokładnie. Pozostałe 17 scenariuszy obejmowało notatki/quota/kolizje, poprzednie serie 10/10/9, szkice strukturalne po restarcie, back-off, drop, L/P, grupy, plany i aktywację. Pełną regresję końcowego commitu wykonuje workflow PR (219 Node + 211 Chromium/PWA); finalny status jest podany w PR. Testy integralności nie są zastępowane asercjami wizualnymi. Nie wykonano nowego odbioru fizycznego Pixela 9 ani prawdziwego konta Google; testy i profile są syntetyczne, izolowane.
+Poprzedni HEAD `80e592d` miał pełne CI PASS: run `40659025224` (219 Node + 211 Chromium/PWA). To wynik sprzed uzupełnienia, nie wynik obecnego kodu.
+
+Bieżące uzupełnienie: pełny Node **221/221 PASS**, kontrola składni, zgodność worker/hash i build produkcyjny PASS (release `c5b18c811967523e38db5993`, bez wdrożenia). Pełną regresję Chromium/PWA wykonuje wymagany workflow PR; końcowy status i link są w PR. Nowe przypadki obejmują przygotowanie notatki bez aktywacji, offline/restart, ten sam ID ćwiczenia w kolejnej wersji planu, wyczyszczenie tekstu jako własną rewizję, stare nieprzypisane rekordy i legacy ze snapshotem. Zachowano dokładne porównania źródeł, snapshotów i historii, testy quota i kolizji oraz mobilne 360/390/412 px. W lokalnym przebiegu wystąpiły niestabilne timeouty oczekiwania UI (5 s), m.in. przy otwieraniu bazy/aktywacji i potwierdzeniu zapisu; brak stwierdzonego naruszenia asercji danych. Oddzielny przypadek 10/10/9 przeszedł na poprzednim runtime `80e592d` i obecnym kodzie. Nie rozstrzygamy na tej podstawie przyczyny pozostałych timeoutów ani nie zwiększamy limitów testów. Wyniki końcowej lokalnej próby i pełnego CI są podane w PR. Nie wykonano odbioru fizycznego Pixela 9 ani prawdziwego konta Google.
 
 ## Pomiary przed/po
+
+**Poniższe pomiary dotyczą runtime `d74d298` / testowego HEAD `80e592d`, przed obecnym uproszczeniem Notatek. Nie są pomiarem nowego kodu.** Nie powtarzano zakończonych benchmarków ani nie optymalizowano protokołu w tym uzupełnieniu.
 
 Chromium/Linux, CPU ×4, izolowane profile i dokładnie zachowane syntetyczne fixture’y A–E. Baza to bieżący `main` / PR #96. Historyczne wyniki 125/221 ms i 195/319 ms nie są uczciwą dzisiejszą kontrolą: również niezmieniony `main` działał dziś znacznie wolniej. Dlatego po pierwszym pomiarze zmian wykonano nowy kontrolny przebieg bazy. Serie uruchamiano kolejno, bez innych lokalnych testów. Kolejność nie była losowana; próbka jest mała. Nie zmieniono limitów, throttlingu ani walidacji i nie odrzucono najgorszych prób. [Pełne agregaty, zegary, hashe i orakle](performance/compact-matrix-final-polish.json).
 
@@ -81,4 +79,4 @@ Pierwszy workflow `40654345171` zakończył się timeoutem jednego przypadku (`t
 
 Oczekiwanie rodziny testów lokalnych kopii/izolowanego podglądu zostało oparte na bezpośrednim odczycie kontrolera i czasie monotonicznym Pythona, niezależnie od dostarczania klatek animacji. Zachowano warunek `controller !== null`, dotychczasowy limit 30 s i wszystkie asercje danych. Rejestracja `ready` nadal nie wystarcza. Dwa nowe testy z rzeczywistym, testowym service workerem sprawdzają odrzucenie aktywnej rejestracji bez kontrolera oraz wymagane przejęcie strony, także przy wstrzymanym czasie wirtualnym. Probe nie dotyka cache aplikacji ani IndexedDB. To korekta synchronizacji w harnessie, nie deklaracja odtworzenia pierwotnego błędu CI.
 
-Zmiany po pomiarach dotyczą wyłącznie testów i raportu; SHA-256 runtime nadal odpowiada opublikowanym pomiarom. Końcowy workflow obejmuje 219 Node i 211 Chromium/PWA; wynik jest podany w PR.
+Na HEAD `80e592d` zmiany po pomiarach dotyczyły wyłącznie testów i raportu; workflow `40659025224` przeszedł. Obecne uproszczenie Notatek zmienia runtime, więc jego SHA-256 jest inny; historycznych czasów nie traktujemy jako pomiaru obecnego HEAD.
