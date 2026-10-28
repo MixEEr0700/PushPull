@@ -244,7 +244,7 @@ class BrowserRegression(BrowserHarness):
         self.assertEqual(saved['entries'][0]['series'][1]['kg'],'85')
         self.page.reload()
         self.assertEqual(self.state(),saved)
-        self.assertEqual(saved['exercises']['PUSH A'][0]['notes'],'Łopatki stabilnie')
+        self.assertEqual(saved['exercises'],before_notes['exercises']) # No legacy/source text was edited by the Notes view.
         self.page.locator('[data-tab=calendar]').click()
         self.assertIn('mark', self.page.locator('[data-day="2026-10-20"]').get_attribute('class').split())
 
