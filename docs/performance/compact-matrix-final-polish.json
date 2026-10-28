@@ -1,0 +1,635 @@
+{
+  "syntheticOnly": true,
+  "base": "3d581cfccafc476a0e07135dd2f378f8c9f12b50",
+  "cpuThrottle": 4,
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "note": "Serial isolated Chromium/Linux. First after run, then fresh main control because old PR96 timings were much faster even than todays unchanged main. No dropped samples or arbitrary throttling changes. n=8 writes, 4new+4corrections, p95=max; not physical Android. Separate native navigation DOM/two-rAF clocks distinguish UI from RPC-inclusive ms. Two rAFs are paint opportunity, not proof of physical display. Tail regression cannot be excluded.",
+  "runtimeSha256": {
+    "style.css": "f0f0fc5f96b9c48cb9648921669b6ea01176d83ac5ca49ffd1588bd15912da77",
+    "app.js": "e2c723802ea7b01b706b7765569dc19b8db2e90345ef6d2b62bda1c1ca6da289",
+    "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+    "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+    "model/performance-editor.mjs": "de54e5ead918efb62e36515867d7a689dab29b1575e035b3d95c5f5b3ea924b4"
+  },
+  "writes": {
+    "small": {
+      "before": {
+        "clickToStrictCompleteMs": {
+          "n": 8,
+          "median": 690.25,
+          "p95": 1056.6000000000931,
+          "max": 1056.6000000000931
+        },
+        "firstMs": {
+          "n": 8,
+          "median": 64.09999999997672,
+          "p95": 217.5,
+          "max": 217.5
+        },
+        "fullMs": {
+          "n": 8,
+          "median": 993.6999999999534,
+          "p95": 2604.4000000001397,
+          "max": 2604.4000000001397
+        },
+        "maxTaskMs": {
+          "n": 8,
+          "median": 170.0,
+          "p95": 1059,
+          "max": 1059
+        },
+        "blockingMs": {
+          "n": 8,
+          "median": 161.5,
+          "p95": 1279,
+          "max": 1279
+        },
+        "sampledHeapHighWaterBytes": {
+          "n": 8,
+          "median": 10533715.5,
+          "p95": 13370596,
+          "max": 13370596
+        }
+      },
+      "after": {
+        "clickToStrictCompleteMs": {
+          "n": 8,
+          "median": 631.5999999999767,
+          "p95": 1154.3999999999069,
+          "max": 1154.3999999999069
+        },
+        "firstMs": {
+          "n": 8,
+          "median": 59.8499999998603,
+          "p95": 71,
+          "max": 71
+        },
+        "fullMs": {
+          "n": 8,
+          "median": 855.9000000000233,
+          "p95": 1674.5,
+          "max": 1674.5
+        },
+        "maxTaskMs": {
+          "n": 8,
+          "median": 125.5,
+          "p95": 376,
+          "max": 376
+        },
+        "blockingMs": {
+          "n": 8,
+          "median": 75.5,
+          "p95": 587,
+          "max": 587
+        },
+        "sampledHeapHighWaterBytes": {
+          "n": 8,
+          "median": 9919412.0,
+          "p95": 12908488,
+          "max": 12908488
+        }
+      },
+      "fixtureSHA256": "0f2b19da8b7f58e68cb3ad0799bd6320c03a80d074788ca8d958760ada6c30cb",
+      "preserved": true,
+      "proof": {
+        "history": "9527c34932eeeb7dee347bffb73fb86f3fe91979c49a0786d626d6267bd01c1e",
+        "archives": "82eaf21ae79d029e15aa23cc58e5f764e26ed76780ce8c2514c0303a7be993bf",
+        "sessions": 4,
+        "results": 35,
+        "snapshots": 4
+      }
+    },
+    "history40-raw4": {
+      "before": {
+        "clickToStrictCompleteMs": {
+          "n": 8,
+          "median": 1043.7000000000698,
+          "p95": 1654.8999999999069,
+          "max": 1654.8999999999069
+        },
+        "firstMs": {
+          "n": 8,
+          "median": 59.800000000046566,
+          "p95": 87.9000000001397,
+          "max": 87.9000000001397
+        },
+        "fullMs": {
+          "n": 8,
+          "median": 1298.8500000000931,
+          "p95": 1947.3999999999069,
+          "max": 1947.3999999999069
+        },
+        "maxTaskMs": {
+          "n": 8,
+          "median": 142.5,
+          "p95": 292,
+          "max": 292
+        },
+        "blockingMs": {
+          "n": 8,
+          "median": 144.5,
+          "p95": 396,
+          "max": 396
+        },
+        "sampledHeapHighWaterBytes": {
+          "n": 8,
+          "median": 17548269.0,
+          "p95": 23272573,
+          "max": 23272573
+        }
+      },
+      "after": {
+        "clickToStrictCompleteMs": {
+          "n": 8,
+          "median": 1074.6500000000233,
+          "p95": 3949.600000000093,
+          "max": 3949.600000000093
+        },
+        "firstMs": {
+          "n": 8,
+          "median": 61.70000000006985,
+          "p95": 120.0999999998603,
+          "max": 120.0999999998603
+        },
+        "fullMs": {
+          "n": 8,
+          "median": 1288.3500000000931,
+          "p95": 4266.700000000186,
+          "max": 4266.700000000186
+        },
+        "maxTaskMs": {
+          "n": 8,
+          "median": 127.0,
+          "p95": 1114,
+          "max": 1114
+        },
+        "blockingMs": {
+          "n": 8,
+          "median": 98.5,
+          "p95": 2755,
+          "max": 2755
+        },
+        "sampledHeapHighWaterBytes": {
+          "n": 8,
+          "median": 17017435.5,
+          "p95": 20514630,
+          "max": 20514630
+        }
+      },
+      "fixtureSHA256": "04397db19db0ef0ed66571126f6533d5bb6e3a53ef55181235c9a3a713f4fef2",
+      "preserved": true,
+      "proof": {
+        "history": "c82c5a9cf205b5ac7831ef506ef791b27ebabb4b2b931a7236db98fb76aca559",
+        "archives": "9d92f740ff7821d90cd294f6d0e3da8e56eed7717a2e0b08201a3b83fb2ac904",
+        "sessions": 40,
+        "results": 350,
+        "snapshots": 40
+      },
+      "slowFirstAfterSample": {
+        "firstMs": 88.80000000004657,
+        "fullMs": 4266.700000000186,
+        "handlerQueueMs": [],
+        "spans": [
+          {
+            "name": "innerHTML",
+            "start": 88174.80000000005,
+            "ms": 36.89999999990687
+          }
+        ],
+        "maxTaskMs": 1114,
+        "blockingMs": 2755,
+        "transactions": [
+          {
+            "start": 84608.09999999986,
+            "ms": 25.800000000046566,
+            "mode": "readonly"
+          },
+          {
+            "start": 84635.5,
+            "ms": 15.899999999906868,
+            "mode": "readonly"
+          },
+          {
+            "start": 84654.3999999999,
+            "ms": 8,
+            "mode": "readonly"
+          },
+          {
+            "start": 84662.59999999986,
+            "ms": 7.300000000046566,
+            "mode": "readonly"
+          },
+          {
+            "start": 84671.80000000005,
+            "ms": 6.199999999953434,
+            "mode": "readonly"
+          },
+          {
+            "start": 84681.3999999999,
+            "ms": 8.100000000093132,
+            "mode": "readonly"
+          },
+          {
+            "start": 84689.59999999986,
+            "ms": 7,
+            "mode": "readonly"
+          },
+          {
+            "start": 84702.3999999999,
+            "ms": 5.699999999953434,
+            "mode": "readonly"
+          },
+          {
+            "start": 84709.69999999995,
+            "ms": 5.800000000046566,
+            "mode": "readonly"
+          },
+          {
+            "start": 84716.09999999986,
+            "ms": 9.5,
+            "mode": "readonly"
+          },
+          {
+            "start": 84730.59999999986,
+            "ms": 6.100000000093132,
+            "mode": "readonly"
+          },
+          {
+            "start": 84739.09999999986,
+            "ms": 11.700000000186265,
+            "mode": "readonly"
+          },
+          {
+            "start": 84751,
+            "ms": 10.599999999860302,
+            "mode": "readonly"
+          },
+          {
+            "start": 84761.80000000005,
+            "ms": 14.399999999906868,
+            "mode": "readonly"
+          },
+          {
+            "start": 84789,
+            "ms": 17.5999999998603,
+            "mode": "readonly"
+          },
+          {
+            "start": 84811,
+            "ms": 4.5,
+            "mode": "readonly"
+          },
+          {
+            "start": 84818.5,
+            "ms": 11,
+            "mode": "readonly"
+          },
+          {
+            "start": 84831,
+            "ms": 5.199999999953434,
+            "mode": "readonly"
+          },
+          {
+            "start": 84837.5,
+            "ms": 22.300000000046566,
+            "mode": "readonly"
+          },
+          {
+            "start": 84861,
+            "ms": 6.5,
+            "mode": "readonly"
+          },
+          {
+            "start": 84869.8999999999,
+            "ms": 10.199999999953434,
+            "mode": "readonly"
+          },
+          {
+            "start": 84884.3999999999,
+            "ms": 12.900000000139698,
+            "mode": "readonly"
+          },
+          {
+            "start": 84898.8999999999,
+            "ms": 12.5,
+            "mode": "readonly"
+          },
+          {
+            "start": 84911.8999999999,
+            "ms": 10.199999999953434,
+            "mode": "readonly"
+          },
+          {
+            "start": 84922.3999999999,
+            "ms": 11.199999999953434,
+            "mode": "readonly"
+          },
+          {
+            "start": 84953.69999999995,
+            "ms": 2.8999999999068677,
+            "mode": "readonly"
+          },
+          {
+            "start": 84957.19999999995,
+            "ms": 13,
+            "mode": "readonly"
+          },
+          {
+            "start": 84978.59999999986,
+            "ms": 1.8000000000465661,
+            "mode": "readonly"
+          },
+          {
+            "start": 84984,
+            "ms": 6.899999999906868,
+            "mode": "readonly"
+          },
+          {
+            "start": 84994.80000000005,
+            "ms": 7.899999999906868,
+            "mode": "readonly"
+          },
+          {
+            "start": 85005.19999999995,
+            "ms": 7.899999999906868,
+            "mode": "readonly"
+          },
+          {
+            "start": 85014.30000000005,
+            "ms": 1.1999999999534339,
+            "mode": "readonly"
+          },
+          {
+            "start": 85015.69999999995,
+            "ms": 9,
+            "mode": "readonly"
+          },
+          {
+            "start": 85027.3999999999,
+            "ms": 3.9000000001396984,
+            "mode": "readonly"
+          },
+          {
+            "start": 85031.69999999995,
+            "ms": 6,
+            "mode": "readonly"
+          },
+          {
+            "start": 85037.8999999999,
+            "ms": 6.400000000139698,
+            "mode": "readonly"
+          },
+          {
+            "start": 85045.80000000005,
+            "ms": 4.099999999860302,
+            "mode": "readonly"
+          },
+          {
+            "start": 85053.80000000005,
+            "ms": 9.099999999860302,
+            "mode": "readonly"
+          },
+          {
+            "start": 85065.59999999986,
+            "ms": 5.7000000001862645,
+            "mode": "readonly"
+          },
+          {
+            "start": 85072.09999999986,
+            "ms": 3.800000000046566,
+            "mode": "readonly"
+          },
+          {
+            "start": 85076,
+            "ms": 2.8999999999068677,
+            "mode": "readonly"
+          },
+          {
+            "start": 85079,
+            "ms": 4.099999999860302,
+            "mode": "readonly"
+          },
+          {
+            "start": 85086.5,
+            "ms": 5,
+            "mode": "readonly"
+          },
+          {
+            "start": 85099.59999999986,
+            "ms": 14.300000000046566,
+            "mode": "readonly"
+          },
+          {
+            "start": 85115.80000000005,
+            "ms": 4.7999999998137355,
+            "mode": "readonly"
+          },
+          {
+            "start": 85122.3999999999,
+            "ms": 10,
+            "mode": "readonly"
+          },
+          {
+            "start": 85134.59999999986,
+            "ms": 10.200000000186265,
+            "mode": "readonly"
+          },
+          {
+            "start": 85152.30000000005,
+            "ms": 9.299999999813735,
+            "mode": "readonly"
+          },
+          {
+            "start": 85164.8999999999,
+            "ms": 1649.9000000001397,
+            "mode": "readonly"
+          },
+          {
+            "start": 86823.3999999999,
+            "ms": 1275.1000000000931,
+            "mode": "readwrite"
+          },
+          {
+            "start": 88110.69999999995,
+            "ms": 26,
+            "mode": "readwrite"
+          }
+        ],
+        "kind": "new",
+        "first": true,
+        "clickToStrictCompleteMs": 3949.600000000093,
+        "nativeEventMs": 3947.9000000001397,
+        "sampledHeapHighWaterBytes": 14788762,
+        "marks": [
+          {
+            "name": "detach-validate",
+            "at": 84351.5
+          },
+          {
+            "name": "index-prepare",
+            "at": 84948.09999999986
+          },
+          {
+            "name": "transaction-open",
+            "at": 86822.3999999999
+          },
+          {
+            "name": "cas",
+            "at": 86824.09999999986
+          },
+          {
+            "name": "write-objects",
+            "at": 86941.59999999986
+          },
+          {
+            "name": "write-result-root",
+            "at": 86999.30000000005
+          },
+          {
+            "name": "readback",
+            "at": 87006.5
+          },
+          {
+            "name": "strict-complete",
+            "at": 88100.19999999995,
+            "eventTimeStamp": 88098.5,
+            "durability": "strict"
+          },
+          {
+            "name": "publication",
+            "at": 88100.19999999995
+          }
+        ],
+        "completionCallbackMs": [
+          {
+            "ms": 3963.8000000000466,
+            "durability": "strict"
+          }
+        ],
+        "stageMs": {
+          "detach-validate": 596.5999999998603,
+          "index-prepare": 1874.3000000000466,
+          "transaction-open": 1.6999999999534339,
+          "cas": 117.5,
+          "write-objects": 57.700000000186265,
+          "write-result-root": 7.199999999953434,
+          "readback": 1093.6999999999534
+        }
+      }
+    }
+  },
+  "navigationRpc": {
+    "small": {
+      "before": {
+        "medianMs": 66.10000000009313,
+        "p95Ms": 149.70000000018626
+      },
+      "after": {
+        "medianMs": 153.80000000004657,
+        "p95Ms": 360.4000000001397
+      },
+      "idbRequests": 0,
+      "fixtureSHA256": "0f2b19da8b7f58e68cb3ad0799bd6320c03a80d074788ca8d958760ada6c30cb"
+    },
+    "history40-raw4": {
+      "before": {
+        "medianMs": 75.29999999981374,
+        "p95Ms": 217.40000000037253
+      },
+      "after": {
+        "medianMs": 540.1999999999534,
+        "p95Ms": 677.8999999999069
+      },
+      "idbRequests": 0,
+      "fixtureSHA256": "04397db19db0ef0ed66571126f6533d5bb6e3a53ef55181235c9a3a713f4fef2"
+    },
+    "history400-raw4": {
+      "before": {
+        "medianMs": 95.39999999990687,
+        "p95Ms": 395.20000000018626
+      },
+      "after": {
+        "medianMs": 109.10000000009313,
+        "p95Ms": 970.4000000001397
+      },
+      "idbRequests": 0,
+      "fixtureSHA256": "f55358bf1212585371cee33a193ac75fe8e58fb897fcec4a628ffd4f6d53b55c"
+    }
+  },
+  "nativeNavigation": {
+    "small": {
+      "before": {
+        "ms": {
+          "n": 5,
+          "median": 156.5,
+          "p95": 265.1999999997206
+        },
+        "nativeDomMs": {
+          "n": 5,
+          "median": 17.600000000093132,
+          "p95": 59.5
+        },
+        "nativeTwoFramesMs": {
+          "n": 5,
+          "median": 86.8000000002794,
+          "p95": 156.6999999997206
+        }
+      },
+      "after": {
+        "ms": {
+          "n": 5,
+          "median": 120.29999999981374,
+          "p95": 302.60000000009313
+        },
+        "nativeDomMs": {
+          "n": 5,
+          "median": 22.100000000093132,
+          "p95": 62.10000000009313
+        },
+        "nativeTwoFramesMs": {
+          "n": 5,
+          "median": 62.799999999813735,
+          "p95": 169.10000000009313
+        }
+      },
+      "idbRequests": 0
+    },
+    "history40-raw4": {
+      "before": {
+        "ms": {
+          "n": 5,
+          "median": 96.39999999990687,
+          "p95": 249
+        },
+        "nativeDomMs": {
+          "n": 5,
+          "median": 15.600000000093132,
+          "p95": 69.70000000018626
+        },
+        "nativeTwoFramesMs": {
+          "n": 5,
+          "median": 65.20000000018626,
+          "p95": 173.60000000009313
+        }
+      },
+      "after": {
+        "ms": {
+          "n": 5,
+          "median": 197.20000000018626,
+          "p95": 980.6000000000931
+        },
+        "nativeDomMs": {
+          "n": 5,
+          "median": 43.5,
+          "p95": 190.79999999981374
+        },
+        "nativeTwoFramesMs": {
+          "n": 5,
+          "median": 141,
+          "p95": 892.6999999997206
+        }
+      },
+      "idbRequests": 0
+    }
+  }
+}

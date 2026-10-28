@@ -1,6 +1,6 @@
 """Issue #12: source skeleton, read-only preview and approved V2 cards."""
 from playwright.sync_api import expect
-from test_browser import BrowserHarness,open_result_panel
+from test_browser import BrowserHarness,open_result_panel,open_notes
 import test_indexeddb as legacy
 import test_v2_training as flows
 
@@ -50,7 +50,8 @@ class V2Presentation(BrowserHarness):
             expect(card.locator('.exercise-description')).to_have_count(0)
             expect(card).to_contain_text('2 × 8–10 | tempo 2010 | RIR 0')
             card.locator('[data-expand]').click()
-            expect(card.locator('.expanded p.small')).to_contain_text('C1: narciarz')
+            open_notes(card);expect(card.locator('[data-instructions]')).to_have_count(0)
+            expect(card.locator('.exercise-notes')).not_to_contain_text('C1: narciarz')
             card.locator('[data-personal-note] > summary').click()
             expect(card.locator('.v2NoteForm textarea')).to_be_visible()
             expect(card.locator('.v2NoteForm textarea')).to_have_value('')

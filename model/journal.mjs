@@ -2,7 +2,7 @@
  * Existing flat results and opaque legacy metadata retain their original meaning.
  */
 import {createModel,captureSessionSnapshot,validateModel,validateSessionSnapshot,createResultReferences} from './training-model.mjs';
-import {views,PLAN_ID,groupMemberNumber} from './v2-plan.mjs';
+import {views,PLAN_ID,groupMemberNumber,userNoteBinding} from './v2-plan.mjs';
 import {validatePerformance,flatten} from './performance.mjs';
 import {canonical,immutableJSON,requireThat as check} from './backup-json.mjs';
 const source=(reference,recordedAt=null)=>({kind:'legacy',reference,recordedAt});
@@ -60,8 +60,8 @@ export function exercisesFor(data,session) {
   }
   if(structuredSnapshot(snap))return views(snap.model,snap.planVersionId,session.type,data);
   return snap.model.positions.filter(p=>p.planVersionId===snap.planVersionId && p.unitId===snap.unitId).sort((a,b)=>a.order-b.order).map(p=>({
-    ...structuredClone(p.legacyExercise),initialKg:'',journalVariantId:p.variantId,
-    notes:Object.values(data.exercises).flat().find(e=>e.id===p.exerciseId)?.notes??''}));
+    ...structuredClone(p.legacyExercise),initialKg:'',journalVariantId:p.variantId,planVersionId:snap.planVersionId,
+    notes:userNoteBinding(data.trainingJournal?.model,snap.planVersionId,p.exerciseId,p.variantId)?.text??''}));
 }
 export async function startSession(data,session,startedAt) {
   const j=data.trainingJournal;check(j?.version===1,'unsupported journal');

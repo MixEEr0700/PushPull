@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 from playwright.sync_api import expect
-from test_browser import BrowserHarness
+from test_browser import BrowserHarness,open_notes
 import test_v2_training
 
 class CompactMatrix(BrowserHarness):
@@ -14,7 +14,7 @@ class CompactMatrix(BrowserHarness):
     def open_note(self,page=None):
         p=page or self.page
         p.locator('[data-expand="PUSH-A-1"]').click()
-        note=p.locator('[data-personal-note]').first
+        open_notes(p);note=p.locator('[data-personal-note]').first
         if not note.evaluate('(e)=>e.open'):note.locator('summary').click()
         return note
 
@@ -75,9 +75,10 @@ class CompactMatrix(BrowserHarness):
             expect(card.locator('.detail').first).to_be_visible()
             card.locator('[data-expand]').click();expect(card.locator('.performanceForm')).to_be_visible()
             self.assertEqual(card.locator('[data-quick]').evaluate_all('(els)=>els.map(e=>e.dataset.quick)'),['reps','kg'])
-            coach=card.locator('[data-instructions=coach]')
-            expect(coach.locator('p')).to_have_text('Oryginalna instrukcja testowa trenera')
-            expect(coach.locator('textarea,input')).to_have_count(0)
+            open_notes(card)
+            expect(card.locator('[data-instructions]')).to_have_count(0)
+            expect(card.locator('.exercise-notes')).not_to_contain_text('Oryginalna instrukcja testowa trenera')
+            self.assertEqual(self.state()['trainingJournal']['model']['coachInstructions'][0]['text'],'Oryginalna instrukcja testowa trenera')
             expect(card.locator('[data-personal-note] textarea')).not_to_be_visible()
             self.assertGreaterEqual(card.locator('[data-expand]').bounding_box()['height'],44)
             self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))

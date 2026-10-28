@@ -10,6 +10,7 @@ from pathlib import Path
 import subprocess
 import shutil
 import threading
+import time
 import unittest
 from playwright.sync_api import sync_playwright, expect
 from ci_annotations import install as install_ci_annotations
@@ -23,6 +24,21 @@ def confirm_restore(page):
     expect(page.locator('[data-restore-confirm]')).to_be_visible(timeout=60000)
     page.locator('[data-restore-confirm]').click()
     expect(page.locator('[data-restore-busy]')).to_have_count(0,timeout=120000)
+
+def wait_for_service_worker_controller(page, timeout=30000):
+    """Poll the native controller without depending on animation-frame delivery."""
+    deadline=time.monotonic()+timeout/1000
+    while True:
+        controlled=page.evaluate('navigator.serviceWorker.controller!==null')
+        remaining=deadline-time.monotonic()
+        if controlled and remaining>=0:return
+        if remaining<=0:raise AssertionError('Service worker did not control the page within '+str(timeout)+' ms')
+        time.sleep(min(.02,remaining))
+
+def open_notes(scope):
+    """Header toggle in the final polish; historical release fixtures have no toggle."""
+    toggle=scope.locator('[data-note-toggle]').first
+    if toggle.count() and toggle.get_attribute('aria-expanded')=='false':toggle.click()
 
 def open_result_panel(scope):
     """Issue95 auto-opens the form; correction/history still have an opener.
@@ -198,10 +214,11 @@ class BrowserRegression(BrowserHarness):
         self.assertEqual(self.page.locator('.series-total strong').inner_text().replace('\xa0','').replace(' ',''), '1640kg')
         self.save()
         self.assertEqual(len(self.state()['entries'][0]['series']), 2)
-        self.page.locator('[data-personal-note] > summary').click()
-        self.page.locator('#notesForm textarea').fill('Łopatki stabilnie')
-        self.page.locator('#notesForm [type=submit]').click()
-        expect(self.page.locator('[data-training-pending]')).to_have_count(0)
+        before_notes=self.state()
+        open_notes(self.page)
+        expect(self.page.locator('[data-note-unbound]')).to_be_visible()
+        expect(self.page.locator('.exercise-notes textarea')).to_have_count(0)
+        self.assertEqual(self.state(),before_notes)
         self.page.locator('[data-panel=stats]').click()
         expect(self.page.locator('.stat-tile.selected strong')).to_contain_text('640')
         for metric in ['weight','reps','pace','tonnage']:
@@ -227,7 +244,7 @@ class BrowserRegression(BrowserHarness):
         self.assertEqual(saved['entries'][0]['series'][1]['kg'],'85')
         self.page.reload()
         self.assertEqual(self.state(),saved)
-        self.assertEqual(saved['exercises']['PUSH A'][0]['notes'],'Łopatki stabilnie')
+        self.assertEqual(saved['exercises'],before_notes['exercises']) # No legacy/source text was edited by the Notes view.
         self.page.locator('[data-tab=calendar]').click()
         self.assertIn('mark', self.page.locator('[data-day="2026-10-20"]').get_attribute('class').split())
 
@@ -361,6 +378,12 @@ class BrowserRegression(BrowserHarness):
         # Functional assertions elsewhere remain unchanged.
         from pathlib import Path
         output=Path('/tmp/pushpull-compact-review');output.mkdir(exist_ok=True)
+        # Own notes need a saved plan context; unversioned source text is protected
+        # by test_series_tonnage_history_notes_and_reload and test_user_notes.
+        self.plans('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click()
         for width,height in [(360,800),(390,844),(412,915)]:
             self.page.set_viewport_size({'width':width,'height':height})
             self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()
@@ -372,7 +395,7 @@ class BrowserRegression(BrowserHarness):
             before=self.state();card.locator('[data-expand]').click()
             expect(card.locator('.detail').first).to_be_visible()
             expect(card.locator('[data-personal-note] textarea')).not_to_be_visible()
-            card.locator('[data-personal-note] > summary').click()
+            open_notes(card);card.locator('[data-personal-note] > summary').click()
             expect(card.locator('[data-personal-note] textarea')).to_be_visible()
             self.assertEqual(self.state(),before)
             self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))

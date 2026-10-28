@@ -2,7 +2,7 @@
 import re
 from pathlib import Path
 from playwright.sync_api import expect
-from test_browser import BrowserHarness,open_result_panel
+from test_browser import BrowserHarness,open_result_panel,open_notes
 import test_v2_training as v2
 
 class Compact95(BrowserHarness):
@@ -64,8 +64,9 @@ class Compact95(BrowserHarness):
             self.assertGreaterEqual(card.locator('.num').evaluate('(e)=>parseFloat(getComputedStyle(e).fontSize)'),20)
             card.locator('[data-expand]').click();f=self.form()
             expect(card.locator('.panel h3')).to_have_count(0)
-            expect(card.locator('.exercise-notes h3')).to_have_text('Notatki')
-            expect(card.locator('[data-instructions=coach] .note-text')).to_contain_text('Instrukcja trenera Ł 😀')
+            open_notes(card);expect(card.locator('.exercise-notes h3')).to_have_text('Notatki')
+            expect(card.locator('[data-instructions]')).to_have_count(0)
+            expect(card.locator('.exercise-notes')).not_to_contain_text('Instrukcja trenera Ł 😀')
             expect(card.locator('[data-instructions]').locator('textarea,input,[contenteditable]')).to_have_count(0)
             expect(card.locator('.exercise-notes')).not_to_contain_text('Wskazówki źródłowe')
             self.assertEqual(f.locator('.quick-result input').count(),2)
