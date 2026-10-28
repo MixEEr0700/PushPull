@@ -1,6 +1,6 @@
 """Issue99 real isolated IndexedDB and compact editor. Synthetic evidence only."""
 from playwright.sync_api import expect
-from test_browser import BrowserHarness,seed_historical_editor,wait_for_service_worker_controller
+from test_browser import add_drop,BrowserHarness,seed_historical_editor,wait_for_service_worker_controller
 import test_v2_training as v2
 import test_plan_import as plans_fixture
 
@@ -54,7 +54,7 @@ class Compact99(BrowserHarness):
     def test_drop_order_ids_one_two_three_segments_and_no_history_mutation(self):
         self.activate();f=self.open_result('PUSH A','PUSH-A-5');self.fill_rows(f,'20','8');before=self.state();original=self.memory()['performance']
         expect(f.locator('[data-compact-row]')).to_have_count(6)
-        f.locator('[data-rich-action=add-segment][data-row="0"]').click();expect(f.locator('[data-compact-row]')).to_have_count(7)
+        add_drop(f,0);expect(f.locator('[data-compact-row]')).to_have_count(7)
         expect(f.locator('[data-row="0"][data-segment="2"][data-field=kg]')).to_have_value('')
         f.locator('[data-row="0"][data-segment="2"][data-field=kg]').fill('5');f.locator('[data-row="0"][data-segment="2"][data-field=reps]').fill('12')
         expect(f.locator('.compact-set').first.locator('.compact-number')).to_have_text(['1','+1','+2'])

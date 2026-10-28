@@ -1,10 +1,10 @@
 import {canonical} from './backup-json.mjs';
 import {rangeText,tempoText} from './v2-plan.mjs';
-import {newPerformance,flatten} from './performance.mjs';
+import {newPerformance,flatten,userDrop} from './performance.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const drafts=new Map(),key=(id,sid)=>sid+'::'+id;
 export const clear=()=>drafts.clear();
-export function state(id,sid){const d=drafts.get(key(id,sid));if(!d)return null;return structuredClone({performance:d.performance,open:d.open,custom:d.custom,sidePairs:d.sidePairs});}
+export function state(id,sid){const d=drafts.get(key(id,sid));if(!d)return null;return structuredClone({performance:d.performance,open:d.open,custom:d.custom,sidePairs:d.sidePairs,executionMode:d.executionMode});}
 export function restore(id,sid,value){drafts.delete(key(id,sid));drafts.set(key(id,sid),{...structuredClone(value),ex:null});}
 export function discard(id,sid){drafts.delete(key(id,sid));}
 export function editor(ex,sid,entry,last){
@@ -15,7 +15,7 @@ export function editor(ex,sid,entry,last){
   const custom=performance.rows.some(r=>r.segments.some(s=>s.kg!==first.kg||s.reps!==first.reps));
   d={ex,performance,open:false,custom};drafts.set(k,d);
  }
- d.ex=ex;d.allowSideDeclaration=!entry;preparePairs(d);
+ d.ex=ex;d.allowSideDeclaration=!entry;preparePairs(d);establishExecution(d);
  return `<div class="panel result-panel"><form class="performanceForm" novalidate data-id="${ex.id}" data-session="${sid}">${contents(d)}</form></div>`;
 }
 // A comparable saved result is an editor seed, not a new planned result.
@@ -68,11 +68,47 @@ export function parameters(ex){
 function contents(d){const ex=d.ex,p=d.performance,first=p.rows[0]?.segments[0];return `${ex.loadConvention.basis===null?`<label>Znaczenie ciężaru<select data-load-basis><option value="">Nieokreślone</option>${[['per-implement','Jeden hantel'],['machine-indication','Wskazanie urządzenia'],['combined','Łącznie']].map(([v,l])=>`<option value="${v}" ${p.loadConvention.basis===v?'selected':''}>${l}</option>`).join('')}</select></label>`:''}<div class="grid2 quick-result"><input ${sideExceptions(d)?'readonly':''} data-quick="reps" inputmode="numeric" aria-label="Szybkie powtórzenia" placeholder="powtórzenia" value="${esc(first?.reps)}"><input ${sideExceptions(d)?'readonly':''} data-quick="kg" inputmode="decimal" aria-label="Ciężar (kg)" placeholder="kg" value="${esc(first?.kg)}"></div><p class="hint warning" data-side-guard ${sideExceptions(d)?'':'hidden'}>Zachowano różnice lub niejednoznaczność stron. Otwórz Edytuj serie i szczegóły.</p><div data-rich-details ${d.open?'':'hidden'}>${details(d)}</div><p class="series-total sr-only">Tonaż: <strong>${flatten(p).reduce((n,s)=>n+(Number(s.kg.replace(',','.'))||0)*(Number(s.reps)||0),0).toLocaleString('pl-PL')} kg</strong></p><div class="result-controls"><div class="result-buttons"><button class="btn primary" type="submit">${d.open?'Zapisz korektę':'Zapisz wynik'}</button><button type="button" class="btn" data-rich-action="toggle">✎ ${d.open?'Zwiń':'Edytuj'} serie</button></div><div class="result-secondary"><button type="button" class="btn" data-panel="history" data-id="${esc(ex.id)}">Historia</button><button type="button" class="btn" data-panel="stats" data-id="${esc(ex.id)}">Statystyki</button></div></div>`;}
 const trash='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6m4-6v6"/></svg>';
 const sideMetadata=r=>canonical({...r,id:null,side:null,segments:r.segments.map(s=>({...s,id:null,kg:null,reps:null}))});
-const perSide=d=>d.performance.loadConvention.unit==='kg'&&['per-implement','machine-indication'].includes(d.performance.loadConvention.basis);
+const perSide=d=>d.performance.loadConvention.unit==='kg'&&d.ex.loadConvention.unit==='kg'&&['per-implement','machine-indication'].includes(d.performance.loadConvention.basis)&&(d.ex.loadConvention.basis===null||d.ex.loadConvention.basis===d.performance.loadConvention.basis);
 function sharedPair(d,p){
  if(!p||!perSide(d))return false;
  const left=d.performance.rows.find(r=>r.id===p.leftId),right=d.performance.rows.find(r=>r.id===p.rightId);
  return !!left&&!!right&&equalSides(left,right)&&sideMetadata(left)===sideMetadata(right);
+}
+// Persist the execution decision in the draft before rows can be removed.
+// Missing mode in an old empty optional draft is unknown, never guessed.
+function establishExecution(d){
+ const rows=d.performance.rows;
+ if(d.ex.sideMode==='required'){d.executionMode='paired';return;}
+ if(d.ex.sideMode==='bilateral'){d.executionMode=rows.some(r=>r.side!==null)?'unknown':'single';return;}
+ if(!['single','paired','unknown'].includes(d.executionMode)){
+  d.executionMode=!rows.length?'unknown':rows.every(r=>r.side===null)?'single':rows.every(r=>r.side&&pairFor(d,r))?'paired':'unknown';
+ }
+ if(d.executionMode==='single'&&rows.some(r=>r.side!==null)||d.executionMode==='paired'&&(d.ex.laterality==='bilateral'||rows.some(r=>r.side===null)))d.executionMode='unknown';
+}
+function canAddSet(d){return !d.performance.rows.some(r=>r.side&&!pairFor(d,r))&&(d.executionMode==='single'||d.executionMode==='paired'&&perSide(d)&&d.ex.laterality!=='bilateral')&&(!d.ex.group||d.ex.targets.some(t=>!d.performance.rows.some(r=>r.setId===t.id)));}
+function dropTargets(d){
+ const options=[],used=new Set();let number=0;
+ for(const [index,row] of d.performance.rows.entries()){
+  if(used.has(row.id))continue;number++;
+  if(row.side===null){options.push({row,index,number,shared:false,label:'Seria '+number});continue;}
+  const p=pairFor(d,row);
+  if(!p||!perSide(d))continue;
+  const members=[d.performance.rows.find(r=>r.id===p.leftId),d.performance.rows.find(r=>r.id===p.rightId)];members.forEach(r=>used.add(r.id));
+  if(sharedPair(d,p))options.push({row:members[0],index:d.performance.rows.indexOf(members[0]),number,shared:true,label:'Seria '+number});
+  else for(const r of members)options.push({row:r,index:d.performance.rows.indexOf(r),number,shared:false,label:'Seria '+number+' '+(r.side==='left'?'L':'P')});
+ }
+ return options;
+}
+function appendDrop(d,id){
+ const target=dropTargets(d).find(t=>t.row.id===id);if(!target)throw Error('Seria zmieniła się lub nie można potwierdzić stron/konwencji kg. Nie dodano segmentu.');
+ const rows=target.shared?[target.row,otherSide(d,target.row)]:[target.row];
+ if(rows.some(r=>!d.ex.targets.some(t=>t.id===r.setId&&t.drop)&&Object.hasOwn(r,'dropOrigin')&&r.dropOrigin!=='user'))throw Error('Zachowano nieznane metadane dropOrigin. Nie dodano segmentu ani nie zastąpiono metadanych.');
+ for(const r of rows){if(!d.ex.targets.some(t=>t.id===r.setId&&t.drop))r.dropOrigin='user';r.segments.push({id:crypto.randomUUID(),kg:'',reps:''});}
+ d.custom=true;d.choosingDropTarget=false;d.open=true;
+}
+function addControls(d){
+ const options=dropTargets(d),unknown=d.executionMode==='unknown'&&!d.performance.rows.length;
+ return `<div class="series-add-actions"><button type="button" class="btn" data-rich-action="add-set" ${canAddSet(d)?'':'disabled'}>+ Dodaj serię</button><button type="button" class="btn" data-rich-action="add-drop" ${options.length?'':'disabled'}>+ Dodaj dropset</button></div>${unknown?`<label class="hint warning">Nieustalone wykonanie pustego szkicu. Wybierz rzeczywisty sposób wykonania.<select data-execution-choice><option value="">Wybierz wykonanie</option><option value="single">Jeden zapis</option>${perSide(d)&&d.ex.laterality!=='bilateral'?'<option value="paired">Obie strony (L/P)</option>':''}</select></label>`:d.executionMode==='paired'&&!perSide(d)?'<p class="hint warning">Nie dodano stron: najpierw określ znaczenie kg. Nie przeliczamy dawnych danych.</p>':''}${d.choosingDropTarget?`<label class="drop-target">Do której serii?<select data-drop-target><option value="">Wybierz serię</option>${options.map(t=>`<option value="${esc(t.row.id)}" data-row="${t.index}">${esc(t.label)}</option>`).join('')}</select></label>`:''}`;
 }
 function sideExceptions(d){return d.performance.rows.some(r=>r.side!==null&&!sharedPair(d,pairFor(d,r)));}
 function sideCaption(rows){return rows.map(r=>(r.side==='left'?'L':'P')+': '+r.segments.map(s=>`${s.reps||'?'} × ${s.kg||'?'} kg`).join(' → ')).join(' | ');}
@@ -87,13 +123,12 @@ function details(d){
   const choices=rows.filter(r=>r.side&&r.side!==row.side&&!pairFor(d,r)&&sameSet(row,r));
   return `<details class="side-exception" data-side-pair data-side-exception open><summary><span class="compact-number">${number}</span><span data-side-caption>${esc(sideCaption(members))}</span></summary><p class="hint warning">${!perSide(d)?'Konwencja kg nie pozwala na wspólny wpis L/P. Zachowano zapis; sprawdź znaczenie ciężaru.':!pair?'Brak ustalonej strony/pary. Niczego nie dopisano.':'Różne wartości lub metadane stron. Zachowano obie wersje.'}</p>${members.map(r=>rowHTML(d,r,rows.indexOf(r),number,false,true)).join('')}${pair&&perSide(d)?`<div class="exception-actions"><button type="button" class="btn" data-rich-action="merge-left" data-row="${i}">Użyj L dla obu</button><button type="button" class="btn" data-rich-action="merge-right" data-row="${i}">Użyj P dla obu</button></div>`:''}${!pair?`${choices.length?`<label>Druga strona<select data-pair-choice>${choices.map(r=>`<option value="${esc(r.id)}">Wiersz ${rows.indexOf(r)+1}</option>`).join('')}</select></label><button type="button" class="btn" data-rich-action="pair-existing" data-row="${i}">Ustal parę L/P</button>`:''}<span class="hint warning" data-missing-side>Brakująca strona wymaga decyzji.</span><button type="button" class="btn" data-rich-action="missing-side" data-row="${i}">Dodaj brakującą stronę (puste pola)</button>`:''}<button type="button" class="btn flat" data-rich-action="exception-done">Gotowe</button></details>`;
  }).join('');
- const canAdd=!d.ex.group||d.ex.targets.some(t=>!rows.some(r=>r.setId===t.id));
- return `${groups}<button type="button" class="btn wide compact-add" data-rich-action="add-set" ${canAdd?'':'disabled'}>＋ Dodaj serię</button>${d.ex.sideMode==='optional'&&d.allowSideDeclaration&&perSide(d)&&rows.length&&rows.every(r=>r.side===null)?'<details class="execution-choice"><summary>Sposób wykonania</summary><p class="hint">Wybierz tylko dla nowego wyniku, jeśli faktycznie wykonano obie strony. Dotychczasowe zapisy pozostają bez przeliczeń.</p><button type="button" class="btn" data-rich-action="sides">Wykonano osobno obie strony</button></details>':''}`;
+ return `${groups}${addControls(d)}${d.ex.sideMode==='optional'&&d.allowSideDeclaration&&d.ex.laterality!=='bilateral'&&perSide(d)&&rows.length&&rows.every(r=>r.side===null)?'<details class="execution-choice"><summary>Sposób wykonania</summary><p class="hint">Wybierz tylko dla nowego wyniku, jeśli faktycznie wykonano obie strony. Dotychczasowe zapisy pozostają bez przeliczeń.</p><button type="button" class="btn" data-rich-action="sides">Wykonano osobno obie strony</button></details>':''}`;
 }
 function rowHTML(d,row,i,number,shared=false,exception=false){
- const drop=d.ex.targets.some(t=>t.id===row.setId&&t.drop),tag=shared?' data-common-pair="true"':'',side=row.side==='left'?'L':'P';
+ const tag=shared?' data-common-pair="true"':'',side=row.side==='left'?'L':'P';
  const remove=(act,label,segment='')=>`<button type="button" class="btn flat compact-remove" data-rich-action="${act}" data-row="${i}" ${segment}${tag} aria-label="${esc(label)}">${trash}</button>`;
- return `<div class="compact-set" data-compact-set>${row.segments.map((segment,j)=>`<div class="individual-line${j?' drop-segment':''}" data-compact-row><span class="compact-number" aria-hidden="true">${exception?side+(j?' +'+j:''):j?'+'+j:number}</span><input data-row="${i}" data-segment="${j}" data-field="reps"${tag} aria-label="Powtórzenia serii ${number}${exception?' '+side:''}${j?', segment '+j:''}" placeholder="powt." inputmode="numeric" value="${esc(segment.reps)}" required><input data-row="${i}" data-segment="${j}" data-field="kg"${tag} aria-label="Ciężar serii ${number}${exception?' '+side:''}${j?', segment '+j:''}" placeholder="kg" inputmode="decimal" value="${esc(segment.kg)}" required>${j?remove('remove-segment','Usuń segment '+j+' serii '+number,`data-segment="${j}"`):remove('remove-set','Usuń serię '+number)}</div>`).join('')}${drop?`<button type="button" class="btn flat compact-add-segment" data-rich-action="add-segment" data-row="${i}"${tag}>＋ Dodaj segment</button>`:''}</div>`;
+ return `<div class="compact-set" data-compact-set>${row.segments.map((segment,j)=>`<div class="individual-line${j?' drop-segment':''}" data-compact-row><span class="compact-number" aria-hidden="true">${exception?side+(j?' +'+j:''):j?'+'+j:number}</span><input data-row="${i}" data-segment="${j}" data-field="reps"${tag} aria-label="Powtórzenia serii ${number}${exception?' '+side:''}${j?', segment '+j:''}" placeholder="powt." inputmode="numeric" value="${esc(segment.reps)}" required><input data-row="${i}" data-segment="${j}" data-field="kg"${tag} aria-label="Ciężar serii ${number}${exception?' '+side:''}${j?', segment '+j:''}" placeholder="kg" inputmode="decimal" value="${esc(segment.kg)}" required>${j?remove('remove-segment','Usuń segment '+j+' serii '+number,`data-segment="${j}"`):remove('remove-set','Usuń serię '+number)}</div>`).join('')}</div>`;
 }
 function refresh(form,d){form.innerHTML=contents(d);}
 export function input(event){if(event.target.matches('[data-load-basis]')){change(event);return;}const form=event.target.closest('.performanceForm');if(!form)return;const d=drafts.get(key(form.dataset.id,form.dataset.session)),el=event.target;
@@ -110,7 +145,14 @@ export function input(event){if(event.target.matches('[data-load-basis]')){chang
  form.querySelectorAll('[data-side-exception]').forEach(section=>{const first=section.querySelector('[data-row]');if(first){const r=d.performance.rows[+first.dataset.row],p=pairFor(d,r),members=p?[d.performance.rows.find(x=>x.id===p.leftId),d.performance.rows.find(x=>x.id===p.rightId)]:[r];section.querySelector('[data-side-caption]').textContent=sideCaption(members);}});
  form.querySelector('.series-total strong').textContent=flatten(d.performance).reduce((n,s)=>n+(Number(s.kg.replace(',','.'))||0)*(Number(s.reps)||0),0).toLocaleString('pl-PL')+' kg';
 }
-export function change(event){if(event.target.matches('[data-quick]')){const form=event.target.closest('.performanceForm');if(form)drafts.get(key(form.dataset.id,form.dataset.session)).quickInput=null;return;}if(!event.target.matches('[data-load-basis]'))return;const form=event.target.closest('form'),d=drafts.get(key(form.dataset.id,form.dataset.session));d.performance.loadConvention.basis=event.target.value||null;d.performance.loadConvention.description=event.target.selectedOptions[0].textContent;form.querySelector('[data-rich-details]').innerHTML=details(d);updateSideGuard(form,d);}
+export function change(event){
+ if(event.target.matches('[data-drop-target],[data-execution-choice]')){
+  const form=event.target.closest('form'),d=drafts.get(key(form.dataset.id,form.dataset.session));
+  if(event.target.matches('[data-drop-target]')){if(!event.target.value)return;try{appendDrop(d,event.target.value);}catch(e){alert(e.message);d.choosingDropTarget=false;}}
+  else if(!d.performance.rows.length&&d.executionMode==='unknown'&&['single','paired'].includes(event.target.value)){if(event.target.value==='paired'&&(!perSide(d)||d.ex.laterality==='bilateral'))return;d.executionMode=event.target.value;d.custom=true;}
+  refresh(form,d);return;
+ }
+ if(event.target.matches('[data-quick]')){const form=event.target.closest('.performanceForm');if(form)drafts.get(key(form.dataset.id,form.dataset.session)).quickInput=null;return;}if(!event.target.matches('[data-load-basis]'))return;const form=event.target.closest('form'),d=drafts.get(key(form.dataset.id,form.dataset.session));d.performance.loadConvention.basis=event.target.value||null;d.performance.loadConvention.description=event.target.selectedOptions[0].textContent;form.querySelector('[data-rich-details]').innerHTML=details(d);updateSideGuard(form,d);}
 export function click(event){const b=event.target.closest('[data-rich-action]');if(!b)return;const form=b.closest('form'),d=drafts.get(key(form.dataset.id,form.dataset.session)),rows=d.performance.rows,row=rows[+b.dataset.row],act=b.dataset.richAction;
  const pair=row&&pairFor(d,row),other=row&&otherSide(d,row),common=b.dataset.commonPair==='true';
  if(common&&!sharedPair(d,pair)){alert('Strony zmieniły się. Zachowano wartości; sprawdź szczegóły.');refresh(form,d);return;}
@@ -136,13 +178,24 @@ export function click(event){const b=event.target.closest('[data-rich-action]');
   if(!confirm('Dodać brakującą stronę z pustymi polami? Uzupełnij rzeczywisty wynik przed zapisem.'))return;
   const dest={...row,id:crypto.randomUUID(),side:row.side==='left'?'right':'left',segments:row.segments.map(s=>({...s,id:crypto.randomUUID(),kg:'',reps:''}))};rows.splice(rows.indexOf(row)+1,0,dest);d.sidePairs.push({leftId:row.side==='left'?row.id:dest.id,rightId:row.side==='right'?row.id:dest.id,linked:false});
  }
- if(act==='add-segment'){row.segments.push({id:crypto.randomUUID(),kg:'',reps:''});if(common)other.segments.push({id:crypto.randomUUID(),kg:'',reps:''});}
- if(act==='remove-segment'&&row.segments.length>1){row.segments.splice(+b.dataset.segment,1);if(common)other.segments.splice(+b.dataset.segment,1);}
+ if(act==='add-drop'){
+  const targets=dropTargets(d);if(!targets.length){alert('Dodaj serię i potwierdź strony oraz znaczenie kg.');return false;}
+  if(targets.length===1)appendDrop(d,targets[0].row.id);
+  else{d.choosingDropTarget=true;refresh(form,d);return false;}
+ }
+ // Retained internal action accepts only a currently eligible, identified row.
+ if(act==='add-segment'){appendDrop(d,row.id);}
+
+ if(act==='remove-segment'&&+b.dataset.segment>0&&+b.dataset.segment<row.segments.length){
+  for(const r of common?[row,other]:[row]){r.segments.splice(+b.dataset.segment,1);if(r.segments.length===1&&r.dropOrigin==='user')delete r.dropOrigin;}
+ }
+
  if(act==='remove-set'){if(row.side&&!confirm('Usunąć '+(pair?'obie strony tej pary wraz z segmentami':'tę serię wraz z segmentami')+'? Zmiana trafi do wyniku dopiero po zapisie.'))return;const ids=new Set(pair?[pair.leftId,pair.rightId]:[row.id]);d.performance.rows=rows.filter(r=>!ids.has(r.id));d.sidePairs=d.sidePairs.filter(p=>p!==pair);}
  if(act==='add-set'){
-  const target=d.ex.group?d.ex.targets.find(t=>!rows.some(r=>r.setId===t.id)):null;if(d.ex.group&&!target)return;
-  const sides=d.ex.sideMode==='required'||rows.some(r=>r.side!==null)?['left','right']:[null],added=[];
-  for(const side of sides){const r={id:crypto.randomUUID(),setId:target?.id??null,side,groupId:d.ex.group?.id??null,round:target?target.order+1:null,segments:Array.from({length:target?.drop?2:1},()=>({id:crypto.randomUUID(),kg:'',reps:''}))};rows.push(r);added.push(r);}
+  if(!canAddSet(d)){alert('Nie można potwierdzić wykonania stron, znaczenia kg lub rundy. Nie dodano serii.');return false;}
+  const target=d.ex.targets.find(t=>!rows.some(r=>r.setId===t.id));
+  const sides=d.executionMode==='paired'?['left','right']:[null],added=[];
+  for(const side of sides){const r={id:crypto.randomUUID(),setId:target?.id??null,side,groupId:d.ex.group?.id??null,round:d.ex.group?target.order+1:null,segments:Array.from({length:target?.drop?2:1},()=>({id:crypto.randomUUID(),kg:'',reps:''}))};rows.push(r);added.push(r);}
   if(added.length===2)d.sidePairs.push({leftId:added[0].id,rightId:added[1].id,linked:false});d.open=true;
  }
  if(act==='copy'){
@@ -151,9 +204,9 @@ export function click(event){const b=event.target.closest('[data-rich-action]');
   if(!dest){dest={...row,id:crypto.randomUUID(),side:row.side==='left'?'right':'left',segments:[]};rows.push(dest);d.sidePairs.push({leftId:row.side==='left'?row.id:dest.id,rightId:row.side==='right'?row.id:dest.id,linked:false});}
   copySegments(row,dest);
  }
- if(act==='sides'&&d.allowSideDeclaration&&perSide(d)&&rows.every(r=>r.side===null)){
+ if(act==='sides'&&d.allowSideDeclaration&&d.ex.laterality!=='bilateral'&&perSide(d)&&rows.every(r=>r.side===null)){
   if(!confirm('Rozdzielić L/P i skopiować obecne wartości na obie strony? Kg zachowają dotychczasowe znaczenie. Tonaż będzie sumą faktycznie zapisanych stron; możesz je edytować osobno.'))return;
-  for(const r of [...rows]){r.side='left';const right={...r,id:crypto.randomUUID(),side:'right',segments:[]};copySegments(r,right);rows.push(right);d.sidePairs.push({leftId:r.id,rightId:right.id,linked:false});}d.open=true;
+  for(const r of [...rows]){r.side='left';const right={...r,id:crypto.randomUUID(),side:'right',segments:[]};copySegments(r,right);rows.push(right);d.sidePairs.push({leftId:r.id,rightId:right.id,linked:false});}d.open=true;d.executionMode='paired';
  }
  if(!['toggle','exception-done'].includes(act))d.custom=true;refresh(form,d);
 }
@@ -182,7 +235,7 @@ export function summary(e,targets=[],asSets=false){
  const equal=g=>g.members.length===2&&equalSides(...g.members),unpaired=g=>g.members.length===1&&g.members[0].side!==null;
  const special=g=>g.members.some(r=>r.round&&!asSets);
  const role=r=>targets.find(t=>t.id===r.setId)?.role??(r.setId===null&&r.groupId===null&&r.segments?.length===1?'main':null);
- const drop=r=>!!targets.find(t=>t.id===r.setId)?.drop;
+ const drop=r=>!!targets.find(t=>t.id===r.setId)?.drop||userDrop(r);
  const semantic=r=>canonical({...r,id:null,setId:null,side:null,round:asSets?null:r.round,segments:r.segments.map(s=>({...s,id:null,kg:Number(s.kg),reps:Number(s.reps)}))});
  const prescribedPairs=rows.every(r=>r.setId===null||r.side===null||rows.some(other=>other.side&&other.side!==r.side&&sameSet(r,other)));
  const first=rows[0],balanced=rows.every(r=>r.side===null)||rows.every(r=>r.side==='left'||r.side==='right')&&rows.filter(r=>r.side==='left').length===rows.filter(r=>r.side==='right').length;
@@ -194,6 +247,6 @@ export function summary(e,targets=[],asSets=false){
  return `<span class="last-series">${groups.map(g=>{
   const r=g.members[0],label=r.round&&!asSets?'Runda '+r.round:'Seria '+(g.target?g.target.order+1:++extra),side=x=>x.side==='left'?'L':x.side==='right'?'P':'';
   const result=equal(g)?'L/P '+value(r):g.members.map(x=>`${side(x)?side(x)+' ':''}${value(x)}`).join(' · ');
-  return `<span class="last-series-row"><span class="${g.target?.role==='backoff'||g.target?.drop||r.round&&!asSets?'set-kind':'sr-only'}">${esc(label)}${g.target?.role==='backoff'?' · back-off':''}${g.target?.drop?' · dropset':''}: </span>${result}${unpaired(g)?' · para L/P nieustalona':''}${g.members.every(complete)?'':' · niepełny wynik'}</span>`;
+  return `<span class="last-series-row"><span class="${g.target?.role==='backoff'||drop(r)||r.round&&!asSets?'set-kind':'sr-only'}">${esc(label)}${g.target?.role==='backoff'?' · back-off':''}${drop(r)?' · dropset':''}: </span>${result}${unpaired(g)?' · para L/P nieustalona':''}${g.members.every(complete)?'':' · niepełny wynik'}</span>`;
  }).join('')}</span>`;
 }

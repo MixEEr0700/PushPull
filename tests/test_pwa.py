@@ -1,5 +1,5 @@
 """Real service workers + installability metadata + isolated artifact/HTTPS tests."""
-from test_browser import confirm_restore,open_result_panel
+from test_browser import confirm_restore,open_result_panel,add_drop
 import functools
 from datetime import datetime, timezone
 import http.server
@@ -1176,6 +1176,45 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(sum(float(v['kg'])*int(v['reps']) for v in entry['series']),2106)
         self.assertEqual(saved['entries'][:-1],before['data']['entries']);self.assertEqual(saved['trainingJournal']['sessionSnapshots'],before['data']['trainingJournal']['sessionSnapshots'])
         self.assertFalse(drafts());self.page.reload();self.ready();self.assertEqual(self.snapshot()['data'],saved)
+
+    def test_issue101_pr100_update_old_empty_optional_and_removed_drop_segments_remain_recoverable(self):
+        source=self.path/'issue101-pr100-source'
+        for name in [*ASSETS,'scripts/service-worker.template.js']:
+            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
+            dest.write_bytes(subprocess.check_output(['git','show','0a7b1ac62f75c9d3fffd3c750807ec369b065d00:'+name],cwd=ROOT))
+        old_release=self.path/'issue101-pr100';build(old_release,source)
+        current=self.controller['directory'];self.controller['directory']=old_release
+        self.seed();self.page.goto(self.url);self.ready()
+        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click();self.page.locator('[data-type="PUSH A"]').click();self.page.locator('[data-act=start]').click()
+        self.page.locator('[data-expand="PUSH-A-5"]').click();f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click()
+        for el in f.locator('[data-field=kg]').all():el.fill('20')
+        for el in f.locator('[data-field=reps]').all():el.fill('8')
+        for row in [0,1,2]:f.locator(f'[data-rich-action=remove-segment][data-row="{row}"]').click()
+        self.page.locator('[data-expand="PUSH-A-6"]').click();f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click();f.locator('[data-quick=kg]').fill('24');f.locator('[data-quick=reps]').fill('10')
+        f.locator('.execution-choice summary').click();f.locator('[data-rich-action=sides]').click()
+        for _ in range(3):f.locator('[data-rich-action=remove-set]').first.click()
+        expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
+        drafts=lambda:self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
+        before=self.snapshot();old=drafts();self.assertEqual(len(old),2);self.assertTrue(all('executionMode' not in r['value'] for r in old))
+        drop_before=next(r for r in old if r['exerciseId']=='PUSH-A-5')['value']['performance']
+        self.controller['directory']=current;self.wait_update();self.reopen();self.context.set_offline(True)
+        self.assertEqual(self.snapshot(),before);self.assertEqual(drafts(),old)
+        self.page.locator('.spaced').filter(has=self.page.locator('[data-draft-resume]')).filter(has_text='PUSH-A-6').last.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
+        self.assertEqual(f.get_attribute('data-id'),'PUSH-A-6');expect(f.locator('[data-execution-choice]')).to_be_visible();expect(f.locator('[data-rich-action=add-set]')).to_be_disabled()
+        f.locator('[data-execution-choice]').select_option('paired');f.locator('[data-rich-action=add-set]').click()
+        expect(f.locator('[data-field=kg]')).to_have_count(1);f.locator('[data-field=kg]').fill('24');f.locator('[data-field=reps]').fill('10')
+        f.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
+        self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm');self.assertEqual(f.get_attribute('data-id'),'PUSH-A-5')
+        add_drop(f,0);f.locator('[data-row="0"][data-segment="1"][data-field=kg]').fill('10');f.locator('[data-row="0"][data-segment="1"][data-field=reps]').fill('6')
+        self.page.locator('[data-act=finish]').click();self.page.locator('[data-finish-save]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        saved=self.snapshot()['data'];pair=next(e for e in saved['entries'] if e['sessionId']==before['data']['activeId'] and e['exerciseId']=='PUSH-A-6');drop=next(e for e in saved['entries'] if e['sessionId']==before['data']['activeId'] and e['exerciseId']=='PUSH-A-5')
+        self.assertEqual([r['side'] for r in pair['performance']['rows']],['left','right']);self.assertEqual(sum(float(s['kg'])*int(s['reps']) for s in pair['series']),480)
+        self.assertEqual(sum(float(s['kg'])*int(s['reps']) for s in drop['series']),540);self.assertEqual([r['segments'][0] for r in drop['performance']['rows']],[r['segments'][0] for r in drop_before['rows']])
+        self.assertEqual(saved['entries'][:-2],before['data']['entries']);self.assertEqual(saved['trainingJournal']['nextUnitId'],'PULL A');self.assertEqual({**saved['trainingJournal'],'nextUnitId':before['data']['trainingJournal']['nextUnitId']},before['data']['trainingJournal']);self.assertFalse(drafts())
+        self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible();self.assertEqual(self.snapshot()['data'],saved)
 
     def test_stage2_to_stage3_worker_update_retains_database_and_backups(self):
         old=self.path/'stage2'

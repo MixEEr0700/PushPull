@@ -1,5 +1,7 @@
 import {createResultReferences} from './training-model.mjs';
 import {canonical,requireThat as check} from './backup-json.mjs';
+/** Explicit per-result extension; never rewrites the plan's drop prescription. */
+export const userDrop=row=>row?.dropOrigin==='user'&&Array.isArray(row.segments)&&row.segments.length>1;
 export function flatten(performance){return performance.rows.flatMap(row=>row.segments.map(s=>({...s,parentId:row.id,side:row.side})));}
 export function validatePerformance(performance,snapshot,entry){
  check(performance?.version===2&&Array.isArray(performance.rows)&&performance.rows.length,'missing performance');
@@ -16,7 +18,7 @@ export function validatePerformance(performance,snapshot,entry){
   check(Array.isArray(row.segments)&&row.segments.length,'empty segments');
   if(row.groupId!==null){const prescribed=snapshot.model.sets.find(s=>s.id===row.setId);check(prescribed&&row.round===prescribed.order+1,'group round/set mismatch');}
   const drop=snapshot.model.drops.some(d=>d.setId===row.setId);
-  check(drop||row.segments.length===1,'segments require drop prescription');
+  check(drop||userDrop(row)||row.segments.length===1,'segments require drop prescription or explicit user drop');
   for(const s of row.segments){check(typeof s.id==='string'&&s.id&&!ids.has(s.id),'duplicate segment ID');ids.add(s.id);check(typeof s.kg==='string'&&/^\d+(\.\d+)?$/.test(s.kg)&&Number.isFinite(Number(s.kg))&&Number(s.kg)>=0,'invalid kg');check(typeof s.reps==='string'&&/^[1-9]\d*$/.test(s.reps)&&Number.isSafeInteger(Number(s.reps)),'invalid reps');check(Number.isFinite(Number(s.kg)*Number(s.reps)),'invalid tonnage');}
  }
  check(canonical(entry.series)===canonical(flatten(performance)),'performance projection mismatch');
@@ -53,7 +55,7 @@ export function comparison(data,entry){
  const number=s=>String(s).replace(/^0+(?=\d)/,'').replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
  const rows=[],bindings=new Set();
  for(const r of performance.rows){
-  const target=targets.find(t=>t.id===r.setId),group=snap.model.groups.find(g=>g.id===r.groupId),drop=!!target&&snap.model.drops.some(d=>d.setId===target.id);
+  const target=targets.find(t=>t.id===r.setId),group=snap.model.groups.find(g=>g.id===r.groupId),drop=!!target&&snap.model.drops.some(d=>d.setId===target.id)||userDrop(r);
   if(r.setId!==null&&!target||![null,'left','right'].includes(r.side)||p.sideMode==='required'&&r.side===null)return null;
   if(r.groupId!==null&&(!group||!group.positionIds.includes(p.id)||r.round!==target?.order+1)||r.groupId===null&&r.round!==null)return null;
   const key=canonical([r.setId,r.side,r.groupId,r.round]);if(r.setId!==null&&bindings.has(key))return null;bindings.add(key);

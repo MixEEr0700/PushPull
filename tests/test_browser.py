@@ -49,6 +49,16 @@ def open_result_panel(scope):
         scope.locator('[data-panel=result],[data-panel=historicalResult]').click()
     expect(form).to_be_visible()
 
+def add_drop(form,row=0):
+    """Select an explicit stable parent in the current compact toolbar."""
+    form.locator('[data-rich-action=add-drop]').click()
+    choice=form.locator('[data-drop-target]')
+    if choice.count():
+        option=choice.locator(f'option[data-row="{row}"]')
+        expect(option).to_have_count(1)
+        choice.select_option(option.get_attribute('value'))
+
+
 def seed_historical_editor(page,patch):
     """Synthetic PR98-era editor evidence; no user/history records are changed.
 

@@ -119,3 +119,8 @@ button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-off
 .exception-actions{display:flex;flex-wrap:wrap;gap:6px}
 .execution-choice{margin-top:8px;font-size:12px;color:#aaa}
 .execution-choice>summary{min-height:44px;display:flex;align-items:center}
+
+/* Issue #101: the two primary add actions share the available width. */
+.series-add-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:8px 0}
+.series-add-actions>.btn{width:100%;min-width:0;padding:9px 4px}
+.drop-target{margin:8px 0}
