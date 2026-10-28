@@ -18,7 +18,9 @@ class FinishPairs(BrowserHarness):
     def fill(self,f):f.locator('[data-quick=kg]').fill('40');f.locator('[data-quick=reps]').fill('10');expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
 
     def test_pairs_remove_first_last_add_independent_merge_and_restart_at_mobile_widths(self):
-        self.activate();f=self.open_result('PULL A','PULL-A-1');self.fill(f)
+        self.activate();f=self.open_result('PULL A','PULL-A-1')
+        self.page.evaluate("()=>{const c=window.confirm;window.confirm=m=>{(window.quickPrompts??=[]).push(m);return c(m)}}")
+        self.fill(f);self.assertEqual(self.page.evaluate('window.quickPrompts||[]'),[])
         before=self.state();original=[r['id'] for r in self.drafts()[0]['value']['performance']['rows']]
         for width in [360,390,412]:
             self.page.set_viewport_size({'width':width,'height':844})

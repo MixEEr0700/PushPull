@@ -2634,10 +2634,17 @@
       }
     },
     "subsequentUnmeasuredEdit": {
-      "scope": "Only confirmation text for discarding drafts after partial success; no measured save/finish control flow changed",
-      "asset": "app.js",
-      "measuredSHA256": "707b7dc3cd21b60d8d5fb69d0540abb7ab91426c78bbdb271aaa2a09151b8f10",
-      "reviewSHA256": "6aafc643ac2a51b14104632fb8db36c76b5617e4a49b2c6f0d5c14e0fb5dcf60"
+      "scope": "Discard-confirmation wording and removal of redundant initial L/P quick-input prompt. Neither measured finish nor the bilateral quick-input preparation is changed.",
+      "assets": {
+        "app.js": {
+          "measuredSHA256": "707b7dc3cd21b60d8d5fb69d0540abb7ab91426c78bbdb271aaa2a09151b8f10",
+          "reviewSHA256": "6aafc643ac2a51b14104632fb8db36c76b5617e4a49b2c6f0d5c14e0fb5dcf60"
+        },
+        "model/performance-editor.mjs": {
+          "measuredSHA256": "c4da3e1f51aac23f8e3c70a777b061b39d752a44516e0f36d9c68d63115055c6",
+          "reviewSHA256": "38da35cf4b420eece3ffd6d885dec3666f6f42a903a0ee72a8134ed1636b1ff7"
+        }
+      }
     }
   }
 }

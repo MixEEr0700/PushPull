@@ -84,7 +84,7 @@ function rowHTML(d,row,i){
 }
 function refresh(form,d){form.innerHTML=contents(d);}
 export function input(event){if(event.target.matches('[data-load-basis]')){change(event);return;}const form=event.target.closest('.performanceForm');if(!form)return;const d=drafts.get(key(form.dataset.id,form.dataset.session)),el=event.target;
- if(el.dataset.quick){const field=el.dataset.quick;if((d.custom||d.sidePairs.some(p=>!p.linked))&&d.quickInput!==el&&!confirm('Zastąpić wpisane wartości głównych segmentów? Pozostałe segmenty pozostaną bez zmian.')){el.value=d.performance.rows[0]?.segments[0]?.[field]??'';return;}d.quickInput=el;d.performance.rows.forEach(r=>r.segments[0][field]=el.value);d.custom=d.performance.rows.some(r=>!equalSides(r,d.performance.rows[0]));form.querySelector('[data-rich-details]').innerHTML=details(d);}
+ if(el.dataset.quick){const field=el.dataset.quick;if(d.custom&&d.quickInput!==el&&!confirm('Zastąpić wpisane wartości głównych segmentów? Pozostałe segmenty pozostaną bez zmian.')){el.value=d.performance.rows[0]?.segments[0]?.[field]??'';return;}d.quickInput=el;d.performance.rows.forEach(r=>r.segments[0][field]=el.value);d.custom=d.performance.rows.some(r=>!equalSides(r,d.performance.rows[0]));form.querySelector('[data-rich-details]').innerHTML=details(d);}
  else if(el.dataset.row!==undefined){
   d.quickInput=null;
   const row=d.performance.rows[+el.dataset.row],segment=+el.dataset.segment,field=el.dataset.field;

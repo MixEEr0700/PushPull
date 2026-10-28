@@ -11,7 +11,7 @@ Usunięto widoczny nagłówek Notatki i drugi piktogram przy pustej treści: poz
 ## Serie i strony
 
 - Przy wierszach edytora nie ma napisu back-off. Role, cele, ID, liczba i wartości serii pozostają w modelu. Parametry planu i historia nadal rozróżniają back-off/drop.
-- W trybie L/P są sekcje **Seria 1 (L/P)** itd. Lewa i prawa są domyślnie niezależne. Dodanie tworzy całą parę z pustymi wartościami; usunięcie po potwierdzeniu usuwa obie strony ze szkicu, także pierwszą i ostatnią parę. Pusty szkic da się wznowić, ale nie zapisać jako wynik.
+- W trybie L/P są sekcje **Seria 1 (L/P)** itd. Lewa i prawa są domyślnie niezależne. Pierwszy szybki wpis do nietkniętego formularza nie wymaga potwierdzenia; rzeczywiste indywidualne zmiany nadal są chronione. Dodanie tworzy całą parę z pustymi wartościami; usunięcie po potwierdzeniu usuwa obie strony ze szkicu, także pierwszą i ostatnią parę. Pusty szkic da się wznowić, ale nie zapisać jako wynik.
 - **Scal L/P** łączy sterowanie formularzem, zachowując dwa rzeczywiste rekordy stron i ich ID. Nie zmniejsza liczby zapisanych stron ani tonażu. Równe wartości można połączyć bez wyboru; przy asymetrii trzeba wybrać L lub P i osobno potwierdzić zastąpienie wartości. Rozdziel L/P ponownie udostępnia niezależne pola. Stan szkicu przeżywa restart.
 - Różna struktura segmentów lub metadane blokują scalanie do ręcznego uporządkowania. Kopiowanie L/P zachowuje dodatkowe segmenty docelowe; nie skraca drugiej strony po cichu. Segmenty można usuwać istniejącymi jawnymi kontrolkami.
 - Stare niekompletne/niejednoznaczne układy nie otrzymują dopisanych wartości ani usuniętych wierszy. Widok wskazuje brakującą stronę; użytkownik może jawnie wskazać istniejącą parę albo dodać pustą stronę i wpisać rzeczywisty wynik. Nowe dodatkowe pary mają sąsiadującą kolejność L/R, odtwarzalną po zapisie. Dawne nieparzyste/niejednoznaczne układy wymagają decyzji użytkownika. Nie zmieniono kontraktu wyników ani grup/rund.
@@ -48,7 +48,7 @@ Pusty lokalny edytor jest stanem do odzyskania, nie wynikiem. Wspólny walidator
 
 Chromium/Linux, CPU ×4, syntetyczne izolowane profile, 390 px, bez sieciowych operacji Drive. Każdy wariant ma **n=3**, empiryczne p95 jest maksimum. To nie Pixel 9 ani dowód osiągnięcia celu Androida. Nie odrzucano wolniejszych prób.
 
-Przed: `de84e63`. Po: końcowy mechanizm tego PR. [Pełne próbki, zegary, hashe i orakle](performance/workout-finish.json). Bazowy zakończony pomiar zachowano, zamiast go powtarzać. Po doprecyzowaniu walidacji prezentacji zmierzono końcowy runtime ponownie. Ostatnia późniejsza zmiana dotyczy wyłącznie tekstu potwierdzenia odrzucania szkiców po częściowym sukcesie; nie zmienia mierzonej ścieżki zapisu/zakończenia. JSON jawnie zapisuje hash pomiaru i hash tej korekty tekstowej.
+Przed: `de84e63`. Po: końcowy mechanizm tego PR. [Pełne próbki, zegary, hashe i orakle](performance/workout-finish.json). Bazowy zakończony pomiar zachowano, zamiast go powtarzać. Po doprecyzowaniu walidacji prezentacji zmierzono końcowy runtime ponownie. Późniejsze korekty obejmują tekst potwierdzenia odrzucania oraz zbędny prompt przy pierwszym wpisie do nietkniętego L/P. Nie zmieniają mierzonej ścieżki zapisu/zakończenia; przygotowanie benchmarku używa ćwiczeń obustronnych. JSON jawnie zapisuje hashe zmierzonych plików i tych korekt.
 
 | Scenariusz | Przed: mediana / p95 klik → native strict complete | Po: mediana / p95 |
 | --- | --- | --- |
