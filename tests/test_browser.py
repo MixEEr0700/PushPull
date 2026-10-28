@@ -378,6 +378,12 @@ class BrowserRegression(BrowserHarness):
         # Functional assertions elsewhere remain unchanged.
         from pathlib import Path
         output=Path('/tmp/pushpull-compact-review');output.mkdir(exist_ok=True)
+        # Own notes need a saved plan context; unversioned source text is protected
+        # by test_series_tonnage_history_notes_and_reload and test_user_notes.
+        self.plans('v2-owner-2026-10-22')
+        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click()
         for width,height in [(360,800),(390,844),(412,915)]:
             self.page.set_viewport_size({'width':width,'height':height})
             self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()

@@ -60,7 +60,7 @@ export function exercisesFor(data,session) {
   }
   if(structuredSnapshot(snap))return views(snap.model,snap.planVersionId,session.type,data);
   return snap.model.positions.filter(p=>p.planVersionId===snap.planVersionId && p.unitId===snap.unitId).sort((a,b)=>a.order-b.order).map(p=>({
-    ...structuredClone(p.legacyExercise),initialKg:'',journalVariantId:p.variantId,planVersionId:snap.planVersionId,positionId:p.id,
+    ...structuredClone(p.legacyExercise),initialKg:'',journalVariantId:p.variantId,planVersionId:snap.planVersionId,
     notes:userNoteBinding(data.trainingJournal?.model,snap.planVersionId,p.exerciseId,p.variantId)?.text??''}));
 }
 export async function startSession(data,session,startedAt) {
