@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 from playwright.sync_api import expect
-from test_browser import BrowserHarness
+from test_browser import BrowserHarness,wait_for_service_worker_controller
 import test_indexeddb as legacy
 
 class LocalBackupV5(BrowserHarness):
@@ -25,7 +25,7 @@ class LocalBackupV5(BrowserHarness):
         self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.settings();before=self.records()
         self.page.evaluate('navigator.serviceWorker.ready')
-        self.page.wait_for_function('navigator.serviceWorker.controller!==null')
+        wait_for_service_worker_controller(self.page)
         self.context.set_offline(True);self.page.reload()
         expect(self.page.locator('[data-act=start]')).to_be_visible();self.settings()
         with self.page.expect_download(timeout=120000) as download:self.page.locator('[data-export-v5]').click()

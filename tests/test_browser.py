@@ -10,6 +10,7 @@ from pathlib import Path
 import subprocess
 import shutil
 import threading
+import time
 import unittest
 from playwright.sync_api import sync_playwright, expect
 from ci_annotations import install as install_ci_annotations
@@ -23,6 +24,16 @@ def confirm_restore(page):
     expect(page.locator('[data-restore-confirm]')).to_be_visible(timeout=60000)
     page.locator('[data-restore-confirm]').click()
     expect(page.locator('[data-restore-busy]')).to_have_count(0,timeout=120000)
+
+def wait_for_service_worker_controller(page, timeout=30000):
+    """Poll the native controller without depending on animation-frame delivery."""
+    deadline=time.monotonic()+timeout/1000
+    while True:
+        controlled=page.evaluate('navigator.serviceWorker.controller!==null')
+        remaining=deadline-time.monotonic()
+        if controlled and remaining>=0:return
+        if remaining<=0:raise AssertionError('Service worker did not control the page within '+str(timeout)+' ms')
+        time.sleep(min(.02,remaining))
 
 def open_notes(scope):
     """Header toggle in the final polish; historical release fixtures have no toggle."""

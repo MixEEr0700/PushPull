@@ -2,7 +2,7 @@
 from pathlib import Path
 import shutil
 from playwright.sync_api import expect
-from test_browser import BrowserHarness
+from test_browser import BrowserHarness,wait_for_service_worker_controller
 import test_indexeddb as legacy
 import test_v2_training as native
 
@@ -23,7 +23,7 @@ class BackupV5Preview(BrowserHarness):
         expect(form.locator('[data-draft-status]')).to_have_text('Szkic zapisany lokalnie · wynik niezatwierdzony')
         before=self.records()
         text=self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const source=d.export();source.archives.push({id:'c1-large',kind:'opaque',createdAt:'2026-10-24T00:00:00.000Z',raw:'x'.repeat(4*1024*1024)+'\\ud800'});return (await(await import('./model/backup-v5.mjs')).exportBackupV5(source,{createdAt:'2026-10-24T00:00:00.000Z'})).text}finally{d.close()}}""")
-        self.page.evaluate('navigator.serviceWorker.ready');self.page.wait_for_function('navigator.serviceWorker.controller!==null')
+        self.page.evaluate('navigator.serviceWorker.ready');wait_for_service_worker_controller(self.page)
         self.context.set_offline(True);self.page.reload();self.page.locator('[data-tab=settings]').click();self.advanced_data()
         self.page.locator('[data-preview-v5]').set_input_files({'name':'v5.json','mimeType':'application/json','buffer':text.encode()})
         expect(self.page.locator('[data-v5-preview]')).to_contain_text('Szkice nie są zawarte',timeout=120000)

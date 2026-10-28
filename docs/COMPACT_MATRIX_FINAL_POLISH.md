@@ -43,7 +43,7 @@ Bez zmian w schemacie IndexedDB v2, modułach protokołu przyrostowego, CAS, rea
 
 ## Testy i pomiary
 
-Lokalny pełny Node: 219/219 PASS. Lokalna regresja tematyczna: 20 przypadków, 19 PASS i jeden błąd synchronizacji odczytu CSS nowego testu; po oczekiwaniu na koniec rozpoczęcia sesji i sprawdzaniu CSS z automatycznym ponowieniem cały nowy moduł 3/3 PASS. Nie zmieniono asercji danych; oczekiwane kolory i font są sprawdzane dokładnie. Pozostałe 17 scenariuszy obejmowało notatki/quota/kolizje, poprzednie serie 10/10/9, szkice strukturalne po restarcie, back-off, drop, L/P, grupy, plany i aktywację. Pełną regresję końcowego commitu wykonuje workflow PR (219 Node + 209 Chromium/PWA); finalny status jest podany w PR. Testy integralności nie są zastępowane asercjami wizualnymi. Nie wykonano nowego odbioru fizycznego Pixela 9 ani prawdziwego konta Google; testy i profile są syntetyczne, izolowane.
+Lokalny pełny Node: 219/219 PASS. Lokalna regresja tematyczna: 20 przypadków, 19 PASS i jeden błąd synchronizacji odczytu CSS nowego testu; po oczekiwaniu na koniec rozpoczęcia sesji i sprawdzaniu CSS z automatycznym ponowieniem cały nowy moduł 3/3 PASS. Nie zmieniono asercji danych; oczekiwane kolory i font są sprawdzane dokładnie. Pozostałe 17 scenariuszy obejmowało notatki/quota/kolizje, poprzednie serie 10/10/9, szkice strukturalne po restarcie, back-off, drop, L/P, grupy, plany i aktywację. Pełną regresję końcowego commitu wykonuje workflow PR (219 Node + 211 Chromium/PWA); finalny status jest podany w PR. Testy integralności nie są zastępowane asercjami wizualnymi. Nie wykonano nowego odbioru fizycznego Pixela 9 ani prawdziwego konta Google; testy i profile są syntetyczne, izolowane.
 
 ## Pomiary przed/po
 
@@ -74,3 +74,11 @@ Dodatkowo rozdzielono zegar wewnątrz strony: gotowy DOM wykryty przez MutationO
 | 40 sesji + raw 4 MiB | 15,6 / 69,7 ms | 43,5 / 190,8 ms | 65,2 / 173,6 ms | 141,0 / 892,7 ms |
 
 Wszystkie próby nawigacji: 0 żądań IndexedDB i brak `ensureFull()`. Zegary DOM/rAF nie są pomiarem ekranu fizycznego telefonu. Bieżące porównanie nie uprawnia do deklaracji zachowania p95 zapisu na Androidzie bez rzeczywistego odbioru.
+
+## Korekta synchronizacji testu PWA po pierwszym CI
+
+Pierwszy workflow `40654345171` zakończył się timeoutem jednego przypadku (`test_local_backup_v4`, oczekiwanie na `serviceWorker.controller`). Lokalny przebieg tego oryginalnego przypadku przeszedł, więc nie potwierdzono deterministycznej przyczyny timeoutu ani błędu aplikacji. Nie zmieniano service workera ani logiki aktywacji.
+
+Oczekiwanie rodziny testów lokalnych kopii/izolowanego podglądu zostało oparte na bezpośrednim odczycie kontrolera i czasie monotonicznym Pythona, niezależnie od dostarczania klatek animacji. Zachowano warunek `controller !== null`, dotychczasowy limit 30 s i wszystkie asercje danych. Rejestracja `ready` nadal nie wystarcza. Dwa nowe testy z rzeczywistym, testowym service workerem sprawdzają odrzucenie aktywnej rejestracji bez kontrolera oraz wymagane przejęcie strony, także przy wstrzymanym czasie wirtualnym. Probe nie dotyka cache aplikacji ani IndexedDB. To korekta synchronizacji w harnessie, nie deklaracja odtworzenia pierwotnego błędu CI.
+
+Zmiany po pomiarach dotyczą wyłącznie testów i raportu; SHA-256 runtime nadal odpowiada opublikowanym pomiarom. Końcowy workflow obejmuje 219 Node i 211 Chromium/PWA; wynik jest podany w PR.
