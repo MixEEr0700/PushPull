@@ -13,11 +13,11 @@ test('three prescribed L/P pairs compress to exactly one line; rendering leaves 
  editor(ex,'summary-draft',e,null);const draft=state(ex.id,'summary-draft');
  assert.deepEqual(lines(e),['L/P 15 × 105 kg']);assert.deepEqual(e,before);assert.deepEqual(flatten(e.performance),projection);assert.deepEqual(state(ex.id,'summary-draft'),draft);forget(ex.id,'summary-draft');
 });
-test('only asymmetric third set displays L/P, in target order regardless of physical row order',()=>{
+test('only asymmetric third set displays L/P, in actual recorded order',()=>{
  const e=result();e.performance.rows[4].segments[0].reps='12';e.performance.rows[5].segments[0].reps='14';e.performance.rows.reverse();
- assert.deepEqual(lines(e),['Seria 1: L/P 15 × 105 kg','Seria 2: L/P 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg']);
+ assert.deepEqual(lines(e),['Seria 3: L 12 × 105 kg · P 14 × 105 kg','Seria 2: L/P 15 × 105 kg','Seria 1: L/P 15 × 105 kg']);
  e.performance.rows.find(r=>r.setId===ex.targets[2].id&&r.side==='right').segments[0].kg='95';
- assert.equal(lines(e)[2],'Seria 3: L 12 × 105 kg · P 14 × 95 kg');
+ assert.equal(lines(e)[0],'Seria 3: L 12 × 105 kg · P 14 × 95 kg');
 });
 test('different sets with equal sides have one row per actual set; optional separated and unsplit records are supported',()=>{
  const e=result();for(const r of e.performance.rows.filter(r=>r.setId===ex.targets[2].id))r.segments[0].reps='12';
@@ -26,12 +26,13 @@ test('different sets with equal sides have one row per actual set; optional sepa
  unsplit.performance.rows=structuredClone(e.performance.rows);assert.deepEqual(lines(unsplit),lines(e));
  const legacy=result({...ex,sideMode:null});legacy.performance.rows[2].segments[0].kg='90';assert.deepEqual(lines(legacy),['Seria 1: 15 × 105 kg','Seria 2: 15 × 105 kg','Seria 3: 15 × 90 kg']);
 });
-test('incomplete/ambiguous pairs never collapse; extra unprescribed pairs use only safe unique grouping',()=>{
+test('incomplete pairs stay visible; identical balanced extras compress without changing their identities',()=>{
  const e=result();e.performance.rows.splice(5,1);assert.equal(lines(e).length,3);assert.match(lines(e)[2],/Seria 3: L 15 × 105 kg · para L\/P nieustalona/);
  const extra=structuredClone(result().performance.rows.slice(0,2));extra.forEach(r=>{r.id=crypto.randomUUID();r.setId=null;});e.performance.rows=extra;
  assert.deepEqual(lines(e),['L/P 15 × 105 kg']);
  e.performance.rows.push(...structuredClone(extra).map(r=>({...r,id:crypto.randomUUID()})));
- assert.equal(lines(e).length,4);assert.ok(lines(e).every(s=>s.includes('para L/P nieustalona')));
+ assert.deepEqual(lines(e),['L/P 15 × 105 kg']); // balanced, identical actual values; no pairing inferred
+ e.performance.rows[0].segments[0].reps='13';assert.equal(lines(e).length,2);assert.match(lines(e)[0],/L 13.*P 15/);
  const bad=result();bad.performance.rows[0].segments[0].kg='';assert.match(summary(bad,ex.targets),/niepełny wynik/);assert.notDeepEqual(lines(bad),['L/P 15 × 105 kg']);
  bad.performance.rows[0].segments=undefined;assert.match(summary(bad,ex.targets),/Brak pełnych danych/);assert.match(summary({performance:{rows:[]}}),/Brak pełnych danych/);
  // More physical records than targets: extra target-less results stay visible.
@@ -56,4 +57,14 @@ test('missing prescribed rows and unrelated targets cannot renumber actual extra
  const other={id:'unrelated-target',order:99,positionId:'other'};
  assert.deepEqual(lines(e,[...ex.targets,other]),['Seria 1: L/P 15 × 105 kg','Seria 2: L/P 15 × 90 kg']);
  const before=structuredClone(e);summary(e,ex.targets);assert.deepEqual(e,before);
+});
+
+test('2, 3 and 8 equal sets including individually added plain rows compress independent of identities',()=>{
+ for(const n of [2,3,8]){const e=result({...ex,sideMode:'optional'});e.performance.rows=Array.from({length:n},(_,i)=>({...structuredClone(e.performance.rows[0]),id:'row'+i,setId:i<ex.targets.length?ex.targets[i].id:null}));const before=structuredClone(e);assert.deepEqual(lines(e),['15 × 105 kg']);assert.deepEqual(e,before);e.performance.rows[n-1].segments[0].reps='14';assert.equal(lines(e).length,n);}
+});
+
+test('balanced totals cannot hide mismatched prescribed sides or opaque row semantics',()=>{
+ const e=result();e.performance.rows=[e.performance.rows[0],e.performance.rows[3]];assert.equal(lines(e).length,2);assert.ok(lines(e).every(s=>s.includes('nieustalona')));
+ const d=result({...ex,sideMode:'optional'});d.performance.rows[1].opaqueMeaning='different';assert.equal(lines(d).length,3);
+ delete d.performance.rows[1].opaqueMeaning;d.performance.rows[1].segments[0].kg='105.0';assert.deepEqual(lines(d),['15 × 105 kg']);
 });
