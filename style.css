@@ -85,3 +85,21 @@ button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-off
 .individual-line .btn{min-width:44px;padding:7px 2px}
 .bottom .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;padding:5px}
 .nav-icon{width:23px;height:23px;flex-shrink:0}
+
+/* Final Compact Matrix polish: only exercise cards and their result controls. */
+.exercise-heading{display:flex;align-items:flex-start;gap:4px}
+.exercise-heading .exercise-toggle{flex:1;min-width:0}
+.exercise-toggle .num{width:38px;height:38px;font-size:22px;background:#176b45;color:#fff}
+.exercise-toggle .name{font-size:20.5px;font-weight:750;overflow-wrap:anywhere}
+.exercise-toggle .chevron{align-self:flex-start;margin-top:8px}
+.note-toggle{flex:0 0 44px;min-width:44px;display:grid;place-items:center;padding:7px}
+.exercise-toggle .detail{color:#a9b7af}
+.exercise-toggle .last-result,.exercise-toggle .last-series{color:#39ff74;font-size:13px;font-weight:600}
+.exercise-toggle [data-result-change]{font-size:11px;color:#a9b7af;font-weight:400}
+.exercise-notes[hidden]{display:none}
+.expanded:has(.result-panel)>.actions{display:none}
+.result-controls{margin-top:8px}
+.result-buttons,.result-secondary{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:8px 0 0}
+.result-secondary .btn{width:100%;padding:9px 5px}
+.expanded>.idle-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.idle-controls .btn{width:100%;min-width:0}

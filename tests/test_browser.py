@@ -24,6 +24,11 @@ def confirm_restore(page):
     page.locator('[data-restore-confirm]').click()
     expect(page.locator('[data-restore-busy]')).to_have_count(0,timeout=120000)
 
+def open_notes(scope):
+    """Header toggle in the final polish; historical release fixtures have no toggle."""
+    toggle=scope.locator('[data-note-toggle]').first
+    if toggle.count() and toggle.get_attribute('aria-expanded')=='false':toggle.click()
+
 def open_result_panel(scope):
     """Issue95 auto-opens the form; correction/history still have an opener.
     Also exercises old-release upgrade fixtures that need an explicit click.
@@ -198,7 +203,7 @@ class BrowserRegression(BrowserHarness):
         self.assertEqual(self.page.locator('.series-total strong').inner_text().replace('\xa0','').replace(' ',''), '1640kg')
         self.save()
         self.assertEqual(len(self.state()['entries'][0]['series']), 2)
-        self.page.locator('[data-personal-note] > summary').click()
+        open_notes(self.page);self.page.locator('[data-personal-note] > summary').click()
         self.page.locator('#notesForm textarea').fill('Łopatki stabilnie')
         self.page.locator('#notesForm [type=submit]').click()
         expect(self.page.locator('[data-training-pending]')).to_have_count(0)
@@ -372,7 +377,7 @@ class BrowserRegression(BrowserHarness):
             before=self.state();card.locator('[data-expand]').click()
             expect(card.locator('.detail').first).to_be_visible()
             expect(card.locator('[data-personal-note] textarea')).not_to_be_visible()
-            card.locator('[data-personal-note] > summary').click()
+            open_notes(card);card.locator('[data-personal-note] > summary').click()
             expect(card.locator('[data-personal-note] textarea')).to_be_visible()
             self.assertEqual(self.state(),before)
             self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))

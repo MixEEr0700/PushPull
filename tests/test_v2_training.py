@@ -1,5 +1,5 @@
 """V2 in the existing phone journal, using only synthetic history."""
-from test_browser import confirm_restore,open_result_panel
+from test_browser import confirm_restore,open_result_panel,open_notes
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -67,7 +67,7 @@ class V2Training(BrowserHarness):
         expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: 6 × 100 kg','Seria 2: 6 × 100 kg','Seria 3 · back-off: 10 × 70 kg'])
         saved=self.state();sid=saved['activeId'];entry=saved['entries'][-1]
         self.assertEqual(len(entry['performance']['rows']),3)
-        self.page.locator('[data-personal-note] > summary').click()
+        open_notes(self.page);self.page.locator('[data-personal-note] > summary').click()
         self.page.locator('.v2NoteForm textarea').fill('Moja technika, nie instrukcja trenera')
         self.page.locator('.v2NoteForm [type=submit]').click()
         expect(self.page.get_by_text('Notatka zapisana',exact=True)).to_be_visible()
