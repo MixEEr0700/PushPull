@@ -11,17 +11,17 @@ function context({limits:overrides={},signal}={}){
 }
 // Capture all properties before the first await; no getters, sparse arrays or silent JSON coercion.
 function capture(root,guard){
- let properties=0;const nodes=[],seen=new Map(),active=new Set(),strings=new Map(),structures=new Map();
+ let properties=0;const nodes=[],seen=new Map(),active=new Set(),strings=new Map(),structures=new Map(),heights=new Map();
  function visit(v,depth=0){
   guard();check(depth<=64,'model depth');
   if(typeof v==='string'&&strings.has(v))return strings.get(v);
-  check(!active.has(v),'cycle');if(v&&typeof v==='object'&&seen.has(v))return seen.get(v);
+  check(!active.has(v),'cycle');if(v&&typeof v==='object'&&seen.has(v)){const id=seen.get(v);check(depth+heights.get(id)<=64,'model depth');return id;}
   let node;
   if(v===null||typeof v==='boolean')node=['value',v];
   else if(typeof v==='number'){check(Number.isFinite(v),'nonfinite number');node=['number',Object.is(v,-0)?'-0':String(v)];}
   else if(typeof v==='string')node=['string',v];
   else{
-   check(v&&typeof v==='object'&&(Array.isArray(v)||Object.getPrototypeOf(v)===Object.prototype||Object.getPrototypeOf(v)===null),'nonportable value');active.add(v);
+   check(v&&typeof v==='object'&&(Array.isArray(v)?Object.getPrototypeOf(v)===Array.prototype:Object.getPrototypeOf(v)===Object.prototype||Object.getPrototypeOf(v)===null),'nonportable value');active.add(v);
    const keys=Reflect.ownKeys(v);properties+=keys.length;check(keys.length<=10000&&properties<=100000,'property limit');check(keys.every(k=>typeof k==='string'),'symbol property');
    for(const k of keys){const d=Object.getOwnPropertyDescriptor(v,k);check(Object.hasOwn(d,'value')&&(d.enumerable||Array.isArray(v)&&k==='length'),'accessor or hidden property');}
    if(Array.isArray(v)){check(keys.length===v.length+1&&Array.from({length:v.length},(_,i)=>Object.hasOwn(v,i)).every(Boolean),'sparse or extended array');node=['array',v.map(x=>visit(x,depth+1))];}
@@ -30,6 +30,7 @@ function capture(root,guard){
   }
   const key=typeof v==='string'?null:JSON.stringify(node);let id=key===null?undefined:structures.get(key);
   if(id===undefined){check(nodes.length<10000,'node limit');id=nodes.length;nodes.push(node);if(key!==null)structures.set(key,id);}
+  const refs=node[0]==='array'?node[1]:node[0]==='object'?node[1].flat():[];const height=refs.reduce((h,r)=>Math.max(h,1+heights.get(r)),0);check(depth+height<=64,'model depth');heights.set(id,height);
   if(typeof v==='string')strings.set(v,id);else if(v&&typeof v==='object')seen.set(v,id);return id;
  }
  return {format:'pushpull-model-graph',version:1,root:visit(root),nodes};
@@ -76,9 +77,9 @@ export async function readCompactModel(file,options={}){
  const bytes=new Uint8Array(descriptor.bytes);let p=0;for await(const b of reader.readObject('graph')){guard();bytes.set(b,p);p+=b.length;}
  const graph=boundedBackupJson(new TextDecoder('utf-8',{fatal:true}).decode(bytes),limits,limits.manifestBytes);
  check(graph&&Object.keys(graph).sort().join(',')==='format,nodes,root,version'&&graph.format==='pushpull-model-graph'&&graph.version===1&&Array.isArray(graph.nodes)&&graph.nodes.length<=10000,'graph schema');
- const values=new Map(),active=new Set(),used=new Set(['graph']);
+ const values=new Map(),heights=new Map(),active=new Set(),used=new Set(['graph']);
  async function visit(i,depth=0){
-  guard();check(Number.isSafeInteger(i)&&i>=0&&i<graph.nodes.length&&depth<=64,'reference or depth');check(!active.has(i),'cycle');if(values.has(i))return values.get(i);active.add(i);
+  guard();check(Number.isSafeInteger(i)&&i>=0&&i<graph.nodes.length&&depth<=64,'reference or depth');check(!active.has(i),'cycle');if(values.has(i)){check(depth+heights.get(i)<=64,'model depth');return values.get(i);}active.add(i);
   const n=graph.nodes[i];check(Array.isArray(n)&&n.length===2,'node');const [type,v]=n;let out;
   if(type==='value'){check(v===null||typeof v==='boolean','value');out=v;}
   else if(type==='number'){check(typeof v==='string'&&Number.isFinite(Number(v))&&(v==='-0'||String(Number(v))===v),'number');out=Number(v);}
@@ -89,7 +90,7 @@ export async function readCompactModel(file,options={}){
   }else if(type==='array'){check(Array.isArray(v),'array');out=[];for(const ref of v)out.push(await visit(ref,depth+1));}
   else if(type==='object'){check(Array.isArray(v),'object');out={};for(const pair of v){check(Array.isArray(pair)&&pair.length===2,'entry');const key=await visit(pair[0],depth+1);check(typeof key==='string'&&!Object.hasOwn(out,key),'duplicate key');Object.defineProperty(out,key,{value:await visit(pair[1],depth+1),writable:true,enumerable:true,configurable:true});}}
   else throw Error('compact graph: node type');
-  active.delete(i);values.set(i,out);return out;
+  const refs=type==='array'?v:type==='object'?v.flat():[];const height=refs.reduce((h,r)=>Math.max(h,1+heights.get(r)),0);check(depth+height<=64,'model depth');heights.set(i,height);active.delete(i);values.set(i,out);return out;
  }
  const result=await visit(graph.root);check(values.size===graph.nodes.length&&used.size===reader.manifest.objects.length,'unreachable data');guard();return freeze(result);
 }

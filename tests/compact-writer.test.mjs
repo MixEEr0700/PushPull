@@ -19,9 +19,10 @@ test('deduplication, gzip/none, large repeated archive; synthetic benchmark',asy
 });
 test('reject unsupported values rather than silently changing them',async()=>{
  const cyclic={};cyclic.self=cyclic;const getter={get x(){throw Error('must not execute');}};
- for(const v of [undefined,NaN,Infinity,1n,new Date(),cyclic,getter,[,1],Object.assign([],{extra:1}),{x:undefined}])await assert.rejects(writeCompactModel(v));
+ for(const v of [undefined,NaN,Infinity,1n,new Date(),new (class extends Array {})(),cyclic,getter,[,1],Object.assign([],{extra:1}),{x:undefined}])await assert.rejects(writeCompactModel(v));
 });
 test('limits, cancellation, corrupt payload and truncation never publish restored model',async()=>{
+ let nested=false;const chain=[];for(let i=0;i<70;i++){nested=[nested];chain.push(nested);}await assert.rejects(writeCompactModel(chain),/depth/);
  const s=fixture();for(const limits of [{totalDecodedBytes:1},{fileBytes:40},{manifestBytes:1},{chunks:1},{chunkStoredBytes:1},{depth:1},{tokens:1}])await assert.rejects(writeCompactModel(s,{limits}));
  const c=new AbortController();c.abort();await assert.rejects(writeCompactModel(s,{signal:c.signal}),{name:'AbortError'});
  const f=await writeCompactModel(s);await assert.rejects(readCompactModel(f.slice(0,-1)));const b=new Uint8Array(await f.arrayBuffer());b[b.length-1]^=1;await assert.rejects(readCompactModel(new Blob([b])));
@@ -32,6 +33,7 @@ test('capture precedes async work; later caller edits cannot change the file',as
 test('malformed domain graph rejected even with correct transport hashes',async()=>{
  const {createHash}=await import('node:crypto');const hash=b=>createHash('sha256').update(b).digest('hex');
  async function container(nodes,root=0){const raw=Buffer.from(JSON.stringify({format:'pushpull-model-graph',version:1,root,nodes})),manifest=Buffer.from(JSON.stringify({format:'pushpull-compact',version:1,chunks:[{storedBytes:raw.length,decodedBytes:raw.length,storedSha256:hash(raw),decodedSha256:hash(raw),compression:'none'}],objects:[{id:'graph',parts:[0],bytes:raw.length}]})),header=Buffer.alloc(40);header.write('PPC1');header.writeUInt32BE(manifest.length,4);Buffer.from(hash(manifest),'hex').copy(header,8);return new Blob([header,manifest,raw]);}
+ const deep=[['value',false]];for(let i=1;i<70;i++)deep.push(['array',[i-1]]);deep.push(['array',Array.from({length:70},(_,i)=>i)]);await assert.rejects(readCompactModel(await container(deep,70)),/depth/);
  for(const nodes of [[['array',[0]]],[['value',true],['value',false]],[['string','missing']],[['number','NaN']],[['array',[99]]]])await assert.rejects(readCompactModel(await container(nodes)));
 });
 test('8 MiB opaque archive roundtrip under 64 MiB V8 old-space',async()=>{
