@@ -519,7 +519,7 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(value()['trainingJournal']['nextUnitId'],'PUSH A')
         at(8,3);f=form('PUSH A','PUSH-A-1','2026-08-03')
         card=self.page.locator('.exercise-card').filter(has=self.page.locator('[data-expand="PUSH-A-1"]'))
-        expect(card.locator('.exercise-toggle .last-result')).to_have_text('10 × 105 kg')
+        expect(card.locator('.exercise-toggle .last-result')).to_have_text('10×105 kg')
         f.locator('[data-quick=kg]').fill('95');f.locator('[data-quick=reps]').fill('10');save(f);finish()
         self.page.locator('[data-type="PUSH A"]').click()
         if card.locator('[data-expand]').get_attribute('aria-expanded')!='true':card.locator('[data-expand]').click()
@@ -596,7 +596,7 @@ class PWADeployment(unittest.TestCase):
         expect(f.locator('[data-row="0"][data-field=kg]')).to_have_value('95')
         expect(card().locator('[data-result-change]')).to_contain_text('3 sesje temu')
         save(f)
-        expect(card().locator('.exercise-toggle .last-result')).to_have_text('L/P 12 × 95 kg')
+        expect(card().locator('.exercise-toggle .last-result')).to_have_text('L/P 12×95 kg')
         expect(card().locator('[data-result-change]')).to_contain_text('3 sesje temu') # In-progress session does not count.
         sid=self.snapshot()['data']['activeId']
         self.page.locator('[data-act=finish]').click();self.page.locator('[data-type="PULL B"]').click()
@@ -684,7 +684,7 @@ class PWADeployment(unittest.TestCase):
         self.reopen();self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
         expect(f.locator('[data-row="4"][data-field=reps]')).to_have_value('12');expect(f.locator('[data-row="5"][data-field=reps]')).to_have_value('14')
         f.locator('[type=submit]').click();expect(f).to_have_count(0)
-        expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: L/P 15 × 105 kg','Seria 2: L/P 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg'])
+        expect(self.page.locator('.exercise-toggle .result-unit')).to_have_text(['L/P 15×105 kg','L/P 15×105 kg','L 12×105 · P 14×105 kg'])
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000)
         self.assertEqual(value()['trainingJournal']['nextUnitId'],'PUSH A') # Old PULL A must not advance this new V2 period.
         self.page.locator('[data-act=start]').click();self.ready()
@@ -741,7 +741,7 @@ class PWADeployment(unittest.TestCase):
         expect(f.locator('[data-row="4"][data-field=reps]')).to_have_value('12');expect(f.locator('[data-row="5"][data-field=reps]')).to_have_value('14')
         f.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
         expected=['Seria 1: L/P 15 × 105 kg','Seria 2: L/P 15 × 105 kg','Seria 3: L 12 × 105 kg · P 14 × 105 kg']
-        expect(card.locator('.exercise-toggle .last-series-row')).to_have_text(expected)
+        expect(card.locator('.exercise-toggle .result-unit')).to_have_text(['L/P 15×105 kg','L/P 15×105 kg','L 12×105 · P 14×105 kg'])
         saved=self.snapshot();self.assertEqual(saved['data']['trainingJournal']['sessionSnapshots'],before['data']['trainingJournal']['sessionSnapshots'])
         self.assertEqual(saved['data']['entries'][:-1],before['data']['entries'][:-1])
         self.assertEqual([r['id'] for r in saved['data']['entries'][-1]['performance']['rows']],[r['id'] for r in before['data']['entries'][-1]['performance']['rows']])

@@ -96,7 +96,7 @@ class FinishPairs(BrowserHarness):
         self.context=self.new_context(service_workers='allow');self.page=self.context.new_page();self.page.on('dialog',self.dialog)
         self.page.goto(self.url);wait_for_service_worker_controller(self.page);self.activate();f=self.open_result('PUSH A','PUSH-A-1');self.fill(f)
         for _ in range(5):f.locator('[data-rich-action=add-set]').click()
-        self.fill(f);self.save_form(f);expect(self.page.locator('.exercise-card').first.locator('.last-result')).to_contain_text('10 × 40 kg')
+        self.fill(f);self.save_form(f);expect(self.page.locator('.exercise-card').first.locator('.last-result')).to_contain_text('10×40 kg')
         self.assertEqual(len(self.state()['entries'][-1]['performance']['rows']),8)
         self.page.reload();self.ready();expect(self.page.locator('.exercise-card').first.locator('.last-result')).to_contain_text('10×40 kg')
         self.context.set_offline(True);self.page.locator('[data-expand="PUSH-A-2"]').click();self.fill(self.page.locator('.performanceForm'))

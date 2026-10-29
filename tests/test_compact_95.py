@@ -24,7 +24,7 @@ class Compact95(BrowserHarness):
         f=self.form();f.locator('[data-rich-action=toggle]').click();self.fill_rows(f,'80','10')
         f.locator('[data-row="2"][data-field=reps]').fill('9');self.save_form(f)
         first=self.state();sid=first['activeId'];source=first['entries'][-1];card=self.page.locator('.exercise-card').first
-        expect(card.locator('.last-series-row')).to_have_text(['Seria 1: 10 × 80 kg','Seria 2: 10 × 80 kg','Seria 3: 9 × 80 kg'])
+        expect(card.locator('.result-unit')).to_have_text(['10×80 kg','10×80 kg','9×80 kg'])
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.page.locator('[data-type="PUSH A"]').click();self.page.locator('[data-act=start]').click();f=self.form()
         expect(f.locator('[data-quick=reps]')).to_have_value('10');expect(f.locator('[data-quick=kg]')).to_have_value('80')
