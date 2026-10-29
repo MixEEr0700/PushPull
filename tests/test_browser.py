@@ -223,6 +223,8 @@ class BrowserHarness(unittest.TestCase):
         if drawer.count() and not drawer.evaluate('(e)=>e.open'):
             drawer.locator(':scope > summary').click()
         if drawer.count():expect(drawer).to_have_attribute('open','')
+        technical=p.locator('[data-technical]')
+        if technical.count() and not technical.evaluate('(e)=>e.open'):technical.locator(':scope > summary').click()
 
     def settings(self):
         self.page.locator('[data-tab=settings]').click()

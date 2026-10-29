@@ -62,7 +62,7 @@ class BackupV5Preview(BrowserHarness):
         before=self.records();self.page.locator('[data-tab=settings]').click()
         # details.toggle is queued. A File selection may render before it runs.
         # Reproduce that ordering in one task instead of adding timing sleeps.
-        self.page.evaluate("""raw=>{const drawer=document.querySelector('[data-backup-advanced]');drawer.open=true;const input=drawer.querySelector('[data-preview-v5]'),transfer=new DataTransfer();transfer.items.add(new File([raw],'v5.json',{type:'application/json'}));input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}))}""",raw)
+        self.page.evaluate("""raw=>{const drawer=document.querySelector('[data-backup-advanced]');drawer.open=true;drawer.querySelector('[data-technical]').open=true;const input=drawer.querySelector('[data-preview-v5]'),transfer=new DataTransfer();transfer.items.add(new File([raw],'v5.json',{type:'application/json'}));input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}))}""",raw)
         expect(self.page.locator('[data-backup-advanced]')).to_have_attribute('open','')
         expect(self.page.locator('[data-v5-preview]')).to_be_visible(timeout=120000)
         expect(self.page.locator('[data-v5-cancel]')).to_be_visible()
