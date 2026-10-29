@@ -36,17 +36,29 @@ class ResultsNotes(BrowserHarness):
             self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
             self.assertTrue(result.locator('.result-unit').evaluate_all('(es)=>es.every(e=>getComputedStyle(e).whiteSpace==="nowrap"&&e.clientHeight<=parseFloat(getComputedStyle(e).lineHeight)+1)'))
             self.page.screenshot(path=str(output/f'drop-{width}.png'),full_page=True)
+        # Both states use the same tokens and measure their own available width.
+        for width in [360,390,412]:
+            self.page.set_viewport_size({'width':width,'height':844})
+            for expanded in [True,False,True,False]:
+                card.locator('[data-expand]').click()
+                self.assertEqual(card.locator('[data-expand]').get_attribute('aria-expanded'),str(expanded).lower())
+                expect(result.locator('.result-unit')).to_have_text(['3×20 + drop 3×10 kg','3×20 + drop 3×9 kg','3×20 + drop 3×8 kg'])
+                expect(result).to_have_class('last-result adaptive-result result-stacked')
+                self.assertTrue(result.locator('.result-unit').evaluate_all('(es)=>es.every(e=>getComputedStyle(e).whiteSpace==="nowrap"&&e.clientHeight<=parseFloat(getComputedStyle(e).lineHeight)+1)'))
+                self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         # A short identical drop fits; the presence of a drop must not force stacking.
         card.locator('[data-expand]').click();f=card.locator('.performanceForm')
         if not f.locator('[data-rich-details]').is_visible():f.locator('[data-rich-action=toggle]').click()
         self.fill_rows(f,'2','3');self.save_form(f);card.locator('[data-expand]').click()
         expect(result.locator('.result-unit')).to_have_count(1);expect(result).not_to_have_class('last-result adaptive-result result-stacked')
+        card.locator('[data-expand]').click();expect(result.locator('.result-unit')).to_have_count(1);expect(result).not_to_have_class('last-result adaptive-result result-stacked');card.locator('[data-expand]').click()
         self.assertEqual(self.state()['entries'][:-1],before['entries'][:-1])
         # Plain mixed values fit inline with a single final kg, equal values compress.
         self.page.locator('[data-expand="PUSH-A-1"]').click();f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click();self.fill_rows(f,'20','2')
         f.locator('[data-row="1"][data-field=kg]').fill('18');f.locator('[data-row="2"][data-field=kg]').fill('10');self.save_form(f)
         self.page.locator('[data-expand="PUSH-A-1"]').click();r=self.page.locator('.exercise-card').first.locator('[data-adaptive-result]')
         expect(r).not_to_have_class('last-result adaptive-result result-stacked');self.assertEqual(r.inner_text(),'2×20 | 2×18 | 2×10 kg')
+        self.page.locator('[data-expand="PUSH-A-1"]').click();expect(r).not_to_have_class('last-result adaptive-result result-stacked');self.assertEqual(r.inner_text(),'2×20 | 2×18 | 2×10 kg')
         self.page.reload();self.ready();expect(self.page.locator('.exercise-card').first.locator('[data-adaptive-result]')).to_have_text('2×20 kg | 2×18 kg | 2×10 kg')
 
     def test_quick_fields_keep_drop_children_and_individual_fields_through_restart_without_dialog(self):

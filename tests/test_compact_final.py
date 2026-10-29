@@ -52,7 +52,7 @@ class CompactFinal(BrowserHarness):
             self.page.screenshot(path=str(output/f'{width}.png'),full_page=True)
         f.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
         self.assertEqual([r['reps'] for r in self.state()['entries'][-1]['series']],['10','10','9'])
-        self.assertEqual(card.locator('.last-series').evaluate('(e)=>getComputedStyle(e).color'),'rgb(57, 255, 116)')
+        self.assertEqual(card.locator('.adaptive-result').evaluate('(e)=>getComputedStyle(e).color'),'rgb(57, 255, 116)')
         expect(card.locator('.idle-controls button')).to_have_count(4)
         before=self.state();card.locator('[data-open-series]').click();expect(card.locator('[data-rich-details]')).to_be_visible();self.assertEqual(self.state(),before)
         self.page.reload();self.ready();card=self.card();card.locator('[data-expand]').click()
