@@ -124,6 +124,7 @@ class RuntimeIndex(BrowserHarness):
         self.page.reload();expect(self.page.locator('[role=alert]').first).to_be_visible()
         self.page.locator('#importFile').set_input_files({'name':'synthetic-full-v2.json','mimeType':'application/json','buffer':raw.encode()})
         confirm_restore(self.page);expect(self.page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible()
+        self.page.locator('[data-tab=training]').click()
         self.page.locator('[data-act=start]').click();expect(self.page.locator('[data-act=finish]')).to_be_visible()
         preserved=self.page.evaluate("""async raw=>{const expected=JSON.parse(raw),actual=await __fastDB.auditExport(),a=await import('./model/journal-idb.mjs'),db=await a.connectV2('pushpull');try{return {
          indexed:!!(await a.readRecords(db)).state.runtime,entries:a.same(actual.data.entries,expected.data.entries),

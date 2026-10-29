@@ -96,6 +96,7 @@ class PlanOverview(BrowserHarness):
         self.page.locator('[data-exercise-plan]').select_option('');self.page.locator('[data-panel=history]').click()
         expect(self.page.locator('.panel .entry')).to_have_count(2)
         saved=self.state();self.settings()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_text()
         self.assertEqual(self.page.evaluate('async t=>(await PushPullDB.parseModelBackup(t)).data',raw),saved)

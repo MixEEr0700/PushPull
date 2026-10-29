@@ -32,7 +32,10 @@ class ResultsNotes(BrowserHarness):
             self.page.set_viewport_size({'width':width,'height':height})
             if width<=412:expect(result).to_have_class('last-result adaptive-result result-stacked')
             self.assertEqual(result.locator('.result-unit').all_text_contents(),['3×20 + drop 3×10 kg','3×20 + drop 3×9 kg','3×20 + drop 3×8 kg'])
-            self.assertEqual(len(set(result.locator('.result-unit').evaluate_all('(es)=>es.map(e=>e.getBoundingClientRect().y)'))),3 if result.evaluate("e=>e.classList.contains('result-stacked')") else 1)
+            # Read layout and its ResizeObserver class in the same JS task.
+            # Two evaluate calls can observe opposite sides of a resize delivery.
+            layout=result.evaluate("e=>({lines:new Set([...e.querySelectorAll('.result-unit')].map(r=>r.getBoundingClientRect().y)).size,stacked:e.classList.contains('result-stacked')})")
+            self.assertEqual(layout['lines'],3 if layout['stacked'] else 1)
             self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
             self.assertTrue(result.locator('.result-unit').evaluate_all('(es)=>es.every(e=>getComputedStyle(e).whiteSpace==="nowrap"&&e.clientHeight<=parseFloat(getComputedStyle(e).lineHeight)+1)'))
             self.page.screenshot(path=str(output/f'drop-{width}.png'),full_page=True)

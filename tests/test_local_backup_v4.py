@@ -79,6 +79,7 @@ class LocalBackupV4(BrowserHarness):
         self.assertTrue(self.page.evaluate("""async text=>{const s=await(await import('./model/backup-v4.mjs')).decodeBackup(text),db=await PushPullDB.open(()=>{});try{
          const {canonical}=await import('./model/backup-json.mjs');return canonical(s.live.data)===canonical(db.value)&&canonical(s.live.catalog)===canonical(db.export().catalog)&&canonical(s.archives)===canonical(db.export().archives);
         }finally{db.close()}}""",text))
+        self.backup_flow('save')
         with self.page.expect_download(timeout=120000) as legacy:self.page.locator('[data-act=export]').click()
         old=Path(legacy.value.path()).read_bytes()
         self.page.locator('#importFile').set_input_files({'name':'legacy.json','mimeType':'application/json','buffer':old})

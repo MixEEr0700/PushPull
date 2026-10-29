@@ -83,6 +83,7 @@ class Compact101(BrowserHarness):
         self.assertEqual(sum(float(s['kg'])*int(s['reps']) for s in e['series']),1072)
         self.assertEqual(saved['entries'][:-1],before['entries']);self.assertEqual(saved['trainingJournal'],before['trainingJournal'])
         self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as dl:self.page.locator('[data-act=export]').click()
         text=Path(dl.value.path()).read_bytes();other=self.new_context(service_workers='block');page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url)
         page.locator('[data-tab=settings]').click();page.locator('#importFile').set_input_files({'name':'user-drops-v3.json','mimeType':'application/json','buffer':text});confirm_restore(page)

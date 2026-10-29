@@ -85,6 +85,7 @@ class V2Training(BrowserHarness):
         self.page.locator('[data-panel=stats]').click()
         expect(self.page.locator('.stat-tile').first).to_contain_text('1680')
         self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_text();backup=json.loads(raw)
         self.assertEqual(backup['version'],3)
@@ -155,6 +156,7 @@ class V2Training(BrowserHarness):
         self.assertFalse(self.alerts,self.alerts)
         # The full copy must include sides, flexible drops and both group members.
         expected=self.state();self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_text()
         other=self.new_context(service_workers='block');page=other.new_page();page.on('dialog',lambda d:d.accept())

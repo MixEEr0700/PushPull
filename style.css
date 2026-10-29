@@ -132,3 +132,4 @@ button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-off
 .adaptive-result.result-stacked .result-unit{display:block;max-width:100%;overflow-x:auto;white-space:nowrap}
 .adaptive-result.result-stacked .result-unit>.result-kg{display:inline}
 .adaptive-result.result-stacked>.adaptive-separator{display:none}
+[data-backup-body][hidden]{display:none}
