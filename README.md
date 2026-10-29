@@ -64,3 +64,5 @@ Raport zakładki Dane: [Issue #90](docs/DATA_TAB_ISSUE_90.md).
 - [Kompaktowy edytor serii — Issue #99: L/P, segmenty, testy i pomiary](docs/COMPACT_EDITOR_ISSUE_99.md)
 
 - [Odtwarzanie L/P i dowolne segmenty dropsetu — Issue #101](docs/COMPACT_EDITOR_ISSUE_101.md)
+
+- [Prezentacja wyników, bezpieczne szybkie pola i przyrostowy zapis notatek](docs/RESULTS_NOTES_POLISH.md)

@@ -19,7 +19,7 @@ class Compact95(BrowserHarness):
         open_result_panel(card)
         return card.locator('.performanceForm')
 
-    def test_actual_10_10_9_prefill_individual_edits_restart_and_confirmation(self):
+    def test_actual_10_10_9_prefill_individual_edits_restart_and_safe_quick(self):
         self.activate();self.page.locator('[data-type="PUSH A"]').click();self.page.locator('[data-act=start]').click()
         f=self.form();f.locator('[data-rich-action=toggle]').click();self.fill_rows(f,'80','10')
         f.locator('[data-row="2"][data-field=reps]').fill('9');self.save_form(f)
@@ -31,11 +31,11 @@ class Compact95(BrowserHarness):
         f.locator('[data-rich-action=toggle]').click()
         self.assertEqual(f.locator('[data-field=reps]').evaluate_all('(els)=>els.map(e=>e.value)'),['10','10','9'])
         self.confirm=False;f.locator('[data-quick=kg]').fill('90')
-        expect(f.locator('[data-quick=kg]')).to_have_value('80');expect(f.locator('[data-row="2"][data-field=reps]')).to_have_value('9')
+        expect(f.locator('[data-quick=kg]')).to_have_value('90');expect(f.locator('[data-row="2"][data-field=reps]')).to_have_value('9')
         f.locator('[data-rich-action=add-set]').click();f.locator('[data-row="3"][data-field=reps]').fill('7');f.locator('[data-row="3"][data-field=kg]').fill('70');expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         f.locator('[data-rich-action=toggle]').click();expect(f.locator('[data-rich-details]')).not_to_be_visible()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-tab=training]').click()
-        f=self.page.locator('.performanceForm');expect(f.locator('[data-quick=kg]')).to_have_value('80')
+        f=self.page.locator('.performanceForm');expect(f.locator('[data-quick=kg]')).to_have_value('90')
         self.page.reload();self.ready();self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
         if not f.locator('[data-rich-details]').is_visible():f.locator('[data-rich-action=toggle]').click()
         self.assertEqual(f.locator('[data-field=reps]').evaluate_all('(els)=>els.map(e=>e.value)'),['10','10','9','7'])
@@ -59,7 +59,7 @@ class Compact95(BrowserHarness):
         for width in [360,390,412]:
             self.page.set_viewport_size({'width':width,'height':844});card=self.page.locator('.exercise-card').first
             if card.locator('[data-expand]').get_attribute('aria-expanded')=='true':card.locator('[data-expand]').click()
-            expect(card.locator('.detail').first).to_be_visible();expect(card.locator('.last-result')).to_have_text('10 × 80 kg')
+            expect(card.locator('.detail').first).to_be_visible();expect(card.locator('.last-result')).to_have_text('10×80 kg')
             self.assertGreaterEqual(card.locator('.name').evaluate('(e)=>parseFloat(getComputedStyle(e).fontSize)'),18)
             self.assertGreaterEqual(card.locator('.num').evaluate('(e)=>parseFloat(getComputedStyle(e).fontSize)'),20)
             card.locator('[data-expand]').click();f=self.form()
@@ -83,29 +83,29 @@ class Compact95(BrowserHarness):
         expect(card.locator('[data-personal-note] summary')).to_contain_text('Własne Ł 😀')
         expect(card.locator('[data-personal-note] summary')).not_to_contain_text('Moja notatka')
 
-    def test_quick_confirm_preserves_other_individual_field_and_does_not_need_new_confirmation_per_keystroke(self):
+    def test_quick_preserves_individual_fields_without_confirmation(self):
         self.activate();self.page.locator('[data-act=start]').click();f=self.form();f.locator('[data-rich-action=toggle]').click();self.fill_rows(f,'80','10');f.locator('[data-row="2"][data-field=reps]').fill('9')
         self.confirm=True;f.locator('[data-quick=kg]').fill('90');self.confirm=False;f.locator('[data-quick=reps]').fill('12')
         expect(f.locator('[data-row="2"][data-field=reps]')).to_have_value('9');expect(f.locator('[data-row="0"][data-field=kg]')).to_have_value('90')
         self.confirm=True;f.locator('[data-quick=reps]').press_sequentially('2')
-        expect(f.locator('[data-row="2"][data-field=reps]')).to_have_value('102')
-        self.save_form(f);self.assertEqual([r['segments'][0]['reps'] for r in self.state()['entries'][-1]['performance']['rows']],['102']*3)
+        expect(f.locator('[data-row="2"][data-field=reps]')).to_have_value('9')
+        self.save_form(f);self.assertEqual([r['segments'][0]['reps'] for r in self.state()['entries'][-1]['performance']['rows']],['122','122','9'])
 
-    def test_legacy_quick_typing_preserves_individual_reps_and_asks_once_per_edit(self):
+    def test_legacy_quick_typing_preserves_individual_reps_without_confirmation(self):
         self.start();self.result('80','10');f=self.page.locator('.seriesResultForm')
         f.locator('[data-series-toggle]').click();f.locator('[data-series-index="2"][data-field=reps]').fill('9')
         confirmations=[];self.page.on('dialog',lambda d:confirmations.append(d.message) if d.type=='confirm' else None)
         f.locator('[data-main=kg]').fill('');f.locator('[data-main=kg]').press_sequentially('90')
-        self.assertEqual(len(confirmations),1)
+        self.assertEqual(len(confirmations),0)
         self.confirm=False;f.locator('[data-main=reps]').fill('12')
-        self.assertEqual(len(confirmations),2)
-        expect(f.locator('[data-main=reps]')).to_have_value('10')
-        self.assertEqual(f.locator('[data-field=reps]').evaluate_all('(els)=>els.map(e=>e.value)'),['10','10','9'])
+        self.assertEqual(len(confirmations),0)
+        expect(f.locator('[data-main=reps]')).to_have_value('12')
+        self.assertEqual(f.locator('[data-field=reps]').evaluate_all('(els)=>els.map(e=>e.value)'),['12','12','9'])
         f.locator('[data-series-toggle]').click();self.save()
-        self.assertEqual([r['reps'] for r in self.state()['entries'][-1]['series']],['10','10','9'])
+        self.assertEqual([r['reps'] for r in self.state()['entries'][-1]['series']],['12','12','9'])
         self.assertEqual([r['kg'] for r in self.state()['entries'][-1]['series']],['90']*3)
         self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
-        self.assertEqual([r['reps'] for r in self.state()['entries'][-1]['series']],['10','10','9'])
+        self.assertEqual([r['reps'] for r in self.state()['entries'][-1]['series']],['12','12','9'])
 
     def test_structural_series_edits_are_durable_drafts_without_a_followup_keystroke(self):
         self.activate();self.page.locator('[data-act=start]').click();f=self.form()

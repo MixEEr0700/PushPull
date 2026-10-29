@@ -64,7 +64,7 @@ class V2Training(BrowserHarness):
         form.locator('[data-row="2"][data-field=kg]').fill('70')
         form.locator('[data-row="2"][data-field=reps]').fill('10')
         self.save_form(form)
-        expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: 6 × 100 kg','Seria 2: 6 × 100 kg','Seria 3 · back-off: 10 × 70 kg'])
+        expect(self.page.locator('.exercise-toggle .last-series-row')).to_have_text(['Seria 1: 6 × 100 kg','Seria 2: 6 × 100 kg','Seria 3: 10 × 70 kg'])
         saved=self.state();sid=saved['activeId'];entry=saved['entries'][-1]
         self.assertEqual(len(entry['performance']['rows']),3)
         open_notes(self.page);self.page.locator('[data-personal-note] > summary').click()
@@ -76,14 +76,14 @@ class V2Training(BrowserHarness):
         form=self.history_edit(sid,'PUSH-A-3')
         self.confirm=False;form.locator('[data-quick=kg]').fill('90')
         expect(form.locator('[data-row="2"][data-field=kg]')).to_have_value('70')
-        expect(form.locator('[data-row="0"][data-field=kg]')).to_have_value('100')
+        expect(form.locator('[data-row="0"][data-field=kg]')).to_have_value('90')
         self.confirm=True
         form.locator('[data-row="2"][data-field=kg]').fill('60')
         self.save_form(form)
         self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'],saved['trainingJournal']['sessionSnapshots'])
         self.assertEqual([r['id'] for r in self.state()['entries'][-1]['performance']['rows']],[r['id'] for r in entry['performance']['rows']])
         self.page.locator('[data-panel=stats]').click()
-        expect(self.page.locator('.stat-tile').first).to_contain_text('1800')
+        expect(self.page.locator('.stat-tile').first).to_contain_text('1680')
         self.page.locator('[data-tab=settings]').click()
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_text();backup=json.loads(raw)
@@ -135,7 +135,7 @@ class V2Training(BrowserHarness):
         self.fill_rows(form,'15','10');self.save_form(form)
         saved=self.state();sid=saved['activeId']
         for eid,value in [('PULL-B-6-SKI','8 × 50 kg'),('PULL-B-6-SHRUGS','10 × 15 kg')]:
-            expect(self.page.locator('.exercise-card').filter(has=self.page.locator(f'[data-expand="{eid}"]')).locator('.exercise-toggle .last-result')).to_have_text(value)
+            expect(self.page.locator('.exercise-card').filter(has=self.page.locator(f'[data-expand="{eid}"]')).locator('.exercise-toggle .last-result')).to_have_text(value if self.page.locator(f'[data-expand="{eid}"]').get_attribute('aria-expanded')=='true' else value.replace(' × ','×'))
         pair=saved['entries'][-2:]
         self.assertEqual([e['exerciseId'] for e in pair],['PULL-B-6-SKI','PULL-B-6-SHRUGS'])
         self.assertTrue(all([r['round'] for r in e['performance']['rows']]==[1,2] for e in pair))

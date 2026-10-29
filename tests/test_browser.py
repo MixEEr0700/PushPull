@@ -374,7 +374,7 @@ class BrowserRegression(BrowserHarness):
         self.assertEqual(self.state()['entries'][0]['series'][1]['kg'],'80')
         self.assertFalse(self.alerts,self.alerts)
 
-    def test_copied_custom_series_require_confirmation(self):
+    def test_copied_custom_series_keep_independent_values_without_confirmation(self):
         self.start();self.result()
         self.page.locator('[data-series-toggle]').click()
         self.page.locator('[data-series-index="1"][data-field=kg]').fill('80')
@@ -386,9 +386,10 @@ class BrowserRegression(BrowserHarness):
         open_result_panel(self.page)
         self.confirm=False
         self.page.locator('[data-main=kg]').fill('110')
-        expect(self.page.locator('[data-main=kg]')).to_have_value('100')
+        expect(self.page.locator('[data-main=kg]')).to_have_value('110')
         self.page.locator('[data-series-toggle]').click()
         expect(self.page.locator('[data-series-index="1"][data-field=kg]')).to_have_value('80')
+        expect(self.page.locator('[data-series-index="0"][data-field=kg]')).to_have_value('110')
 
     def test_other_tab_change_blocks_stale_edit(self):
         self.start()

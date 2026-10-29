@@ -86,7 +86,7 @@ class RuntimeIndex(BrowserHarness):
         self.page.locator('.seriesResultForm [type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.page.locator('[data-type="PUSH A"]').click()
-        expect(self.page.locator('.exercise-card').filter(has=self.page.locator('[data-expand="PUSH-A-1"]')).locator('.last-result')).to_have_text('8 × 27 kg')
+        expect(self.page.locator('.exercise-card').filter(has=self.page.locator('[data-expand="PUSH-A-1"]')).locator('.last-result')).to_have_text('8×27 kg')
         self.assertFalse(self.alerts,self.alerts)
 
     def test_index_installation_preserves_journal_revision_but_blocks_prepared_old_writer(self):

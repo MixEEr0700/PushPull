@@ -1,5 +1,5 @@
 import {SLOTS,PLAN_ID} from './v2-plan-data.mjs';
-import {canonical,requireThat as check} from './backup-json.mjs';
+import {canonical,freeze,requireThat as check} from './backup-json.mjs';
 import {createModel,validateModel} from './training-model.mjs';
 export {SLOTS,PLAN_ID};
 /** Own notes only. An arbitrary historical ID cannot prove a plan binding.
@@ -15,6 +15,19 @@ export function userNoteBinding(model,versionId,exerciseId,variantId){
  const record=model.userNotes.find(n=>n.id===id);
  const valid=record?.exerciseId===exerciseId&&record.origin==='user'&&record.sessionId===null;
  return {id,context:version.executionVersion===2?versionId:variantId,text:valid?record.text:'',revision:valid?record.revision:0};
+}
+/** Only the current plan's own note changes. Snapshots/source text stay intact. */
+export function editUserNote(model,command){
+ const {versionId,exerciseId,variantId,noteId,base,revision,text,recordedAt}=command;
+ const binding=userNoteBinding(model,versionId,exerciseId,variantId);
+ check(binding&&binding.id===noteId,'Nie można potwierdzić kontekstu notatki. Zachowaj szkic.');
+ check(binding.text===base&&binding.revision===revision,'Notatka zmieniła się od rozpoczęcia edycji. Zachowaj szkic.');
+ check(typeof text==='string','Nieprawidłowa treść notatki.');
+ const old=model.userNotes.find(n=>n.id===noteId);
+ check(!old||old.exerciseId===exerciseId&&old.sessionId===null&&old.origin==='user','Identyfikator notatki należy do innego kontekstu. Zachowaj szkic.');
+ const note=old?{...old,text,revision:old.revision+1}:{id:noteId,exerciseId,sessionId:null,text,origin:'user',revision:1,source:{kind:'owner',reference:'Własna notatka użytkownika',recordedAt}};
+ const next=freeze({...model,userNotes:old?model.userNotes.map(n=>n.id===noteId?note:n):[...model.userNotes,note]});
+ validateModel(next);return {model:next,note};
 }
 /** Presentation only: one shared slot number and A/B/C… for any group size. */
 export function groupMemberNumber(slot,index){
