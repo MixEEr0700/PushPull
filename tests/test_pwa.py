@@ -302,6 +302,7 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(self.notification_state(),before)
         self.page.locator('[data-tab=settings]').click()
         drawer=self.page.locator('[data-backup-advanced]');expect(drawer).not_to_have_attribute('open','');drawer.locator(':scope > summary').click()
+        self.page.locator('[data-technical] > summary').click()
         section=self.page.locator('[data-journal-advanced]')
         expect(section.locator('summary')).to_have_text('Opcje zaawansowane')
         expect(section).not_to_have_attribute('open','');expect(section.locator('[data-enable-journal]')).to_be_hidden()
