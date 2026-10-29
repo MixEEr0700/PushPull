@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 import {valueProfile,textProfile,escapedProfile} from '../model/backup-size-json.mjs';
-import {inventory,anonymousReport} from '../model/backup-size.mjs';
+import {inventory,anonymousReport,anonymousPartial,anonymousRefusal,refusalMessage,LIMITS} from '../model/backup-size.mjs';
 import {createProtocol} from '../model/journal-protocol.mjs';
 import {nativeData,AT} from './fixtures/backup-v4-fixture.mjs';
 const bytes=s=>Buffer.byteLength(s);
@@ -83,4 +83,45 @@ test('counter handles virtual serialization over 200 MB under 64 MiB V8 old-spac
  console.log(JSON.stringify({bytes:p.bytes,twice:twice.bytes,ms:Math.round(performance.now()-started),rss:process.resourceUsage().maxRSS*1024}));`;
  const result=JSON.parse(execFileSync(process.execPath,['--max-old-space-size=64','--input-type=module','-e',code],{encoding:'utf8',timeout:30000}));
  assert.ok(result.twice>200000000);console.log('Isolated counter / 64 MiB old-space:',result);
+});
+
+test('all five refusals identify safe values and limits; partial reports have no full totals',async()=>{
+ const input=source(false),raw='{"rescue":"PRIVATE"}',{sha}=await import('../model/journal-index.mjs');
+ const bundle=await createProtocol(input,{checkpoints:[{id:'PRIVATE-checkpoint',protocol:2,raw,sha256:await sha(raw)}]}),before=JSON.stringify(bundle);
+ for(const kind of ['objectBytes','records','checkpointBytes','semanticBytes','timeoutMs']){
+  const r=reader(bundle);let clock=0;
+  if(kind==='timeoutMs'){const get=r.get;r.get=async(s,k)=>{const v=await get(s,k);if(s==='journalMetadata')clock=11;return v};}
+  const limit=kind==='timeoutMs'?10:1;let error;
+  try{await inventory(r,{limits:{[kind]:limit},now:()=>clock});assert.fail('must refuse')}catch(e){error=e}
+  assert.equal(error.code,'limit');assert.equal(error.refusal.kind,kind);assert.equal(error.refusal.limit,limit);
+  const expected={objectBytes:bundle.state.allocation.maxObjectBytes,records:bundle.state.allocation.records,checkpointBytes:bytes(JSON.stringify(bundle.records.journalCheckpoints[0])),semanticBytes:bytes(JSON.stringify(input.catalog)),timeoutMs:11};
+  assert.equal(error.refusal.value,expected[kind]);
+  assert.match(refusalMessage(error.refusal),/Obowiązujący limit:/);assert.ok(refusalMessage(error.refusal).includes(String(limit)));
+  const p=anonymousPartial(error.partial);assert.equal(p.complete,false);assert.equal(p.metadata.sessions,input.data.sessions.length);assert.equal(p.metadata.results,input.data.entries.length);
+  assert.equal(p.metadata.protocolRecords,bundle.state.allocation.records);assert.equal(p.metadata.largestObjectBytes,bundle.state.allocation.maxObjectBytes);
+  for(const key of ['sourceBytes','storedBytes','total','plans','revision','root'])assert.equal(Object.hasOwn(p,key),false);
+  const text=JSON.stringify(p);assert.ok(text.length<8192);assert.ok(!text.includes('PRIVATE'));assert.ok(!text.includes(AT));assert.ok(!text.includes(bundle.state.epoch));
+  for(const mutate of [v=>v.complete=true,v=>v.metadata.secret='PRIVATE',v=>v.sourceBytes={total:1},v=>v.refusal.value='PRIVATE',v=>v.progress.total=1]){const bad=structuredClone(p);mutate(bad);assert.throws(()=>anonymousPartial(bad));}
+ }
+ assert.equal(JSON.stringify(bundle),before);
+ assert.match(refusalMessage({kind:'objectBytes',value:null,limit:LIMITS.objectBytes,basis:'metadata'}),/nie została bezpiecznie ustalona/);
+ assert.throws(()=>anonymousRefusal({kind:'PRIVATE',value:1,limit:1,basis:'metadata'}));
+});
+
+test('revision change or cancellation during refusal confirmation discards partial counters',async()=>{
+ const bundle=await createProtocol(source(false));
+ for(const cancel of [false,true]){
+  const r=reader(bundle),get=r.get,c=new AbortController();let states=0;
+  r.get=async(s,k)=>{const value=await get(s,k);if(s==='journalState'&&++states===2){if(cancel)c.abort();else return {...value,revision:value.revision+1};}return value;};
+  await assert.rejects(inventory(r,{signal:c.signal,limits:{objectBytes:1}}),e=>e.code===(cancel?'cancelled':'changed')&&!e.partial);
+ }
+});
+
+test('record enumeration cap reports a lower bound instead of pretending a full count',async()=>{
+ const bundle=await createProtocol(source(false)),r=reader(bundle),keys=r.keys;
+ r.keys=async(s,max)=>s==='journalObjects'?Array(max).fill('PRIVATE-key'):keys(s,max);
+ await assert.rejects(inventory(r,{limits:{records:bundle.state.allocation.records}}),e=>{
+  assert.equal(e.refusal.kind,'records');assert.equal(e.refusal.basis,'lowerBound');assert.equal(e.refusal.value,bundle.state.allocation.records+1);
+  assert.match(refusalMessage(e.refusal),/co najmniej/);assert.equal(e.partial.progress.enumeratedRecordsAtLeast,e.refusal.value);assert.equal(e.partial.progress.scannedObjects,0);return true;
+ });
 });

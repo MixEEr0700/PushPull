@@ -1,5 +1,7 @@
 # Lokalna diagnostyka rozmiaru — PR 1 po #105
 
+**Aktualizacja po PR #106:** [PR #107 — szczegółowe przyczyny odmowy i osobny raport NIEPEŁNY](BACKUP_SIZE_REFUSALS_PR107.md). Poniższe wyniki opisują etap PR 1; zasada braku raportu po każdym przekroczeniu limitu została zastąpiona jawnym raportem niepełnym wyłącznie dla potwierdzonych liczników, bez podnoszenia progów.
+
 Baza: `main` `44c1ce6`. Przeczytano plan nadrzędny, AGENTS.md i raport Issue #54. Pliku `PushPull_Specyfikacja_Kopii_i_Dane_po_PR105.md` nie ma w udostępnionym checkoutcie; nie zakładano dostępu do Library. Zakres wyznaczają wymagania właściciela w zleceniu PR 1.
 
 W Dane → Opcje zaawansowane dodano „Sprawdź rozmiar kopii”, anulowanie oraz pobranie małego anonimowego raportu. Główne cztery działania, eksportery, import/restore, Drive, schemat i writery IndexedDB pozostają bez zmian. Nie usuwano danych ani nie spłaszczano archiwów.

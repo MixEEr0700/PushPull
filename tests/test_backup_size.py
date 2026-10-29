@@ -116,3 +116,94 @@ class BackupSize(BrowserHarness):
         self.assertLess(max(samples),1000)
         print('Synthetic backup-size navigation ms:',samples,'report timings:',report['timingsMs'],'largest main task ms:',self.page.evaluate('Math.max(0,...__sizeLongTasks)'),flush=True)
         self.assertFalse(self.alerts,self.alerts)
+
+    def test_each_data_limit_names_its_value_and_exposes_only_incomplete_counters(self):
+        from test_browser import ROOT
+        self.prepare()
+        source=(ROOT/'model/backup-size.mjs').read_text()
+        defaults={'objectBytes':'64*1024*1024','records':'250000','checkpointBytes':'64*1024*1024','semanticBytes':'8*1024*1024'}
+        labels={'objectBytes':'pojedynczego obiektu','records':'liczby rekordów','checkpointBytes':'checkpointów łącznie','semanticBytes':'analizy semantycznej'}
+        pattern='**/model/backup-size.mjs'
+        for kind,default in defaults.items():
+            with self.subTest(kind=kind):
+                # Lower only the served fixture; production caps remain unchanged.
+                token=kind+':'+default
+                self.assertEqual(source.count(token),1)
+                fixture=source.replace(token,kind+':1')
+                self.context.route(pattern,lambda route:route.fulfill(body=fixture,content_type='text/javascript'))
+                self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
+                before=self.records();local_before=self.page.evaluate('({...localStorage})')
+                root=next(r for r in before['journalState'] if r['id']=='active')
+                panel=self.panel();panel.locator('[data-backup-size-check]').click()
+                expect(panel.locator('[data-backup-size-incomplete]')).to_be_visible(timeout=30000)
+                expect(panel).to_contain_text('limit '+labels[kind])
+                expect(panel).to_contain_text('Wartość:')
+                expect(panel).to_contain_text('Obowiązujący limit: 1')
+                expect(panel.locator('[data-backup-size-report]')).to_have_count(0)
+                with self.page.expect_download() as pending:
+                    panel.locator('[data-backup-size-partial-download]').click()
+                self.assertEqual(pending.value.suggested_filename,'pushpull-rozmiar-raport-niepelny.json')
+                report=json.loads(Path(pending.value.path()).read_text())
+                self.assertIs(report['complete'],False)
+                self.assertEqual(report['refusal']['kind'],kind);self.assertEqual(report['refusal']['limit'],1)
+                self.assertEqual(report['metadata']['sessions'],root['counts']['journalSessions'])
+                self.assertEqual(report['metadata']['protocolRecords'],root['allocation']['records'])
+                self.assertNotIn('sourceBytes',report);self.assertNotIn('storedBytes',report)
+                self.assertNotIn('plans',report['metadata']);self.assertNotIn('total',report)
+                self.assertLess(len(json.dumps(report)),8192)
+                self.assertNotIn(root['epoch'],json.dumps(report));self.assertNotIn(root['root'],json.dumps(report))
+                for width in [360,390,412]:
+                    self.page.set_viewport_size({'width':width,'height':844})
+                    self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+                self.assertEqual(self.records(),before);self.assertEqual(self.page.evaluate('({...localStorage})'),local_before)
+                self.context.unroute(pattern)
+        self.assertFalse(self.alerts,self.alerts)
+
+    def test_deadline_without_confirmed_counters_names_time_and_has_no_partial_report(self):
+        self.prepare();before=self.records();local_before=self.page.evaluate('({...localStorage})')
+        panel=self.gate()
+        self.page.locator('[data-tab=training]').click();expect(self.page.locator('[data-act=finish]')).to_be_visible()
+        self.panel()
+        # Exercise the real client watchdog; the worker has received no data yet.
+        self.page.clock.run_for(120001)
+        expect(panel).to_contain_text('limit czasu pomiaru')
+        expect(panel).to_contain_text('120\u00a0000 ms')
+        expect(panel).to_contain_text('Brak potwierdzonych liczników')
+        expect(panel.locator('[data-backup-size-incomplete],[data-backup-size-report]')).to_have_count(0)
+        self.assertEqual(self.records(),before);self.assertEqual(self.page.evaluate('({...localStorage})'),local_before)
+        self.assertFalse(self.alerts,self.alerts)
+
+    def test_old_refusal_cannot_replace_new_measurement_after_cancel(self):
+        self.prepare();before=self.records();panel=self.gate()
+        self.page.evaluate("""()=>{window.__lateRefusal=__sizeWorker.onmessage;}""")
+        panel.locator('[data-backup-size-cancel]').click()
+        self.page.evaluate('()=>{window.Worker=Object.getPrototypeOf(Worker)}')
+        complete=self.report()
+        self.page.evaluate("""()=>__lateRefusal({data:{error:'limit',refusal:{kind:'records',value:2,limit:1,basis:'metadata'},partial:{format:'pushpull-backup-size-incomplete',complete:false,refusal:{kind:'records',value:2,limit:1,basis:'metadata'},metadata:{sessions:1,results:1,snapshots:1,archives:1,protocolRecords:2,allocatedBytes:2,largestObjectBytes:1},progress:{enumeratedRecordsAtLeast:0,scannedObjects:0},timingsMs:{elapsed:1}}}})""")
+        expect(panel.locator('[data-backup-size-report]')).to_be_visible()
+        expect(panel.locator('[data-backup-size-incomplete]')).to_have_count(0)
+        self.assertEqual(self.records(),before);self.assertGreater(complete['sourceBytes']['total'],0)
+        self.assertFalse(self.alerts,self.alerts)
+
+    def test_offline_default_object_cap_partial_metadata_and_stale_download(self):
+        self.context.close();self.context=self.new_context(service_workers='allow')
+        self.page=self.context.new_page();self.page.on('dialog',self.dialog);self.page.on('pageerror',lambda e:self.errors.append(str(e)))
+        self.page.goto(self.url);self.prepare();wait_for_service_worker_controller(self.page)
+        # Isolated signed metadata fixture. No huge object allocation, and no
+        # change to the production 64 MiB cap. Values are explicitly metadata.
+        self.page.evaluate("""async()=>{const a=await import('./model/journal-idb.mjs'),p=await import('./model/journal-protocol.mjs'),m=await import('./model/backup-size.mjs'),db=await a.connectV2('pushpull');try{const old=await a.transact(db,['journalState'],'readonly',tx=>a.request(tx.objectStore('journalState').get('active')));const next=await p.sealState({...old,revision:old.revision+1,allocation:{...old.allocation,maxObjectBytes:m.LIMITS.objectBytes+1}});await a.transact(db,['journalState'],'readwrite',tx=>tx.objectStore('journalState').put(next));}finally{db.close()}}""")
+        self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
+        before=self.records();local_before=self.page.evaluate('({...localStorage})');self.context.set_offline(True)
+        panel=self.panel();panel.locator('[data-backup-size-check]').click()
+        expect(panel.locator('[data-backup-size-incomplete]')).to_be_visible(timeout=30000)
+        expect(panel).to_contain_text('według metadanych bazy')
+        with self.page.expect_download() as pending:panel.locator('[data-backup-size-partial-download]').click()
+        report=json.loads(Path(pending.value.path()).read_text())
+        self.assertEqual(report['refusal'],{'kind':'objectBytes','value':67108865,'limit':67108864,'basis':'metadata'})
+        self.assertEqual(report['progress']['scannedObjects'],0)
+        self.assertEqual(self.records(),before);self.assertEqual(self.page.evaluate('({...localStorage})'),local_before)
+        # A later committed root invalidates the previously obtained counters.
+        self.page.evaluate("""async()=>{const a=await import('./model/journal-idb.mjs'),p=await import('./model/journal-protocol.mjs'),db=await a.connectV2('pushpull');try{const old=await a.transact(db,['journalState'],'readonly',tx=>a.request(tx.objectStore('journalState').get('active')));const next=await p.sealState({...old,revision:old.revision+1});await a.transact(db,['journalState'],'readwrite',tx=>tx.objectStore('journalState').put(next));}finally{db.close()}new BroadcastChannel('pushpull-indexeddb').postMessage({revision:999999})}""")
+        expect(self.page.locator('h1')).to_have_text('Dane wymagają odzyskania')
+        expect(self.page.locator('[data-backup-size-partial-download]')).to_have_count(0)
+        self.assertFalse(self.alerts,self.alerts)
