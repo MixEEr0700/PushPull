@@ -31,7 +31,7 @@ class LazyData(BrowserHarness):
         self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
         self.page.locator('[data-tab=settings]').click();expect(self.page.locator('h1')).to_have_text('Dane i kopia zapasowa')
         downloads=[];self.page.on('download',lambda d:downloads.append(d))
-        self.advanced_data()
+        self.backup_flow('save');self.advanced_data()
         for selector in ('[data-act=export]','[data-export-v4]','[data-export-v5]','[data-drive-action=upload]','[data-load-backups]'):
             self.page.locator(selector).click();expect(self.page.locator('[data-full-audit]')).to_have_count(0,timeout=60000)
         self.assertFalse(downloads)
@@ -42,6 +42,7 @@ class LazyData(BrowserHarness):
         self.prepare()
         self.page.evaluate("""()=>{const original=__fastDB.ensureFull;__fastDB.ensureFull=async()=>{await new Promise(r=>window.__releaseAudit=r);return original()}}""")
         self.page.locator('[data-tab=settings]').click();downloads=[];self.page.on('download',lambda d:downloads.append(d))
+        self.backup_flow('save')
         self.page.locator('[data-act=export]').click();expect(self.page.locator('[data-full-audit]')).to_be_visible()
         self.page.wait_for_function('!!window.__releaseAudit')
         self.page.locator('[data-full-audit-cancel]').click();self.page.locator('[data-tab=training]').click()
@@ -53,6 +54,7 @@ class LazyData(BrowserHarness):
         self.prepare();self.page.locator('[data-tab=settings]').click()
         self.advanced_data();self.page.locator('[data-load-backups]').click();expect(self.page.locator('[data-backup-export]')).to_be_visible(timeout=60000)
         self.assertFalse(self.page.evaluate('__fastDB.archivesDeferred'))
+        self.backup_flow('save')
         with self.page.expect_download() as item:self.page.locator('[data-act=export]').click()
         import json
         from pathlib import Path
@@ -64,7 +66,7 @@ class LazyData(BrowserHarness):
         self.page.evaluate("""()=>{const original=__fastDB.ensureFull;__fastDB.ensureFull=async()=>{await new Promise(r=>window.__releaseAudit=r);return original()}}""")
         self.page.locator('#importFile').set_input_files({'name':'cancelled.json','mimeType':'application/json','buffer':b'{}'})
         self.page.wait_for_function('!!window.__releaseAudit')
-        self.page.locator('[data-full-audit-cancel]').click();self.page.evaluate('__releaseAudit()')
+        self.page.locator('[data-restore-cancel]').click();self.page.evaluate('__releaseAudit()')
         expect(self.page.locator('[data-full-audit]')).to_have_count(0,timeout=60000)
         expect(self.page.locator('#importFile')).to_have_value('')
         expect(self.page.locator('[data-restore-preview]')).to_have_count(0)
@@ -84,7 +86,7 @@ class LazyData(BrowserHarness):
         mock=test_drive_sync.MockGoogle();mock.install(self.context)
         self.prepare();self.page.locator('[data-tab=settings]').click()
         self.page.evaluate("""()=>{const original=__fastDB.writeDriveState;let first=true;__fastDB.writeDriveState=async(...args)=>{if(first){first=false;await new Promise(r=>window.__releaseConfig=r)}return original(...args)}}""")
-        self.advanced_data();self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
+        self.backup_flow('save');self.advanced_data();self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
         self.page.locator('#driveConfig button').click();self.page.wait_for_function('!!window.__releaseConfig')
         self.page.locator('[data-drive-action=connect]').click()

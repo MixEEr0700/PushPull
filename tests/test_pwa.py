@@ -1,5 +1,5 @@
 """Real service workers + installability metadata + isolated artifact/HTTPS tests."""
-from test_browser import confirm_restore,open_result_panel,add_drop
+from test_browser import confirm_restore,open_result_panel,add_drop,open_backup_flow
 import functools
 from datetime import datetime, timezone
 import http.server
@@ -105,6 +105,9 @@ class ArtifactBuild(unittest.TestCase):
             finally:server.shutdown();server.server_close();thread.join()
 
 class PWADeployment(unittest.TestCase):
+    def backup_flow(self,mode,page=None):
+        open_backup_flow(page or self.page,mode)
+
     @classmethod
     def setUpClass(cls):
         cls.pw=sync_playwright().start()
@@ -336,11 +339,12 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.page.reload();self.ready()
         self.assertEqual(self.snapshot(),before)
         self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_text();self.assertEqual(json.loads(raw),before)
         self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
         confirm_restore(self.page)
-        expect(self.page.locator('h1')).to_have_text('Trening')
+        expect(self.page.locator('h1')).to_have_text('Dane i kopia zapasowa')
         self.assertEqual(self.snapshot()['data'],FIXTURE)
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
 
@@ -425,6 +429,7 @@ class PWADeployment(unittest.TestCase):
         def value():return self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}')
         def drafts():return self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
         expected=value();self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes();self.assertGreater(len(raw),16*1024*1024)
         self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value;v.exercises['PUSH A'][0].notes='newer local note protected by preimage';await d.commit(v)}finally{d.close()}}""")
@@ -436,11 +441,11 @@ class PWADeployment(unittest.TestCase):
         print('Issue82 16 MiB live v1-to-v2 conversion/reopen ms:',round((time.monotonic()-conversion_started)*1000),flush=True)
         self.assertEqual(value(),before);self.assertEqual(drafts(),before_drafts)
         self.page.locator('[data-tab=settings]').click()
-        for text in ['Zapisz kopię na Google Drive','Pobierz kopię na telefon','Pobierz kopię z Google Drive','Importuj kopię z telefonu']:expect(self.page.get_by_text(text,exact=True)).to_be_visible()
+        for text in ['Zapisz kopię','Przywróć kopię']:expect(self.page.get_by_text(text,exact=True)).to_be_visible()
         drawer=self.page.locator('[data-backup-advanced]')
         expect(drawer).not_to_have_attribute('open','')
         expect(self.page.locator('[data-drive-action=restore]')).not_to_be_visible()
-        drawer.locator(':scope > summary').click()
+        self.backup_flow('restore')
         expect(self.page.locator('[data-drive-action=restore]')).to_be_visible()
         self.page.evaluate('window.__previewTicks=0;window.__ticker=setInterval(()=>window.__previewTicks++,5)')
         self.page.locator('#importFile').set_input_files({'name':'large-v3.json','mimeType':'application/json','buffer':raw})
@@ -544,6 +549,7 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(saved['trainingJournal']['sessionSnapshots'][:-1],before['data']['trainingJournal']['sessionSnapshots'])
         self.assertEqual(drafts(),[]);self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
         page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url);page.locator('[data-tab=settings]').click()
@@ -617,6 +623,7 @@ class PWADeployment(unittest.TestCase):
         expect(card().locator('[data-result-change]')).to_contain_text('4 sesje temu')
         self.assertEqual(self.snapshot(),expected);self.assertEqual(drafts(),[])
         self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes()
         other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
@@ -694,6 +701,7 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(value()['sessions'][-1]['type'],'PUSH A')
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000);self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A')
         saved=value();self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block',accept_downloads=True);self.addCleanup(other.close)
         page=other.new_page();messages=[]
@@ -894,6 +902,7 @@ class PWADeployment(unittest.TestCase):
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click()
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
+        self.backup_flow('save')
         self.page.locator('#driveConfig button').click();self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Zsynchronizowano')
         old_files=dict(mock.files)
@@ -923,9 +932,11 @@ class PWADeployment(unittest.TestCase):
         expect(self.page.locator('.seriesResultForm')).to_have_count(0)
         today=self.snapshot();self.assertEqual(today['data']['entries'][-1]['kg'],'84.125')
         self.context.set_offline(False);self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
         self.assertEqual(mock.posts,count)
         expect(self.page.locator('[data-drive-diagnostics]')).to_have_count(0)
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')
         self.assertEqual(mock.posts,count+1)
@@ -1010,10 +1021,12 @@ class PWADeployment(unittest.TestCase):
             self.page.locator('[data-panel=history]').click()
             expect(self.page.locator('.panel .entry')).to_have_count(1)
         self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes()
         self.page.locator('#importFile').set_input_files({'name':'pair.json','mimeType':'application/json','buffer':raw})
         confirm_restore(self.page)
+        self.page.locator('[data-tab=training]').click()
         self.ready();self.assertEqual(self.snapshot()['data'],state)
         self.page.locator('[data-tab=calendar]').click()
         self.page.locator(f'[data-act=openSession][data-id="{old_session}"]').click()
@@ -1266,12 +1279,13 @@ class PWADeployment(unittest.TestCase):
         expect(self.page).to_have_title('Aplikacja Treningowa')
         self.assertEqual(self.snapshot(),before)
         self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_text()
         self.assertEqual(json.loads(raw),before)
         self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
         confirm_restore(self.page)
-        expect(self.page.locator('h1')).to_have_text('Trening')
+        expect(self.page.locator('h1')).to_have_text('Dane i kopia zapasowa')
         restored=self.snapshot()
         self.assertEqual(restored['data'],before['data'])
         self.assertEqual(restored['catalog'],before['catalog'])

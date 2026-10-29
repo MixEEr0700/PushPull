@@ -20,6 +20,7 @@ class DriveAudit(BrowserHarness):
         before = self.records()
         downloads = []
         self.page.on('download', lambda d: downloads.append(d))
+        self.backup_flow('download')
         self.page.locator('[data-drive-action=download]').click()
         expect(self.page.locator('#driveCopy option')).to_have_count(2)
         self.page.locator('#driveCopy').select_option('file-0')
@@ -51,6 +52,7 @@ class DriveAudit(BrowserHarness):
         self.page.locator('[data-tab=training]').click()
         self.page.locator('[data-tab=settings]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Anulowano pobieranie')
+        self.backup_flow('download')
         self.page.locator('[data-drive-action=download]').click()
         expect(self.page.locator('#driveCopy option')).to_have_count(2)
         with self.page.expect_download() as pending:
@@ -80,6 +82,7 @@ class DriveAudit(BrowserHarness):
           __fastDB.ensureFull=async()=>{__audits++;await gate;return audit()};
         }""")
         mock.hold = True
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=upload]').evaluate('(b)=>{b.click();b.click()}')
         expect(self.page.locator('[data-full-audit]')).to_be_visible()
         self.page.evaluate('__releaseAudit()')
@@ -101,6 +104,7 @@ class DriveAudit(BrowserHarness):
             self.assertEqual(mock.files[key]['text'], text)
         self.assertEqual(self.records(), before)
         # A later deliberate action is a new backup, never permanently locked.
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=upload]').click()
         self.page.wait_for_function('__uploadCalls===2')
         expect(self.page.locator('[data-drive-action=upload]')).to_be_enabled(timeout=60000)
@@ -116,6 +120,7 @@ class DriveAudit(BrowserHarness):
           __fastDB.ensureFull=async()=>{await gate;return audit()};
         }""")
         # Assert reservation is visible synchronously, before the queue runs.
+        self.backup_flow('save')
         self.assertTrue(self.page.locator('[data-drive-action=upload]').evaluate('(b)=>{b.click();return b.disabled}'))
         expect(self.page.locator('[data-full-audit]')).to_be_visible()
         self.page.locator('[data-full-audit-cancel]').click()
@@ -136,12 +141,14 @@ class DriveAudit(BrowserHarness):
         before = self.records()
         # Every refused or failed operation must unlock; none automatically retries.
         self.context.set_offline(True)
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=upload]').evaluate('(b)=>{b.click();b.click()}')
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('Brak Internetu')
         expect(self.page.locator('[data-drive-action=upload]')).to_be_enabled()
         self.assertEqual(mock.posts, 0)
         self.context.set_offline(False)
         mock.error = 500
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=upload]').evaluate('(b)=>{b.click();b.click()}')
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('(500)')
         expect(self.page.locator('[data-drive-action=upload]')).to_be_enabled()
@@ -149,6 +156,7 @@ class DriveAudit(BrowserHarness):
         mock.error = 0
         pattern = 'https://www.googleapis.com/drive/v3/files/*?alt=media'
         self.context.route(pattern, lambda r: r.abort('failed'))
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=upload]').evaluate('(b)=>{b.click();b.click()}')
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('Failed to fetch')
         expect(self.page.locator('[data-drive-action=upload]')).to_be_enabled()
@@ -156,6 +164,7 @@ class DriveAudit(BrowserHarness):
         expect(self.page.locator('[data-drive-status]')).not_to_contain_text('Kopia zapisana i zweryfikowana')
         self.context.unroute(pattern)
         mock.corrupt = True
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=upload]').evaluate('(b)=>{b.click();b.click()}')
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('integralności')
         expect(self.page.locator('[data-drive-action=upload]')).to_be_enabled()
@@ -175,6 +184,7 @@ class DriveAudit(BrowserHarness):
         before = self.records()
         self.context.set_offline(True)
         with self.page.expect_download() as pending:
+            self.backup_flow('save')
             self.page.locator('[data-act=export]').click()
         expect(self.page.locator('.toast')).to_have_text('Zlecono pobranie kopii na telefon')
         parsed = self.page.evaluate('async text=>JSON.parse(text).version===3?(await PushPullDB.parseModelBackup(text)).data:PushPullDB.parseBackup(JSON.parse(text)).data', Path(pending.value.path()).read_text())

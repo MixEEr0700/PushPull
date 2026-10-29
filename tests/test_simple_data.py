@@ -1,4 +1,4 @@
-"""Stage G: four manual actions, real native stores, only Google HTTP is mocked."""
+"""Two inline flows with retained manual actions, real native stores, only Google HTTP is mocked."""
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -23,16 +23,17 @@ class SimpleData(BrowserHarness):
         self.page.locator('[data-backup-advanced] > summary').click()
         return mock
 
-    def test_four_actions_download_exact_file_without_restore_or_local_audit(self):
+    def test_two_flows_download_exact_file_without_restore_or_local_audit(self):
         mock=self.seed_cloud();before=self.records();downloads=[];self.page.on('download',lambda d:downloads.append(d))
         for width in [360,390,412]:
             self.page.set_viewport_size({'width':width,'height':844})
             primary=self.page.locator('[data-primary-backups]')
-            self.assertEqual(primary.locator(':scope > button,:scope > label').evaluate_all('(es)=>es.map(e=>e.textContent.trim())'),['Zapisz kopię na Google Drive','Pobierz kopię na telefon','Pobierz kopię z Google Drive','Importuj kopię z telefonu'])
+            self.assertEqual(primary.locator(':scope > button,:scope > label').evaluate_all('(es)=>es.map(e=>e.textContent.trim())'),['Zapisz kopię','Przywróć kopię'])
             expect(self.page.locator('#driveConfig input')).not_to_be_visible()
             expect(self.page.locator('[data-export-v5]')).not_to_be_visible()
             self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
             for box in primary.locator(':scope > button,:scope > label').all():self.assertGreaterEqual(box.bounding_box()['height'],44)
+        self.backup_flow('download')
         self.page.locator('[data-drive-action=download]').click()
         expect(self.page.locator('#driveCopy option')).to_have_count(2)
         self.assertEqual(self.page.locator('#driveCopy option').first.get_attribute('value'),'file-1')
@@ -51,13 +52,16 @@ class SimpleData(BrowserHarness):
 
     def test_corrupt_unavailable_and_offline_cloud_copy_preserve_all_native_stores(self):
         mock=self.seed_cloud();before=self.records();downloads=[];self.page.on('download',lambda d:downloads.append(d))
+        self.backup_flow('download')
         self.page.locator('[data-drive-action=download]').click();expect(self.page.locator('#driveCopy option')).to_have_count(2)
         del mock.files['file-1']  # Explicit selection disappears; no silent fallback.
         self.page.locator('[data-drive-action=download-file]').click()
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('nie jest już dostępna')
         self.assertEqual(self.records(),before)
+        self.backup_flow('download')
         mock.corrupt=True;self.page.locator('[data-drive-action=download]').click()
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('Nie znaleziono prawidłowej kopii')
+        self.backup_flow('download')
         self.context.set_offline(True);self.page.locator('[data-drive-action=download]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Brak Internetu')
         self.assertFalse(downloads);self.assertEqual(mock.posts,0);self.assertEqual(self.records(),before)
@@ -69,6 +73,7 @@ class SimpleData(BrowserHarness):
         mock=self.seed_cloud();before=self.records();held=[];downloads=[];self.page.on('download',lambda d:downloads.append(d))
         self.context.route('https://www.googleapis.com/drive/v3/files?*',lambda r:held.append(r))
         with self.page.expect_request('https://www.googleapis.com/drive/v3/files?*'):
+            self.backup_flow('download')
             self.page.locator('[data-drive-action=download]').evaluate('(b)=>{b.click();b.click()}')
         expect(self.page.locator('[data-drive-download-busy]')).to_be_visible()
         self.assertEqual(len(held),1)

@@ -20,6 +20,15 @@ ROOT = Path(__file__).resolve().parents[1]
 KEY = 'pushpull_skeleton_v1'
 BASE = '92390b1449bd61c4c6fdc41ccf8a272e5ff914d3'
 
+def open_backup_flow(page, mode):
+    """Open current inline controls; old PWA fixtures retain their original UI."""
+    flow='restore' if mode=='download' else mode
+    opener=page.locator('[data-backup-flow='+flow+']')
+    if opener.count() and opener.get_attribute('aria-expanded')=='false':opener.click()
+    if mode=='download' and opener.count():
+        drawer=page.locator('[data-backup-body=restore] > details').last
+        if not drawer.evaluate('(e)=>e.open'):drawer.locator(':scope > summary').click()
+
 def confirm_restore(page):
     expect(page.locator('[data-restore-confirm]')).to_be_visible(timeout=60000)
     page.locator('[data-restore-confirm]').click()
@@ -218,6 +227,9 @@ class BrowserHarness(unittest.TestCase):
     def settings(self):
         self.page.locator('[data-tab=settings]').click()
 
+    def backup_flow(self,mode,page=None):
+        open_backup_flow(page or self.page,mode)
+
 class BrowserRegression(BrowserHarness):
     def test_full_rotation_and_manual_choice(self):
         for current, next_type in [('PUSH A','PULL A'),('PULL A','PUSH B'),('PUSH B','PULL B'),('PULL B','PUSH A')]:
@@ -288,6 +300,7 @@ class BrowserRegression(BrowserHarness):
         original=self.raw()
         self.settings()
         with self.page.expect_download() as download:
+            self.backup_flow('save')
             self.page.locator('[data-act=export]').click()
         exported=Path(download.value.path()).read_text()
         self.assertEqual(json.loads(exported)['data'],json.loads(original))
@@ -312,7 +325,8 @@ class BrowserRegression(BrowserHarness):
             before=self.raw()
             self.import_data(content)
             self.assertEqual(self.raw(),before)
-        self.assertEqual(len(self.alerts),4)
+            expect(self.page.locator('[data-backup-body=restore] [data-restore-error]')).to_be_visible()
+        self.assertFalse(self.alerts,self.alerts)
 
     def test_corrupt_and_unsupported_boot_recovery_download_and_import(self):
         self.start()

@@ -61,17 +61,20 @@ class ManualDriveFlow(BrowserHarness):
         self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
         self.page.locator('#driveConfig button').click()
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
 
     def upload(self):
         # Full source-backed validation + verified readback can exceed the UI
         # assertion default (5s) on CI; wait for success, never just a request.
+        self.backup_flow('save')
         self.page.locator('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=60000)
 
     def restore_preview(self,file_id=None):
         self.advanced_data()
+        self.backup_flow('restore')
         self.page.locator('[data-drive-action=restore]').click()
         expect(self.page.locator('#driveCopy')).to_be_visible(timeout=60000)
         if file_id:self.page.locator('#driveCopy').select_option(file_id)
@@ -97,6 +100,7 @@ class ManualDriveFlow(BrowserHarness):
         before=fingerprint();copies={};sizes=[]
         for number in range(1,4):
             with self.page.expect_request('https://www.googleapis.com/upload/**'):
+                self.backup_flow('save')
                 self.page.locator('[data-drive-action=upload]').click()
             expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=120000)
             self.assertEqual(mock.posts,number);self.assertEqual(len(mock.files),number)
@@ -113,7 +117,7 @@ class ManualDriveFlow(BrowserHarness):
         before=self.state();drafts=self.drafts()
         for width,height in [(390,844),(360,640),(1280,800)]:
             self.page.set_viewport_size({'width':width,'height':height})
-            self.advanced_data();self.page.get_by_role('button',name='Przywróć z Google Drive',exact=True).click()
+            self.backup_flow('restore');self.page.get_by_role('button',name='Przywróć z Google Drive',exact=True).click()
             choice=self.page.locator('[data-drive-action=preview]')
             expect(choice).to_have_text('Wybierz tę kopię',timeout=60000)
             expect(self.page.locator('[data-restore-confirm]')).to_have_count(0)
@@ -161,6 +165,7 @@ class ManualDriveFlow(BrowserHarness):
         self.assertEqual(mock.posts,0)
         self.page.locator('[data-tab=settings]').click();mock.hold=True
         with self.page.expect_request('https://www.googleapis.com/upload/**'):
+            self.backup_flow('save')
             self.page.locator('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-status]')).not_to_contain_text('zweryfikowana')
         self.assertTrue(mock.held);self.assertNotIn('13.125',mock.held[0][1]['text'])
@@ -175,13 +180,14 @@ class ManualDriveFlow(BrowserHarness):
         expect(self.page.locator('[data-act=start]')).to_be_visible()
         offline=self.state();self.assertEqual(offline['sessions'][-1]['status'],'done')
         self.context.set_offline(False);self.page.evaluate("window.dispatchEvent(new Event('online'));document.dispatchEvent(new Event('visibilitychange'))")
-        self.page.locator('[data-tab=settings]').click();self.page.locator('[data-drive-action=connect]').click()
+        self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden();self.assertEqual(mock.posts,1)
         self.upload();self.assertEqual(mock.posts,2);self.assertEqual(self.state(),offline)
         self.restore_preview();backup=json.loads(list(mock.files.values())[-1]['text'])['backup'];restored=self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',backup)
         self.assertEqual(restored,offline)
         self.assertEqual(len(offline['entries']),len(saved['entries'])+1)
         self.page.locator('[data-restore-cancel]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as local:self.page.locator('[data-act=export]').click()
         self.assertEqual(self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',Path(local.value.path()).read_text()),offline)
         self.assertFalse(self.alerts,self.alerts)
@@ -207,6 +213,7 @@ class ManualDriveFlow(BrowserHarness):
         self.page.goto(self.url);self.activate();f=self.open_result('PUSH A','PUSH-A-1');self.fill_rows(f,'81.123','7')
         expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         local=self.state();drafts=self.drafts();self.configure();self.assertEqual(mock.posts,1)
+        self.backup_flow('restore')
         mock.corrupt=True;self.advanced_data();self.page.locator('[data-drive-action=restore]').click()
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('Nie znaleziono prawidłowej kopii')
         self.assertEqual(self.state(),local);self.assertEqual(self.drafts(),drafts);mock.corrupt=False
@@ -222,6 +229,7 @@ class ManualDriveFlow(BrowserHarness):
         self.assertEqual(self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return d.export().catalog}finally{d.close()}}'),expected_catalog)
         preimage=self.page.evaluate("""async({before,local})=>{const d=await PushPullDB.open(()=>{});try{for(const key of d.backups().filter(k=>!before.includes(k))){try{const raw=await d.readBackup(key),parsed=await(await import('./model/drive-sync.mjs')).inspectBackup(raw);const {canonical}=await import('./model/backup-json.mjs');if(canonical(parsed.data)===canonical(local))return true;}catch{}}return false;}finally{d.close()}}""",{'before':before_keys,'local':local})
         self.assertTrue(preimage);self.assertEqual(mock.files,files);self.assertEqual(mock.posts,1)
+        self.page.locator('[data-tab=training]').click()
         expect(self.page.locator('[data-draft-download]')).to_have_count(1)
         expect(self.page.locator('[data-draft-resume]')).to_have_count(0) # B's snapshot is not silently applied to A.
         self.page.evaluate('navigator.serviceWorker.ready');self.page.wait_for_function('navigator.serviceWorker.controller!==null')
@@ -231,6 +239,7 @@ class ManualDriveFlow(BrowserHarness):
 
     def test_restore_preview_rejects_newer_commit_from_another_tab(self):
         self.page.add_init_script('window.BroadcastChannel=undefined');self.activate();self.settings=lambda:self.page.locator('[data-tab=settings]').click();self.settings()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes()
         self.page.locator('#importFile').set_input_files({'name':'old.json','mimeType':'application/json','buffer':raw})
@@ -250,6 +259,7 @@ class ManualDriveFlow(BrowserHarness):
 
     def test_post_commit_readback_failure_never_reports_success_and_keeps_preimage(self):
         self.prepare();self.ready();self.page.locator('[data-tab=settings]').click()
+        self.backup_flow('save')
         with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
         candidate=json.loads(Path(download.value.path()).read_text());before=self.state()
         candidate['data']['exercises']['PUSH A'][0]['notes']='restored value'
@@ -288,7 +298,7 @@ class ManualDriveFlow(BrowserHarness):
         meta=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await db.readDriveState()}finally{db.close()}}')
         self.assertFalse(meta['enabled']);self.assertEqual(meta['mode'],'manual')
         self.assertEqual(meta['accounts']['mock-account']['outbox'],self.page.evaluate('window.__archive["mock-account"].outbox'))
-        self.reopen();self.page.locator('[data-tab=settings]').click();self.page.locator('[data-drive-action=connect]').click()
+        self.reopen();self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
         before=self.state();self.upload();self.assertEqual(mock.posts,1)
         raw=next(iter(mock.files.values()))['text'];parsed=self.page.evaluate('async text=>(await import("./model/drive-sync.mjs")).inspectBackup(JSON.parse(text).backup)',raw)
@@ -297,6 +307,7 @@ class ManualDriveFlow(BrowserHarness):
 
     def test_expired_auth_manual_retry_does_not_block_local_result_or_duplicate_series(self):
         mock=MockGoogle();mock.install(self.context);self.prepare();self.ready();self.configure();self.upload()
+        self.backup_flow('save')
         before=self.state();mock.error=401;self.page.locator('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('Autoryzacja Google wygasła')
         expect(self.page.locator('[data-drive-action=connect]')).to_be_visible()
@@ -304,6 +315,6 @@ class ManualDriveFlow(BrowserHarness):
         form=self.page.locator('.seriesResultForm');form.locator('[data-main=kg]').fill('77');form.locator('[data-main=reps]').fill('9')
         form.locator('[type=submit]').click();expect(self.page.locator('.seriesResultForm')).to_have_count(0)
         saved=self.state();self.assertEqual(len(saved['entries']),len(before['entries']));self.assertEqual(saved['entries'][-1]['id'],before['entries'][-1]['id'])
-        mock.error=0;self.page.locator('[data-tab=settings]').click();self.page.locator('[data-drive-action=connect]').click()
+        mock.error=0;self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden();count=mock.posts;self.upload()
         self.assertEqual(mock.posts,count+1);self.assertEqual(self.state(),saved);self.assertFalse(self.alerts,self.alerts)

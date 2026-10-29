@@ -1,5 +1,7 @@
 # Etap G — prostsze Dane (Issues #27 i #45)
 
+**Aktualizacja po PR #107:** interfejs czterech przycisków zastępują dwa przepływy opisane w [Dane — dwa przepływy kopii](TWO_BACKUP_FLOWS.md). Poniżej zachowano historyczny raport etapu G.
+
 Baza: PR #92 / etap F (`1be8b75`), po `main` `58310ff` i PR #91.
 Osobny PR; żadnego scalenia zależności.
 
