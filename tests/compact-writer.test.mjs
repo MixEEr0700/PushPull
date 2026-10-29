@@ -8,7 +8,7 @@ globalThis.crypto??=webcrypto;
 const fixture=()=>({history:JSON.parse(readFileSync(new URL('./fixtures/v1.json',import.meta.url))),sessions:[{id:'s',snapshotId:'p',results:[{side:'L',reps:10,kg:12},{side:'R',reps:9,kg:12}],draft:{kg:'12,',reps:''}}],snapshots:[{id:'p',instructions:'original'}],plans:{active:'p',versions:[{id:'p',userNotes:'😀\ud800\udfff\0é'}]},archives:[{id:'a',raw:' { "opaque": "\\ud800" } ',metadata:{custom:true}},{id:'null',raw:null},{id:'empty',raw:''}],settings:{unknown:[false,null,-0,1e100],compatibility:{retained:'yes'}}});
 test('entire model, all unknown fields and UTF16 code units roundtrip; shared graph identity',async()=>{
  const source=fixture();source.alias=source.snapshots;Object.defineProperty(source,'__proto__',{value:{safe:true},enumerable:true});
- const file=await writeCompactModel(source),out=await readCompactModel(file);assert.deepStrictEqual(out,source);assert.equal(out.alias,out.snapshots);assert.equal(Object.getPrototypeOf(out),Object.prototype);
+ const file=await writeCompactModel(source),out=await readCompactModel(file);assert.deepStrictEqual(out,source);assert.equal(out.alias,out.snapshots);assert.ok(Object.isFrozen(out.alias));assert.throws(()=>{out.snapshots[0].instructions='changed';},TypeError);assert.equal(Object.getPrototypeOf(out),Object.prototype);
 });
 test('deduplication, gzip/none, large repeated archive; synthetic benchmark',async()=>{
  const source=fixture();source.archives.push({id:'large',raw:'x'.repeat(8*1024*1024)});source.archives.push({id:'same',raw:source.archives.at(-1).raw});

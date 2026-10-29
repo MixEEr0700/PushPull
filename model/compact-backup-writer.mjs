@@ -1,6 +1,7 @@
 /** Isolated JSON-compatible model graph. No database, export UI or Drive. */
 import {openCompactBackup,COMPACT_LIMITS} from './compact-backup-reader.mjs';
 import {boundedBackupJson} from './backup-v4.mjs';
+import {freeze} from './backup-json.mjs';
 const check=(v,m)=>{if(!v)throw Error('compact graph: '+m);};
 const sha=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),x=>x.toString(16).padStart(2,'0')).join('');
 const enc=new TextEncoder();
@@ -90,5 +91,5 @@ export async function readCompactModel(file,options={}){
   else throw Error('compact graph: node type');
   active.delete(i);values.set(i,out);return out;
  }
- const result=await visit(graph.root);check(values.size===graph.nodes.length&&used.size===reader.manifest.objects.length,'unreachable data');guard();return result;
+ const result=await visit(graph.root);check(values.size===graph.nodes.length&&used.size===reader.manifest.objects.length,'unreachable data');guard();return freeze(result);
 }
