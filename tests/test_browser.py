@@ -83,7 +83,7 @@ class QuietServer(http.server.SimpleHTTPRequestHandler):
         prefix = '/upgrade/' if self.path.startswith('/upgrade/') else '/legacy/' if self.path.startswith('/legacy/') else None
         if prefix:
             asset=self.path[len(prefix):].split('?')[0] or 'index.html'
-            allowed={'index.html','app.js','storage.js','indexeddb.js','style.css','sw.js','manifest.webmanifest','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs','model/training-model.mjs','model/backup.mjs','model/backup-json.mjs','model/legacy-backup.mjs','model/legacy-model.mjs','model/v2-plan-data.mjs','model/v2-plan.mjs','model/performance.mjs','model/performance-editor.mjs','model/workout-drafts.mjs','model/journal.mjs','model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs','model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'}
+            allowed={'model/backup-size.mjs','model/backup-size-json.mjs','index.html','app.js','storage.js','indexeddb.js','style.css','sw.js','manifest.webmanifest','icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs','model/training-model.mjs','model/backup.mjs','model/backup-json.mjs','model/legacy-backup.mjs','model/legacy-model.mjs','model/v2-plan-data.mjs','model/v2-plan.mjs','model/performance.mjs','model/performance-editor.mjs','model/workout-drafts.mjs','model/journal.mjs','model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs','model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'}
             if asset not in allowed:
                 self.send_error(404);return
             try:
@@ -120,7 +120,7 @@ class BrowserHarness(unittest.TestCase):
             ref='6002889'
             assets=runpy.run_path(str(ROOT/'scripts/build_release.py'))['ASSETS']
             # The v2 modules are isolated test modules, unused by that release.
-            assets={*assets,'sw.js'}-{'model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'}
+            assets={*assets,'sw.js'}-{'model/backup-size.mjs','model/backup-size-json.mjs','model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'}
             handler=type('V1CompatibilityServer',(QuietServer,),{'runtime_ref':ref,'legacy_assets':assets})
         cls.server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(handler, directory=str(ROOT)))
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)

@@ -26,7 +26,10 @@ from serve_test import ReleaseHandler, make_server, verify_release
 # Historical app bytes stay at their original ref. The current release builder
 # also precaches the newly introduced, unused-by-old-app v4 support modules.
 V4_ASSETS={'model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs'}
-V4_ASSETS.update({'model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'})
+# Added to the current build allowlist; absent and unused in PR98/PR100.
+# Every other historical runtime file must still come from its exact ref.
+DIAGNOSTIC_ASSETS={'model/backup-size.mjs','model/backup-size-json.mjs'}
+V4_ASSETS.update(DIAGNOSTIC_ASSETS|{'model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'})
 def historical_asset(ref,name):
     if name in V4_ASSETS:return (ROOT/name).read_bytes()
     return subprocess.check_output(['git','show',ref+':'+name],cwd=ROOT)
@@ -1144,7 +1147,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue99-pr98-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','42fc1010092c7adea0ad3520a493f7600d9b1bdc:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in DIAGNOSTIC_ASSETS else subprocess.check_output(['git','show','42fc1010092c7adea0ad3520a493f7600d9b1bdc:'+name],cwd=ROOT))
         old_release=self.path/'issue99-pr98';build(old_release,source)
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
@@ -1181,7 +1184,7 @@ class PWADeployment(unittest.TestCase):
         source=self.path/'issue101-pr100-source'
         for name in [*ASSETS,'scripts/service-worker.template.js']:
             dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(subprocess.check_output(['git','show','0a7b1ac62f75c9d3fffd3c750807ec369b065d00:'+name],cwd=ROOT))
+            dest.write_bytes((ROOT/name).read_bytes() if name in DIAGNOSTIC_ASSETS else subprocess.check_output(['git','show','0a7b1ac62f75c9d3fffd3c750807ec369b065d00:'+name],cwd=ROOT))
         old_release=self.path/'issue101-pr100';build(old_release,source)
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
