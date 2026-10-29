@@ -1,0 +1,425 @@
+{
+  "syntheticOnly": true,
+  "ref": "working",
+  "cpuThrottle": 4,
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "cases": {
+    "small": [
+      {
+        "click": 1427.6999999999534,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 1466.3999999999069,
+            "end": 1574.5
+          },
+          {
+            "name": "render",
+            "start": 1575.6000000000931,
+            "end": 1589.1000000000931
+          }
+        ],
+        "tx": [
+          {
+            "start": 1493.3999999999069,
+            "durability": "strict",
+            "complete": 1573
+          }
+        ],
+        "paint": 1650.8000000000466,
+        "clickToStrictMs": 145.30000000004657,
+        "nativeTransactionMs": 79.60000000009313,
+        "clickToPaintMs": 223.10000000009313,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      },
+      {
+        "click": 1300.1999999999534,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 1401.4000000001397,
+            "end": 1562.6000000000931
+          },
+          {
+            "name": "render",
+            "start": 1564.8000000000466,
+            "end": 1581.4000000001397
+          }
+        ],
+        "tx": [
+          {
+            "start": 1473.4000000001397,
+            "durability": "strict",
+            "complete": 1560.9000000001397
+          }
+        ],
+        "paint": 1692.4000000001397,
+        "clickToStrictMs": 260.70000000018626,
+        "nativeTransactionMs": 87.5,
+        "clickToPaintMs": 392.20000000018626,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      },
+      {
+        "click": 1376.7999999998137,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 1418.2999999998137,
+            "end": 1571
+          },
+          {
+            "name": "render",
+            "start": 1571.2999999998137,
+            "end": 1584.0999999998603
+          }
+        ],
+        "tx": [
+          {
+            "start": 1487.3999999999069,
+            "durability": "strict",
+            "complete": 1569.0999999998603
+          }
+        ],
+        "paint": 1662.2999999998137,
+        "clickToStrictMs": 192.30000000004657,
+        "nativeTransactionMs": 81.69999999995343,
+        "clickToPaintMs": 285.5,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      },
+      {
+        "click": 873.3999999999069,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 908.3000000000466,
+            "end": 1054.8999999999069
+          },
+          {
+            "name": "render",
+            "start": 1055,
+            "end": 1073.6999999999534
+          }
+        ],
+        "tx": [
+          {
+            "start": 960,
+            "durability": "strict",
+            "complete": 1051.8000000000466
+          }
+        ],
+        "paint": 1139.5999999998603,
+        "clickToStrictMs": 178.4000000001397,
+        "nativeTransactionMs": 91.80000000004657,
+        "clickToPaintMs": 266.19999999995343,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      },
+      {
+        "click": 723.0999999998603,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 751.1999999999534,
+            "end": 874.3999999999069
+          },
+          {
+            "name": "render",
+            "start": 876.7999999998137,
+            "end": 896.8999999999069
+          }
+        ],
+        "tx": [
+          {
+            "start": 788.2999999998137,
+            "durability": "strict",
+            "complete": 871.0999999998603
+          }
+        ],
+        "paint": 981.5,
+        "clickToStrictMs": 148.0,
+        "nativeTransactionMs": 82.80000000004657,
+        "clickToPaintMs": 258.4000000001397,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      }
+    ],
+    "history40-raw4": [
+      {
+        "click": 737,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 775.9000000001397,
+            "end": 955.2000000001863
+          },
+          {
+            "name": "render",
+            "start": 957,
+            "end": 969.5
+          }
+        ],
+        "tx": [
+          {
+            "start": 837.8000000000466,
+            "durability": "strict",
+            "complete": 952.3000000000466
+          }
+        ],
+        "paint": 1066.8000000000466,
+        "clickToStrictMs": 215.30000000004657,
+        "nativeTransactionMs": 114.5,
+        "clickToPaintMs": 329.80000000004657,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      },
+      {
+        "click": 1369.6999999999534,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 1465.6999999999534,
+            "end": 1877.3000000000466
+          },
+          {
+            "name": "render",
+            "start": 1878.1000000000931,
+            "end": 1911.6999999999534
+          }
+        ],
+        "tx": [
+          {
+            "start": 1632.5,
+            "durability": "strict",
+            "complete": 1870.9000000001397
+          }
+        ],
+        "paint": 2026.8000000000466,
+        "clickToStrictMs": 501.20000000018626,
+        "nativeTransactionMs": 238.4000000001397,
+        "clickToPaintMs": 657.1000000000931,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      },
+      {
+        "click": 1786.1999999999534,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 1818.7999999998137,
+            "end": 2138
+          },
+          {
+            "name": "render",
+            "start": 2139.0999999998603,
+            "end": 2158.5999999998603
+          }
+        ],
+        "tx": [
+          {
+            "start": 1901.6999999999534,
+            "durability": "strict",
+            "complete": 2134.399999999907
+          }
+        ],
+        "paint": 2226.2999999998137,
+        "clickToStrictMs": 348.19999999995343,
+        "nativeTransactionMs": 232.69999999995343,
+        "clickToPaintMs": 440.0999999998603,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      },
+      {
+        "click": 1401,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 1487.8000000000466,
+            "end": 1849.1000000000931
+          },
+          {
+            "name": "render",
+            "start": 1851.8000000000466,
+            "end": 1896.4000000001397
+          }
+        ],
+        "tx": [
+          {
+            "start": 1629.2000000001863,
+            "durability": "strict",
+            "complete": 1839.1000000000931
+          }
+        ],
+        "paint": 2037.9000000001397,
+        "clickToStrictMs": 438.10000000009313,
+        "nativeTransactionMs": 209.89999999990687,
+        "clickToPaintMs": 636.9000000001397,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      },
+      {
+        "click": 1219.0999999998603,
+        "stages": [
+          {
+            "name": "saveUserNote",
+            "start": 1254.3999999999069,
+            "end": 1402.3999999999069
+          },
+          {
+            "name": "render",
+            "start": 1403.7999999998137,
+            "end": 1422.7999999998137
+          }
+        ],
+        "tx": [
+          {
+            "start": 1320.8999999999069,
+            "durability": "strict",
+            "complete": 1399.8999999999069
+          }
+        ],
+        "paint": 1509.5,
+        "clickToStrictMs": 180.80000000004657,
+        "nativeTransactionMs": 79.0,
+        "clickToPaintMs": 290.4000000001397,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      }
+    ]
+  },
+  "runtimeSHA256": {
+    "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+    "style.css": "38f2ee49a51387fa51fbd18aed8ae9fddfd25505e6bef6982a7000c90d10aae4",
+    "app.js": "bb3b52849ed48fd85d12052fe7babba4969609f990b56b3c160128be1a25cedb",
+    "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+    "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+    "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+    "model/journal-runtime.mjs": "eb20aaf14370ba4db7fe8ffa7ea5c12386f68ce135d73e7c8905a689be9f1a2a",
+    "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+    "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+    "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+    "model/journal-database.mjs": "cf10e0a2ea1b9d06d7901d242473d3a7377eec05f99d93aba486c6ccdf364cbb",
+    "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+    "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+    "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+    "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+    "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+    "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+    "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+    "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+    "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+    "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+    "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+    "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+    "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+    "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+    "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+    "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+    "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+    "model/v2-plan.mjs": "4bea75e0cd7928cda47d8fba2968549d5d21c9fd1353978929d48c56e7e36adc",
+    "model/performance.mjs": "5381c47847788125ea79d71c136b4f8ee86c3da001f951c11e90cb2231f468c4",
+    "model/performance-editor.mjs": "b2f607d999c60df28b981644427e35b5c5a5369abc09612e9c6a7a6e763b8891",
+    "model/workout-drafts.mjs": "08842aeb4a6fc2829001bc3586f28b15f63971c146ebafa6748c2dd0e409bc32",
+    "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+    "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+    "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+    "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+    "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+    "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+  },
+  "release": {
+    "format": "pushpull-static-release",
+    "version": 1,
+    "release": "531c0985947b1d236f19dd43",
+    "files": {
+      "app.js": "6d60fc4f336d6cd8ff275d006a32f3f6844803297a908cd4998b9b6155850707",
+      "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+      "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+      "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+      "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+      "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+      "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+      "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+      "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+      "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+      "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+      "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+      "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+      "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+      "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+      "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+      "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+      "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+      "model/journal-database.mjs": "cf10e0a2ea1b9d06d7901d242473d3a7377eec05f99d93aba486c6ccdf364cbb",
+      "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+      "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+      "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+      "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+      "model/journal-runtime.mjs": "eb20aaf14370ba4db7fe8ffa7ea5c12386f68ce135d73e7c8905a689be9f1a2a",
+      "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+      "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+      "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+      "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+      "model/performance-editor.mjs": "b2f607d999c60df28b981644427e35b5c5a5369abc09612e9c6a7a6e763b8891",
+      "model/performance.mjs": "5381c47847788125ea79d71c136b4f8ee86c3da001f951c11e90cb2231f468c4",
+      "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+      "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+      "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+      "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+      "model/v2-plan.mjs": "4bea75e0cd7928cda47d8fba2968549d5d21c9fd1353978929d48c56e7e36adc",
+      "model/workout-drafts.mjs": "08842aeb4a6fc2829001bc3586f28b15f63971c146ebafa6748c2dd0e409bc32",
+      "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+      "style.css": "38f2ee49a51387fa51fbd18aed8ae9fddfd25505e6bef6982a7000c90d10aae4",
+      "sw.js": "cb2098845e6545428c51f9f465ea123629aa850b2ad3edc7a4b9a4af3908a913"
+    }
+  },
+  "chromiumVersion": "154.0.8037.57",
+  "stats": {
+    "small": {
+      "clickToStrictMs": {
+        "median": 178.4000000001397,
+        "p95": 260.70000000018626,
+        "n": 5
+      },
+      "nativeTransactionMs": {
+        "median": 82.80000000004657,
+        "p95": 91.80000000004657,
+        "n": 5
+      },
+      "clickToPaintMs": {
+        "median": 266.19999999995343,
+        "p95": 392.20000000018626,
+        "n": 5
+      }
+    },
+    "history40-raw4": {
+      "clickToStrictMs": {
+        "median": 348.19999999995343,
+        "p95": 501.20000000018626,
+        "n": 5
+      },
+      "nativeTransactionMs": {
+        "median": 209.89999999990687,
+        "p95": 238.4000000001397,
+        "n": 5
+      },
+      "clickToPaintMs": {
+        "median": 440.0999999998603,
+        "p95": 657.1000000000931,
+        "n": 5
+      }
+    }
+  }
+}

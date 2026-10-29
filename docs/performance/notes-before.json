@@ -1,0 +1,475 @@
+{
+  "syntheticOnly": true,
+  "ref": "376ccd3",
+  "cpuThrottle": 4,
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "cases": {
+    "small": [
+      {
+        "click": 1534.8999999999069,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 1588.1000000000931,
+            "end": 5339.600000000093
+          },
+          {
+            "name": "commit",
+            "start": 5351.300000000047,
+            "end": 11962.600000000093
+          },
+          {
+            "name": "render",
+            "start": 11971.699999999953,
+            "end": 11985.300000000047
+          }
+        ],
+        "tx": [
+          {
+            "start": 5920.199999999953,
+            "durability": "strict",
+            "complete": 9392.300000000047
+          }
+        ],
+        "paint": 12150.699999999953,
+        "clickToStrictMs": 7857.40000000014,
+        "nativeTransactionMs": 3472.100000000093,
+        "clickToPaintMs": 10615.800000000047,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      },
+      {
+        "click": 2364.8000000000466,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 2447.100000000093,
+            "end": 5715.40000000014
+          },
+          {
+            "name": "commit",
+            "start": 5730.300000000047,
+            "end": 14402.199999999953
+          },
+          {
+            "name": "render",
+            "start": 14442.699999999953,
+            "end": 14483.699999999953
+          }
+        ],
+        "tx": [
+          {
+            "start": 6850.199999999953,
+            "durability": "strict",
+            "complete": 11691.800000000047
+          }
+        ],
+        "paint": 14615.800000000047,
+        "clickToStrictMs": 9327.0,
+        "nativeTransactionMs": 4841.600000000093,
+        "clickToPaintMs": 12251.0,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      },
+      {
+        "click": 1546.5999999998603,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 1727.5999999998603,
+            "end": 8196.699999999953
+          },
+          {
+            "name": "commit",
+            "start": 8203.399999999907,
+            "end": 14349.59999999986
+          },
+          {
+            "name": "render",
+            "start": 14363.699999999953,
+            "end": 14399.399999999907
+          }
+        ],
+        "tx": [
+          {
+            "start": 8909.09999999986,
+            "durability": "strict",
+            "complete": 12362.09999999986
+          }
+        ],
+        "paint": 14516.399999999907,
+        "clickToStrictMs": 10815.5,
+        "nativeTransactionMs": 3453.0,
+        "clickToPaintMs": 12969.800000000047,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      },
+      {
+        "click": 1490.3000000000466,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 1522.1999999999534,
+            "end": 2597.3000000000466
+          },
+          {
+            "name": "commit",
+            "start": 2606.899999999907,
+            "end": 6903.199999999953
+          },
+          {
+            "name": "render",
+            "start": 6909.399999999907,
+            "end": 6925.5
+          }
+        ],
+        "tx": [
+          {
+            "start": 3572.600000000093,
+            "durability": "strict",
+            "complete": 5555.300000000047
+          }
+        ],
+        "paint": 7207,
+        "clickToStrictMs": 4065.0,
+        "nativeTransactionMs": 1982.6999999999534,
+        "clickToPaintMs": 5716.699999999953,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      },
+      {
+        "click": 1437,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 1512,
+            "end": 2585.3000000000466
+          },
+          {
+            "name": "commit",
+            "start": 2596.600000000093,
+            "end": 7170.700000000186
+          },
+          {
+            "name": "render",
+            "start": 7179.800000000047,
+            "end": 7204.200000000186
+          }
+        ],
+        "tx": [
+          {
+            "start": 3200,
+            "durability": "strict",
+            "complete": 5962.100000000093
+          }
+        ],
+        "paint": 7309.800000000047,
+        "clickToStrictMs": 4525.100000000093,
+        "nativeTransactionMs": 2762.100000000093,
+        "clickToPaintMs": 5872.800000000047,
+        "fixtureSHA256": "c375d83ee590818c216322b307f5760c44316042e3ee4ce89d78d774cadf5255",
+        "unchangedSourceSHA256": "9b56ced101a38b760a018d85d147f5d34f426a47f842b9bf5d2abc43c082cc6d",
+        "oraclePass": true
+      }
+    ],
+    "history40-raw4": [
+      {
+        "click": 1313.1999999999534,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 1360.3000000000466,
+            "end": 3138.600000000093
+          },
+          {
+            "name": "commit",
+            "start": 3169.3000000000466,
+            "end": 44022.60000000009
+          },
+          {
+            "name": "render",
+            "start": 44099.10000000009,
+            "end": 44127.69999999995
+          }
+        ],
+        "tx": [
+          {
+            "start": 7453.800000000047,
+            "durability": "strict",
+            "complete": 38722.10000000009
+          }
+        ],
+        "paint": 44247.30000000005,
+        "clickToStrictMs": 37408.90000000014,
+        "nativeTransactionMs": 31268.300000000047,
+        "clickToPaintMs": 42934.10000000009,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      },
+      {
+        "click": 1212.8999999999069,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 1242.8000000000466,
+            "end": 4108.300000000047
+          },
+          {
+            "name": "commit",
+            "start": 4159.899999999907,
+            "end": 25605.899999999907
+          },
+          {
+            "name": "render",
+            "start": 25659.899999999907,
+            "end": 25705.399999999907
+          }
+        ],
+        "tx": [
+          {
+            "start": 10381.5,
+            "durability": "strict",
+            "complete": 23298.199999999953
+          }
+        ],
+        "paint": 25830.600000000093,
+        "clickToStrictMs": 22085.300000000047,
+        "nativeTransactionMs": 12916.699999999953,
+        "clickToPaintMs": 24617.700000000186,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      },
+      {
+        "click": 1831.8999999999069,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 1916.6999999999534,
+            "end": 14316.199999999953
+          },
+          {
+            "name": "commit",
+            "start": 14490.09999999986,
+            "end": 94971.3999999999
+          },
+          {
+            "name": "render",
+            "start": 95023.59999999986,
+            "end": 95108.5
+          }
+        ],
+        "tx": [
+          {
+            "start": 24261.800000000047,
+            "durability": "strict",
+            "complete": 86558.69999999995
+          }
+        ],
+        "paint": 95229.30000000005,
+        "clickToStrictMs": 84726.80000000005,
+        "nativeTransactionMs": 62296.89999999991,
+        "clickToPaintMs": 93397.40000000014,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      },
+      {
+        "click": 758.5999999998603,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 798.0999999998603,
+            "end": 13767.09999999986
+          },
+          {
+            "name": "commit",
+            "start": 13915.09999999986,
+            "end": 36618.39999999991
+          },
+          {
+            "name": "render",
+            "start": 36687.69999999995,
+            "end": 36758.30000000005
+          }
+        ],
+        "tx": [
+          {
+            "start": 21297.09999999986,
+            "durability": "strict",
+            "complete": 33467.59999999986
+          }
+        ],
+        "paint": 36872.89999999991,
+        "clickToStrictMs": 32709.0,
+        "nativeTransactionMs": 12170.5,
+        "clickToPaintMs": 36114.30000000005,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      },
+      {
+        "click": 1651.4000000001397,
+        "stages": [
+          {
+            "name": "ensureHistory",
+            "start": 1846.2000000001863,
+            "end": 7893.5
+          },
+          {
+            "name": "commit",
+            "start": 8408.100000000093,
+            "end": 40709
+          },
+          {
+            "name": "render",
+            "start": 40776,
+            "end": 40848.5
+          }
+        ],
+        "tx": [
+          {
+            "start": 13277.100000000093,
+            "durability": "strict",
+            "complete": 37012
+          }
+        ],
+        "paint": 41001,
+        "clickToStrictMs": 35360.59999999986,
+        "nativeTransactionMs": 23734.899999999907,
+        "clickToPaintMs": 39349.59999999986,
+        "fixtureSHA256": "4533d8b1adf5c312684ccdac3b2484efa81799f715d0b37d4817c038bb60e5e8",
+        "unchangedSourceSHA256": "c59edaaf9cdc933ea7adc44dc6581e299a20f243ddf3daa4f5eb5c28e9324090",
+        "oraclePass": true
+      }
+    ]
+  },
+  "runtimeSHA256": {
+    "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+    "style.css": "0e52a8334ea21be651cd36d5b227a42c38a6c326dd7f81c8d3b5383b5bf16898",
+    "app.js": "c909a17c1fb028e19574a8ae9a9ccc21ffbd3a83d8a8be2a12994e0f583907d6",
+    "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+    "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+    "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+    "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+    "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+    "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+    "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+    "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+    "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+    "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+    "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+    "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+    "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+    "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+    "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+    "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+    "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+    "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+    "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+    "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+    "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+    "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+    "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+    "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+    "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+    "model/v2-plan.mjs": "30836954eaad4218b798c880e26d8a4424bcc49a91c268af3219987dc7802735",
+    "model/performance.mjs": "5381c47847788125ea79d71c136b4f8ee86c3da001f951c11e90cb2231f468c4",
+    "model/performance-editor.mjs": "4b57c8c8a9127a617e643a59bd1b699b7989969c09a80e2f2a8a4f075b967c69",
+    "model/workout-drafts.mjs": "08842aeb4a6fc2829001bc3586f28b15f63971c146ebafa6748c2dd0e409bc32",
+    "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+    "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+    "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+    "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+    "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+    "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7"
+  },
+  "release": {
+    "format": "pushpull-static-release",
+    "version": 1,
+    "release": "8158da549a64d101a8bbbda0",
+    "files": {
+      "app.js": "82ec9ef592e48328077946866a6939cfa4a6c4e0a66b834350dde308cb848150",
+      "icon.svg": "aeda27c2fcf740f06ee4b3b3644c4e5092241f963d150e4413ef2fe9aa9f1fe0",
+      "icons/icon-192.png": "033a4966248ecaca9e5fed641065b9aca6d6cd927e60f2340f95fd751fff0cc6",
+      "icons/icon-512.png": "8a565e0257c70483bdac6343479a63ff5e3cd0a13e077023222e040ba14641ba",
+      "icons/icon-maskable-512.png": "f108df286d15df8bdb0addfea4f53b2ab2f88e98c4722fe32ca4fcd336e9d8b7",
+      "index.html": "e65eb736cd94e2d0574775c715b547dd692087b694472c9fec7757a75f730c89",
+      "indexeddb.js": "670c580113dee7c219bb380d129826ec4c7893ccf77aa00ebaa3560ed0cba41a",
+      "manifest.webmanifest": "224e7193ceeec1ff10eccfb3a9a38ce9066c9d1141b944c250d22b04f3fd18f5",
+      "model/backup-json.mjs": "a295240faf597361aa2ffc4aa2551ee2620b3f7b97094e0a354359aa9f83c6e9",
+      "model/backup-v4-export.mjs": "82ec07d7d0f2936cc72a85ea29317bfaffeaad73308aec530b6ef9ecfe063cfa",
+      "model/backup-v4.mjs": "5dc290e662338546be76ff6ac8fe53398cf353d2065e01dd0a0e53f29a9bee37",
+      "model/backup-v5-preview.mjs": "22ff6f3b79e346ee3af955a3f156090141b4b6704454554794f3a600370d4d5f",
+      "model/backup-v5.mjs": "cf813ee775466d5920a6ef82659d1ea01bef9f7f93f3abe1c8d740ef1a9617a6",
+      "model/backup-v6.mjs": "fe6bff38e45e56c64f67bb265e554b9e3ec762140224243d1ac4274d0652ac9d",
+      "model/backup.mjs": "17c80645d7f85ab9c9688e535c8487e29a63be88a3dc0727cc301bb5868f6c37",
+      "model/draft-collector.mjs": "d39afe2c7b0e316b2037c221286060ea8227f50b30ba53111773de4f4778a77a",
+      "model/drive-sync.mjs": "791c4735f7c99cff900e6474ca99f2861ac0dab8a21bc30367af9a4532043157",
+      "model/google-drive.mjs": "41d86aefb28bb1b48a74060f2dbfd6c59698e12a6b1d2967b0cfc2faee18bbbb",
+      "model/journal-database.mjs": "66f5699e8199d5c745a47660eb6739634f01a3be818801de3b342dd4c27edad8",
+      "model/journal-idb.mjs": "ddae5c68da501f8405a20115c9f856bc471a25a33f98ec31709a70bc98082fb4",
+      "model/journal-index.mjs": "e778ce5027514c694fe703afb2d771e5810c426874e9c4a93cf6c4b1dbcdaf07",
+      "model/journal-protocol.mjs": "7bf6ea4201669c46bf071018cfc1d9ad0f84391ca2fb91dd73276bfca94611a0",
+      "model/journal-runtime-index.mjs": "99fc0f8c2da22eff33be450238dbd9eb4f4b1b1c6755792b4328c869ef2b2660",
+      "model/journal-runtime.mjs": "c031e1a349b1fbbbdf4934e590a925317b61d68f3429b389b7b54e6ae33d153b",
+      "model/journal.mjs": "79c8697470e6145810a2f297f17aba36f17fe96ae86e0f0e5e2e08eff23b3260",
+      "model/legacy-backup.mjs": "4271d0854b653f5489d34f99df58b1bbbad13b5ae86d5dd805a303f7b0c3f010",
+      "model/legacy-model.mjs": "b3f3087fc66bec642521cb5fbdb2481d2ea9332a9026403e2c9f5725314321d3",
+      "model/local-backup-v4.mjs": "da54dda78daf7e8daef97093b5bf3145fef61e0b34b15ee2779cff345a85ef35",
+      "model/performance-editor.mjs": "4b57c8c8a9127a617e643a59bd1b699b7989969c09a80e2f2a8a4f075b967c69",
+      "model/performance.mjs": "5381c47847788125ea79d71c136b4f8ee86c3da001f951c11e90cb2231f468c4",
+      "model/plan-import.mjs": "2c3c7be36c3d633f73e289c3a6231284c2a5784bed14a0235e99e8ab5c01fedc",
+      "model/plan-overview.mjs": "e83bf1a7b25223e39ef873212c289da228ebb18dc55a1c6bec0320dae313c2ae",
+      "model/training-model.mjs": "ac0b8ba6a6988983ec0f7e9a9af0c2ea14eac88811aabf742e1ef3d8290aa83e",
+      "model/v2-plan-data.mjs": "ca5eea8cc78102d3d4912ff9633b926a12e288e0e690887c3ad2836fdcceee05",
+      "model/v2-plan.mjs": "30836954eaad4218b798c880e26d8a4424bcc49a91c268af3219987dc7802735",
+      "model/workout-drafts.mjs": "08842aeb4a6fc2829001bc3586f28b15f63971c146ebafa6748c2dd0e409bc32",
+      "storage.js": "1f21acbf9f9372ff669b9b4c150679ba6f6b24501da7a781287c3fa0f1331bca",
+      "style.css": "0e52a8334ea21be651cd36d5b227a42c38a6c326dd7f81c8d3b5383b5bf16898",
+      "sw.js": "a4fd3a4205a99fc3603f7d597f0c70124f43afe4d3f8a8d51ccc6720e8b953c7"
+    }
+  },
+  "chromiumVersion": "154.0.8037.57",
+  "stats": {
+    "small": {
+      "clickToStrictMs": {
+        "median": 7857.40000000014,
+        "p95": 10815.5,
+        "n": 5
+      },
+      "nativeTransactionMs": {
+        "median": 3453.0,
+        "p95": 4841.600000000093,
+        "n": 5
+      },
+      "clickToPaintMs": {
+        "median": 10615.800000000047,
+        "p95": 12969.800000000047,
+        "n": 5
+      }
+    },
+    "history40-raw4": {
+      "clickToStrictMs": {
+        "median": 35360.59999999986,
+        "p95": 84726.80000000005,
+        "n": 5
+      },
+      "nativeTransactionMs": {
+        "median": 23734.899999999907,
+        "p95": 62296.89999999991,
+        "n": 5
+      },
+      "clickToPaintMs": {
+        "median": 39349.59999999986,
+        "p95": 93397.40000000014,
+        "n": 5
+      }
+    }
+  }
+}

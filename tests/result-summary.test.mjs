@@ -39,11 +39,11 @@ test('incomplete pairs stay visible; identical balanced extras compress without 
  const more=result(),onePair=structuredClone(result().performance.rows.slice(0,2));onePair.forEach(r=>r.setId=null);onePair[0].segments[0].reps='10';more.performance.rows.push(...onePair);
  assert.equal(lines(more).length,4);assert.match(lines(more)[3],/^Seria 4: L 10 × 105 kg · P 15 × 105 kg$/);
 });
-test('drops preserve segment order and backoff remains labelled even if weights/reps are identical',()=>{
+test('drops preserve segment order and backoff semantics prevent compression without a visible label',()=>{
  const m=buildPlan('summary-special'),drop=views(m,PLAN_ID,'PUSH A',{}).find(e=>e.id==='PUSH-A-5'),backoff=views(m,PLAN_ID,'PUSH A',{}).find(e=>e.id==='PUSH-A-3');
  const d=result(drop);d.performance.rows[0].segments[1].kg='30';d.performance.rows[0].segments[1].reps='6';
  assert.match(lines(d,drop.targets)[0],/dropset: 15 × 105 kg → 6 × 30 kg/);assert.equal(lines(d,drop.targets).length,3);
- assert.match(lines(result(backoff),backoff.targets)[2],/Seria 3 · back-off: 15 × 105 kg/);
+ assert.match(lines(result(backoff),backoff.targets)[2],/Seria 3: 15 × 105 kg/);assert.equal(lines(result(backoff),backoff.targets).length,3);assert.equal(backoff.targets[2].role,'backoff');assert.doesNotMatch(summary(result(backoff),backoff.targets),/back-off/);
 });
 test('rounds remain meaningful; independent A/B cards have independent compact results; escaping is retained',()=>{
  const p=views(buildPlan('summary-rounds'),PLAN_ID,'PULL B',{}),a=p.find(e=>e.id==='PULL-B-6-SKI'),b=p.find(e=>e.id==='PULL-B-6-SHRUGS');

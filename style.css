@@ -124,3 +124,11 @@ button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-off
 .series-add-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:8px 0}
 .series-add-actions>.btn{width:100%;min-width:0;padding:9px 4px}
 .drop-target{margin:8px 0}
+
+/* Collapsed results: measure the complete inline sequence, then stack whole sets. */
+.exercise-toggle .adaptive-result{display:block;max-width:100%;min-width:0;color:#39ff74;font-size:13px;font-weight:600;line-height:1.6;white-space:nowrap}
+.adaptive-result .result-unit{display:inline-block;vertical-align:top;white-space:nowrap}
+.adaptive-result .result-unit:not(:last-child)>.result-kg{display:none}
+.adaptive-result.result-stacked .result-unit{display:block;max-width:100%;overflow-x:auto;white-space:nowrap}
+.adaptive-result.result-stacked .result-unit>.result-kg{display:inline}
+.adaptive-result.result-stacked>.adaptive-separator{display:none}

@@ -178,6 +178,7 @@ export async function openDatabase(v1,fresh,{training=false}={}){
   get archivesDeferred(){return deferred},get historyDeferred(){return historyDeferred},ensureFull,ensureHistory,
   get startSession(){return writer?.startSession?command=>sessionCommand('startSession',command):undefined},
   get finishSession(){return writer?.finishSession?command=>sessionCommand('finishSession',command):undefined},
+  get saveUserNote(){return writer?.saveUserNote?command=>sessionCommand('saveUserNote',command):undefined},
   changeAge(entry){return writer?.changeAge?.(entry)??null},
   get raw(){try{return raw()}catch{return anchor}},get revision(){return revision()},
   get model(){if(deferred)throw Error('Pełny model wymaga odczytu i audytu archiwów.');return writer?.state.modelEnabled&&source?clone(legacyPayload(source,writer.state.ownerId)):null},

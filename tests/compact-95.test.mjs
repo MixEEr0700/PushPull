@@ -29,12 +29,12 @@ test('95: incompatible load or target context is never used to seed a new result
 });
 test('95: compact plan text preserves real ranges, tempo, unknown values and backoff/drop roles',()=>{
  assert.equal(parameters({...ex,targets:ex.targets.map(t=>({...t,reps:{min:8,max:10},tempo:[2,1,1,1],rir:{min:0,max:0}}))}),'3 × 8–10 | tempo 2111 | RIR 0');
- assert.match(parameters(exercises.find(e=>e.id==='PUSH-A-3')),/back-off/);assert.match(parameters(exercises.find(e=>e.id==='PUSH-A-5')),/drop/);
+ assert.doesNotMatch(parameters(exercises.find(e=>e.id==='PUSH-A-3')),/back-off/);assert.ok(exercises.find(e=>e.id==='PUSH-A-3').targets.some(t=>t.role==='backoff'));assert.match(parameters(exercises.find(e=>e.id==='PUSH-A-5')),/drop/);
  assert.equal(parameters({...ex,targets:[{reps:null,tempo:null,rir:null,role:'main'}]}),'1 × nieokreślone | tempo nieokreślone | RIR nieokreślone');
 });
 test('95: equal numeric values with different side/role/segment semantics never become one fictional result',()=>{
  const e=result(['10','10','10']);e.performance.rows[1].side='left';const html=summary(e,ex.targets);assert.match(text(html),/L 10 × 80 kg/);assert.equal((html.match(/last-series-row/g)||[]).length,3);
- const other=result(['10','10','10']),before=flatten(other.performance);const targets=structuredClone(ex.targets);targets[2].role='backoff';assert.match(summary(other,targets),/back-off/);assert.deepEqual(flatten(other.performance),before);
+ const other=result(['10','10','10']),before=flatten(other.performance);const targets=structuredClone(ex.targets);targets[2].role='backoff';assert.doesNotMatch(summary(other,targets),/back-off/);assert.equal((summary(other,targets).match(/last-series-row/g)||[]).length,3);assert.deepEqual(flatten(other.performance),before);
 });
 
 test('95: identical drops compact the entire ordered segment sequence, not its first pair',()=>{

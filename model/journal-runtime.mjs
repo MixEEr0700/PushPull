@@ -8,6 +8,7 @@ import * as journal from './journal.mjs';
 import {validateSessionSnapshot} from './training-model.mjs';
 import {prepareLegacyBackup} from './legacy-backup.mjs';
 import {comparison} from './performance.mjs';
+import {editUserNote} from './v2-plan.mjs';
 const proofs=new WeakMap();
 function sessionData(source,{starting=false}={}){
  const d=source.data,j=d.trainingJournal;
@@ -231,7 +232,20 @@ export async function openIndexedWriter(db,{token,guard=()=>{},signal,completeSo
    return {source:freeze({...source,data:d}),info:nextInfo,ages:nextAges,ack:{session:s}};
   },options);
  }
- return {context,saveResult,startSession,finishSession,get source(){return source},get state(){return state},get legacyRaw(){return legacy},
+ async function saveUserNote(command,options={}){
+  portable(command);const cmd=protocolInput(command);
+  return change(async({metadata,before})=>{
+   check(cmd.expectedEpoch===before.epoch&&cmd.expectedRevision===before.revision,'note root CAS');
+   const current=source.data.trainingJournal;check(current,'Brak wersjonowanego kontekstu notatki.');
+   // Authenticated journal metadata, bounded current plan validation; no scan
+   // of sessions/results/archives and no replacement of historical snapshots.
+   const verified=await r.metadata('journal');check(same(verified.model,current.model),'note model context');
+   const updated=editUserNote(current.model,cmd),journal={...current,model:updated.model};
+   await metadata('journal',journal);
+   return {source:freeze({...source,data:{...source.data,trainingJournal:journal}}),ack:{note:updated.note}};
+  },options);
+ }
+ return {context,saveResult,startSession,finishSession,saveUserNote,get source(){return source},get state(){return state},get legacyRaw(){return legacy},
   sessionContext(){return {expectedEpoch:state.epoch,expectedRevision:state.revision}},changeAge(entry){const c=comparison(source.data,entry);return c?(ages.get(c.context)??null):null},
   async audit(){return materialize(await readRecords(db))}};
 }
