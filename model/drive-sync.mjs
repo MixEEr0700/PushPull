@@ -48,7 +48,7 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
   if(!online())throw Error('Brak Internetu. Dane i szkice pozostają zapisane lokalnie.');
   if(!transport.authenticated||connectedAccount!==state.selected||connectedClient!==state.clientId)throw Error('Połącz Google, aby wykonać kopię lub ją pobrać.');
  }
- async function operation(fn){return mutex(async()=>{await refresh();requireConnection();busy=true;notice='Trwa operacja Google Drive…';emit();try{return await fn();}finally{busy=false;emit();}});}
+ async function operation(fn,isCurrent=()=>true){return mutex(async()=>{if(!isCurrent())return;await refresh();if(!isCurrent())return;requireConnection();busy=true;notice='Trwa operacja Google Drive…';emit();try{return await fn();}finally{busy=false;emit();}});}
  const api={
   set onchange(fn){changed=fn;},
   get config(){return {clientId:state.clientId,selected:state.selected,label:state.accounts[state.selected]?.label??'',connected:transport.authenticated&&connectedAccount===state.selected&&connectedClient===state.clientId};},
@@ -82,7 +82,7 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
    notice='Kopia zapisana i zweryfikowana na Google Drive. '+new Date(node.createdAt).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'})+' · Sesje: '+summary.sessions+' · Wyniki: '+summary.results+' · Kompletne wersje planów: '+summary.completePlans+'. Szkice pozostają lokalnie.'+(database.revision!==revision?' W międzyczasie zmieniono dane lokalne — zapisz kolejną kopię.':'');
    return {fileId:file.id,revision,summary};
   });},
-  async download(fileId,{choose=false,forRestore=false}={}){return operation(async()=>{
+  async download(fileId,{choose=false,forRestore=false,isCurrent=()=>true}={}){return operation(async()=>{
    const files=await transport.list(),valid=[];let skipped=0;
    for(const file of files){
     try{
@@ -106,13 +106,13 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
    const ambiguous=!tips.length||origins.size>1||candidates.some(c=>!Number.isFinite(c.time))||candidates.some((c,i)=>i&&c.time===candidates[0].time&&!same(c.node.backup,candidates[0].node.backup));
    const warning=(skipped?'Pominięto nieprawidłowe lub niedostępne kopie. ':'')+(ambiguous?'Kopie mogą zawierać różne historie urządzeń. Data zapisu w Drive nie rozstrzyga, która historia jest pełniejsza. Wybierz plik; pobranie nie zmieni danych lokalnych.':'');
    if(!fileId&&(choose||ambiguous||skipped)){
-    notice=forRestore?'Wybierz kopię do podglądu. Różne urządzenia mogą mieć różne historie; niczego nie przywrócono. '+(skipped?'Pominięto nieprawidłowe kopie.':''):warning;return {choices:(choose?valid.slice().sort((a,b)=>(b.time||0)-(a.time||0)):candidates).map(c=>({fileId:c.fileId,date:c.date,sessionCount:c.sessionCount,entryCount:c.entryCount})),warning};
+    if(isCurrent())notice=forRestore?'Wybierz kopię do podglądu. Różne urządzenia mogą mieć różne historie; niczego nie przywrócono. '+(skipped?'Pominięto nieprawidłowe kopie.':''):warning;return {choices:(choose?valid.slice().sort((a,b)=>(b.time||0)-(a.time||0)):candidates).map(c=>({fileId:c.fileId,date:c.date,sessionCount:c.sessionCount,entryCount:c.entryCount})),warning};
    }
    const chosen=fileId?valid.find(c=>c.fileId===fileId):candidates[0];
    if(!chosen)throw Error('Wybrana kopia nie jest już dostępna lub jest nieprawidłowa. Wybierz ponownie.');
-   notice=forRestore?'Kopia zweryfikowana. Sprawdź podgląd przed zastąpieniem lokalnej bazy.':'Kopia sprawdzona. Pobieramy JSON na telefon; baza lokalna pozostaje bez zmian.';
+   if(isCurrent())notice=forRestore?'Kopia zweryfikowana. Sprawdź podgląd przed zastąpieniem lokalnej bazy.':'Kopia sprawdzona. Pobieramy JSON na telefon; baza lokalna pozostaje bez zmian.';
    return {backup:chosen.node.backup,date:chosen.date};
-  });},
+  },isCurrent);},
   report(error){notice='Błąd: '+error.message;busy=false;emit();},
   close(){closed=true;transport.clear();},
   // Passive compatibility for older cached shells used during PWA upgrades.

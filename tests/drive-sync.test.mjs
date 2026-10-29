@@ -161,3 +161,26 @@ test('verified large upload does not allocate another escaped backup after readb
  assert.ok(JSON.parse(transport.files.get(uploaded.fileId).text).backup===backup,'verified backup text must remain exact');
  assert.match(sync.status.detail,/zapisana i zweryfikowana/);
 });
+
+test('obsolete download never publishes late success or a late list choice',async()=>{
+ for(const choose of [false,true]){
+  const {sync,transport}=await setup();await sync.upload();
+  let release,entered,current=true;
+  const gate=new Promise(r=>release=r),started=new Promise(r=>entered=r),read=transport.read.bind(transport);
+  transport.read=async id=>{entered();await gate;return read(id)};
+  const pending=sync.download(undefined,{choose,isCurrent:()=>current});
+  await started;current=false;const cancelledNotice=sync.status.detail;release();await pending;
+  assert.equal(sync.status.detail,cancelledNotice);
+  assert.equal(sync.status.busy,false);
+  transport.read=read;
+  assert.ok((await sync.download()).backup,'a new deliberate download is allowed');
+ }
+});
+
+test('obsolete queued download cannot start HTTP or overwrite the current notice',async()=>{
+ const {sync,transport,database}=await setup();await sync.upload();const before=database.export(),notice=sync.status.detail;
+ let reads=0;transport.list=async()=>{reads++;return []};
+ assert.equal(await sync.download(undefined,{isCurrent:()=>false}),undefined);
+ assert.equal(reads,0);assert.equal(sync.status.detail,notice);assert.equal(sync.status.busy,false);
+ assert.deepEqual(database.export(),before);
+});
