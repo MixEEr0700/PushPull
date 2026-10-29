@@ -44,7 +44,7 @@ Liczniki sesji, wyników, snapshotów i archiwów pochodzą z aktywnych kolekcji
 
 Testy Node porównują wszystkie profile z niezależnymi natywnymi `JSON.stringify` / UTF-8 dla małych fixture’ów, Unicode, kodowania wielokrotnego oraz 400 sesji z deduplikowanymi modelami snapshotów. Sprawdzają rozłączność sum, brak zmian wejścia, brakujące źródło, przerwanie, zmianę rewizji, błędy, limity i ścisłą allowlistę raportu. Osobna próba licznika działa z limitem starej generacji V8 64 MiB i wylicza wirtualne kodowanie >200 MB; nie jest pomiarem całego Workera/Androida.
 
-Lokalne Chromium: **19/19 PASS**. Nowe cztery przypadki obejmują offline/PWA, 360/390/412 px, porównanie wszystkich rekordów i localStorage przed/po, brak pełnych metod eksportu fasady, anulowanie/spóźniony worker, konflikt rewizji, awarię workera bez ujawnienia wyjątku i duży opaque archive. Dużą bazę porównano SHA-256 wszystkich rekordów wszystkich store’ów przed/po. Pozostałe przypadki chronią cztery działania Dane, poprawki Drive B1/B2, build/allowlistę, aktualizację PWA i offline w podkatalogu.
+Lokalne Chromium: **21 różnych scenariuszy PASS** (przebieg 19/19 oraz dwa dodatkowe testy historycznych aktualizacji 2/2, 32,66 s). Nowe cztery przypadki obejmują offline/PWA, 360/390/412 px, porównanie wszystkich rekordów i localStorage przed/po, brak pełnych metod eksportu fasady, anulowanie/spóźniony worker, konflikt rewizji, awarię workera bez ujawnienia wyjątku i duży opaque archive. Dużą bazę porównano SHA-256 wszystkich rekordów wszystkich store’ów przed/po. Pozostałe przypadki chronią cztery działania Dane, poprawki Drive B1/B2, build/allowlistę, aktualizację PWA i offline w podkatalogu.
 
 Profil syntetyczny: Chromium/Linux, 11 sesji, 46 wyników, 6 snapshotów, 4 archiwa; strona z CPU ×4, worker w oddzielnym kontekście. Pomiar nawigacji n=5. Nie uruchamiano drugiego lokalnego Chromium podczas pomiaru. Dane: [anonimowy wynik](performance/backup-size-diagnostics.json).
 
@@ -61,6 +61,8 @@ Profil syntetyczny: Chromium/Linux, 11 sesji, 46 wyników, 6 snapshotów, 4 arch
 | Najdłuższe zaobserwowane zadanie głównej strony | 55 ms |
 
 P95 przy n=5 to maksimum próby, nie statystyczna gwarancja urządzenia. CPU ×4 dotyczy emulacji strony; nie stanowi pomiaru fizycznego procesora Pixela ani równoważności throttlingu workerów. Odciski baz/orakle w testach mogą alokować pełne reprezentacje; produkcyjna diagnostyka nie korzysta z tych orakli. Nie zmierzono całkowitego szczytu RAM urządzenia.
+
+Pierwszy CI ujawnił dwa pominięte konstruktory fixture’ów PR #98/#100: próbowały odczytać nowe pliki diagnostyki z historycznych commitów. Odtworzono oba błędy lokalnie (2/2 ERROR przed poprawką). Teraz tylko dwa nowe moduły, nieużywane przez historyczne aplikacje, są dodawane do ich katalogów testowych; każdy pozostały plik nadal pochodzi z dokładnego historycznego ref. Wszystkie asercje aktualizacji, asymetrii, ID, tonażu, historii, szkiców i offline pozostały. Oba kompletne scenariusze po poprawce PASS. Kod runtime i wcześniej zmierzone wyniki nie zmieniły się.
 
 Pełne lokalne Node: **257/257 PASS**, 34,94 s. Izolowany licznik: wirtualne 220 200 988 B, 316 ms, maksymalny RSS procesu 62 386 176 B przy limicie V8 old-space 64 MiB. Build produkcyjny i zgodność hashy service workera PASS (release `b252bdcae5536cf39cf2eab7`). Wynik istniejącego pełnego CI na końcowym commicie znajduje się w opisie PR. Nie powtarzano wcześniejszych kosztownych analiz Issue #54 ani nie zmieniano workflow.
 
