@@ -1,0 +1,7 @@
+# Lokalne przywracanie PPC1 — #121
+
+Przepływ Dane → Przywróć kopię → Z pliku rozpoznaje nagłówek PPC1 i w workerze odczytuje oraz waliduje kontener i model. Podgląd przedstawia liczniki i ostrzeżenia; osobne potwierdzenie uruchamia dotychczasowy importer, który zastępuje lokalną bazę. Importer zachowuje preimage oraz istniejące kontrole revision/CAS, odczytu zwrotnego i kompletności transakcji. Konflikt lub błąd przerywa zapis. Starsze kopie JSON nadal korzystają z dotychczasowego importera.
+
+Obsługiwany model źródłowy ma na poziomie głównym wyłącznie `format`, `version`, `data`, `catalog` i `archives`, z walidacją kontenera oraz semantyczną zgodnie z istniejącym czytnikiem i podglądem PPC1. Dane wewnątrz obsługiwanych sekcji są przekazywane do importera; archiwa raw pozostają nieinterpretowane. Osobne główne sekcje ustawień, metadanych, szkiców lub inne rozszerzenia powodują odmowę przed zapisem: istniejący importer nie potrafi zagwarantować ich zachowania. Nie jest to deklaracja pełnej obsługi dowolnych modeli PPC1. Istniejące lokalne szkice pozostają na urządzeniu i mogą wymagać osobnego odzyskania.
+
+Anulowanie podglądu kończy worker i zapobiega publikacji spóźnionego wyniku. Rozpoczętej transakcji nie można obiecać natychmiast anulować. Odtworzony model jest w całości przechowywany w pamięci, więc duże kopie nadal wymagają odpowiednich zasobów. Ta zmiana nie wprowadza eksportu PPC1, zmian Google Drive ani automatycznego backupu.
