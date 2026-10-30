@@ -1,11 +1,11 @@
 /** Future-data canonical model. Isolated PPC1 codec, no storage/migration/restore. */
-import {portable,freeze} from './backup-json.mjs';
+import {portable,freeze,immutableJSON} from './backup-json.mjs';
 import {validateCompactSource} from './compact-backup-preview.mjs';
 import {writeCompactModel,readCompactModel} from './compact-backup-writer.mjs';
 const check=(v,m)=>{if(!v)throw Error('Canonical PPC1: '+m);};
 const exact=(v,keys)=>check(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===keys.length&&keys.every(k=>Object.hasOwn(v,k)),'fields');
 export function validateCanonicalBackup(input,{signal}={}){
- signal?.throwIfAborted();portable(input);
+ signal?.throwIfAborted();portable(input);if(!immutableJSON(input))input=freeze(intern(input));
  exact(input,['format','version','source','drafts','buffers','preferences','drive']);
  check(input.format==='pushpull-canonical'&&input.version===1,'version');
  exact(input.source,['format','version','data','catalog']);
@@ -21,7 +21,7 @@ export function validateCanonicalBackup(input,{signal}={}){
  * from the old complete ledger or arbitrary archive stripping. */
 export function createCanonicalBackup({source,drafts,buffers,preferences,drive},{signal}={}){
  signal?.throwIfAborted();const input={format:'pushpull-canonical',version:1,source,drafts,buffers,preferences,drive};
- validateCanonicalBackup(input,{signal});return freeze(intern(input));
+ return validateCanonicalBackup(input,{signal});
 }
 export async function writeCanonicalBackup(input,options={}){validateCanonicalBackup(input,options);return writeCompactModel(input,options);}
 export async function readCanonicalBackup(file,options={}){const value=await readCompactModel(file,options);validateCanonicalBackup(value,options);return value;}
