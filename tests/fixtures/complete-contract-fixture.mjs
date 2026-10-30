@@ -1,0 +1,8 @@
+import {createProtocol,STORES} from '../../model/journal-protocol.mjs';
+import {COMPLETE_STORES} from '../../model/complete-backup-contract.mjs';
+export async function completeFixture(source){
+ const bundle=await createProtocol(source),stores=Object.fromEntries(COMPLETE_STORES.map(k=>[k,[]]));for(const k of STORES)stores[k]=structuredClone(bundle.records[k]);
+ for(const k of COMPLETE_STORES.filter(k=>!STORES.includes(k)&&k!=='meta'))stores[k]=[{id:k+'-retained',unknown:{unicode:'\ud800😀\0',kept:true}}];
+ stores.meta=[{key:'journal-protocol-v2',protocol:2,status:'active',epoch:bundle.state.epoch},{key:'workout-draft:one',id:'one',token:'a',sequence:1,value:{kg:'12,',reps:''}},{key:'drive-sync-v1',clientId:'synthetic',selected:'account',mode:'manual',accounts:{account:{heads:['old-node'],outbox:[{pending:true}]}},token:'cas-token'},{key:'training-model-v1',revision:0,document:{retained:true}},{key:'future-meta',untouched:[null,false,'Ł']}];
+ const result={format:'pushpull-complete-contract',version:1,capture:{before:bundle.state.root,after:bundle.state.root,scope:'supplied-persistent-snapshot',otherTabs:'unknown'},source,indexedDB:{name:'pushpull',version:2,stores},localStorage:[{key:'pushpull_skeleton_v1',raw:'  {legacy evidence} '},{key:'pushpull_indexeddb_owner',raw:'pushpull:2'},{key:'pushpull_skeleton_v1_backup_old',raw:'broken raw preserved'},{key:'pushpull_workout_draft_v1:one:conflict',raw:'{unfinished\ud800'},{key:'pushpull-note-ui-v1:context:tab',raw:'{"text":"unfinished"}'},{key:'pushpull-note-ui-v1:retired:old-token',raw:'1'}]};result.capture.counts=Object.fromEntries(COMPLETE_STORES.map(k=>[k,stores[k].length]));result.capture.localKeys=result.localStorage.map(r=>r.key);return result;
+}
