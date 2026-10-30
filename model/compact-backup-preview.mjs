@@ -66,6 +66,12 @@ function validatePlans(data){
  }
  for(const version of j.model.planVersions)if(version.executionVersion===2)check(storedPlanModel(data,version.id),'invalid-model');
 }
+/** Shared semantic boundary for already decoded immutable PPC1 models. No writes. */
+export function validateCompactSource(source,guard=()=>{}){
+ supported(source);guard();const owner=source.data.trainingJournal?.model?.ownerId??'ppc1-preview-legacy';
+ validateStructuredSource(source,owner);guard();validatePlans(source.data);guard();
+ const summary=backupSummary(source.data);guard();check(summary.plans.every(p=>p.complete),'invalid-model');return summary;
+}
 /** One controller = one latest operation. Consumers use read() to recheck freshness. */
 export function createCompactPreview(){
  let operation=0,controller=null,published=null;
@@ -87,9 +93,7 @@ export function createCompactPreview(){
     guard();check(getRevision===undefined||typeof getRevision==='function','source-unavailable');
     const before=await revision(getRevision,c.signal);guard();
     const source=await readCompactModel(file,{limits,signal:c.signal});guard();stage='schema';supported(source);guard();stage='semantic';
-    const owner=source.data.trainingJournal?.model?.ownerId??'ppc1-preview-legacy';
-    validateStructuredSource(source,owner);guard();validatePlans(source.data);guard();
-    const summary=backupSummary(source.data);guard();check(summary.plans.every(p=>p.complete),'invalid-model');
+    const summary=validateCompactSource(source,guard);
     const after=await revision(getRevision,c.signal);guard();check(before===after,'revision');
     const report=freeze({format:'PPC1',modelVersion:2,status:'validated-training-preview',canRestore:false,revisionChecked:!!getRevision,
      sessions:summary.sessions,completed:summary.completed,ongoing:summary.ongoing,results:summary.results,snapshots:summary.snapshots,
