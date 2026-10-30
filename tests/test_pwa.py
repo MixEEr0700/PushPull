@@ -23,16 +23,17 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
 from build_release import ASSETS, FILES, build, generate
 from serve_test import ReleaseHandler, make_server, verify_release
-# Historical app bytes stay at their original ref. The current release builder
-# also precaches the newly introduced, unused-by-old-app v4 support modules.
-V4_ASSETS={'model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs'}
-# Added to the current build allowlist; absent and unused in PR98/PR100.
-# Every other historical runtime file must still come from its exact ref.
-DIAGNOSTIC_ASSETS={'model/backup-size.mjs','model/backup-size-json.mjs'}
-V4_ASSETS.update(DIAGNOSTIC_ASSETS|{'model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'})
-def historical_asset(ref,name):
-    if name in V4_ASSETS:return (ROOT/name).read_bytes()
-    return subprocess.check_output(['git','show',ref+':'+name],cwd=ROOT)
+def build_historical(ref,source,output):
+    """Use exactly the historical builder, asset allowlist and template."""
+    script=subprocess.check_output(['git','show',ref+':scripts/build_release.py'],cwd=ROOT)
+    namespace={'__name__':'historical_release','__file__':str(source/'scripts/build_release.py')}
+    exec(compile(script,namespace['__file__'],'exec'),namespace)
+    for name in [*namespace['ASSETS'],'scripts/service-worker.template.js']:
+        target=source/name;target.parent.mkdir(parents=True,exist_ok=True)
+        target.write_bytes(subprocess.check_output(['git','show',ref+':'+name],cwd=ROOT))
+    namespace['build'](output,source)
+    if (output/'sw.js').read_bytes()!=subprocess.check_output(['git','show',ref+':sw.js'],cwd=ROOT):
+        raise AssertionError('Historical service worker does not match its original commit')
 
 FIXTURE=json.loads((ROOT/'tests/fixtures/v1.json').read_text())
 RAW=' '+json.dumps(FIXTURE,ensure_ascii=False)+'\n'
@@ -204,10 +205,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue44_existing_main_then_waiting_release_keeps_two_tabs_native_editor_and_history(self):
         source=self.path/'notice-main-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(historical_asset('23e1cab',name))
-        old_release=self.path/'notice-main';build(old_release,source)
+        old_release=self.path/'notice-main';build_historical('23e1cab',source,old_release)
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         # Synthetic large legacy history, opaque extension, and retained Google metadata.
@@ -288,10 +286,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue48_main_update_keeps_legacy_data_draft_and_advanced_options_closed(self):
         source=self.path/'advanced-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(historical_asset('af79976',name))
-        old_release=self.path/'advanced-old';build(old_release,source)
+        old_release=self.path/'advanced-old';build_historical('af79976',source,old_release)
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-expand="PUSH-A-1"]').click();open_result_panel(self.page)
@@ -412,10 +407,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue40_update_preview_and_large_v3_restore_offline_keeps_local_drafts(self):
         source=self.path/'restore-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(historical_asset('8d327a7',name))
-        old_release=self.path/'restore-old';build(old_release,source)
+        old_release=self.path/'restore-old';build_historical('8d327a7',source,old_release)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
@@ -466,10 +458,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue34_return_continues_version_history_and_dated_gaps_after_pwa_update(self):
         source=self.path/'return-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(historical_asset('3a92fbf',name))
-        old_release=self.path/'return-old';build(old_release,source)
+        old_release=self.path/'return-old';build_historical('3a92fbf',source,old_release)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.page.clock.install(time=datetime(2026,2,1,10,tzinfo=timezone.utc))
         self.seed();self.page.goto(self.url);self.ready()
@@ -563,10 +552,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue36_change_age_after_pwa_update_edit_restore_and_offline_restart(self):
         source=self.path/'issue36-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(historical_asset('fd708b0',name))
-        old_release=self.path/'issue36-old';build(old_release,source)
+        old_release=self.path/'issue36-old';build_historical('fd708b0',source,old_release)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.page.clock.install(time=datetime(2026,10,23,10,tzinfo=timezone.utc))
         self.seed();self.page.goto(self.url);self.ready()
@@ -640,10 +626,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue34_saved_plan_return_periods_draft_and_cycle_after_existing_pwa_update(self):
         source=self.path/'issue34-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(historical_asset('c40e173',name))
-        old_release=self.path/'issue34-old';build(old_release,source)
+        old_release=self.path/'issue34-old';build_historical('c40e173',source,old_release)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.page.clock.install(time=datetime(2026,10,21,10,tzinfo=timezone.utc))
         self.seed();self.page.goto(self.url);self.ready()
@@ -719,10 +702,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue32_compact_results_after_update_preserve_saved_history_and_asymmetric_draft(self):
         source=self.path/'issue32-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes(historical_asset('084f470',name))
-        old_release=self.path/'issue32-old';build(old_release,source)
+        old_release=self.path/'issue32-old';build_historical('084f470',source,old_release)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
@@ -768,10 +748,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue30_update_preserves_active_plan_drafts_snapshots_and_offline_statistics(self):
         source=self.path/'issue30-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-overview.mjs' else historical_asset('133bbd7',name))
-        old_release=self.path/'issue30-old';build(old_release,source)
+        old_release=self.path/'issue30-old';build_historical('133bbd7',source,old_release)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-preview-v2]').click()
@@ -809,10 +786,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue29_update_recovers_old_asymmetric_draft_and_active_v2_without_reactivation(self):
         source=self.path/'issue29-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name=='model/plan-overview.mjs' else historical_asset('3c51bc9',name))
-        old_release=self.path/'issue29-old';build(old_release,source)
+        old_release=self.path/'issue29-old';build_historical('3c51bc9',source,old_release)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-preview-v2]').click()
@@ -855,10 +829,7 @@ class PWADeployment(unittest.TestCase):
     def test_issue21_plan_import_offline_after_real_main_update_retains_history_and_draft(self):
         # Upgrade the actual pre-import main release on one origin, no clearing data.
         source=self.path/'issue21-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/plan-overview.mjs'} else historical_asset('ef0dec6',name))
-        old=self.path/'issue21-old';build(old,source);self.controller['directory']=old
+        old=self.path/'issue21-old';build_historical('ef0dec6',source,old);self.controller['directory']=old
         self.seed();self.page.goto(self.url);self.ready();before=self.snapshot()
         self.page.locator('[data-expand="PUSH-A-1"]').click();open_result_panel(self.page)
         self.page.locator('[data-main=kg]').fill('63');self.page.locator('[data-main=reps]').fill('7')
@@ -894,10 +865,7 @@ class PWADeployment(unittest.TestCase):
     def test_issue26_update_from_conflict_preserves_data_copies_drafts_and_disables_automation(self):
         from test_drive_sync import MockGoogle
         source=self.path/'issue26-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-import.mjs','model/plan-overview.mjs'} else historical_asset('e93a4a5',name))
-        old_release=self.path/'issue26-old';build(old_release,source)
+        old_release=self.path/'issue26-old';build_historical('e93a4a5',source,old_release)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         mock=MockGoogle();mock.install(self.context)
         self.seed();self.page.goto(self.url);self.ready()
@@ -950,10 +918,7 @@ class PWADeployment(unittest.TestCase):
     def test_issue14_upgrade_saved_skeleton_draft_and_independent_source_pair(self):
         # Real pre-fix build + persisted IDB + waiting SW; never reset app data.
         source=self.path/'issue14-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else historical_asset('cf9b765',name))
-        old_release=self.path/'issue14-old';build(old_release,source)
+        old_release=self.path/'issue14-old';build_historical('cf9b765',source,old_release)
         current_release=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-act=finish]').click()
@@ -1037,10 +1002,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue17_card_copy_after_update_preserves_saved_sessions_and_drafts(self):
         source=self.path/'issue17-old-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in {'model/plan-overview.mjs','model/plan-import.mjs','model/google-drive.mjs','model/drive-sync.mjs'} else historical_asset('16e131a',name))
-        old_release=self.path/'issue17-old';build(old_release,source)
+        old_release=self.path/'issue17-old';build_historical('16e131a',source,old_release)
         current_release=self.controller['directory']
         def check_cards():
             for eid,number,name in [('PULL-B-6-SKI','6A','Narciarz'),('PULL-B-6-SHRUGS','6B','Szrugsy')]:
@@ -1159,10 +1121,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue99_update_from_pr98_preserves_asymmetric_draft_ids_offline_and_history(self):
         source=self.path/'issue99-pr98-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in DIAGNOSTIC_ASSETS else subprocess.check_output(['git','show','42fc1010092c7adea0ad3520a493f7600d9b1bdc:'+name],cwd=ROOT))
-        old_release=self.path/'issue99-pr98';build(old_release,source)
+        old_release=self.path/'issue99-pr98';build_historical('42fc1010092c7adea0ad3520a493f7600d9b1bdc',source,old_release)
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
@@ -1196,10 +1155,7 @@ class PWADeployment(unittest.TestCase):
 
     def test_issue101_pr100_update_old_empty_optional_and_removed_drop_segments_remain_recoverable(self):
         source=self.path/'issue101-pr100-source'
-        for name in [*ASSETS,'scripts/service-worker.template.js']:
-            dest=source/name;dest.parent.mkdir(parents=True,exist_ok=True)
-            dest.write_bytes((ROOT/name).read_bytes() if name in DIAGNOSTIC_ASSETS else subprocess.check_output(['git','show','0a7b1ac62f75c9d3fffd3c750807ec369b065d00:'+name],cwd=ROOT))
-        old_release=self.path/'issue101-pr100';build(old_release,source)
+        old_release=self.path/'issue101-pr100';build_historical('0a7b1ac62f75c9d3fffd3c750807ec369b065d00',source,old_release)
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
@@ -1331,10 +1287,7 @@ class PWADeployment(unittest.TestCase):
     def test_protocol_v1_to_v2_update_retains_native_draft_and_old_writer_fails_closed(self):
         ref='46475114841895ad063a8eaea5054b10ef2b2094'
         source=self.path/'pre-incremental-source'
-        for name in ASSETS:
-            target=source/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(historical_asset(ref,name))
-        template=source/'scripts/service-worker.template.js';template.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/'scripts/service-worker.template.js',template)
-        old=self.path/'pre-incremental';build(old,source);self.controller['directory']=old
+        old=self.path/'pre-incremental';build_historical(ref,source,old);self.controller['directory']=old
         self.seed();self.page.goto(self.url);self.ready()
         self.page.evaluate("""async()=>{
          const db=await PushPullDB.open(()=>{});try{

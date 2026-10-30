@@ -154,11 +154,11 @@ class DataFlows(BrowserHarness):
         legacy.IndexedDBMigration.prepare(self);self.page.locator('[data-tab=settings]').click()
         self.backup_flow('restore');before=self.records()
         raw=self.page.request.get(self.url+'tests/fixtures/v1.json').text()
-        reserved=self.page.evaluate("""raw=>{const original=File.prototype.text;window.__fileReading=false;window.__previewWorkers=0;const Native=Worker;
+        reserved=self.page.evaluate("""raw=>{const original=Blob.prototype.arrayBuffer;window.__fileReading=false;window.__previewWorkers=0;const Native=Worker;
          window.Worker=class extends Native{constructor(url,options){super(url,options);if(String(url).endsWith('/legacy-model.mjs'))__previewWorkers++}};
-         File.prototype.text=function(){__fileReading=true;return new Promise(r=>window.__releaseFile=async()=>{r(await original.call(this));window.__fileReturned=true})};
+         Blob.prototype.arrayBuffer=function(){__fileReading=true;return new Promise(r=>window.__releaseFile=async()=>{r(await original.call(this));window.__fileReturned=true})};
          const transfer=new DataTransfer();transfer.items.add(new File([raw],'same-turn.json',{type:'application/json'}));const input=document.querySelector('#importFile');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
-         const reserved=__fileReading;document.querySelector('[data-tab=training]').click();return reserved;
+         const reserved=__fileReading&&!!document.querySelector('[data-restore-busy]');document.querySelector('[data-tab=training]').click();return reserved;
         }""",raw)
         try:self.assertTrue(reserved,'File preview must reserve its generation before queued navigation')
         finally:
