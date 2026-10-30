@@ -1,7 +1,7 @@
 /** Isolated persistent-state contract. No database/localStorage access or restore. */
 import {STORES,materialize,equalJSON} from './journal-protocol.mjs';
 import {validateCompactSource} from './compact-backup-preview.mjs';
-import {portable,freeze} from './backup-json.mjs';
+import {portable,freeze,immutableJSON} from './backup-json.mjs';
 import {writeCompactModel,readCompactModel} from './compact-backup-writer.mjs';
 export const COMPLETE_STORES=Object.freeze(['meta','plans','planVersions','exercises','sessions','entries','sets','notes','changes','backups',...STORES]);
 export const LOCAL_SOURCES=Object.freeze(['pushpull_skeleton_v1','pushpull_indexeddb_owner','pushpull_skeleton_v1_backup_','pushpull_workout_draft_v1:','pushpull-note-ui-v1:']);
@@ -9,7 +9,7 @@ const check=(v,m)=>{if(!v)throw Error('PPC1 contract: '+m);};
 const exact=(v,keys)=>check(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===keys.length&&keys.every(k=>Object.hasOwn(v,k)),'sections');
 const abort=signal=>{if(signal?.aborted)throw new DOMException('Cancelled','AbortError');};
 export async function validateCompleteContract(input,{signal}={}){
- abort(signal);portable(input);
+ abort(signal);portable(input);if(!immutableJSON(input))input=freeze(structuredClone(input));
  exact(input,['format','version','capture','source','indexedDB','localStorage']);check(input.format==='pushpull-complete-contract'&&input.version===1,'version');
  exact(input.capture,['before','after','scope','otherTabs','counts','localKeys']);
  check(typeof input.capture.before==='string'&&input.capture.before.length>0&&input.capture.before.length<=256&&input.capture.before===input.capture.after,'unstable capture');
