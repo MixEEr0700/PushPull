@@ -2,6 +2,8 @@
 import {portable,freeze,immutableJSON} from './backup-json.mjs';
 import {validateCompactSource} from './compact-backup-preview.mjs';
 import {writeCompactModel,readCompactModel} from './compact-backup-writer.mjs';
+import {openCompactBackup} from './compact-backup-reader.mjs';
+import {JSON_OBJECT,writeCanonicalJSON,readCanonicalJSON} from './canonical-json-transport.mjs';
 const check=(v,m)=>{if(!v)throw Error('Canonical PPC1: '+m);};
 const exact=(v,keys)=>check(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===keys.length&&keys.every(k=>Object.hasOwn(v,k)),'fields');
 export function validateCanonicalBackup(input,{signal}={}){
@@ -23,8 +25,8 @@ export function createCanonicalBackup({source,drafts,buffers,preferences,drive},
  signal?.throwIfAborted();const input={format:'pushpull-canonical',version:1,source,drafts,buffers,preferences,drive};
  return validateCanonicalBackup(input,{signal});
 }
-export async function writeCanonicalBackup(input,options={}){validateCanonicalBackup(input,options);return writeCompactModel(input,options);}
-export async function readCanonicalBackup(file,options={}){const value=await readCompactModel(file,options);validateCanonicalBackup(value,options);return value;}
+export async function writeCanonicalBackup(input,options={}){const owned=validateCanonicalBackup(input,options);try{return await writeCanonicalJSON(owned,options);}catch(error){if(error.name==='AbortError'||!/v4: (token|nesting) limit/.test(error.message))throw error;return writeCompactModel(owned,options);}}
+export async function readCanonicalBackup(file,options={}){const reader=await openCompactBackup(file,options);const value=reader.manifest.objects.some(o=>o.id===JSON_OBJECT)?await readCanonicalJSON(reader,options):await readCompactModel(file,options);validateCanonicalBackup(value,options);return value;}
 
 // Intern equal subtrees before the transport traversal budget: identical copied
 // snapshots become shared immutable values; ordered arrays/keys stay intact.
