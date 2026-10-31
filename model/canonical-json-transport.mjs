@@ -1,6 +1,6 @@
 /** Versioned JSON payload inside the unchanged PPC1 transport container. */
 import {openCompactBackup,COMPACT_LIMITS} from './compact-backup-reader.mjs';
-import {boundedBackupJson} from './backup-v4.mjs';
+import {parseCanonicalJSON,CANONICAL_PARSE_BUDGET} from './canonical-json-parser.mjs';
 import {freeze,portable} from './backup-json.mjs';
 const check=(v,m)=>{if(!v)throw Error('PPC1 JSON: '+m);};
 const hash=async b=>new Uint8Array(await crypto.subtle.digest('SHA-256',b));
@@ -26,7 +26,7 @@ export async function writeCanonicalJSON(input,{signal,limits:overrides={}}={}){
 }
 export async function readCanonicalJSON(reader,{signal,limits={}}={}){
  const bounds={...COMPACT_LIMITS,...limits},start=performance.now(),guard=()=>{signal?.throwIfAborted();check(performance.now()-start<=bounds.ms,'time limit');};guard();
- check(reader.manifest.objects.length===1&&reader.manifest.objects[0].id===JSON_OBJECT,'encoding');const object=reader.manifest.objects[0];check(object.bytes<=bounds.totalDecodedBytes,'decoded limit');
+ check(reader.manifest.objects.length===1&&reader.manifest.objects[0].id===JSON_OBJECT,'encoding');const object=reader.manifest.objects[0];check(object.bytes<=bounds.totalDecodedBytes,'decoded limit');check(object.bytes*3<=CANONICAL_PARSE_BUDGET,'parse memory budget');
  const bytes=new Uint8Array(object.bytes);let p=0;for await(const b of reader.readObject(JSON_OBJECT)){guard();bytes.set(b,p);p+=b.length;}
- const value=boundedBackupJson(new TextDecoder('utf-8',{fatal:true}).decode(bytes),bounds,bounds.totalDecodedBytes);portable(value);guard();return freeze(value);
+ const value=parseCanonicalJSON(new TextDecoder('utf-8',{fatal:true}).decode(bytes),bytes.length,bounds,signal);portable(value);guard();return freeze(value);
 }

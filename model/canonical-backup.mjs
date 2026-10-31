@@ -25,7 +25,7 @@ export function createCanonicalBackup({source,drafts,buffers,preferences,drive},
  signal?.throwIfAborted();const input={format:'pushpull-canonical',version:1,source,drafts,buffers,preferences,drive};
  return validateCanonicalBackup(input,{signal});
 }
-export async function writeCanonicalBackup(input,options={}){const owned=validateCanonicalBackup(input,options);try{return await writeCanonicalJSON(owned,options);}catch(error){if(error.name==='AbortError'||!/v4: (token|nesting) limit/.test(error.message))throw error;return writeCompactModel(owned,options);}}
+export async function writeCanonicalBackup(input,options={}){const owned=validateCanonicalBackup(input,options);try{return await writeCanonicalJSON(owned,options);}catch(error){if(error.name==='AbortError'||!/v4: (token|nesting) limit|PPC1 JSON: nesting limit/.test(error.message))throw error;return writeCompactModel(owned,options);}}
 export async function readCanonicalBackup(file,options={}){const reader=await openCompactBackup(file,options);const value=reader.manifest.objects.some(o=>o.id===JSON_OBJECT)?await readCanonicalJSON(reader,options):await readCompactModel(file,options);validateCanonicalBackup(value,options);return value;}
 
 // Intern equal subtrees before the transport traversal budget: identical copied
