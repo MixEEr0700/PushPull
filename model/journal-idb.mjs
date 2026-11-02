@@ -17,16 +17,18 @@ export async function verifyConversionEvidence(evidence){
 }
 export const request=req=>new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
 export const same=(a,b)=>{portable(a);portable(b);return equalJSON(a,b);};
-export function transact(db,stores,mode,work,{signal}={}){
+export function transact(db,stores,mode,work,{signal,restoreId}={}){
  checkAbort(signal);
+ if(mode==='readwrite'&&typeof localStorage!=='undefined'&&localStorage.getItem('pushpull_canonical_restore_pending')&&!restoreId)throw Error('Przywracanie pending: zapis zablokowany.');
  return new Promise((resolve,reject)=>{
+  const gated=mode==='readwrite'&&db.objectStoreNames.contains('meta');if(gated)stores=[...new Set([...stores,'meta'])];
   const tx=db.transaction(stores,mode,mode==='readwrite'?{durability:'strict'}:undefined);let result,failure,finished=false;
   const abort=()=>{failure=signal.reason??new DOMException('Aborted','AbortError');try{tx.abort()}catch{}};
   const cleanup=()=>signal?.removeEventListener('abort',abort);
   tx.oncomplete=()=>{cleanup();if(finished)resolve(result);else reject(Error('Transakcja zakończyła się przed weryfikacją odczytu.'))};
   tx.onabort=()=>{cleanup();reject(failure??tx.error??new DOMException('Aborted','AbortError'))};tx.onerror=()=>{};
   signal?.addEventListener('abort',abort,{once:true});
-  Promise.resolve().then(()=>work(tx)).then(value=>{result=value;finished=true},error=>{failure=error;try{tx.abort()}catch{cleanup();reject(error)}});
+  Promise.resolve().then(async()=>{if(gated){const pending=await request(tx.objectStore('meta').get('canonical-restore-pending'));check(!pending||pending.status==='pending'&&pending.id===restoreId,'Przywracanie pending: zapis zablokowany.');check(!restoreId||pending?.id===restoreId,'Brak własnego markera restore.');}return work(tx);}).then(value=>{result=value;finished=true},error=>{failure=error;try{tx.abort()}catch{cleanup();reject(error)}});
  });
 }
 export async function connectV2(name,{onVersionChange=()=>{}}={}){
@@ -198,7 +200,7 @@ export async function replaceLive(db,input,{expectedState,ownerId,modelEnabled,l
 }
 /** Full operation for archive additions, preimages and explicit import/restore. A confirmed restore can quarantine a corrupt representation
  * as exact opaque evidence; normal operations never purge immutable records. */
-export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0,indexed=false}={}){
+export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0,indexed=false,restoreId}={}){
  portable(input);const source=freeze(structuredClone(input)),before=await readRecords(db,{signal});
  check(same(before.state??null,expectedState??null),'bulk root CAS');
  if(!recovery)await auditBundle(before,{signal});
@@ -235,7 +237,7 @@ export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled
   await readback(tx,'journalObjects',bundle.records.journalObjects);await readback(tx,'journalIndex',bundle.records.journalIndex);
   tx.objectStore('journalState').put(bundle.state);await readback(tx,'journalState',[bundle.state]);
   const marker={key:MARKER,protocol:2,status:'active',epoch:bundle.state.epoch};tx.objectStore('meta').put(marker);check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'bulk marker readback');guard();
- },{signal});
+ },{signal,restoreId});
  try{
   const stored=await readRecords(db,{signal});check(same(stored.state,bundle.state),'bulk restart revision');
   check(same(await auditBundle(stored,{signal}),source),'bulk restart source');return await openWriter(db,{bundle:stored,signal,guard});

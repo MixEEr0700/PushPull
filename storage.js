@@ -112,3 +112,6 @@ const PushPullStorage = (() => {
   return {KEY, validate, open};
 })();
 if (typeof module !== 'undefined') module.exports = PushPullStorage;
+
+// Module workers reuse the exact app validator; no independent restore shim.
+if(typeof DedicatedWorkerGlobalScope!=='undefined'&&globalThis instanceof DedicatedWorkerGlobalScope)globalThis.PushPullStorage=PushPullStorage;
