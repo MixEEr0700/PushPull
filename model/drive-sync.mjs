@@ -1,6 +1,7 @@
 /** Manual, append-only Drive backups. Legacy files remain readable.
  * No timers, outbox execution, automatic upload or cloud-to-database restore.
  */
+import {runIncremental} from './drive-incremental-client.mjs';
 import {canonical} from './backup-json.mjs';
 import {parseModelBackup,backupSummary} from './legacy-model.mjs';
 import {readLegacyBackup} from './legacy-backup.mjs';
@@ -33,7 +34,7 @@ export async function readNode(transport,row,inspect=inspectBackup){
 }
 // Keep the existing metadata key and archive ALL legacy account/outbox fields.
 const initial=()=>({clientId:'',enabled:false,selected:null,accounts:{}});
-export async function openDriveBackup({database,transport,inspect=inspectBackup,online=()=>navigator.onLine,withLock=fn=>globalThis.navigator?.locks?navigator.locks.request('pushpull-drive-sync',fn):fn()}={}){
+export async function openDriveBackup({database,transport,inspect=inspectBackup,online=()=>navigator.onLine,captureCanonical,withLock=fn=>globalThis.navigator?.locks?navigator.locks.request('pushpull-drive-sync',fn):fn()}={}){
  let state,serial=Promise.resolve(),changed=()=>{},notice='',busy=false,connectedAccount=null,connectedClient=null,closed=false;
  const emit=()=>changed();
  const deviceId=crypto.randomUUID();
@@ -49,6 +50,7 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
   if(!transport.authenticated||connectedAccount!==state.selected||connectedClient!==state.clientId)throw Error('Połącz Google, aby wykonać kopię lub ją pobrać.');
  }
  async function operation(fn,isCurrent=()=>true){return mutex(async()=>{if(!isCurrent())return;await refresh();if(!isCurrent())return;requireConnection();busy=true;notice='Trwa operacja Google Drive…';emit();try{return await fn();}finally{busy=false;emit();}});}
+ let incrementalRunning=null,queueing=null,retryTimer=null,retryDelay=1000;
  const api={
   set onchange(fn){changed=fn;},
   get config(){return {clientId:state.clientId,selected:state.selected,label:state.accounts[state.selected]?.label??'',connected:transport.authenticated&&connectedAccount===state.selected&&connectedClient===state.clientId};},
@@ -62,9 +64,36 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
    const clientId=state.clientId,identity=await transport.connect(clientId);
    await mutex(async()=>{await refresh();if(state.clientId!==clientId){transport.clear();throw Error('Konfiguracja Google zmieniła się. Połącz ponownie.');}
     if(state.selected&&state.selected!==identity.id){transport.clear();throw Error('Wybrano inne konto. Odłącz poprzednie w opcjach zaawansowanych.');}
-    state.selected=identity.id;state.accounts[identity.id]??={};state.accounts[identity.id].label=identity.label;state.enabled=false;await save();connectedAccount=identity.id;connectedClient=clientId;notice='Połączono Google. Teraz wybierz zapis lub przywrócenie kopii.';emit();});
+    state.selected=identity.id;state.accounts[identity.id]??={};state.accounts[identity.id].label=identity.label;state.enabled=false;await save();connectedAccount=identity.id;connectedClient=clientId;state.autoPPC1??=true;await save();notice='Połączono Google. Teraz wybierz zapis lub przywrócenie kopii.';emit();});
   },
   async disconnect(){transport.clear();connectedAccount=null;connectedClient=null;await mutex(async()=>{await refresh();state.selected=null;state.enabled=false;await save();});notice='Odłączono Google. Dane lokalne i kopie Drive pozostają.';emit();},
+  get automatic(){return state.autoPPC1===true;},
+  async setAutomatic(enabled){await mutex(async()=>{await refresh();state.autoPPC1=!!enabled;await save();});},
+  queueCanonical({manual=false}={}){if(queueing)return queueing;queueing=mutex(async()=>{await refresh();if(!manual&&!state.autoPPC1)return;state.ppc1Queue??=crypto.randomUUID();await save();notice='Trening zapisany lokalnie / Oczekuje na wysłanie';emit();}).then(()=>api.retryCanonical()).finally(()=>{queueing=null});return queueing;},
+  retryCanonical(){
+   clearTimeout(retryTimer);let failed=false;
+   if(incrementalRunning)return incrementalRunning;if(!state.ppc1Queue)return Promise.resolve();
+   incrementalRunning=operation(async()=>{
+    if(!state.ppc1Queue)return;
+    let account=state.accounts[state.selected];const queue=state.ppc1Queue;
+    account.ppc1??={};let pending=account.ppc1.pending;
+    if(!pending){
+     if(!captureCanonical)throw Error('Brak kolektora PPC1.');
+     const value=await captureCanonical();
+     const {packet}=await runIncremental('prepare',{file:value,parent:account.ppc1.last??null},transport);
+     pending={fileId:await transport.reservePointId(),packet,queue};
+     account.ppc1.pending=pending;await save();
+    }
+    notice='Trening zapisany lokalnie / Zapisywanie kopii na Drive';emit();
+    const result=await runIncremental('upload',pending,transport);
+    account=state.accounts[state.selected];account.ppc1.last=result.fileId;delete account.ppc1.pending;
+    if(state.ppc1Queue===pending.queue)delete state.ppc1Queue;
+    account.ppc1.verified=new Date().toISOString();await save();
+    notice='Kopia zweryfikowana';emit();return result;
+   }).catch(error=>{failed=true;notice=(error.auth||!transport.authenticated)?'Trening zapisany lokalnie / Wymagane logowanie':'Trening zapisany lokalnie / Oczekuje na wysłanie: '+error.message;emit();}).finally(()=>{incrementalRunning=null;if(!closed&&state.ppc1Queue&&transport.authenticated&&online()&&typeof window!=='undefined'){retryDelay=failed?Math.min(retryDelay*2,600000):1000;retryTimer=setTimeout(()=>void api.retryCanonical(),failed?retryDelay:0);}});return incrementalRunning;
+  },
+  async canonicalPoints(){return operation(()=>transport.listPoints());},
+  async canonicalPoint(fileId,{signal}={}){return operation(()=>runIncremental('restore',{fileId},transport,{signal}));},
   async upload(){return operation(async()=>{
    if(database.error)throw Error('Najpierw odzyskaj lokalne dane. Nie wysłano pustej kopii.');
    const revision=database.revision,current=database.value;
@@ -114,7 +143,7 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
    return {backup:chosen.node.backup,date:chosen.date};
   },isCurrent);},
   report(error){notice='Błąd: '+error.message;busy=false;emit();},
-  close(){closed=true;transport.clear();},
+  close(){closed=true;clearTimeout(retryTimer);transport.clear();},
   // Passive compatibility for older cached shells used during PWA upgrades.
   // These calls must NEVER resume the former automatic queue.
   localChanged(){},retryNow(){return Promise.resolve();},

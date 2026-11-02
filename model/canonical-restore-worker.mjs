@@ -15,11 +15,11 @@ async function restore(file,baseline){
   const state=await transact(db,['journalState'],'readonly',tx=>request(tx.objectStore('journalState').get('active'))),revision=state?.revision;
   check(state&&revision===1&&state.counts.journalSessions===0&&state.counts.journalResults===0&&state.counts.journalSnapshots===0&&state.counts.journalArchives===0&&state.legacyRef===await hashJSON(null),'Cel nie jest nowym, czystym profilem.');
   const current=await readCanonicalBackup((await exportCanonicalLive([],revision)).file);
-  check(same(current.source.data,baseline.data)&&same(current.source.catalog,baseline.catalog)&&current.drafts.length===0&&Object.keys(current.preferences).length===0&&current.drive.clientId==='','Cel nie jest czystą instalacją. Nie nadpisano danych.');
+  check(same(current.source.data,baseline.data)&&same(current.source.catalog,baseline.catalog)&&current.drafts.length===0&&Object.keys(current.preferences).length===0&&(current.drive.clientId===''||baseline.allowDriveConnection),'Cel nie jest czystą instalacją. Nie nadpisano danych.');
   const meta=await transact(db,['meta'],'readonly',tx=>request(tx.objectStore('meta').getAll()));
   check(meta.every(r=>['state','training-model-v1','journal-protocol-v2','drive-sync-v1','canonical-preferences-v1'].includes(r.key)),'Cel ma dodatkowe trwałe dane.');const preferenceBefore=meta.find(r=>r.key==='canonical-preferences-v1');check(!preferenceBefore||same(preferenceBefore.value,{}),'Cel ma preferencje.');
   check(same(meta.find(r=>r.key==='journal-protocol-v2'),{key:'journal-protocol-v2',protocol:2,status:'active',epoch:state.epoch}),'Marker celu zmienił się.');
-  const driveBefore=meta.find(r=>r.key==='drive-sync-v1'),legacyState=meta.find(r=>r.key==='state');check((driveBefore?.clientId??'')===''&&legacyState?.migration?.source==='new'&&!driveBefore?.selected&&Object.keys(driveBefore?.accounts??{}).length===0,'Profil był już używany.');
+  const driveBefore=meta.find(r=>r.key==='drive-sync-v1'),legacyState=meta.find(r=>r.key==='state');check(legacyState?.migration?.source==='new'&&((driveBefore?.clientId??'')===''&&!driveBefore?.selected&&Object.keys(driveBefore?.accounts??{}).length===0||baseline.allowDriveConnection&&!driveBefore?.ppc1Queue&&!Object.values(driveBefore?.accounts??{}).some(a=>a.ppc1?.pending)),'Profil był już używany.');
   const before=await readRecords(db);check(same(before.state,state),'Zmieniono profil podczas sprawdzania.');
   check(!meta.some(r=>r.key===RESTORE_KEY),'Inne przywracanie jest w toku.');
   const reserved=await new Promise(resolve=>{reserveLocal=resolve;postMessage({reserve:id});});check(reserved===true,'Nie zarezerwowano pustego localStorage.');

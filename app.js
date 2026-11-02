@@ -44,7 +44,7 @@ let draftReport=null,draftCollectError='',draftCollecting=false,draftCollectCont
 let drive=null,driveInitError='',driveChoices=[],driveChoicesMode='restore',driveChoiceWarning='',downloadBusy=false,downloadCancelled=false,driveUpload=null,backupAdvancedOpen=false,technicalOpen=false;
 let canonicalExport=null,canonicalExportMetrics=null;
 let backupFlow=null,backupSaveStatus='',restoreController=null,restoreCommitting=false,restoreCancelled=false;
-try{const {createGoogleDrive}=await import('./model/google-drive.mjs');drive=await (await import('./model/drive-sync.mjs')).openDriveBackup({database,transport:createGoogleDrive(),inspect:raw=>inspectForRestore(raw,null)});}catch(error){driveInitError=error.message;}
+try{const {createGoogleDrive}=await import('./model/google-drive.mjs');drive=await (await import('./model/drive-sync.mjs')).openDriveBackup({database,captureCanonical:async()=>{const {exportCanonicalLocal}=await import('./model/canonical-export.mjs');const {readCanonicalBackup}=await import('./model/canonical-backup.mjs');if(savedDrafts.error||savedDrafts.readError)throw Error('Nie utrwalono szkiców.');return (await exportCanonicalLocal({getRevision:()=>database.error?null:database.revision})).file;},transport:createGoogleDrive(),inspect:raw=>inspectForRestore(raw,null)});}catch(error){driveInitError=error.message;}
 function downloadRaw(content,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 const handlers=new Map();let actions=Promise.resolve();
 // Feedback is volatile UI state. The existing strict commit/CAS path below
@@ -363,6 +363,7 @@ function driveSummaryText(){
  if(drive.status.busy||downloadBusy||driveUpload)return 'Trwa operacja Google Drive… Trening pozostaje dostępny.';
  if(text.startsWith('Błąd:'))return /Brak Internetu/.test(text)?'Brak Internetu. Dane pozostają na telefonie.':/Autoryzacja|Połącz Google/.test(text)?'Połącz ponownie Google, aby wykonać tę operację.':'Nie udało się wykonać operacji. Dane na telefonie pozostają bez zmian.';
  if(text.startsWith('Kopia zapisana'))return 'Kopia zapisana i zweryfikowana na Google Drive.'+(text.includes('W międzyczasie')?' Dane na telefonie zmieniły się w trakcie wysyłania — zapisz kolejną kopię.':'');
+ if(text.startsWith('Kopia zweryfikowana')||text.startsWith('Trening zapisany lokalnie'))return text;
  if(text.startsWith('Kopia sprawdzona'))return 'Kopia zweryfikowana; zlecono pobranie pliku. Nie przywrócono danych.';
  return drive.config.connected?'Google połączone. Kopie zapisujesz i pobierasz ręcznie.':'Kopie lokalne działają. Połącz Google, aby użyć Drive.';
 }
@@ -524,10 +525,10 @@ function drivePanel(){
  <section class="stack" id="backup-restore" data-backup-body="restore" ${backupFlow==='restore'?'':'hidden'}>
  <label class="btn backup-import">Z pliku<input type="file" id="importFile" accept="application/json,.json,application/octet-stream,.ppc1,.ppc1.txt" ${restoreCommitting?'disabled':''}></label>
  <button class="btn" data-drive-action="restore" ${!drive?'disabled':''}>Przywróć z Google Drive</button>
- ${restoreChoicePanel()}${restorePanel()}${restoreResult()}
+ <button class="btn" data-ppc1-list>Punkty odzyskiwania PPC1 na Drive</button><div data-ppc1-points></div>${restoreChoicePanel()}${restorePanel()}${restoreResult()}
  ${backupFlow==='restore'?status:''}
  <details><summary class="btn">Pobierz plik z Drive bez przywracania</summary><button class="btn" data-drive-action="download" ${!drive?'disabled':''}>Pobierz kopię z Google Drive</button></details></section></div>
- <details data-backup-advanced ${backupAdvancedOpen?'open':''}><summary class="btn">Opcje zaawansowane</summary><div class="stack spaced"><section><h3>Połączenie Google Drive</h3><p class="hint" data-drive-detail>${esc(driveStatusText())}</p>${!backupFlow?connection:drive?`<button class="btn" data-connect-from-advanced ${drive.config.connected?'hidden':''}>Połącz Google</button>`:''}${drive?`<details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</section><section><h3>Zachowane kopie ratunkowe</h3>${backupControls()}</section><section><h3>Diagnostyka kopii</h3>${backupSizePanel()}</section><details data-technical ${technicalOpen?'open':''}><summary class="btn">Narzędzia techniczne</summary>${localV4Panel()}${v5PreviewPanel()}${draftCollectorPanel()}${legacyJournalControls()}</details></div></details></div>`;
+ <details data-backup-advanced ${backupAdvancedOpen?'open':''}><summary class="btn">Opcje zaawansowane</summary><div class="stack spaced"><section><h3>Połączenie Google Drive</h3>${drive?`<label><input type="checkbox" data-auto-ppc1 ${drive.automatic?'checked':''}> Automatyczna kopia PPC1 po treningu</label><button class="btn" data-ppc1-send>Zapisz / ponów PPC1 na Drive</button>`:''}<p class="hint" data-drive-detail>${esc(driveStatusText())}</p>${!backupFlow?connection:drive?`<button class="btn" data-connect-from-advanced ${drive.config.connected?'hidden':''}>Połącz Google</button>`:''}${drive?`<details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</section><section><h3>Zachowane kopie ratunkowe</h3>${backupControls()}</section><section><h3>Diagnostyka kopii</h3>${backupSizePanel()}</section><details data-technical ${technicalOpen?'open':''}><summary class="btn">Narzędzia techniczne</summary>${localV4Panel()}${v5PreviewPanel()}${draftCollectorPanel()}${legacyJournalControls()}</details></div></details></div>`;
 }
 function settings(){if(dataView==='plans')return planScreen();if(dataView==='weekly')return weeklyScreen();return `<div class="eyebrow">DANE</div><h1>Dane i kopia zapasowa</h1><div class="card stack"><button class="btn" data-view="plans">Plany treningowe</button><button class="btn" data-view="weekly">Statystyki ogólne</button></div>${drivePanel()}${pwaInfo()}`;}
 
@@ -582,7 +583,7 @@ const resultWidthObserver=new ResizeObserver(entries=>{
 });
 // Font loading/zoom can change content without changing the outer card width.
 document.fonts?.addEventListener('loadingdone',()=>{document.querySelectorAll('[data-adaptive-result]').forEach(el=>{resultWidths.delete(el);resultWidthObserver.unobserve(el);resultWidthObserver.observe(el);});});
-function render(){if(canonicalLocked)return;if(canonicalLocalBlocked()){canonicalLocked=true;canonicalGate.showCanonicalPending();return;}resultWidthObserver.disconnect();let app=$('#app');const drawer=app.querySelector('[data-backup-advanced]');if(drawer)backupAdvancedOpen=drawer.open;const technical=app.querySelector('[data-technical]');if(technical)technicalOpen=technical.open;if(recoveryError){app.innerHTML=recovery();paintPwa();return}app.innerHTML=`<main class="app">${tab==='training'?main():tab==='calendar'?(historicalId?historical():calendar()):settings()}</main><nav class="bottom"><div class="inner"><button class="btn ${tab==='training'?'active':''}" data-tab="training"><svg class="nav-icon" data-nav-icon="training" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M3 8l5-5m8 18 5-5M1 6l5-5m12 22 5-5M4 11l7-7m2 16 7-7"/></svg><span>Trening</span></button><button class="btn ${tab==='calendar'?'active':''}" data-tab="calendar"><svg class="nav-icon" data-nav-icon="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18m-13 4h2m4 0h2m-8 3h2"/></svg><span>Kalendarz</span></button><button class="btn ${tab==='settings'?'active':''}" data-tab="settings"><svg class="nav-icon" data-nav-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 4 18 4 18 0V5M3 12c0 4 18 4 18 0"/></svg><span>Dane</span></button></div></nav>`;paintPwa();paintFullAudit();paintDrive();document.querySelectorAll('[data-adaptive-result]').forEach(el=>resultWidthObserver.observe(el))}
+function render(){if(canonicalLocked)return;if(canonicalLocalBlocked()){canonicalLocked=true;canonicalGate.showCanonicalPending();return;}resultWidthObserver.disconnect();let app=$('#app');const drawer=app.querySelector('[data-backup-advanced]');if(drawer)backupAdvancedOpen=drawer.open;const technical=app.querySelector('[data-technical]');if(technical)technicalOpen=technical.open;if(recoveryError){app.innerHTML=recovery();paintPwa();return}app.innerHTML=`<main class="app">${tab==='training'?main():tab==='calendar'?(historicalId?historical():calendar()):settings()}</main><p class="hint" role="status" data-drive-detail>${esc(driveStatusText())}</p><nav class="bottom"><div class="inner"><button class="btn ${tab==='training'?'active':''}" data-tab="training"><svg class="nav-icon" data-nav-icon="training" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M3 8l5-5m8 18 5-5M1 6l5-5m12 22 5-5M4 11l7-7m2 16 7-7"/></svg><span>Trening</span></button><button class="btn ${tab==='calendar'?'active':''}" data-tab="calendar"><svg class="nav-icon" data-nav-icon="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18m-13 4h2m4 0h2m-8 3h2"/></svg><span>Kalendarz</span></button><button class="btn ${tab==='settings'?'active':''}" data-tab="settings"><svg class="nav-icon" data-nav-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 4 18 4 18 0V5M3 12c0 4 18 4 18 0"/></svg><span>Dane</span></button></div></nav>`;paintPwa();paintFullAudit();paintDrive();document.querySelectorAll('[data-adaptive-result]').forEach(el=>resultWidthObserver.observe(el))}
 let finishing=null;
 const finishRecords=sid=>savedDrafts.records.filter(r=>r.sessionId===sid);
 const finishTokens=rows=>JSON.stringify(rows.map(r=>[r.id,r.token,r.sequence]).sort((a,b)=>String(a[0]).localeCompare(String(b[0]))));
@@ -609,7 +610,7 @@ function finishPlan(){
  const order=sessionExercises(session()).map(ex=>ex.id),records=finishRecords(session().id).sort((a,b)=>order.indexOf(a.exerciseId)-order.indexOf(b.exerciseId)),seen=new Set();
  return records.map(r=>{try{if(seen.has(r.exerciseId))throw Error('Kilka wersji szkicu — uzgodnij je ręcznie.');seen.add(r.exerciseId);return draftEntry(r);}catch(e){const error=Error((sessionExercises(session()).find(ex=>ex.id===r.exerciseId)?.name||r.exerciseId||'Szkic')+': '+e.message);error.exerciseId=r.exerciseId;throw error;}});
 }
-async function completeSession(){const s=session();performance.mark('pushpull-finish-session-start');if(database.finishSession){await database.finishSession({id:s.id});data=database.value;}else{s.status='done';data.activeId=null;journal.advance(data,s);await persist();}performance.mark('pushpull-finish-session-durable');chosenType=null;panel=null;finishing=null;render();performance.mark('pushpull-finish-ui-ready');toast('Trening zakończony');}
+async function completeSession(){const s=session();performance.mark('pushpull-finish-session-start');if(database.finishSession){await database.finishSession({id:s.id});data=database.value;}else{s.status='done';data.activeId=null;journal.advance(data,s);await persist();}performance.mark('pushpull-finish-session-durable');chosenType=null;panel=null;finishing=null;render();performance.mark('pushpull-finish-ui-ready');toast('Trening zakończony');if(drive)void drive.queueCanonical().catch(error=>drive.report(error));}
 async function finish(){
  const s=session();if(!s)return;performance.mark('pushpull-finish-start');
  performance.mark('pushpull-finish-drafts-start');await savedDrafts.flush();await savedDrafts.reload();performance.mark('pushpull-finish-drafts-ready');
@@ -733,7 +734,7 @@ on('click',async e=>{
   if(p.canonical){
    if(!confirm('Przywrócić wszystkie dane PPC1 do czystej instalacji? Przerwana operacja zablokuje profil do wyjaśnienia.'))return;
    const {restoreCanonicalFile}=await import('./model/canonical-restore.mjs');
-   const result=await restoreCanonicalFile(p.raw,{data:fresh(),catalog:PushPullDB.catalogFor(fresh(),null,true)});
+   const result=await restoreCanonicalFile(p.raw,{data:fresh(),catalog:PushPullDB.catalogFor(fresh(),null,true),allowDriveConnection:!!p.fromDrive});
    try{sessionStorage.setItem('pushpull-canonical-restored',JSON.stringify(result))}catch{}location.reload();return;
   }
   await savedDrafts.flush();await savedDrafts.reload();
@@ -776,7 +777,7 @@ on('click',e=>{const button=e.target.closest('[data-drive-action]');if(!button||
   })();return;
  }
  void (async()=>{
-  if(action==='connect')await drive.connect();
+  if(action==='connect'){await drive.connect();void drive.retryCanonical();}
   if(action==='disconnect'){await drive.disconnect();driveChoices=[];}
   if(action==='upload'){backupSaveStatus='';await drive.upload();driveChoices=[];}
   if(tab==='settings')render();else paintDrive();
@@ -828,7 +829,7 @@ function draftStatus(){
  });
 }
 savedDrafts.onchange=draftStatus;
-if(drive)drive.onchange=paintDrive;
+if(drive){drive.onchange=paintDrive;addEventListener('online',()=>void drive.retryCanonical());void drive.retryCanonical();}
 // Run synchronously after each editor input, before yielding back to the browser.
 function captureDraft(event){
  const form=event.target.closest('.performanceForm,.seriesResultForm');if(!form)return;
@@ -865,4 +866,15 @@ on('click',e=>{if(e.target.closest('[data-pwa-check]')){pwaStatus.error='';paint
 database.onchange=error=>{recoveryError=error;if(error&&restoreBusy&&!restoreCommitting){cancelRestore();restoreError=error.message;}render()};
 window.addEventListener('pagehide',()=>{draftCollectController?.abort();draftObserver?.close();drive?.close();database.close()});
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+
+on('change',e=>{if(e.target.matches('[data-auto-ppc1]')&&drive)void drive.setAutomatic(e.target.checked).catch(error=>drive.report(error));});
+on('click',e=>{
+ if(!drive)return;
+ if(e.target.closest('[data-ppc1-send]'))void drive.queueCanonical({manual:true}).catch(error=>drive.report(error));
+ if(e.target.closest('[data-ppc1-list]'))void drive.canonicalPoints().then(rows=>{const host=document.querySelector('[data-ppc1-points]');if(host)host.innerHTML=rows.map(r=>`<button class="btn" data-ppc1-point="${esc(r.id)}">${esc(r.createdTime||'Kopia PPC1')}</button>`).join('');}).catch(error=>drive.report(error));
+ const chosen=e.target.closest('[data-ppc1-point]');if(!chosen)return;
+ const op=beginRestore();render();focusRestore();
+ void drive.canonicalPoint(chosen.dataset.ppc1Point,{signal:op.signal}).then(async result=>{await prepareRestore(result.file,op.revision,op.sequence,null,op.signal);if(op.sequence===restoreSequence&&restoreCandidate)restoreCandidate.fromDrive=true;}).catch(error=>{if(op.sequence===restoreSequence){restoreBusy=false;restoreError=error.message;render();}});
+});
+
 })().catch(error=>{document.getElementById('app').textContent='Nie udało się otworzyć bazy. Nie wyczyszczono historii. '+error.message});
