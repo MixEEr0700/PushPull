@@ -54,7 +54,7 @@ class UserNotes(BrowserHarness):
         expect(card.locator('.exercise-notes [data-instructions]')).to_have_count(0)
         expect(card.locator('[data-personal-note] summary')).to_contain_text(text+' offline')
         self.page.reload();self.ready();self.page.locator('[data-expand="TEST-1"]').click()
-        expect(card.locator('.exercise-notes')).not_to_be_visible();open_notes(card)
+        expect(card.locator('.exercise-notes')).to_be_visible()
         expect(card.locator('[data-personal-note] summary')).to_contain_text(text+' offline')
         final=self.state();self.assertEqual(final['trainingJournal']['model']['userNotes'][0]['revision'],2)
         self.assertEqual(final['entries'],before['entries'])
