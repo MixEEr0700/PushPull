@@ -168,6 +168,7 @@ export async function openIndexedWriter(db,{token,guard=()=>{},signal,completeSo
     for(const {store,row} of changed){if(row.version===1)tx.objectStore(store).add(row);else tx.objectStore(store).put(row);}tx.objectStore('journalState').put(next);
     await Promise.all([['journalObjects',objects],['journalIndex',nodes]].map(([store,rows])=>checkRows(tx,store,[...rows.values()],'delta readback')));
     await Promise.all(changed.map(({store,row})=>checkRows(tx,store,[row],'delta readback')));
+    if(result.finishedSessionId){const meta=tx.objectStore('meta'),drive=await request(meta.get('drive-sync-v1'));if(drive?.autoPPC1===true){const queued={...drive,ppc1Queue:next.epoch+':'+next.revision,token:crypto.randomUUID()};meta.put(queued);check(same(await request(meta.get('drive-sync-v1')),queued),'backup intent readback');}}
     check(same(await request(tx.objectStore('journalState').get('active')),next),'root readback');check(same(await request(tx.objectStore('meta').get(MARKER)),marker(next)),'marker readback');guard();
    },{signal});
    // Publish only after the native strict transaction's complete event.
@@ -229,7 +230,7 @@ export async function openIndexedWriter(db,{token,guard=()=>{},signal,completeSo
    const nextAges=new Map(ages);
    for(const id of exerciseIds){const history=await r.runtime('history',id);check(history,'runtime history');const next=history.map(ds=>ds.session.id===s.id?{...ds,session:sessionHeader(s)}:ds),summary=contextSummary(next);await index(['history',id],next);await index(['context',id],summary);for(const [k,v] of summary.ages)nextAges.set(k,v)}
    const nextInfo={...info,lastDone:info.lastDone&&d.sessions.find(v=>v.id===info.lastDone)?.seq>s.seq?info.lastDone:s.id};await index(['info'],nextInfo);
-   return {source:freeze({...source,data:d}),info:nextInfo,ages:nextAges,ack:{session:s}};
+   return {source:freeze({...source,data:d}),info:nextInfo,ages:nextAges,finishedSessionId:s.id,ack:{session:s}};
   },options);
  }
  async function saveUserNote(command,options={}){

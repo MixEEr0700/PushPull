@@ -55,7 +55,7 @@ class ManualDriveFlow(BrowserHarness):
     fill_rows=training.V2Training.fill_rows
     save_form=training.V2Training.save_form
 
-    def configure(self):
+    def configure(self,automatic=False):
         self.page.locator('[data-tab=settings]').click()
         self.advanced_data()
         self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
@@ -64,6 +64,9 @@ class ManualDriveFlow(BrowserHarness):
         self.backup_flow('save')
         self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
+        # These legacy scenarios explicitly exercise manual JSON, not #109.
+        self.page.locator('[data-auto-ppc1]').set_checked(automatic)
+        self.page.wait_for_function("""async expected=>{const h=await PushPullDB.open(()=>{});try{return (await h.readDriveState()).autoPPC1===expected}finally{h.close()}}""",arg=automatic)
 
     def upload(self):
         # Full source-backed validation + verified readback can exceed the UI
