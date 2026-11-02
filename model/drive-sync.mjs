@@ -142,6 +142,7 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
    if(isCurrent())notice=forRestore?'Kopia zweryfikowana. Sprawdź podgląd przed zastąpieniem lokalnej bazy.':'Kopia sprawdzona. Pobieramy JSON na telefon; baza lokalna pozostaje bez zmian.';
    return {backup:chosen.node.backup,date:chosen.date};
   },isCurrent);},
+  pauseForRestore(){clearTimeout(retryTimer);transport.clear();connectedAccount=null;connectedClient=null;},
   report(error){notice='Błąd: '+error.message;busy=false;emit();},
   close(){closed=true;clearTimeout(retryTimer);transport.clear();},
   // Passive compatibility for older cached shells used during PWA upgrades.

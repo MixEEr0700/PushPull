@@ -43,3 +43,7 @@ function intern(root){
  }
  return visit(root).value;
 }
+
+/** Production restore must be able to write the exact draft record to meta.
+ * Codec compatibility stays unchanged; no mutation or invented missing keys. */
+export function assertCanonicalRestoreKeys(value){for(const d of value.drafts)if(d.value.key!==d.key)throw Error('PPC1: klucz szkicu nie odpowiada rekordowi IndexedDB.');return value;}

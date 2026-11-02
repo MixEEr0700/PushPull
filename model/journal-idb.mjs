@@ -236,7 +236,8 @@ export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled
   }
   await readback(tx,'journalObjects',bundle.records.journalObjects);await readback(tx,'journalIndex',bundle.records.journalIndex);
   tx.objectStore('journalState').put(bundle.state);await readback(tx,'journalState',[bundle.state]);
-  const marker={key:MARKER,protocol:2,status:'active',epoch:bundle.state.epoch};tx.objectStore('meta').put(marker);check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'bulk marker readback');guard();
+  const marker={key:MARKER,protocol:2,status:'active',epoch:bundle.state.epoch};tx.objectStore('meta').put(marker);check(same(await request(tx.objectStore('meta').get(MARKER)),marker),'bulk marker readback');
+  if(restoreId){const meta=tx.objectStore('meta'),pending=await request(meta.get('canonical-restore-pending'));const nextPending={...pending,state:bundle.state};meta.put(nextPending);check(same(await request(meta.get(nextPending.key)),nextPending),'restore ownership readback');}guard();
  },{signal,restoreId});
  try{
   const stored=await readRecords(db,{signal});check(same(stored.state,bundle.state),'bulk restart revision');

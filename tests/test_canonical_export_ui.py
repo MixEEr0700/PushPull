@@ -29,7 +29,7 @@ class CanonicalExportUI(BrowserHarness):
         decoded=self.decode(raw);self.assertEqual(decoded['source']['data'],expected)
         self.assertEqual(decoded['drive']['clientId'],'synthetic-client.apps.googleusercontent.com');self.assertEqual(decoded['preferences'],{'units':'kg','unicode':'Ł😀'});self.assertEqual(len(decoded['drafts']),1);self.assertEqual(decoded['buffers'],[{'key':'pushpull-note-ui-v1:unfinished','raw':'{raw unfinished'}]);self.assertNotIn('archives',decoded['source'])
         self.assertEqual(legacy.IndexedDBMigration.records(self),before);self.assertEqual(self.page.evaluate('({...localStorage})'),local)
-        expect(self.page.locator('[data-backup-save-status]')).to_contain_text('Przywracanie wymaga czystej instalacji')
+        expect(self.page.locator('[data-backup-save-status]')).to_contain_text('Dostępne przywracanie z punktem cofnięcia')
 
     def test_cancel_navigation_and_double_click_do_not_queue_or_download_late(self):
         self.page.wait_for_selector('[data-act=start]');self.open_export()

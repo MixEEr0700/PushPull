@@ -382,7 +382,7 @@ const PushPullDB = (() => {
         if(!db)throw Error('IndexedDB niedostępne.');
         const next={...clone(value),key:'drive-sync-v1',token:crypto.randomUUID()};
         return transaction(db,'readwrite',async tx=>{
-          const store=tx.objectStore('meta'),old=await request(store.get(next.key));
+          const store=tx.objectStore('meta');if(await request(store.get('canonical-restore-pending')))throw Error('Przywracanie pending: Drive zablokowany.');const old=await request(store.get(next.key));
           if((old?.token??null)!==expectedToken)throw Error('Ustawienia Google zmieniły się w innej karcie. Odśwież aplikację.');
           // Once manual mode is chosen, stale callers must not re-enable timers.
           if(old?.mode==='manual'){next.mode='manual';next.enabled=false;}
