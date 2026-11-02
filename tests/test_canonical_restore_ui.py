@@ -28,7 +28,7 @@ class CanonicalRestoreUI(BrowserHarness):
         return Path(dl.value.path()).read_bytes()
     def target(self,raw):
         ctx=self.new_context(service_workers='allow');p=ctx.new_page();p.on('dialog',self.dialog);p.goto(self.url);p.wait_for_selector('[data-act=start]');wait_for_service_worker_controller(p)
-        p.locator('[data-tab=settings]').click();p.locator('[data-backup-flow=restore]').click();p.locator('#importFile').set_input_files({'name':'new.ppc1','mimeType':'application/octet-stream','buffer':raw});expect(p.locator('[data-canonical-preview]')).to_be_visible(timeout=60000)
+        p.locator('[data-tab=settings]').click();p.locator('[data-backup-flow=restore]').click();self.assertIn('.ppc1.txt',p.locator('#importFile').get_attribute('accept'));p.locator('#importFile').set_input_files({'name':'new.ppc1.txt','mimeType':'text/plain','buffer':raw});expect(p.locator('[data-canonical-preview]')).to_be_visible(timeout=60000)
         return ctx,p
     def test_real_export_import_restart_and_all_canonical_values(self):
         raw=self.produce();expected=self.decode(self.page,raw);sourceRecords=legacy.IndexedDBMigration.records(self);ctx,p=self.target(raw)

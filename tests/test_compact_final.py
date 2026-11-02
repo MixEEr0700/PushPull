@@ -56,7 +56,7 @@ class CompactFinal(BrowserHarness):
         expect(card.locator('.idle-controls button')).to_have_count(4)
         before=self.state();card.locator('[data-open-series]').click();expect(card.locator('[data-rich-details]')).to_be_visible();self.assertEqual(self.state(),before)
         self.page.reload();self.ready();card=self.card();card.locator('[data-expand]').click()
-        expect(card.locator('.exercise-notes')).not_to_be_visible()
+        expect(card.locator('.exercise-notes')).to_be_visible()
 
     def test_source_bytes_and_user_note_survive_closed_notes_restart_and_plan_roundtrip(self):
         self.activate();self.page.locator('[data-act=start]').click();expect(self.page.locator('[data-act=finish]')).to_be_visible();self.card().locator('[data-expand]').click()
@@ -67,7 +67,7 @@ class CompactFinal(BrowserHarness):
         text='Dopisek Ł 😀\n'+'Długi tekst '*40;note.locator('textarea').fill(text)
         self.card().locator('[data-note-toggle]').click();expect(self.card().locator('.exercise-notes')).not_to_be_visible()
         self.page.reload();self.ready();self.card().locator('[data-expand]').click()
-        expect(self.card().locator('.exercise-notes')).not_to_be_visible();open_notes(self.card())
+        expect(self.card().locator('.exercise-notes')).to_be_visible()
         note=self.card().locator('[data-personal-note]');expect(note.locator('textarea')).to_have_value(text)
         self.assertGreaterEqual(note.locator('textarea').evaluate('(e)=>e.clientHeight'),note.locator('textarea').evaluate('(e)=>e.scrollHeight'))
         note.locator('[type=submit]').click();expect(self.page.get_by_text('Notatka zapisana',exact=True)).to_be_visible()

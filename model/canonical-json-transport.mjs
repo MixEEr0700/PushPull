@@ -20,7 +20,7 @@ export async function writeCanonicalJSON(input,{signal,limits:overrides={}}={}){
  }
  const manifest=new TextEncoder().encode(JSON.stringify({format:'pushpull-compact',version:1,chunks,objects:[{id:JSON_OBJECT,parts,bytes:bytes.length}]}));
  check(manifest.length<=limits.manifestBytes,'manifest limit');const head=new Uint8Array(40);head.set([80,80,67,49]);new DataView(head.buffer).setUint32(4,manifest.length);head.set(await hash(manifest),8);
- const file=new Blob([head,manifest,...payload]);check(file.size<=limits.fileBytes,'file limit');guard();
+ const file=new Blob([head,manifest,...payload],{type:'application/octet-stream'});check(file.size<=limits.fileBytes,'file limit');guard();
  // Validate the new representation before publishing any file.
  await readCanonicalJSON(await openCompactBackup(file,{signal,limits}),{signal,limits});guard();return file;
 }
