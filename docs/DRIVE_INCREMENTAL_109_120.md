@@ -26,7 +26,7 @@ Targeted Node: 17 PASS (4 incremental protocol/queue cases and 13 inherited manu
 
 Chromium production HTTP/store/UI with simulated Google OAuth/API: 3 PASS in 11.796 s. Two actual local finishes -> full base + delta -> selected cloud point -> preview/confirm -> clean connected profile -> restore -> restart -> production re-export exactly equals original canonical model. Includes two sessions and one result record with series; widths 360/390/412 without overflow. Synthetic wire JSON sizes: 25,344 B base and 2,086 B delta (sample, not a benchmark). Auth 401 preserves local finished session/intent and reconnect completes once. Offline finish + offline SW restart + online login completes once. Existing local canonical cancel/corrupt/nonempty-target test PASS; existing manual JSON Drive/drafts/offline/restart/full-download regression PASS. Legacy manual scenarios explicitly opt out of new automation; integrity assertions remain.
 
-Build/SW hashes and diff checks PASS. Final full CI result is recorded in PR. No full local suite duplicated.
+Build/SW hashes and diff checks PASS. Initial full CI found six selector failures from a duplicated global status marker. The global status now has its own marker; five affected cases passed immediately. The sixth exposed a fixture race: disabling automation had to be durably read back before taking the no-mutation baseline. That targeted case also passed with its exact storage assertion retained. Final full CI result is recorded in PR. No full local suite duplicated.
 
 ## Limits
 

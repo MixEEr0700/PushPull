@@ -66,6 +66,7 @@ class ManualDriveFlow(BrowserHarness):
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
         # These legacy scenarios explicitly exercise manual JSON, not #109.
         self.page.locator('[data-auto-ppc1]').set_checked(automatic)
+        self.page.wait_for_function("""async expected=>{const h=await PushPullDB.open(()=>{});try{return (await h.readDriveState()).autoPPC1===expected}finally{h.close()}}""",arg=automatic)
 
     def upload(self):
         # Full source-backed validation + verified readback can exceed the UI
