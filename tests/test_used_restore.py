@@ -90,3 +90,19 @@ class UsedRestore(BrowserHarness):
         raw,ctx,p,before=self.used();self.choose(p,raw);held=self.gate_worker(p,ctx);p.locator('[data-restore-confirm]').click();self.wait_gate(p,held);p.reload();held[0].abort()
         p.evaluate("""async()=>{const db=await new Promise(r=>{const q=indexedDB.open('pushpull');q.onsuccess=()=>r(q.result)});await new Promise((r,j)=>{const tx=db.transaction('journalState','readwrite'),s=tx.objectStore('journalState'),q=s.get('active');q.onsuccess=()=>s.put({...q.result,revision:q.result.revision+1});tx.oncomplete=r;tx.onabort=()=>j(tx.error)});db.close()}""")
         changed=native.IndexedDBMigration.records(self,p);p.locator('[data-rollback-pending]').click();expect(p.locator('[data-pending-detail]')).to_contain_text('Zmieniono root',timeout=60000);self.assertEqual(native.IndexedDBMigration.records(self,p),changed)
+    def volatile_note(self,p):
+        from test_browser import open_notes
+        p.locator('[data-tab=training]').click();button=p.locator('[data-expand]').first
+        if button.get_attribute('aria-expanded')=='false':button.click()
+        open_notes(p);note=p.locator('[data-personal-note]').first
+        if not note.evaluate('(e)=>e.open'):note.locator('summary').click()
+        p.evaluate("""()=>{const put=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.startsWith('pushpull-note-ui-v1:'))throw new DOMException('note quota','QuotaExceededError');return put.call(this,k,v)}}""")
+        note.locator('textarea').fill('ONLY MEMORY — must survive refused replacement');return note
+    def test_volatile_note_without_receipt_refuses_preview_and_keeps_editor_memory(self):
+        raw=self.produce();p=self.page;note=self.volatile_note(p);before=native.IndexedDBMigration.records(self);local=p.evaluate('({...localStorage})');p.locator('[data-tab=settings]').click();self.backup_flow('restore');p.locator('#importFile').set_input_files({'name':'earlier.ppc1','mimeType':'application/octet-stream','buffer':raw});expect(p.locator('[data-restore-error]')).to_contain_text('bufora lokalnego',timeout=60000);self.assertEqual(native.IndexedDBMigration.records(self),before);self.assertEqual(p.evaluate('({...localStorage})'),local)
+        from test_browser import open_notes
+        p.locator('[data-tab=training]').click();button=p.locator('[data-expand]').first
+        if button.get_attribute('aria-expanded')=='false':button.click()
+        open_notes(p);expect(p.locator('[data-personal-note] textarea').first).to_have_value('ONLY MEMORY — must survive refused replacement')
+    def test_responding_card_with_volatile_note_blocks_confirm_without_hiding_its_editor(self):
+        raw=self.produce();p=self.page;other=self.context.new_page();other.on('dialog',self.dialog);other.goto(self.url);other.wait_for_selector('[data-act=finish]');note=self.volatile_note(other);self.export(p);self.choose(p,raw);before=native.IndexedDBMigration.records(self);p.locator('[data-restore-confirm]').click();expect(p.locator('[data-restore-error]')).to_contain_text('innej karcie',timeout=60000);self.assertEqual(native.IndexedDBMigration.records(self),before);self.assertIsNone(p.evaluate('localStorage.getItem("pushpull_canonical_restore_pending")'));expect(note.locator('textarea')).to_have_value('ONLY MEMORY — must survive refused replacement')
