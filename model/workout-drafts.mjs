@@ -35,8 +35,9 @@ export async function openDrafts(database){
   records=[...merged.values()];changed();return records;
  }
  function replace(record){records=records.filter(r=>r.id!==record.id);records.push(record);}
- function buffer(record){try{localStorage.setItem(PREFIX+record.id+':'+record.token,JSON.stringify(record));return true;}catch(e){storageError=e;return false;}}
+ function buffer(record){try{if(localStorage.getItem('pushpull_canonical_restore_pending'))throw Error('Przywracanie pending');localStorage.setItem(PREFIX+record.id+':'+record.token,JSON.stringify(record));return true;}catch(e){storageError=e;return false;}}
  function clearBuffer(record){
+  if(localStorage.getItem('pushpull_canonical_restore_pending'))return;
   // Each token has its own immutable key: read/remove cannot erase a later edit
   // written by an older still-open tab between those two storage operations.
   try{const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k?.startsWith(PREFIX+record.id+':'))keys.push(k);}

@@ -1,10 +1,15 @@
 /** Local PPC1 adaptation only. Commits remain in the established importer. */
+import {openCompactBackup} from './compact-backup-reader.mjs';
+import {JSON_OBJECT} from './canonical-json-transport.mjs';
+import {readCanonicalBackup,validateCanonicalBackup} from './canonical-backup.mjs';
 import {readCompactModel} from './compact-backup-writer.mjs';
 import {validateCompactSource} from './compact-backup-preview.mjs';
 import {compareBackupData} from './legacy-model.mjs';
 export async function inspectCompactRestore(file,current=null,{signal,limits}={}){
  try{
-  const source=await readCompactModel(file,{signal,limits});signal?.throwIfAborted();
+  const container=await openCompactBackup(file,{signal,limits});
+  const source=container.manifest.objects.some(o=>o.id===JSON_OBJECT)?await readCanonicalBackup(file,{signal,limits}):await readCompactModel(file,{signal,limits});
+  if(source.format==='pushpull-canonical'){validateCanonicalBackup(source,{signal});return {format:'PPC1',canonical:true,canonicalCounts:{drafts:source.drafts.length,buffers:source.buffers.length,preferences:Object.keys(source.preferences).length},summary:validateCompactSource({...source.source,archives:[]},()=>signal?.throwIfAborted()),comparison:null};}signal?.throwIfAborted();
   const summary=validateCompactSource(source,()=>signal?.throwIfAborted());
   // Existing atomic importer preserves exactly these sections. No silent drop.
   if(Object.keys(source).some(k=>!['format','version','data','catalog','archives'].includes(k)))throw Error('unsupported-sections');
