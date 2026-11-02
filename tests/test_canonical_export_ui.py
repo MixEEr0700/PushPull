@@ -92,3 +92,10 @@ class CanonicalExportUI(BrowserHarness):
             self.page.locator('[data-canonical-export]').click();expect(self.page.locator('[data-backup-save-status]')).to_contain_text('Nie zlecono',timeout=60000)
             expect(self.page.locator('[data-canonical-export]')).to_be_enabled();self.assertEqual(legacy.IndexedDBMigration.records(self),before)
         self.assertFalse(downloads)
+
+    def test_invalid_existing_preferences_are_not_silently_defaulted(self):
+        self.page.wait_for_selector('[data-act=start]');self.open_export()
+        self.page.evaluate("""async()=>{const db=await new Promise(r=>{const q=indexedDB.open('pushpull');q.onsuccess=()=>r(q.result)});await new Promise(r=>{const tx=db.transaction('meta','readwrite');tx.objectStore('meta').put({key:'canonical-preferences-v1',value:null});tx.oncomplete=r});db.close()}""")
+        before=legacy.IndexedDBMigration.records(self);downloads=[];self.page.on('download',lambda d:downloads.append(d));self.page.locator('[data-canonical-export]').click()
+        expect(self.page.locator('[data-backup-save-status]')).to_contain_text('Nieprawidłowe preferencje',timeout=60000)
+        self.assertFalse(downloads);self.assertEqual(legacy.IndexedDBMigration.records(self),before)

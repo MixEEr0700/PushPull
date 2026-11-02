@@ -32,7 +32,7 @@ All current source.data fields are retained. New unknown durable store/meta/loca
 
 Targeted Node: **1 orchestration case PASS**, covering sorted read-only buffer enumeration, unrelated-key exclusion, cancellation/termination, late result, revision/buffer changes, unknown data and worker errors. Inherited codec/domain/security Node tests are unchanged and included in final CI.
 
-Targeted Chromium: **6 cases PASS across focused runs**:
+Targeted Chromium: **7 cases PASS across focused runs**:
 
 1. Fresh UI starts a training session, saves a result; real existing Google configuration form saves synthetic client ID. Synthetic auxiliary draft/conflict/preferences/raw note values are stored in actual browser stores. Actual PPC1 button downloads a file; decoded source and auxiliary fields match exactly; all source IDB/localStorage unchanged; widths 360/390/412 have no horizontal overflow.
 2. Immediate double click sends one worker request. Held worker work does not block navigation (<1500 ms test threshold); cancellation produces no late download.
@@ -40,6 +40,8 @@ Targeted Chromium: **6 cases PASS across focused runs**:
 4. A gated SHA in the real worker allows changing auxiliary preferences during capture; worker refuses, no file and no extra source mutations. The test gate queues bootstrap messages explicitly; no production hook was added.
 5. Separate synthetic real-store source setup at 400/4000 sessions/results with unique snapshot-like preferences; actual app reload and production export button; entire data/catalog/preferences compared, not just counts. This setup is isolated test data creation, not a migration of user state.
 6. Worker-side synthetic read quota/abort failures refuse with no file/mutation. These are read fault injections; no actual disk quota exhaustion or restore-write failure is claimed.
+
+7. Existing malformed preferences (`value:null`) refuse rather than defaulting to empty settings; no download/source mutation. Client config types are checked as well.
 
 Local worker measurements (single cold samples, synthetic; not Pixel, median/p95, peak memory or click-to-download timings):
 
@@ -58,3 +60,5 @@ Build allowlist includes five new runtime modules and SW was hash-refreshed, no 
 Current `journal-database.commit` / `journal-idb.replaceSource` commits the journal plus protocol marker, but does not apply incoming draft/preference records and localStorage. `app.js` immediately opens the database, drafts and Drive; that startup has no durable pending-restore gate. A naive sequence `commit(source); put drafts; setItem buffers` could crash after strict journal complete and then start a partially restored app. Fresh profiles also initialize app state before a file is chosen, so emptiness requires an explicit logical-empty CAS policy rather than assuming the database is absent.
 
 The necessary follow-up is a small fail-closed pending-operation record checked **before startup writers**, with checks for already-open writer tabs, a guarded empty-target executor reusing strict CAS/readback, and activation only after journal + auxiliary + local verification. Interrupted new restore must remain inactive and require a deliberate retry into a clean target; old preimage recovery is not required. This needs actual fault-injected restart tests and destination identity/draft-token rebinding, not a fabricated success flag. No such executor/gate is smuggled into this export PR. There is no new restore preview/confirmation path, no clean-profile restore roundtrip and no claim that all requested #137 acceptance criteria are complete.
+
+Final correctness fix: preference/client type validation prevents silent normalization of existing malformed auxiliary records. Only the new counterexample was rerun locally; the fixed final SHA supersedes the initial CI, with final outcome recorded in PR.

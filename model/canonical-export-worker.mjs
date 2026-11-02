@@ -11,7 +11,8 @@ async function auxiliary(db){return transact(db,['meta'],'readonly',async tx=>{
  check(keys.every(k=>typeof k==='string'&&(allowed.includes(k)||k.startsWith('workout-draft:'))),'Nieznane trwałe ustawienia — nie utworzono niepełnej kopii.');
  const drafts=await Promise.all(keys.filter(k=>k.startsWith('workout-draft:')).map(async key=>({key,value:await request(store.get(key))})));
  const drive=await request(store.get('drive-sync-v1')),preferences=await request(store.get('canonical-preferences-v1'));
- return {drafts,preferences:preferences?.value??{},drive:{clientId:drive?.clientId??''}};
+ check(!preferences||(preferences.value&&typeof preferences.value==='object'&&!Array.isArray(preferences.value)),'Nieprawidłowe preferencje — nie pominięto rekordu.');check(!drive||typeof drive.clientId==='string','Nieprawidłowa konfiguracja klienta.');
+ return {drafts,preferences:preferences?preferences.value:{},drive:{clientId:drive?drive.clientId:''}};
 });}
 export async function exportCanonicalLive(buffers,expectedRevision){
  const start=performance.now(),db=await connect();let changed=false;db.onversionchange=()=>{changed=true;db.close();};
