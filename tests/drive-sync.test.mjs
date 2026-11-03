@@ -170,7 +170,7 @@ test('obsolete download never publishes late success or a late list choice',asyn
   transport.read=async id=>{entered();await gate;return read(id)};
   const pending=sync.download(undefined,{choose,isCurrent:()=>current});
   await started;current=false;const cancelledNotice=sync.status.detail;release();await pending;
-  assert.equal(sync.status.detail,cancelledNotice);
+  assert.equal(cancelledNotice,'Trwa operacja Google Drive…');assert.equal(sync.status.detail,'Brak aktywnej operacji Google Drive.');
   assert.equal(sync.status.busy,false);
   transport.read=read;
   assert.ok((await sync.download()).backup,'a new deliberate download is allowed');

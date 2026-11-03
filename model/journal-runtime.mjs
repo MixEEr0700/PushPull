@@ -25,17 +25,19 @@ async function addRows(tx,store,rows){
 }
 const marker=state=>({key:MARKER,protocol:2,status:'active',epoch:state.epoch});
 /** Capture per-key reads with a root CAS on completion. Hashing never holds a tx. */
-export async function reader(db,state,{signal,cache=null}={}){
+export async function reader(db,state,{signal,cache=null,batch=false}={}){
  validateState(state);validateAllocation(state.allocation);check(state.runtime?.version===1,'runtime index required');
  const {root,...body}=state;check(root===await hashJSON(body),'state SHA-256');
  const maps=Object.fromEntries(STORES.map(s=>[s,new Map()])),values=new Map(),pending=new Map();
+ const batches=new Map();
+ function batchedGet(store,id){return new Promise((resolve,reject)=>{if(!batches.has(store)){batches.set(store,[]);queueMicrotask(()=>{const jobs=batches.get(store);batches.delete(store);Promise.resolve().then(()=>transact(db,[store],'readonly',tx=>Promise.all(jobs.map(j=>request(tx.objectStore(store).get(j.id)))),{signal})).then(rows=>jobs.forEach((j,i)=>j.resolve(rows[i])),e=>jobs.forEach(j=>j.reject(e)));});}batches.get(store).push({id,resolve,reject});});}
  async function get(store,id){
   checkAbort(signal);if(maps[store].has(id))return maps[store].get(id);
   if(cache?.[store]?.has(id)){const row=cache[store].get(id);maps[store].set(id,row);return row;}
   const key=indexKey(store,id);
   // Concurrent paths often share the same node/model. One owned native read,
   // one immutable proof; every use still participates in the strict tx CAS.
-  if(!pending.has(key))pending.set(key,transact(db,[store],'readonly',tx=>request(tx.objectStore(store).get(id)),{signal}).then(value=>{const row=value?freeze(value):null;maps[store].set(id,row);return row}));
+  if(!pending.has(key))pending.set(key,(batch?batchedGet(store,id):transact(db,[store],'readonly',tx=>request(tx.objectStore(store).get(id)),{signal})).then(value=>{const row=value?freeze(value):null;maps[store].set(id,row);return row}));
   return pending.get(key);
  }
  const node=id=>get('journalIndex',id);

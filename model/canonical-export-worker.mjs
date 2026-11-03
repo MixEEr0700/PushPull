@@ -1,4 +1,5 @@
 /** Live canonical export: read-only selective journal capture, no rescue reads. */
+import {freeze} from './backup-json.mjs';
 import {reader} from './journal-runtime.mjs';
 import {transact,request,same,LEGACY_STORES} from './journal-idb.mjs';
 import {STORES} from './journal-protocol.mjs';
@@ -15,18 +16,19 @@ async function auxiliary(db,restoreId){return transact(db,['meta'],'readonly',as
  check(!preferences||(preferences.value&&typeof preferences.value==='object'&&!Array.isArray(preferences.value)),'Nieprawidłowe preferencje — nie pominięto rekordu.');check(!drive||typeof drive.clientId==='string','Nieprawidłowa konfiguracja klienta.');
  return {drafts,preferences:preferences?preferences.value:{},drive:{clientId:drive?drive.clientId:''}};
 });}
-export async function exportCanonicalLive(buffers,expectedRevision,restoreId){
- const start=performance.now(),db=await connect();let changed=false;db.onversionchange=()=>{changed=true;db.close();};
+export async function exportCanonicalLive(buffers,expectedRevision,restoreId,{onPhase=()=>{}}={}){
+ const start=performance.now();onPhase('read');const db=await connect();let changed=false;db.onversionchange=()=>{changed=true;db.close();};
  try{
   check(db.version===2,'Wymagana aktywna baza v2.');check(same([...db.objectStoreNames].sort(),[...LEGACY_STORES,...STORES].sort()),'Nieznane magazyny danych — przerwano eksport.');
   const state=await transact(db,['journalState'],'readonly',tx=>request(tx.objectStore('journalState').get('active')));
   check(state&&state.revision===expectedRevision,'Rewizja zmieniła się. Ponów eksport.');
-  const aux=await auxiliary(db,restoreId),r=await reader(db,state),base=await r.metadata('source');
+  const cache={},aux=await auxiliary(db,restoreId),r=await reader(db,state,{cache,batch:true}),base=await r.metadata('source');
   check(r.maps.journalMetadata.size===state.counts.journalMetadata,'Nieprzypisane metadane.');for(const row of r.maps.journalMetadata.values())check(new Set(row.fields.map(pair=>pair[0])).size===row.fields.length,'Powtórzone pola metadanych.');
   check(Object.keys(base).every(k=>['format','version','data','catalog','archives'].includes(k)),'Nieznane źródła danych.');
   const collections={};
   for(const store of ['journalSessions','journalResults','journalSnapshots']){
    const rows=await transact(db,[store],'readonly',tx=>request(tx.objectStore(store).getAll()));
+   cache[store]=new Map(rows.map(row=>[row.id,freeze(row)]));
    for(const row of rows){check(Number.isSafeInteger(row.version)&&row.version>0,'Wersja rekordu.');if(store==='journalSnapshots')check(new Set(row.fields.map(pair=>pair[0])).size===row.fields.length,'Powtórzone pola snapshotu.');}
    check(rows.length===state.counts[store],'Liczba rekordów zmieniła się.');rows.sort((a,b)=>a.position-b.position);
    collections[store]=[];rows.forEach((row,i)=>check(row.position===i,'Niepełna kolejność historii.'));for(let p=0;p<rows.length;p+=32)collections[store].push(...await Promise.all(rows.slice(p,p+32).map(async row=>{const value=await r.collection(store,row.id);check(value.id===row.id,'Identyfikator rekordu różni się od źródła.');return value;})));
@@ -34,12 +36,13 @@ export async function exportCanonicalLive(buffers,expectedRevision,restoreId){
   const data={...base.data,sessions:collections.journalSessions,entries:collections.journalResults};
   if(data.trainingJournal)data.trainingJournal={...data.trainingJournal,sessionSnapshots:collections.journalSnapshots};
   else check(collections.journalSnapshots.length===0,'Nieprzypisane snapshoty.');
+  const readMs=performance.now()-start;onPhase('validate');const validationStart=performance.now();
   const canonical=createCanonicalBackup({source:{format:base.format,version:base.version,data,catalog:base.catalog},...aux,buffers});
-  await r.stable();const file=await writeCanonicalBackup(canonical);
+  await r.stable();const validationMs=performance.now()-validationStart;onPhase('encode');const codingStart=performance.now(),file=await writeCanonicalBackup(canonical),encodeMs=performance.now()-codingStart;onPhase('verify');const verifyStart=performance.now();
   // End-to-end codec equality is enforced before publishing this Blob.
   check(same(await readCanonicalBackup(file),canonical),'Odczyt kopii różni się od danych źródłowych.');
   await r.stable();check(same(await auxiliary(db,restoreId),aux)&&!changed,'Szkice lub ustawienia zmieniły się podczas eksportu.');
-  return {file,metrics:{bytes:file.size,ms:Math.round(performance.now()-start),sessions:data.sessions.length,results:data.entries.length,snapshots:collections.journalSnapshots.length,drafts:aux.drafts.length,buffers:buffers.length}};
+  return {file,metrics:{readMs,validationMs,encodeMs,verifyMs:performance.now()-verifyStart,bytes:file.size,ms:Math.round(performance.now()-start),sessions:data.sessions.length,results:data.entries.length,snapshots:collections.journalSnapshots.length,drafts:aux.drafts.length,buffers:buffers.length}};
  }finally{db.close();}
 }
-if(typeof DedicatedWorkerGlobalScope!=='undefined'&&globalThis instanceof DedicatedWorkerGlobalScope){globalThis.onmessage=async({data})=>{try{postMessage({result:await exportCanonicalLive(data.buffers,data.revision)})}catch(e){postMessage({error:e.message})}};}
+if(typeof DedicatedWorkerGlobalScope!=='undefined'&&globalThis instanceof DedicatedWorkerGlobalScope){globalThis.onmessage=async({data})=>{try{postMessage({result:await exportCanonicalLive(data.buffers,data.revision,undefined,{onPhase:phase=>postMessage({phase})})})}catch(e){postMessage({error:e.message})}};}

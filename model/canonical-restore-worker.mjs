@@ -20,6 +20,7 @@ async function restore(file,baseline){
   const before=await readRecords(db),meta=await transact(db,['meta'],'readonly',tx=>request(tx.objectStore('meta').getAll()));
   check(same(before.state,state),'Zmieniono profil podczas sprawdzania.');
   const pending=meta.find(r=>r.key===RESTORE_KEY);check(!pending||recovery&&pending.id===id,'Inne przywracanie jest w toku.');
+  let protectedPoint=recovery;
   if(recovery){if(pending)check(same(pending.state,state),'Zmieniono root podczas przerwanej operacji. Nie nadpisano obcych danych.');else{const current=await readCanonicalBackup((await exportCanonicalLive(baseline.buffers,revision)).file);check(await hashJSON(canonicalJSON(current))===recovery.evidence.incoming,'Zmieniono dane po aktywacji. Nie nadpisano obcych danych.');}}
   if(!recovery){
    check(revision===baseline.revision||!baseline.replace&&revision===1,'Rewizja zmieniła się od podglądu.');
@@ -29,7 +30,7 @@ async function restore(file,baseline){
    check(same(current.drafts,meta.filter(r=>r.key.startsWith('workout-draft:')).map(value=>({key:value.key,value})))&&same(current.preferences,meta.find(r=>r.key==='canonical-preferences-v1')?.value??{})&&current.drive.clientId===(meta.find(r=>r.key==='drive-sync-v1')?.clientId??''),'Snapshot ustawień nie odpowiada punktowi ratunkowemu.');
 
    if(!baseline.replace)check(same(current.source.data,baseline.data)&&same(current.source.catalog,baseline.catalog)&&!current.drafts.length&&!Object.keys(current.preferences).length,'Cel nie jest czystą instalacją.');
-   await saveRescue(id,currentFile,{records:before.records,meta,buffers:baseline.buffers,state,incoming:await hashJSON(canonicalJSON(canonical))});
+   protectedPoint=await saveRescue(id,currentFile,{records:before.records,meta,buffers:baseline.buffers,state,incoming:await hashJSON(canonicalJSON(canonical))});
   }
   const reserved=await new Promise(resolve=>{reserveLocal=resolve;postMessage({reserve:id});});check(reserved===true,'Nie zarezerwowano localStorage.');
   await transact(db,[...Object.keys(before.records),'meta'],'readwrite',async tx=>{
@@ -40,7 +41,7 @@ async function restore(file,baseline){
   },pending?{restoreId:id}:{});
   postMessage({claimed:true});
   const guard=()=>check(!closed,'Połączenie zamknięte.');
-  const writer=await replaceSource(db,{...canonical.source,archives:[]},{expectedState:before.state,ownerId:canonical.source.data.trainingJournal?.model.ownerId??'local-journal',modelEnabled:!!canonical.source.data.trainingJournal,recovery:true,indexed:true,legacyRaw:null,guard,restoreId:id});
+  const writer=await replaceSource(db,{...canonical.source,archives:[]},{expectedState:before.state,ownerId:canonical.source.data.trainingJournal?.model.ownerId??'local-journal',modelEnabled:!!canonical.source.data.trainingJournal,recovery:true,indexed:true,legacyRaw:null,guard,restoreId:id,expectedRecords:before.records,rescueReference:{id,sha:protectedPoint.sha,evidenceSHA:protectedPoint.evidenceSHA}});
   await transact(db,['meta'],'readwrite',async tx=>{
    const store=tx.objectStore('meta');
    const expected=[...meta.filter(r=>![RESTORE_KEY,'journal-protocol-v2'].includes(r.key)),{key:RESTORE_KEY,id,status:'pending',state:writer.state},{key:'journal-protocol-v2',protocol:2,status:'active',epoch:writer.state.epoch}];const sort=rows=>rows.sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:0);check(same(sort(await request(store.getAll())),sort(expected)),'Konflikt metadanych po claim.');
