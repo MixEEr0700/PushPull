@@ -187,7 +187,7 @@ class DataFlows(BrowserHarness):
         self.context.unroute(pattern)
         held.pop().fulfill(status=500,headers={'Access-Control-Allow-Origin':'*'},content_type='application/json',body='{"error":"synthetic late error"}')
         expect(self.page.locator('[data-drive-action=restore]')).to_be_enabled()
-        expect(self.page.locator('[data-backup-body=restore] [data-drive-status]')).to_contain_text('Anulowano podgląd')
+        expect(self.page.locator('[data-drive-detail]')).to_contain_text('Anulowano podgląd')
         expect(self.page.locator('[data-restore-preview],[data-restore-error]')).to_have_count(0)
         self.assertEqual(self.records(),before);self.assertFalse(downloads);self.assertEqual(mock.posts,0)
         self.assertFalse(self.alerts,self.alerts)
