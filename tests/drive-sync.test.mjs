@@ -50,7 +50,9 @@ test('two devices always append independent current copies; previous files remai
  const before=clone([...files.entries()]);a.database.change('A newer');await a.sync.upload();
  assert.equal(files.size,3);for(const [id,file] of before)assert.deepEqual(files.get(id),file);
  const result=await a.sync.download();assert.equal(result.choices.length,3);assert.match(result.warning,/różne historie/);
- assert.deepEqual((await inspectBackup((await a.sync.download([...files.keys()][1])).backup)).data,b.database.value);
+ const bFile=[...files.values()].find(file=>JSON.parse(file.text).backup&&JSON.parse(JSON.parse(file.text).backup).exercises['PULL B'][0].notes==='B');
+ assert.ok(bFile,'Kopia urządzenia B musi istnieć niezależnie od kolejności równoległych uploadów');
+ assert.deepEqual((await inspectBackup((await a.sync.download(bFile.id)).backup)).data,b.database.value);
  assert.equal(a.database.value.exercises['PULL B'][0].notes,'A newer');
 });
 

@@ -54,7 +54,7 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
  const api={
   set onchange(fn){changed=fn;},
   get config(){return {clientId:state.clientId,selected:state.selected,label:state.accounts[state.selected]?.label??'',connected:transport.authenticated&&connectedAccount===state.selected&&connectedClient===state.clientId};},
-  get status(){return {busy,detail:notice||'Kopie Drive zapisujesz ręcznie. Trening i szkice są zapisywane lokalnie.'};},
+  get status(){return {busy,automatic:state.autoPPC1===true,connected:api.config.connected,pending:!!state.ppc1Queue,verified:state.accounts[state.selected]?.ppc1?.verified??null,detail:notice||('Automatyczne kopie '+(state.autoPPC1?'włączone':'wyłączone')+'. Trening i szkice są zapisywane lokalnie.')};},
   async configure(clientId){
    await mutex(async()=>{await refresh();state.clientId=clientId.trim();state.enabled=false;await save();});
    transport.clear();connectedAccount=null;connectedClient=null;notice='Konfiguracja zapisana. Połącz Google przy wykonywaniu kopii.';emit();

@@ -11,7 +11,7 @@ ASSETS=(
     'model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs',
     'model/backup-size.mjs','model/backup-size-json.mjs',
     'model/draft-collector.mjs','model/backup-v6.mjs','model/backup-v5-preview.mjs','model/backup-v5.mjs','model/backup-v4.mjs','model/backup-v4-export.mjs','model/local-backup-v4.mjs',
-    'model/plan-overview.mjs','model/plan-import.mjs','model/drive-incremental-client.mjs','model/drive-incremental-worker.mjs','model/drive-incremental.mjs','model/drive-sync.mjs','model/google-drive.mjs','model/training-model.mjs','model/backup.mjs','model/backup-json.mjs',
+    'model/plan-overview.mjs','model/plan-import.mjs','model/drive-incremental-client.mjs','model/drive-incremental-worker.mjs','model/drive-incremental.mjs','model/drive-status.mjs','model/drive-sync.mjs','model/google-drive.mjs','model/training-model.mjs','model/backup.mjs','model/backup-json.mjs',
     'model/canonical-restore-gate.mjs','model/evidence-proof.mjs','model/canonical-rescue.mjs','model/canonical-restore.mjs','model/canonical-restore-worker.mjs',
     'model/canonical-backup.mjs','model/canonical-json-transport.mjs','model/canonical-json-parser.mjs','model/canonical-export.mjs','model/canonical-export-worker.mjs',
     'model/compact-backup-reader.mjs','model/compact-backup-writer.mjs','model/compact-backup-preview.mjs','model/compact-backup-restore.mjs',
