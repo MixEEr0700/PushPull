@@ -58,7 +58,7 @@ class DriveAudit(BrowserHarness):
         with self.page.expect_download() as pending:
             self.page.locator('[data-drive-action=download-file]').click()
         self.assertEqual(Path(pending.value.path()).read_text(), json.loads(mock.files['file-1']['text'])['backup'])
-        expect(self.page.locator('[data-drive-detail]')).to_contain_text('zlecono pobranie')
+        expect(self.page.locator('[data-drive-detail]')).to_contain_text('baza lokalna pozostaje bez zmian')
         self.assertEqual(self.records(), before)
         self.assertFalse(self.alerts, self.alerts)
 
