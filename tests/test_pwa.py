@@ -109,6 +109,14 @@ class PWADeployment(unittest.TestCase):
     def backup_flow(self,mode,page=None):
         open_backup_flow(page or self.page,mode)
 
+    def data_section(self,name,page=None):
+        """Open a current Data accordion; historical PWA releases have none."""
+        scope=page or self.page
+        drawer=scope.locator(f'[data-data-section="{name}"]')
+        if drawer.count() and not drawer.evaluate('(e)=>e.open'):
+            drawer.locator(':scope > summary').click()
+        return drawer
+
     def legacy_control(self,selector,page=None):
         """Reveal moved legacy controls in current releases; old PWA fixtures stay intact."""
         scope=page or self.page
