@@ -217,8 +217,24 @@ class BrowserHarness(unittest.TestCase):
         self.page.wait_for_function("document.querySelector('[data-restore-preview],[data-restore-error]')",timeout=60000)
         if self.page.locator('[data-restore-confirm]').count():confirm_restore(self.page)
 
+    def data_section(self,name,page=None):
+        p=page or self.page
+        section=p.locator('[data-data-section='+name+']')
+        if section.count() and not section.evaluate('(e)=>e.open'):
+            section.locator(':scope > summary').click()
+        return section
+
+    def legacy_control(self,selector,page=None):
+        p=page or self.page
+        drawer=p.locator('[data-backup-advanced]')
+        if drawer.count() and not drawer.evaluate('(e)=>e.open'):
+            drawer.locator(':scope > summary').click()
+        return p.locator(selector)
+
     def advanced_data(self,page=None):
         p=page or self.page
+        self.data_section('google',p)
+        self.data_section('undo',p)
         drawer=p.locator('[data-backup-advanced]')
         if drawer.count() and not drawer.evaluate('(e)=>e.open'):
             drawer.locator(':scope > summary').click()
@@ -303,7 +319,7 @@ class BrowserRegression(BrowserHarness):
         self.settings()
         with self.page.expect_download() as download:
             self.backup_flow('save')
-            self.page.locator('[data-act=export]').click()
+            self.legacy_control('[data-act=export]').click()
         exported=Path(download.value.path()).read_text()
         self.assertEqual(json.loads(exported)['data'],json.loads(original))
         replacement=json.loads(exported)

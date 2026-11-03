@@ -138,7 +138,7 @@ class PlanImport(BrowserHarness):
         self.assertEqual(len(state['entries'][-2]['performance']['rows'][0]['segments']),3)
         self.settings()
         self.backup_flow('save')
-        with self.page.expect_download() as d:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as d:self.legacy_control('[data-act=export]').click()
         raw=Path(d.value.path()).read_bytes();backup=json.loads(raw);self.assertEqual(backup['version'],3)
         other=self.new_context(service_workers='block');page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url)
         page.locator('[data-tab=settings]').click();page.locator('#importFile').set_input_files({'name':'full.json','mimeType':'application/json','buffer':raw})
@@ -182,7 +182,7 @@ class PlanImport(BrowserHarness):
         self.settings()
         with self.page.expect_request('https://www.googleapis.com/upload/**'):
             self.backup_flow('save')
-            self.page.locator('[data-drive-action=upload]').click()
+            self.legacy_control('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=60000)
         self.assertEqual(mock.posts,2)
         current=self.state()

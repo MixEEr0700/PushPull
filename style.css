@@ -133,3 +133,10 @@ button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-off
 .adaptive-result.result-stacked .result-unit>.result-kg{display:inline}
 .adaptive-result.result-stacked>.adaptive-separator{display:none}
 [data-backup-body][hidden]{display:none}
+
+/* Shared Data accordion headers; backup controls retain their existing handlers. */
+[data-data-section]>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;width:100%}
+[data-data-section]>summary::after{content:"⌄";color:#39ff74;font-size:18px}
+[data-data-section][open]>summary::after{content:"⌃"}
+[data-data-section]>summary[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+[data-data-section]>summary+section,[data-data-section]>summary+div{margin-top:8px}
