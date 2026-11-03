@@ -21,8 +21,8 @@ class AdvancedData110(BrowserHarness):
         self.prepare();wait_for_service_worker_controller(self.page);self.context.set_offline(True)
         before=self.records();local=self.page.evaluate('({...localStorage})');self.page.evaluate('__reads=[]');drawer=self.panel()
         self.assertFalse(self.page.evaluate("__reads.some(r=>r.name==='journalObjects'||r.name==='journalCheckpoints')"))
-        self.assertEqual(drawer.locator('section > h3').all_text_contents(),['Połączenie Google Drive','Zachowane kopie ratunkowe','Diagnostyka kopii'])
-        for heading in ('Połączenie Google Drive','Zachowane kopie ratunkowe','Diagnostyka kopii'):expect(drawer.get_by_role('heading',name=heading,level=3)).to_be_visible()
+        self.assertEqual(drawer.locator('section > h3').all_text_contents(),['Zachowane kopie ratunkowe','Diagnostyka kopii'])
+        for heading in ('Połączenie Google Drive','Zachowane kopie ratunkowe','Diagnostyka kopii'):expect(self.page.get_by_role('heading',name=heading,level=3)).to_be_visible()
         expect(drawer.locator('[data-technical]')).not_to_have_attribute('open','')
         expect(drawer.locator('[data-export-v4]')).to_be_hidden()
         for width in (360,390,412):
@@ -61,14 +61,14 @@ class AdvancedData110(BrowserHarness):
         import test_drive_sync as cloud
         mock=cloud.MockGoogle();mock.install(self.context);legacy.IndexedDBMigration.prepare(self)
         before=self.state();drawer=self.panel()
-        drawer.get_by_text('Opcje zaawansowane Google',exact=True).click()
-        drawer.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com');drawer.locator('#driveConfig button').click()
-        expect(drawer.locator('[data-drive-action=connect]')).to_be_visible()
-        drawer.locator('[data-drive-action=connect]').click();expect(drawer.locator('[data-drive-action=connect]')).to_be_hidden()
-        drawer.get_by_text('Opcje zaawansowane Google',exact=True).click();drawer.locator('[data-drive-action=disconnect]').click()
+        self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
+        self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com');self.page.locator('#driveConfig button').click()
+        expect(self.page.locator('[data-drive-action=connect]')).to_be_visible()
+        self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
+        self.page.get_by_text('Opcje zaawansowane Google',exact=True).click();self.page.locator('[data-drive-action=disconnect]').click()
         self.backup_flow('save')
-        expect(drawer.locator('[data-connect-from-advanced]')).to_be_visible()
-        drawer.locator('[data-connect-from-advanced]').click();expect(drawer.locator('[data-connect-from-advanced]')).to_be_hidden()
+        expect(self.page.locator('[data-drive-action=connect]')).to_be_visible()
+        self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
         self.assertEqual(self.state(),before);self.assertEqual(mock.posts,0);self.assertFalse(self.alerts,self.alerts)
 
     def test_opaque_archive_reports_error_without_import_or_mutation(self):
