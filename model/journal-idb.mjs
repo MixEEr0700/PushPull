@@ -200,13 +200,15 @@ export async function replaceLive(db,input,{expectedState,ownerId,modelEnabled,l
 }
 /** Full operation for archive additions, preimages and explicit import/restore. A confirmed restore can quarantine a corrupt representation
  * as exact opaque evidence; normal operations never purge immutable records. */
-export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0,indexed=false,restoreId}={}){
+export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled,legacyRaw,signal,guard=()=>{},recovery=false,revision=0,indexed=false,restoreId,rescueReference,expectedRecords}={}){
  portable(input);const source=freeze(structuredClone(input)),before=await readRecords(db,{signal});
  check(same(before.state??null,expectedState??null),'bulk root CAS');
+ if(expectedRecords)check(same(before.records,expectedRecords),'rescue snapshot CAS');
  if(!recovery)await auditBundle(before,{signal});
  if(recovery)portable(before.records); // Never lose non-JSON corruption in an opaque JSON preimage.
  const previousRevision=Number.isSafeInteger(before.state?.revision)?before.state.revision:revision;
- const checkpoint=recovery?{id:'recovery:'+crypto.randomUUID(),protocol:2,raw:JSON.stringify(before.records)}:null;
+ if(rescueReference)check(restoreId&&rescueReference.id===restoreId&&['sha','evidenceSHA'].every(k=>/^[a-f0-9]{64}$/.test(rescueReference[k])),'verified rescue reference');
+ const checkpoint=recovery?{id:'recovery:'+crypto.randomUUID(),protocol:2,raw:JSON.stringify(rescueReference?{format:'pushpull-rescue-reference',version:1,...rescueReference}:before.records)}:null;
  if(checkpoint)checkpoint.sha256=await sha(checkpoint.raw);
  let bundle=await createProtocol(source,{epoch:recovery?crypto.randomUUID():before.state.epoch,revision:previousRevision+1,ownerId,modelEnabled,legacyRaw,checkpoints:recovery?[checkpoint]:before.records.journalCheckpoints,signal});
  if(indexed||before.state?.runtime){

@@ -49,7 +49,7 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
   if(!online())throw Error('Brak Internetu. Dane i szkice pozostają zapisane lokalnie.');
   if(!transport.authenticated||connectedAccount!==state.selected||connectedClient!==state.clientId)throw Error('Połącz Google, aby wykonać kopię lub ją pobrać.');
  }
- async function operation(fn,isCurrent=()=>true){return mutex(async()=>{if(!isCurrent())return;await refresh();if(!isCurrent())return;requireConnection();busy=true;notice='Trwa operacja Google Drive…';emit();try{return await fn();}finally{busy=false;emit();}});}
+ async function operation(fn,isCurrent=()=>true){return mutex(async()=>{if(!isCurrent())return;await refresh();if(!isCurrent())return;requireConnection();busy=true;notice='Trwa operacja Google Drive…';emit();try{return await fn();}finally{busy=false;if(notice==='Trwa operacja Google Drive…')notice='Brak aktywnej operacji Google Drive.';emit();}});}
  let incrementalRunning=null,queueing=null,retryTimer=null,retryDelay=1000;
  const api={
   set onchange(fn){changed=fn;},
@@ -92,8 +92,8 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
     notice='Kopia zweryfikowana';emit();return result;
    }).catch(error=>{failed=true;notice=(error.auth||!transport.authenticated)?'Trening zapisany lokalnie / Wymagane logowanie':'Trening zapisany lokalnie / Oczekuje na wysłanie: '+error.message;emit();}).finally(()=>{incrementalRunning=null;if(!closed&&state.ppc1Queue&&transport.authenticated&&online()&&typeof window!=='undefined'){retryDelay=failed?Math.min(retryDelay*2,600000):1000;retryTimer=setTimeout(()=>void api.retryCanonical(),failed?retryDelay:0);}});return incrementalRunning;
   },
-  async canonicalPoints(){return operation(()=>transport.listPoints());},
-  async canonicalPoint(fileId,{signal}={}){return operation(()=>runIncremental('restore',{fileId},transport,{signal}));},
+  async canonicalPoints(){return operation(async()=>{try{const rows=await transport.listPoints();notice=rows.length?'Wybierz punkt odzyskiwania PPC1.':'Brak punktów PPC1 na Drive.';return rows;}catch(e){notice='Nie pobrano listy punktów: '+e.message;throw e;}});},
+  async canonicalPoint(fileId,{signal,isCurrent=()=>!signal?.aborted}={}){return operation(async()=>{try{const result=await runIncremental('restore',{fileId},transport,{signal});if(isCurrent())notice='Punkt PPC1 zweryfikowany. Sprawdź podgląd przed przywróceniem.';return result;}catch(e){if(isCurrent())notice='Nie zweryfikowano punktu PPC1: '+e.message;throw e;}},isCurrent);},
   async upload(){return operation(async()=>{
    if(database.error)throw Error('Najpierw odzyskaj lokalne dane. Nie wysłano pustej kopii.');
    const revision=database.revision,current=database.value;

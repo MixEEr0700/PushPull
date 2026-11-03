@@ -502,14 +502,14 @@ on('click',e=>{
 function canonicalCaptureRevision(){if(savedDrafts.error||savedDrafts.readError)throw Error('Nie utrwalono wszystkich szkiców. Zachowaj je przed eksportem.');for(const [key,note] of noteMemory){if(!note.token)continue;const receipt=noteReceipts.get(key);if(receipt?.token!==note.token||localStorage.getItem(key)!==receipt.raw)throw Error('Notatka nie ma potwierdzonego bufora lokalnego.');}return database.error?null:database.revision;}
 function startCanonicalExport(){
  if(canonicalExport||recoveryError||restoreCommitting)return;
- const controller=new AbortController();canonicalExport=controller;backupSaveStatus='Kodowanie PPC1…';render();
+ const controller=new AbortController();canonicalExport=controller;backupSaveStatus='Odczyt danych PPC1…';render();
  void(async()=>{try{
   const {exportCanonicalLocal}=await import('./model/canonical-export.mjs');
   const exportRevision=canonicalCaptureRevision;
-  const result=await exportCanonicalLocal({getRevision:exportRevision,signal:controller.signal});
+  const result=await exportCanonicalLocal({getRevision:exportRevision,signal:controller.signal,onProgress:phase=>{if(canonicalExport!==controller)return;backupSaveStatus=({read:'Odczyt danych PPC1…',validate:'Walidacja PPC1…',encode:'Kodowanie PPC1…',verify:'Weryfikacja odczytu PPC1…'})[phase]||'Przygotowywanie PPC1…';const status=document.querySelector('[data-backup-save-status]');if(status)status.textContent=backupSaveStatus;}});
   if(canonicalExport!==controller||controller.signal.aborted)return;
   const a=document.createElement('a'),url=URL.createObjectURL(result.file);a.href=url;a.download='pushpull-canonical-'+today()+'.ppc1';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  canonicalExportMetrics=result.metrics;backupSaveStatus='Zlecono pobranie PPC1: '+result.metrics.bytes+' B; '+result.metrics.ms+' ms. Dostępne przywracanie z punktem cofnięcia.';
+  canonicalExportMetrics=result.metrics;backupSaveStatus='Zlecono pobranie PPC1: '+result.metrics.bytes+' B; '+Math.round(result.metrics.totalMs??result.metrics.ms)+' ms łącznie. Dostępne przywracanie z punktem cofnięcia.';
  }catch(error){if(canonicalExport===controller)backupSaveStatus=error.name==='AbortError'?'Anulowano eksport PPC1.':'Nie zlecono pobrania PPC1. '+error.message;}
  finally{if(canonicalExport===controller){canonicalExport=null;if(tab==='settings')render();}}
  })();
@@ -876,7 +876,7 @@ on('click',e=>{
  if(e.target.closest('[data-ppc1-list]'))void drive.canonicalPoints().then(rows=>{const host=document.querySelector('[data-ppc1-points]');if(host)host.innerHTML=rows.map(r=>`<button class="btn" data-ppc1-point="${esc(r.id)}">${esc(r.createdTime||'Kopia PPC1')}</button>`).join('');}).catch(error=>drive.report(error));
  const chosen=e.target.closest('[data-ppc1-point]');if(!chosen)return;
  const op=beginRestore();render();focusRestore();
- void drive.canonicalPoint(chosen.dataset.ppc1Point,{signal:op.signal}).then(async result=>{await prepareRestore(result.file,op.revision,op.sequence,null,op.signal);if(op.sequence===restoreSequence&&restoreCandidate)restoreCandidate.fromDrive=true;}).catch(error=>{if(op.sequence===restoreSequence){restoreBusy=false;restoreError=error.message;render();}});
+ void drive.canonicalPoint(chosen.dataset.ppc1Point,{signal:op.signal,isCurrent:()=>op.sequence===restoreSequence}).then(async result=>{await prepareRestore(result.file,op.revision,op.sequence,null,op.signal);if(op.sequence===restoreSequence&&restoreCandidate)restoreCandidate.fromDrive=true;}).catch(error=>{if(op.sequence===restoreSequence){restoreBusy=false;restoreError=error.message;render();}});
 });
 
 

@@ -1,0 +1,61 @@
+{
+  "before": [
+    {
+      "sessions": 40,
+      "bytes": 2586,
+      "ms": 116,
+      "results": 40,
+      "snapshots": 0,
+      "drafts": 0,
+      "buffers": 0,
+      "transactions": 261,
+      "totalMs": 152
+    },
+    {
+      "sessions": 400,
+      "bytes": 8901,
+      "ms": 634,
+      "results": 400,
+      "snapshots": 0,
+      "drafts": 0,
+      "buffers": 0,
+      "transactions": 2421,
+      "totalMs": 680
+    }
+  ],
+  "after": [
+    {
+      "sessions": 40,
+      "readMs": 50.5,
+      "validationMs": 14.199999988079071,
+      "encodeMs": 15.400000005960464,
+      "verifyMs": 12.5,
+      "bytes": 2586,
+      "ms": 93,
+      "results": 40,
+      "snapshots": 0,
+      "drafts": 0,
+      "buffers": 0,
+      "transactions": 86,
+      "startupMs": 40,
+      "totalMs": 132
+    },
+    {
+      "sessions": 400,
+      "readMs": 213,
+      "validationMs": 32.79999998211861,
+      "encodeMs": 35.80000001192093,
+      "verifyMs": 35,
+      "bytes": 8901,
+      "ms": 317,
+      "results": 400,
+      "snapshots": 0,
+      "drafts": 0,
+      "buffers": 0,
+      "transactions": 525,
+      "startupMs": 35,
+      "totalMs": 351
+    }
+  ],
+  "scope": "single synthetic Chromium samples; v1 fixture, not Pixel 9 or 233KB real data"
+}
