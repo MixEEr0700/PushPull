@@ -48,7 +48,7 @@ class SimpleData(BrowserHarness):
         self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred&&__fastDB.historyDeferred'))
         self.assertFalse(self.page.locator('[data-restore-preview],[data-restore-confirm]').count())
         self.assertEqual(len(downloads),1)
-        expect(self.page.locator('[data-drive-status]')).to_contain_text('Nie przywrócono danych')
+        expect(self.page.locator('[data-drive-detail]')).to_contain_text('Nie przywrócono danych')
 
     def test_corrupt_unavailable_and_offline_cloud_copy_preserve_all_native_stores(self):
         mock=self.seed_cloud();before=self.records();downloads=[];self.page.on('download',lambda d:downloads.append(d))
@@ -63,7 +63,7 @@ class SimpleData(BrowserHarness):
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('Nie znaleziono prawidłowej kopii')
         self.backup_flow('download')
         self.context.set_offline(True);self.page.locator('[data-drive-action=download]').click()
-        expect(self.page.locator('[data-drive-status]')).to_contain_text('Brak Internetu')
+        expect(self.page.locator('[data-drive-detail]')).to_contain_text('Brak Internetu')
         self.assertFalse(downloads);self.assertEqual(mock.posts,0);self.assertEqual(self.records(),before)
         self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred&&__fastDB.historyDeferred'))
         self.advanced_data();expect(self.page.locator('[data-export-v4]')).to_be_visible()
