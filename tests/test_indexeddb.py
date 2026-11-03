@@ -153,7 +153,7 @@ class IndexedDBMigration(BrowserHarness):
     def test_full_backup_restores_versions_notes_sets_and_metadata(self):
         self.prepare();self.ready();self.settings()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         backup=Path(download.value.path()).read_text()
         value=json.loads(backup)
         self.assertEqual(value['data'],FIXTURE)
@@ -166,7 +166,7 @@ class IndexedDBMigration(BrowserHarness):
         value['catalog']['planVersions'].append(archived)
         self.import_data(json.dumps(value));self.settings()
         self.backup_flow('save')
-        with self.page.expect_download() as second:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as second:self.legacy_control('[data-act=export]').click()
         restored=json.loads(Path(second.value.path()).read_text())
         self.assertEqual(restored['data'],value['data'])
         self.assertEqual(restored['catalog'],value['catalog'])
@@ -264,14 +264,14 @@ class IndexedDBMigration(BrowserHarness):
         self.assertTrue(any(b['raw']==copy and b['id']==key for b in records['backups']))
         self.settings()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         full=json.loads(Path(download.value.path()).read_text())
         self.assertTrue(any(b['raw']==copy for b in full['archives']))
 
     def test_full_backup_invalid_catalog_and_archives_leave_history_intact(self):
         self.prepare();self.ready();self.settings()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         backup=json.loads(Path(download.value.path()).read_text())
         original=self.state()
         invalid=[]

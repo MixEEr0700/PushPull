@@ -43,7 +43,7 @@ class LazyData(BrowserHarness):
         self.page.evaluate("""()=>{const original=__fastDB.ensureFull;__fastDB.ensureFull=async()=>{await new Promise(r=>window.__releaseAudit=r);return original()}}""")
         self.page.locator('[data-tab=settings]').click();downloads=[];self.page.on('download',lambda d:downloads.append(d))
         self.backup_flow('save')
-        self.page.locator('[data-act=export]').click();expect(self.page.locator('[data-full-audit]')).to_be_visible()
+        self.legacy_control('[data-act=export]').click();expect(self.page.locator('[data-full-audit]')).to_be_visible()
         self.page.wait_for_function('!!window.__releaseAudit')
         self.page.locator('[data-full-audit-cancel]').click();self.page.locator('[data-tab=training]').click()
         expect(self.page.locator('[data-act=finish]')).to_be_visible()
@@ -55,7 +55,7 @@ class LazyData(BrowserHarness):
         self.advanced_data();self.page.locator('[data-load-backups]').click();expect(self.page.locator('[data-backup-export]')).to_be_visible(timeout=60000)
         self.assertFalse(self.page.evaluate('__fastDB.archivesDeferred'))
         self.backup_flow('save')
-        with self.page.expect_download() as item:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as item:self.legacy_control('[data-act=export]').click()
         import json
         from pathlib import Path
         raw=Path(item.value.path()).read_text();self.assertIn('large-raw',raw)
@@ -89,7 +89,7 @@ class LazyData(BrowserHarness):
         self.backup_flow('save');self.advanced_data();self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
         self.page.locator('#driveConfig button').click();self.page.wait_for_function('!!window.__releaseConfig')
-        self.page.locator('[data-drive-action=connect]').click()
+        self.data_section('google');self.page.locator('[data-drive-action=connect]').click()
         self.assertFalse(self.page.evaluate('!!window.__requestedScope'))
         self.page.evaluate('__releaseConfig()')
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()

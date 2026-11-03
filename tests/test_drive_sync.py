@@ -62,7 +62,7 @@ class ManualDriveFlow(BrowserHarness):
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
         self.page.locator('#driveConfig button').click()
         self.backup_flow('save')
-        self.page.locator('[data-drive-action=connect]').click()
+        self.data_section('google');self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
         # These legacy scenarios explicitly exercise manual JSON, not #109.
         self.page.locator('[data-auto-ppc1]').set_checked(automatic)
@@ -72,7 +72,7 @@ class ManualDriveFlow(BrowserHarness):
         # Full source-backed validation + verified readback can exceed the UI
         # assertion default (5s) on CI; wait for success, never just a request.
         self.backup_flow('save')
-        self.page.locator('[data-drive-action=upload]').click()
+        self.legacy_control('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=60000)
 
     def restore_preview(self,file_id=None):
@@ -104,7 +104,7 @@ class ManualDriveFlow(BrowserHarness):
         for number in range(1,4):
             with self.page.expect_request('https://www.googleapis.com/upload/**'):
                 self.backup_flow('save')
-                self.page.locator('[data-drive-action=upload]').click()
+                self.legacy_control('[data-drive-action=upload]').click()
             expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana',timeout=120000)
             self.assertEqual(mock.posts,number);self.assertEqual(len(mock.files),number)
             for key,digest in copies.items():self.assertEqual(hashlib.sha256(mock.files[key]['text'].encode()).hexdigest(),digest)
@@ -169,7 +169,7 @@ class ManualDriveFlow(BrowserHarness):
         self.page.locator('[data-tab=settings]').click();mock.hold=True
         with self.page.expect_request('https://www.googleapis.com/upload/**'):
             self.backup_flow('save')
-            self.page.locator('[data-drive-action=upload]').click()
+            self.legacy_control('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-status]')).not_to_contain_text('zweryfikowana')
         self.assertTrue(mock.held);self.assertNotIn('13.125',mock.held[0][1]['text'])
         # Cloud waiting never prevents local navigation or draft recovery.
@@ -183,7 +183,7 @@ class ManualDriveFlow(BrowserHarness):
         expect(self.page.locator('[data-act=start]')).to_be_visible()
         offline=self.state();self.assertEqual(offline['sessions'][-1]['status'],'done')
         self.context.set_offline(False);self.page.evaluate("window.dispatchEvent(new Event('online'));document.dispatchEvent(new Event('visibilitychange'))")
-        self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.page.locator('[data-drive-action=connect]').click()
+        self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.data_section('google');self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden();self.assertEqual(mock.posts,1)
         self.upload();self.assertEqual(mock.posts,2);self.assertEqual(self.state(),offline)
         self.restore_preview();backup=json.loads(list(mock.files.values())[-1]['text'])['backup'];restored=self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',backup)
@@ -191,7 +191,7 @@ class ManualDriveFlow(BrowserHarness):
         self.assertEqual(len(offline['entries']),len(saved['entries'])+1)
         self.page.locator('[data-restore-cancel]').click()
         self.backup_flow('save')
-        with self.page.expect_download() as local:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as local:self.legacy_control('[data-act=export]').click()
         self.assertEqual(self.page.evaluate('async text=>(await PushPullDB.parseModelBackup(text)).data',Path(local.value.path()).read_text()),offline)
         self.assertFalse(self.alerts,self.alerts)
 
@@ -243,7 +243,7 @@ class ManualDriveFlow(BrowserHarness):
     def test_restore_preview_rejects_newer_commit_from_another_tab(self):
         self.page.add_init_script('window.BroadcastChannel=undefined');self.activate();self.settings=lambda:self.page.locator('[data-tab=settings]').click();self.settings()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes()
         self.page.locator('#importFile').set_input_files({'name':'old.json','mimeType':'application/json','buffer':raw})
         expect(self.page.locator('[data-restore-preview]')).to_be_visible(timeout=60000)
@@ -263,7 +263,7 @@ class ManualDriveFlow(BrowserHarness):
     def test_post_commit_readback_failure_never_reports_success_and_keeps_preimage(self):
         self.prepare();self.ready();self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         candidate=json.loads(Path(download.value.path()).read_text());before=self.state()
         candidate['data']['exercises']['PUSH A'][0]['notes']='restored value'
         self.page.locator('#importFile').set_input_files({'name':'restored.json','mimeType':'application/json','buffer':json.dumps(candidate).encode()})
@@ -301,7 +301,7 @@ class ManualDriveFlow(BrowserHarness):
         meta=self.page.evaluate('async()=>{const db=await PushPullDB.open(()=>{});try{return await db.readDriveState()}finally{db.close()}}')
         self.assertFalse(meta['enabled']);self.assertEqual(meta['mode'],'manual')
         self.assertEqual(meta['accounts']['mock-account']['outbox'],self.page.evaluate('window.__archive["mock-account"].outbox'))
-        self.reopen();self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.page.locator('[data-drive-action=connect]').click()
+        self.reopen();self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.data_section('google');self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
         before=self.state();self.upload();self.assertEqual(mock.posts,1)
         raw=next(iter(mock.files.values()))['text'];parsed=self.page.evaluate('async text=>(await import("./model/drive-sync.mjs")).inspectBackup(JSON.parse(text).backup)',raw)
@@ -311,13 +311,13 @@ class ManualDriveFlow(BrowserHarness):
     def test_expired_auth_manual_retry_does_not_block_local_result_or_duplicate_series(self):
         mock=MockGoogle();mock.install(self.context);self.prepare();self.ready();self.configure();self.upload()
         self.backup_flow('save')
-        before=self.state();mock.error=401;self.page.locator('[data-drive-action=upload]').click()
+        before=self.state();mock.error=401;self.legacy_control('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-detail]')).to_contain_text('Autoryzacja Google wygasła')
         expect(self.page.locator('[data-drive-action=connect]')).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-expand="PUSH-A-1"]').click();open_result_panel(self.page)
         form=self.page.locator('.seriesResultForm');form.locator('[data-main=kg]').fill('77');form.locator('[data-main=reps]').fill('9')
         form.locator('[type=submit]').click();expect(self.page.locator('.seriesResultForm')).to_have_count(0)
         saved=self.state();self.assertEqual(len(saved['entries']),len(before['entries']));self.assertEqual(saved['entries'][-1]['id'],before['entries'][-1]['id'])
-        mock.error=0;self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.page.locator('[data-drive-action=connect]').click()
+        mock.error=0;self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.data_section('google');self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden();count=mock.posts;self.upload()
         self.assertEqual(mock.posts,count+1);self.assertEqual(self.state(),saved);self.assertFalse(self.alerts,self.alerts)

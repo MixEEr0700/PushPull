@@ -109,6 +109,22 @@ class PWADeployment(unittest.TestCase):
     def backup_flow(self,mode,page=None):
         open_backup_flow(page or self.page,mode)
 
+    def data_section(self,name,page=None):
+        """Open a current Data accordion; historical PWA releases have none."""
+        scope=page or self.page
+        drawer=scope.locator(f'[data-data-section="{name}"]')
+        if drawer.count() and not drawer.evaluate('(e)=>e.open'):
+            drawer.locator(':scope > summary').click()
+        return drawer
+
+    def legacy_control(self,selector,page=None):
+        """Reveal moved legacy controls in current releases; old PWA fixtures stay intact."""
+        scope=page or self.page
+        drawer=scope.locator('[data-data-section="service"]')
+        if drawer.count() and not drawer.evaluate('(e)=>e.open'):
+            drawer.locator(':scope > summary').click()
+        return scope.locator(selector)
+
     @classmethod
     def setUpClass(cls):
         cls.pw=sync_playwright().start()
@@ -336,7 +352,7 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(self.snapshot(),before)
         self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         raw=Path(download.value.path()).read_text();self.assertEqual(json.loads(raw),before)
         self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
         confirm_restore(self.page)
@@ -423,7 +439,7 @@ class PWADeployment(unittest.TestCase):
         def drafts():return self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
         expected=value();self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes();self.assertGreater(len(raw),16*1024*1024)
         self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=d.value;v.exercises['PUSH A'][0].notes='newer local note protected by preimage';await d.commit(v)}finally{d.close()}}""")
         self.page.reload();self.ready();before=value();before_drafts=drafts()
@@ -540,7 +556,7 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(drafts(),[]);self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
         page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url);page.locator('[data-tab=settings]').click()
         page.locator('#importFile').set_input_files({'name':'continuous-plans.json','mimeType':'application/json','buffer':raw})
@@ -611,7 +627,7 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(self.snapshot(),expected);self.assertEqual(drafts(),[])
         self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes()
         other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
         page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url);page.locator('[data-tab=settings]').click()
@@ -686,7 +702,7 @@ class PWADeployment(unittest.TestCase):
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000);self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A')
         saved=value();self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block',accept_downloads=True);self.addCleanup(other.close)
         page=other.new_page();messages=[]
         def accept_restore(d):messages.append((d.type,d.message));d.accept()
@@ -872,7 +888,7 @@ class PWADeployment(unittest.TestCase):
         self.page.locator('[data-tab=settings]').click()
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
         self.backup_flow('save')
-        self.page.locator('#driveConfig button').click();self.page.locator('[data-drive-action=connect]').click()
+        self.page.locator('#driveConfig button').click();self.data_section('google');self.page.locator('[data-drive-action=connect]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Zsynchronizowano')
         old_files=dict(mock.files)
         self.page.locator('[data-tab=training]').click()
@@ -902,11 +918,11 @@ class PWADeployment(unittest.TestCase):
         today=self.snapshot();self.assertEqual(today['data']['entries'][-1]['kg'],'84.125')
         self.context.set_offline(False);self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
-        self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
+        self.data_section('google');self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
         self.assertEqual(mock.posts,count)
         expect(self.page.locator('[data-drive-diagnostics]')).to_have_count(0)
         self.backup_flow('save')
-        self.page.locator('[data-drive-action=upload]').click()
+        self.legacy_control('[data-drive-action=upload]').click()
         expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zapisana i zweryfikowana')
         self.assertEqual(mock.posts,count+1)
         for id,old in old_files.items():self.assertEqual(mock.files[id],old)
@@ -988,7 +1004,7 @@ class PWADeployment(unittest.TestCase):
             expect(self.page.locator('.panel .entry')).to_have_count(1)
         self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         raw=Path(download.value.path()).read_bytes()
         self.page.locator('#importFile').set_input_files({'name':'pair.json','mimeType':'application/json','buffer':raw})
         confirm_restore(self.page)
@@ -1237,7 +1253,7 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(self.snapshot(),before)
         self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         raw=Path(download.value.path()).read_text()
         self.assertEqual(json.loads(raw),before)
         self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})

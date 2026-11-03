@@ -97,7 +97,7 @@ class PlanOverview(BrowserHarness):
         expect(self.page.locator('.panel .entry')).to_have_count(2)
         saved=self.state();self.settings()
         self.backup_flow('save')
-        with self.page.expect_download() as download:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
         raw=Path(download.value.path()).read_text()
         self.assertEqual(self.page.evaluate('async t=>(await PushPullDB.parseModelBackup(t)).data',raw),saved)
         other=self.new_context(service_workers='block');page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url)

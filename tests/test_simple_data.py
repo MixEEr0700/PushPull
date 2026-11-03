@@ -20,6 +20,7 @@ class SimpleData(BrowserHarness):
         self.configure()
         # The configuration does not need live history or archive materialization.
         self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred&&__fastDB.historyDeferred'))
+        self.data_section('google').locator(':scope > summary').click()
         self.page.locator('[data-backup-advanced] > summary').click()
         return mock
 
@@ -28,11 +29,11 @@ class SimpleData(BrowserHarness):
         for width in [360,390,412]:
             self.page.set_viewport_size({'width':width,'height':844})
             primary=self.page.locator('[data-primary-backups]')
-            self.assertEqual(primary.locator(':scope > button,:scope > label').evaluate_all('(es)=>es.map(e=>e.textContent.trim())'),['Zapisz kopię','Przywróć kopię'])
+            self.assertEqual(primary.locator(':scope > details > summary').evaluate_all('(es)=>es.map(e=>e.textContent.trim())'),['Zapisz kopię','Przywróć kopię'])
             expect(self.page.locator('#driveConfig input')).not_to_be_visible()
             expect(self.page.locator('[data-export-v5]')).not_to_be_visible()
             self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
-            for box in primary.locator(':scope > button,:scope > label').all():self.assertGreaterEqual(box.bounding_box()['height'],44)
+            for box in primary.locator(':scope > details > summary').all():self.assertGreaterEqual(box.bounding_box()['height'],44)
         self.backup_flow('download')
         self.page.locator('[data-drive-action=download]').click()
         expect(self.page.locator('#driveCopy option')).to_have_count(2)

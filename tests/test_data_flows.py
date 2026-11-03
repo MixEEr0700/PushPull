@@ -36,11 +36,11 @@ class DataFlows(BrowserHarness):
         for width in (360,390,412):
             self.page.set_viewport_size({'width':width,'height':844})
             primary=self.page.locator('[data-primary-backups]')
-            self.assertEqual(primary.locator(':scope > button').all_text_contents(),['Zapisz kopię','Przywróć kopię'])
+            self.assertEqual(primary.locator(':scope > details > summary').all_text_contents(),['Zapisz kopię','Przywróć kopię'])
             self.backup_flow('save')
             expect(self.page.locator('[data-backup-body=restore]')).to_be_hidden()
             expect(self.page.locator('[data-backup-body=save]')).not_to_contain_text('Anulowano podgląd')
-            with self.page.expect_download() as item:self.page.locator('[data-act=export]').click()
+            with self.page.expect_download() as item:self.legacy_control('[data-act=export]').click()
             from pathlib import Path
             raw=Path(item.value.path()).read_bytes()
             expect(self.page.locator('[data-backup-body=save] [data-backup-save-status]')).to_contain_text('Zlecono pobranie')
@@ -60,7 +60,7 @@ class DataFlows(BrowserHarness):
             self.assertEqual(self.records(),before)
             self.confirm=True
             self.page.locator('[data-restore-cancel]').click()
-            for button in primary.locator(':scope > button').all():self.assertGreaterEqual(button.bounding_box()['height'],44)
+            for button in primary.locator(':scope > details > summary').all():self.assertGreaterEqual(button.bounding_box()['height'],44)
         self.context.set_offline(False)  # Harness blocks SW; the full PWA suite covers offline reload.
         self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
         self.assertEqual(self.state(),state)

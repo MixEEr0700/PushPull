@@ -13,7 +13,7 @@ class CanonicalExportUI(BrowserHarness):
 
     def test_new_training_ui_export_exact_auxiliary_no_archives_no_writes_mobile(self):
         self.page.wait_for_selector('[data-act=start]');self.start();self.result('22','9');self.save()
-        self.open_export();self.page.locator('[data-backup-advanced] > summary').click()
+        self.open_export();self.data_section('google')
         self.page.locator('#driveConfig').evaluate('(f)=>{f.closest("details").open=true}')
         self.page.locator('#driveConfig input').fill('synthetic-client.apps.googleusercontent.com');self.page.locator('#driveConfig button').click()
         self.page.wait_for_function("""async()=>{const db=await new Promise(r=>{const q=indexedDB.open('pushpull');q.onsuccess=()=>r(q.result)});try{return await new Promise(r=>{const q=db.transaction('meta').objectStore('meta').get('drive-sync-v1');q.onsuccess=()=>r(q.result?.clientId==='synthetic-client.apps.googleusercontent.com')})}finally{db.close()}}""")

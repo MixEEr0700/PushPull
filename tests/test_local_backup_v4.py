@@ -80,7 +80,7 @@ class LocalBackupV4(BrowserHarness):
          const {canonical}=await import('./model/backup-json.mjs');return canonical(s.live.data)===canonical(db.value)&&canonical(s.live.catalog)===canonical(db.export().catalog)&&canonical(s.archives)===canonical(db.export().archives);
         }finally{db.close()}}""",text))
         self.backup_flow('save')
-        with self.page.expect_download(timeout=120000) as legacy:self.page.locator('[data-act=export]').click()
+        with self.page.expect_download(timeout=120000) as legacy:self.legacy_control('[data-act=export]').click()
         old=Path(legacy.value.path()).read_bytes()
         self.page.locator('#importFile').set_input_files({'name':'legacy.json','mimeType':'application/json','buffer':old})
         expect(self.page.locator('[data-restore-confirm]')).to_be_visible(timeout=120000)
