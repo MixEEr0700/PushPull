@@ -48,7 +48,7 @@ class SimpleData(BrowserHarness):
         self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred&&__fastDB.historyDeferred'))
         self.assertFalse(self.page.locator('[data-restore-preview],[data-restore-confirm]').count())
         self.assertEqual(len(downloads),1)
-        expect(self.page.locator('[data-drive-detail]')).to_contain_text('Nie przywrócono danych')
+        expect(self.page.locator('[data-drive-detail]')).to_contain_text('baza lokalna pozostaje bez zmian')
 
     def test_corrupt_unavailable_and_offline_cloud_copy_preserve_all_native_stores(self):
         mock=self.seed_cloud();before=self.records();downloads=[];self.page.on('download',lambda d:downloads.append(d))
