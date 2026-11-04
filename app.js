@@ -228,7 +228,7 @@ function session(){return data.sessions.find(s=>s.id===data.activeId)}
 function typeIndex(t){return TYPES.indexOf(t)}
 function entriesFor(id){const sessions=new Map(data.sessions.map(s=>[s.id,s]));return data.entries.filter(e=>e.exerciseId===id).sort((a,b)=>{let sa=sessions.get(a.sessionId),sb=sessions.get(b.sessionId);return (sb?.date||'').localeCompare(sa?.date||'')||(sb?.seq||0)-(sa?.seq||0)})}
 function sameContext(ex,e){return (ex.journalVariantId?e.journalVariantId===ex.journalVariantId:!e.journalVariantId)&&(!ex.v2||(ex.loadConvention.basis===null||e.performance?.loadConvention?.basis===ex.loadConvention.basis)&&e.performance?.loadConvention?.unit===ex.loadConvention.unit)}
-function lastFor(ex){return entriesFor(ex.id).find(e=>sameContext(ex,e)&&(!ex.planVersionId||journal.snapshotFor(data,e.sessionId)?.planVersionId===ex.planVersionId))}
+function lastFor(ex){return entriesFor(ex.id).find(e=>sameContext(ex,e)&&(!ex.positionId||e.journalPositionId===ex.positionId)&&(!ex.planVersionId||journal.snapshotFor(data,e.sessionId)?.planVersionId===ex.planVersionId))}
 // Zwarta prezentacja ostatniego wyniku; różne serie są pokazywane oddzielnie.
 function resultSummary(entry, suffix='',compact=false){
  if(!entry)return '<span class="detail last-result">Brak zapisanego wyniku</span>';
