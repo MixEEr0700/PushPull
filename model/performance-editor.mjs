@@ -223,7 +223,7 @@ export function click(event){const b=event.target.closest('[data-rich-action]');
 export function performanceValue(value){
  const d=structuredClone({performance:value.performance,sidePairs:value.sidePairs});preparePairs(d);const p=d.performance;
  if(!p.rows.length)throw Error('Brak serii. Dodaj przynajmniej jedną rzeczywistą serię.');
- if(p.rows.some(r=>r.side!==null&&!pairFor(d,r)))throw Error('Niepełna lub nieustalona para L/P. Ustal brakującą stronę w edytorze.');
+ if(p.rows.some(r=>r.side!==null&&r.side!=='both'&&!pairFor(d,r)))throw Error('Niepełna lub nieustalona para L/P. Ustal brakującą stronę w edytorze.');
  for(const [i,row] of p.rows.entries())for(const [j,s] of row.segments.entries()){s.kg=s.kg.trim().replace(',','.');s.reps=s.reps.trim();if(!/^\d+(\.\d+)?$/.test(s.kg)||!/^[1-9]\d*$/.test(s.reps))throw Error(`Seria ${i+1}${row.side?' '+(row.side==='left'?'L':'P'):''}, segment ${j+1}: uzupełnij poprawne kg i powtórzenia.`);}
  return p;
 }
