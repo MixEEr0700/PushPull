@@ -7,3 +7,5 @@ Przy otwarciu edytora ostatni wynik jest wybierany według ID pozycji, wersji pl
 Nowe wartości konwencji, `side: both` i znacznik jawnego wyboru wymagają wersji aplikacji obsługującej ten kod. Aktualny PPC1 zachowuje dane, ale nie potwierdzono możliwości otwarcia nowej kopii w starej aplikacji. Należy aktualizować aplikację przed jej odtworzeniem. Samo wybranie bez zatwierdzenia wyniku pozostaje szkicem; trwała sugestia następnego treningu pochodzi z ostatniego zapisanego wyniku danej pozycji.
 
 Testy syntetyczne obejmują siedem konwencji, Maszyna → Sztanga, niezmienność wcześniejszego wyniku i snapshotu, identyczną tożsamość ćwiczenia w różnych pozycjach, restart, PPC1 oraz historyczne asymetryczne L/P. Nie wykonano testu na fizycznym Pixelu.
+
+Historia oraz statystyki w karcie są ograniczone do ID pozycji. Dla tożsamości użytej w kilku pozycjach wskaźnik „ostatnia zmiana” jest pozostawiony jako nieustalony: starszy indeks wieku nie zawiera ID pozycji, więc nie wolno prezentować jego wyniku jako porównania pozycji.

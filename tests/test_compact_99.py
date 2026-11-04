@@ -140,6 +140,7 @@ class Compact99Conventions(BrowserHarness):
         self.prepare();self.ready();self.preview(p);self.store();self.activate()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="TEST-A"]').click();self.page.locator('[data-act=start]').click();f=self.form('TEST-1');before=self.state()
+        f=seed_historical_editor(self.page,"d.performance.rows=d.performance.rows.flatMap(r=>['left','right'].map(side=>({...structuredClone(r),id:crypto.randomUUID(),side,segments:r.segments.map(s=>({...s,id:crypto.randomUUID()}))})));d.executionMode='paired';d.sidePairs=[]")
         expect(f.locator('[data-common-pair]')).to_have_count(0);expect(f.locator('[data-side-exception]')).to_have_count(2)
         expect(f.locator('[data-quick=kg]')).to_have_attribute('readonly','')
         expect(f.locator('[data-rich-action=merge-left]')).to_have_count(0)
