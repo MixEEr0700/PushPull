@@ -23,7 +23,9 @@ const ordered=(rows,key='order')=>rows.slice().sort((a,b)=>a[key]-b[key]);
 export function parsePlan(text){try{const p=parseJson(text);portable(p);safeKeys(p);return p;}catch(error){throw TypeError('Plan: nieprawidłowy JSON. '+error.message);}}
 function packetShape(p){
  portable(p);safeKeys(p);
- shape(p,'format version approval planVersion exercises variants positions sets drops groups coachInstructions continuity');
+ const {initialUserNotes,...base}=p;
+ shape(base,'format version approval planVersion exercises variants positions sets drops groups coachInstructions continuity');
+ if(initialUserNotes!==undefined){check(Array.isArray(initialUserNotes),'niepoprawne notatki początkowe');const ids=new Set();for(const n of initialUserNotes){shape(n,'exerciseId text');check(typeof n.text==='string'&&exerciseId(n.exerciseId)&&!ids.has(n.exerciseId),'niepoprawna lub powtórzona notatka');ids.add(n.exerciseId);}}
  check(p.format==='pushpull-plan'&&p.version===1,'nieobsługiwany format lub wersja');
  shape(p.approval,'status reference approvedAt');check(p.approval.status==='approved'&&typeof p.approval.reference==='string'&&p.approval.reference.trim()&&typeof p.approval.approvedAt==='string'&&Number.isFinite(Date.parse(p.approval.approvedAt)),'wymagana deklaracja zatwierdzenia planu przez właściciela');
  shape(p.planVersion,'id planId number label units executionVersion source');check(p.planVersion.executionVersion===2,'protokół wymaga obsługi w aplikacji');
@@ -96,6 +98,8 @@ export function stagePlan(data,packet,ownerId='plan-preview'){
  }
  // Only packet-owned prescriptions may refer to this newly introduced version.
  merge(j.model,p);
+ for(const n of p.initialUserNotes??[]){check(p.positions.some(x=>x.exerciseId===n.exerciseId),'notatka spoza importowanego planu');check(!prior?.exercises.some(x=>x.id===n.exerciseId)&&!originalRegistry.some(x=>x.id===n.exerciseId),'notatki początkowe tylko dla nowych ćwiczeń');j.model.userNotes.push({id:'user:'+p.planVersion.id+':'+n.exerciseId,exerciseId:n.exerciseId,sessionId:null,text:n.text,origin:'user',revision:1,source:structuredClone(p.planVersion.source)});}
+ validateModel(j.model);
  for(const u of p.planVersion.units)next.exercises[u.id]??=[];
  for(const pos of p.positions)if(!Object.values(next.exercises).flat().some(e=>e.id===pos.exerciseId))next.exercises[pos.unitId].push({id:pos.exerciseId,name:pos.label,sets:Math.max(1,p.sets.filter(s=>s.positionId===pos.id).length),target:'',initialKg:'',tempo:'',rir:'',notes:'',journalOnly:true});
  (j.importedPlans??=[]).push(p);

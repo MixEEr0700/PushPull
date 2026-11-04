@@ -1,0 +1,4603 @@
+{
+  "format": "pushpull-plan",
+  "version": 1,
+  "approval": {
+    "status": "approved",
+    "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+    "approvedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "planVersion": {
+    "id": "pp-2026-07-01-v1",
+    "planId": "pp-2026-07-01",
+    "number": 1,
+    "label": "PushPull 01.07.2026",
+    "units": [
+      {
+        "id": "PUSH A",
+        "name": "Push A",
+        "order": 0
+      },
+      {
+        "id": "PULL A",
+        "name": "Pull A",
+        "order": 1
+      },
+      {
+        "id": "PUSH B",
+        "name": "Push B",
+        "order": 2
+      },
+      {
+        "id": "PULL B",
+        "name": "Pull B",
+        "order": 3
+      }
+    ],
+    "executionVersion": 2,
+    "source": {
+      "kind": "owner",
+      "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+      "recordedAt": null
+    }
+  },
+  "exercises": [
+    {
+      "id": "pp260701-u1-p1-ex",
+      "name": "Prostowanie nóg na maszynie siedząc obunóż",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p2-ex",
+      "name": "Wyciskanie na Smithie, skos 30°",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p3-ex",
+      "name": "Wyciskanie na klatkę na maszynie siedząc (poziomo)",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p4-ex",
+      "name": "Wyciskanie na maszynie poziomej (chwyt neutralny)",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p5-ex",
+      "name": "Wznosy hantli bokiem stojąc",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p6-ex",
+      "name": "Bayesian curl",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p7-ex",
+      "name": "Prostowanie z sznurem zza głowy przed siebie siedząc na ławce skos 60° tyłem do wyciągu",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p8-ex",
+      "name": "Brzuch",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p1-ex",
+      "name": "Uginanie nóg na maszynie leżąc jednonóż",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p2-ex",
+      "name": "Odwodzenie ud na maszynie siedząc",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p3-ex",
+      "name": "T-bar row nachwytem (maszyna)",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p4-ex",
+      "name": "Ściąganie drążka wyciągu górnego nachwytem w odchyleniu tułowia",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p5-ex",
+      "name": "Wiosłowanie jednorącz siedząc",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p6-ex",
+      "name": "Odwodzenie ramienia jednorącz na wyciągu górnym",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p7-ex",
+      "name": "Uginanie ramion na wyciągu ze sznurem (chwyt neutralny)",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p8-ex",
+      "name": "Łydki",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p1-ex",
+      "name": "Prostowanie nóg na maszynie siedząc obunóż",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p2-ex",
+      "name": "Przywodzenie ud na maszynie siedząc",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p3-ex",
+      "name": "Butterfly",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p4-ex",
+      "name": "Wyciskanie na Smithie, skos 60–75°",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p5-ex",
+      "name": "Wyciskanie hantli na ławce skośnej 30°",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p6-ex",
+      "name": "Uginanie ramion z hantlami z supinacją stojąc",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p7-ex",
+      "name": "Cross cable tricep extension jednorącz",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p8-ex",
+      "name": "Wznosy w bok z wyciągu dolnego jednorącz",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p9-ex",
+      "name": "Brzuch",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p1-ex",
+      "name": "Uginanie nóg na maszynie leżąc jednonóż",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p2-ex",
+      "name": "Odwodzenie ud na maszynie siedząc",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p3-ex",
+      "name": "Wiosłowanie hantlem jednorącz w oparciu o ławkę",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p4-ex",
+      "name": "Ściąganie jednorącz do biodra",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p5-ex",
+      "name": "Wiosłowanie na maszynie z podparciem klatki (góra/środek pleców)",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6a-ex",
+      "name": "Narciarz drążek łamany",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6b-ex",
+      "name": "Szrugsy hantle",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p7-ex",
+      "name": "Odwrotny butterfly",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p8-ex",
+      "name": "Uginanie na biceps modlitewnik jednorącz",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p9-ex",
+      "name": "Łydki",
+      "status": "confirmed",
+      "legacyId": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    }
+  ],
+  "variants": [
+    {
+      "id": "pp260701-u1-p1-variant",
+      "exerciseId": "pp260701-u1-p1-ex",
+      "label": "Prostowanie nóg na maszynie siedząc obunóż",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Prostowanie nóg na maszynie siedząc obunóż",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p2-variant",
+      "exerciseId": "pp260701-u1-p2-ex",
+      "label": "Wyciskanie na Smithie, skos 30°",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Wyciskanie na Smithie, skos 30°",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p3-variant",
+      "exerciseId": "pp260701-u1-p3-ex",
+      "label": "Wyciskanie na klatkę na maszynie siedząc (poziomo)",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Wyciskanie na klatkę na maszynie siedząc (poziomo)",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p4-variant",
+      "exerciseId": "pp260701-u1-p4-ex",
+      "label": "Wyciskanie na maszynie poziomej (chwyt neutralny)",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Wyciskanie na maszynie poziomej (chwyt neutralny)",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p5-variant",
+      "exerciseId": "pp260701-u1-p5-ex",
+      "label": "Wznosy hantli bokiem stojąc",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Wznosy hantli bokiem stojąc",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p6-variant",
+      "exerciseId": "pp260701-u1-p6-ex",
+      "label": "Bayesian curl wykonywany oburącz.",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Bayesian curl wykonywany oburącz.",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p7-variant",
+      "exerciseId": "pp260701-u1-p7-ex",
+      "label": "Prostowanie z sznurem zza głowy przed siebie siedząc na ławce skos 60° tyłem do wyciągu",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Prostowanie z sznurem zza głowy przed siebie siedząc na ławce skos 60° tyłem do wyciągu",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p8-variant",
+      "exerciseId": "pp260701-u1-p8-ex",
+      "label": "Brzuch",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Brzuch",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p1-variant",
+      "exerciseId": "pp260701-u2-p1-ex",
+      "label": "Uginanie nóg na maszynie leżąc jednonóż",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Uginanie nóg na maszynie leżąc jednonóż",
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p2-variant",
+      "exerciseId": "pp260701-u2-p2-ex",
+      "label": "Odwodzenie ud na maszynie siedząc",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Odwodzenie ud na maszynie siedząc",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p3-variant",
+      "exerciseId": "pp260701-u2-p3-ex",
+      "label": "T-bar row nachwytem (maszyna)",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "T-bar row nachwytem (maszyna)",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p4-variant",
+      "exerciseId": "pp260701-u2-p4-ex",
+      "label": "Ściąganie drążka wyciągu górnego nachwytem w odchyleniu tułowia",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Ściąganie drążka wyciągu górnego nachwytem w odchyleniu tułowia",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p5-variant",
+      "exerciseId": "pp260701-u2-p5-ex",
+      "label": "wyciąg poziomy, linka ustawiona wyżej, jednorącz.",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "wyciąg poziomy, linka ustawiona wyżej, jednorącz.",
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p6-variant",
+      "exerciseId": "pp260701-u2-p6-ex",
+      "label": "Odwodzenie ramienia jednorącz na wyciągu górnym",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Odwodzenie ramienia jednorącz na wyciągu górnym",
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p7-variant",
+      "exerciseId": "pp260701-u2-p7-ex",
+      "label": "Uginanie ramion na wyciągu ze sznurem (chwyt neutralny)",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Uginanie ramion na wyciągu ze sznurem (chwyt neutralny)",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p8-variant",
+      "exerciseId": "pp260701-u2-p8-ex",
+      "label": "Łydki",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Łydki",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p1-variant",
+      "exerciseId": "pp260701-u3-p1-ex",
+      "label": "Prostowanie nóg na maszynie siedząc obunóż",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Prostowanie nóg na maszynie siedząc obunóż",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p2-variant",
+      "exerciseId": "pp260701-u3-p2-ex",
+      "label": "Przywodzenie ud na maszynie siedząc",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Przywodzenie ud na maszynie siedząc",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p3-variant",
+      "exerciseId": "pp260701-u3-p3-ex",
+      "label": "Butterfly",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Butterfly",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p4-variant",
+      "exerciseId": "pp260701-u3-p4-ex",
+      "label": "Wyciskanie na Smithie, skos 60–75°",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Wyciskanie na Smithie, skos 60–75°",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p5-variant",
+      "exerciseId": "pp260701-u3-p5-ex",
+      "label": "Wyciskanie hantli na ławce skośnej 30°",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Wyciskanie hantli na ławce skośnej 30°",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p6-variant",
+      "exerciseId": "pp260701-u3-p6-ex",
+      "label": "Uginanie ramion z hantlami z supinacją stojąc",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Uginanie ramion z hantlami z supinacją stojąc",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p7-variant",
+      "exerciseId": "pp260701-u3-p7-ex",
+      "label": "Cross cable tricep extension jednorącz",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Cross cable tricep extension jednorącz",
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p8-variant",
+      "exerciseId": "pp260701-u3-p8-ex",
+      "label": "Wznosy w bok z wyciągu dolnego jednorącz",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Wznosy w bok z wyciągu dolnego jednorącz",
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p9-variant",
+      "exerciseId": "pp260701-u3-p9-ex",
+      "label": "Brzuch",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Brzuch",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p1-variant",
+      "exerciseId": "pp260701-u4-p1-ex",
+      "label": "Uginanie nóg na maszynie leżąc jednonóż",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Uginanie nóg na maszynie leżąc jednonóż",
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p2-variant",
+      "exerciseId": "pp260701-u4-p2-ex",
+      "label": "Odwodzenie ud na maszynie siedząc",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Odwodzenie ud na maszynie siedząc",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p3-variant",
+      "exerciseId": "pp260701-u4-p3-ex",
+      "label": "klatka i brzuch na ławce 30–45°.",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "klatka i brzuch na ławce 30–45°.",
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p4-variant",
+      "exerciseId": "pp260701-u4-p4-ex",
+      "label": "wyciąg górny, linka do biodra jednorącz.",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "wyciąg górny, linka do biodra jednorącz.",
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p5-variant",
+      "exerciseId": "pp260701-u4-p5-ex",
+      "label": "maszyna górna z dolnym chwytem, klatka oparta.",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "maszyna górna z dolnym chwytem, klatka oparta.",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6a-variant",
+      "exerciseId": "pp260701-u4-p6a-ex",
+      "label": "Narciarz drążek łamany",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Narciarz drążek łamany",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6b-variant",
+      "exerciseId": "pp260701-u4-p6b-ex",
+      "label": "Szrugsy hantle",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Szrugsy hantle",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p7-variant",
+      "exerciseId": "pp260701-u4-p7-ex",
+      "label": "Odwrotny butterfly",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Odwrotny butterfly",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p8-variant",
+      "exerciseId": "pp260701-u4-p8-ex",
+      "label": "hantlem.",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "hantlem.",
+      "laterality": "unilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p9-variant",
+      "exerciseId": "pp260701-u4-p9-ex",
+      "label": "Łydki",
+      "machine": null,
+      "grip": null,
+      "support": null,
+      "execution": "Łydki",
+      "laterality": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    }
+  ],
+  "positions": [
+    {
+      "id": "pp260701-u1-p1-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH A",
+      "order": 0,
+      "label": "Prostowanie nóg na maszynie siedząc obunóż",
+      "exerciseId": "pp260701-u1-p1-ex",
+      "variantId": "pp260701-u1-p1-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p2-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH A",
+      "order": 1,
+      "label": "Wyciskanie na Smithie, skos 30°",
+      "exerciseId": "pp260701-u1-p2-ex",
+      "variantId": "pp260701-u1-p2-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p3-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH A",
+      "order": 2,
+      "label": "Wyciskanie na klatkę na maszynie siedząc (poziomo)",
+      "exerciseId": "pp260701-u1-p3-ex",
+      "variantId": "pp260701-u1-p3-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p4-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH A",
+      "order": 3,
+      "label": "Wyciskanie na maszynie poziomej (chwyt neutralny)",
+      "exerciseId": "pp260701-u1-p4-ex",
+      "variantId": "pp260701-u1-p4-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p5-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH A",
+      "order": 4,
+      "label": "Wznosy hantli bokiem stojąc",
+      "exerciseId": "pp260701-u1-p5-ex",
+      "variantId": "pp260701-u1-p5-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p6-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH A",
+      "order": 5,
+      "label": "Bayesian curl",
+      "exerciseId": "pp260701-u1-p6-ex",
+      "variantId": "pp260701-u1-p6-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p7-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH A",
+      "order": 6,
+      "label": "Prostowanie z sznurem zza głowy przed siebie siedząc na ławce skos 60° tyłem do wyciągu",
+      "exerciseId": "pp260701-u1-p7-ex",
+      "variantId": "pp260701-u1-p7-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p8-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH A",
+      "order": 7,
+      "label": "Brzuch",
+      "exerciseId": "pp260701-u1-p8-ex",
+      "variantId": "pp260701-u1-p8-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p1-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL A",
+      "order": 0,
+      "label": "Uginanie nóg na maszynie leżąc jednonóż",
+      "exerciseId": "pp260701-u2-p1-ex",
+      "variantId": "pp260701-u2-p1-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p2-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL A",
+      "order": 1,
+      "label": "Odwodzenie ud na maszynie siedząc",
+      "exerciseId": "pp260701-u2-p2-ex",
+      "variantId": "pp260701-u2-p2-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p3-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL A",
+      "order": 2,
+      "label": "T-bar row nachwytem (maszyna)",
+      "exerciseId": "pp260701-u2-p3-ex",
+      "variantId": "pp260701-u2-p3-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p4-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL A",
+      "order": 3,
+      "label": "Ściąganie drążka wyciągu górnego nachwytem w odchyleniu tułowia",
+      "exerciseId": "pp260701-u2-p4-ex",
+      "variantId": "pp260701-u2-p4-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p5-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL A",
+      "order": 4,
+      "label": "Wiosłowanie jednorącz siedząc",
+      "exerciseId": "pp260701-u2-p5-ex",
+      "variantId": "pp260701-u2-p5-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p6-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL A",
+      "order": 5,
+      "label": "Odwodzenie ramienia jednorącz na wyciągu górnym",
+      "exerciseId": "pp260701-u2-p6-ex",
+      "variantId": "pp260701-u2-p6-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p7-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL A",
+      "order": 6,
+      "label": "Uginanie ramion na wyciągu ze sznurem (chwyt neutralny)",
+      "exerciseId": "pp260701-u2-p7-ex",
+      "variantId": "pp260701-u2-p7-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p8-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL A",
+      "order": 7,
+      "label": "Łydki",
+      "exerciseId": "pp260701-u2-p8-ex",
+      "variantId": "pp260701-u2-p8-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p1-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH B",
+      "order": 0,
+      "label": "Prostowanie nóg na maszynie siedząc obunóż",
+      "exerciseId": "pp260701-u3-p1-ex",
+      "variantId": "pp260701-u3-p1-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p2-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH B",
+      "order": 1,
+      "label": "Przywodzenie ud na maszynie siedząc",
+      "exerciseId": "pp260701-u3-p2-ex",
+      "variantId": "pp260701-u3-p2-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p3-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH B",
+      "order": 2,
+      "label": "Butterfly",
+      "exerciseId": "pp260701-u3-p3-ex",
+      "variantId": "pp260701-u3-p3-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p4-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH B",
+      "order": 3,
+      "label": "Wyciskanie na Smithie, skos 60–75°",
+      "exerciseId": "pp260701-u3-p4-ex",
+      "variantId": "pp260701-u3-p4-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p5-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH B",
+      "order": 4,
+      "label": "Wyciskanie hantli na ławce skośnej 30°",
+      "exerciseId": "pp260701-u3-p5-ex",
+      "variantId": "pp260701-u3-p5-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p6-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH B",
+      "order": 5,
+      "label": "Uginanie ramion z hantlami z supinacją stojąc",
+      "exerciseId": "pp260701-u3-p6-ex",
+      "variantId": "pp260701-u3-p6-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p7-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH B",
+      "order": 6,
+      "label": "Cross cable tricep extension jednorącz",
+      "exerciseId": "pp260701-u3-p7-ex",
+      "variantId": "pp260701-u3-p7-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p8-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH B",
+      "order": 7,
+      "label": "Wznosy w bok z wyciągu dolnego jednorącz",
+      "exerciseId": "pp260701-u3-p8-ex",
+      "variantId": "pp260701-u3-p8-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p9-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PUSH B",
+      "order": 8,
+      "label": "Brzuch",
+      "exerciseId": "pp260701-u3-p9-ex",
+      "variantId": "pp260701-u3-p9-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p1-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 0,
+      "label": "Uginanie nóg na maszynie leżąc jednonóż",
+      "exerciseId": "pp260701-u4-p1-ex",
+      "variantId": "pp260701-u4-p1-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p2-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 1,
+      "label": "Odwodzenie ud na maszynie siedząc",
+      "exerciseId": "pp260701-u4-p2-ex",
+      "variantId": "pp260701-u4-p2-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p3-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 2,
+      "label": "Wiosłowanie hantlem jednorącz w oparciu o ławkę",
+      "exerciseId": "pp260701-u4-p3-ex",
+      "variantId": "pp260701-u4-p3-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p4-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 3,
+      "label": "Ściąganie jednorącz do biodra",
+      "exerciseId": "pp260701-u4-p4-ex",
+      "variantId": "pp260701-u4-p4-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p5-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 4,
+      "label": "Wiosłowanie na maszynie z podparciem klatki (góra/środek pleców)",
+      "exerciseId": "pp260701-u4-p5-ex",
+      "variantId": "pp260701-u4-p5-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6a-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 5,
+      "label": "Narciarz drążek łamany",
+      "exerciseId": "pp260701-u4-p6a-ex",
+      "variantId": "pp260701-u4-p6a-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6b-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 6,
+      "label": "Szrugsy hantle",
+      "exerciseId": "pp260701-u4-p6b-ex",
+      "variantId": "pp260701-u4-p6b-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p7-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 7,
+      "label": "Odwrotny butterfly",
+      "exerciseId": "pp260701-u4-p7-ex",
+      "variantId": "pp260701-u4-p7-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p8-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 8,
+      "label": "Uginanie na biceps modlitewnik jednorącz",
+      "exerciseId": "pp260701-u4-p8-ex",
+      "variantId": "pp260701-u4-p8-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "required",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p9-pos",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "order": 9,
+      "label": "Łydki",
+      "exerciseId": "pp260701-u4-p9-ex",
+      "variantId": "pp260701-u4-p9-variant",
+      "legacyPositionId": null,
+      "replacesPositionId": null,
+      "setState": "specified",
+      "confirmation": "confirmed",
+      "loadConvention": {
+        "unit": "kg",
+        "basis": null,
+        "description": null
+      },
+      "sideMode": "bilateral",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    }
+  ],
+  "sets": [
+    {
+      "id": "pp260701-u1-p1-set0",
+      "positionId": "pp260701-u1-p1-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p1-set1",
+      "positionId": "pp260701-u1-p1-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p1-set2",
+      "positionId": "pp260701-u1-p1-pos",
+      "order": 2,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p2-set0",
+      "positionId": "pp260701-u1-p2-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 5,
+        "max": 7
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p2-set1",
+      "positionId": "pp260701-u1-p2-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 5,
+        "max": 7
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p3-set0",
+      "positionId": "pp260701-u1-p3-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 5,
+        "max": 7
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p3-set1",
+      "positionId": "pp260701-u1-p3-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 5,
+        "max": 7
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p3-set2",
+      "positionId": "pp260701-u1-p3-pos",
+      "order": 2,
+      "role": "backoff",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": "pp260701-u1-p3-set0",
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p4-set0",
+      "positionId": "pp260701-u1-p4-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        3,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p4-set1",
+      "positionId": "pp260701-u1-p4-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        3,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p5-set0",
+      "positionId": "pp260701-u1-p5-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p5-set1",
+      "positionId": "pp260701-u1-p5-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p5-set2",
+      "positionId": "pp260701-u1-p5-pos",
+      "order": 2,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p6-set0",
+      "positionId": "pp260701-u1-p6-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 6,
+        "max": 8
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p6-set1",
+      "positionId": "pp260701-u1-p6-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 6,
+        "max": 8
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p6-set2",
+      "positionId": "pp260701-u1-p6-pos",
+      "order": 2,
+      "role": "backoff",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": "pp260701-u1-p6-set0",
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p7-set0",
+      "positionId": "pp260701-u1-p7-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p7-set1",
+      "positionId": "pp260701-u1-p7-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p7-set2",
+      "positionId": "pp260701-u1-p7-pos",
+      "order": 2,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p8-set0",
+      "positionId": "pp260701-u1-p8-pos",
+      "order": 0,
+      "role": "main",
+      "reps": null,
+      "rir": null,
+      "tempo": null,
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p1-set0",
+      "positionId": "pp260701-u2-p1-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p1-set1",
+      "positionId": "pp260701-u2-p1-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p1-set2",
+      "positionId": "pp260701-u2-p1-pos",
+      "order": 2,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p2-set0",
+      "positionId": "pp260701-u2-p2-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p2-set1",
+      "positionId": "pp260701-u2-p2-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p3-set0",
+      "positionId": "pp260701-u2-p3-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 5,
+        "max": 7
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p3-set1",
+      "positionId": "pp260701-u2-p3-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 5,
+        "max": 7
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p3-set2",
+      "positionId": "pp260701-u2-p3-pos",
+      "order": 2,
+      "role": "backoff",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": "pp260701-u2-p3-set0",
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p4-set0",
+      "positionId": "pp260701-u2-p4-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p4-set1",
+      "positionId": "pp260701-u2-p4-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p5-set0",
+      "positionId": "pp260701-u2-p5-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p5-set1",
+      "positionId": "pp260701-u2-p5-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p6-set0",
+      "positionId": "pp260701-u2-p6-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p6-set1",
+      "positionId": "pp260701-u2-p6-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p7-set0",
+      "positionId": "pp260701-u2-p7-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 6,
+        "max": 8
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p7-set1",
+      "positionId": "pp260701-u2-p7-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 6,
+        "max": 8
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p7-set2",
+      "positionId": "pp260701-u2-p7-pos",
+      "order": 2,
+      "role": "backoff",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": "pp260701-u2-p7-set0",
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u2-p8-set0",
+      "positionId": "pp260701-u2-p8-pos",
+      "order": 0,
+      "role": "main",
+      "reps": null,
+      "rir": null,
+      "tempo": null,
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p1-set0",
+      "positionId": "pp260701-u3-p1-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p1-set1",
+      "positionId": "pp260701-u3-p1-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p1-set2",
+      "positionId": "pp260701-u3-p1-pos",
+      "order": 2,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p2-set0",
+      "positionId": "pp260701-u3-p2-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p2-set1",
+      "positionId": "pp260701-u3-p2-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p3-set0",
+      "positionId": "pp260701-u3-p3-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p3-set1",
+      "positionId": "pp260701-u3-p3-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p4-set0",
+      "positionId": "pp260701-u3-p4-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 5,
+        "max": 7
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p4-set1",
+      "positionId": "pp260701-u3-p4-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 5,
+        "max": 7
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p4-set2",
+      "positionId": "pp260701-u3-p4-pos",
+      "order": 2,
+      "role": "backoff",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": "pp260701-u3-p4-set0",
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p5-set0",
+      "positionId": "pp260701-u3-p5-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 6,
+        "max": 8
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p5-set1",
+      "positionId": "pp260701-u3-p5-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 6,
+        "max": 8
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p6-set0",
+      "positionId": "pp260701-u3-p6-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p6-set1",
+      "positionId": "pp260701-u3-p6-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p7-set0",
+      "positionId": "pp260701-u3-p7-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p7-set1",
+      "positionId": "pp260701-u3-p7-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p7-set2",
+      "positionId": "pp260701-u3-p7-pos",
+      "order": 2,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p8-set0",
+      "positionId": "pp260701-u3-p8-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 12,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p8-set1",
+      "positionId": "pp260701-u3-p8-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 15,
+        "max": 20
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u3-p9-set0",
+      "positionId": "pp260701-u3-p9-pos",
+      "order": 0,
+      "role": "main",
+      "reps": null,
+      "rir": null,
+      "tempo": null,
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p1-set0",
+      "positionId": "pp260701-u4-p1-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p1-set1",
+      "positionId": "pp260701-u4-p1-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p1-set2",
+      "positionId": "pp260701-u4-p1-pos",
+      "order": 2,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p2-set0",
+      "positionId": "pp260701-u4-p2-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p2-set1",
+      "positionId": "pp260701-u4-p2-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 10,
+        "max": 12
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p3-set0",
+      "positionId": "pp260701-u4-p3-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p3-set1",
+      "positionId": "pp260701-u4-p3-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p4-set0",
+      "positionId": "pp260701-u4-p4-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p4-set1",
+      "positionId": "pp260701-u4-p4-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p4-set2",
+      "positionId": "pp260701-u4-p4-pos",
+      "order": 2,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p5-set0",
+      "positionId": "pp260701-u4-p5-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p5-set1",
+      "positionId": "pp260701-u4-p5-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6a-set0",
+      "positionId": "pp260701-u4-p6a-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6a-set1",
+      "positionId": "pp260701-u4-p6a-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6b-set0",
+      "positionId": "pp260701-u4-p6b-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p6b-set1",
+      "positionId": "pp260701-u4-p6b-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p7-set0",
+      "positionId": "pp260701-u4-p7-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 12,
+        "max": 15
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p7-set1",
+      "positionId": "pp260701-u4-p7-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 12,
+        "max": 15
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p7-set2",
+      "positionId": "pp260701-u4-p7-pos",
+      "order": 2,
+      "role": "main",
+      "reps": {
+        "min": 12,
+        "max": 15
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p8-set0",
+      "positionId": "pp260701-u4-p8-pos",
+      "order": 0,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p8-set1",
+      "positionId": "pp260701-u4-p8-pos",
+      "order": 1,
+      "role": "main",
+      "reps": {
+        "min": 8,
+        "max": 10
+      },
+      "rir": {
+        "min": 0,
+        "max": 0
+      },
+      "tempo": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "side": "each",
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p9-set0",
+      "positionId": "pp260701-u4-p9-pos",
+      "order": 0,
+      "role": "main",
+      "reps": null,
+      "rir": null,
+      "tempo": null,
+      "side": null,
+      "backoffFromSetId": null,
+      "restSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    }
+  ],
+  "drops": [
+    {
+      "id": "pp260701-u1-p5-set0-drop",
+      "setId": "pp260701-u1-p5-set0",
+      "segments": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p5-set1-drop",
+      "setId": "pp260701-u1-p5-set1",
+      "segments": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u1-p5-set2-drop",
+      "setId": "pp260701-u1-p5-set2",
+      "segments": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p7-set0-drop",
+      "setId": "pp260701-u4-p7-set0",
+      "segments": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p7-set1-drop",
+      "setId": "pp260701-u4-p7-set1",
+      "segments": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "id": "pp260701-u4-p7-set2-drop",
+      "setId": "pp260701-u4-p7-set2",
+      "segments": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "pp260701-pullb-pair6",
+      "planVersionId": "pp-2026-07-01-v1",
+      "unitId": "PULL B",
+      "kind": "paired",
+      "positionIds": [
+        "pp260701-u4-p6a-pos",
+        "pp260701-u4-p6b-pos"
+      ],
+      "rounds": 2,
+      "betweenMembersSeconds": 15,
+      "afterRoundSeconds": null,
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    }
+  ],
+  "coachInstructions": [],
+  "continuity": [
+    {
+      "positionId": "pp260701-u1-p1-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u1-p2-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u1-p3-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u1-p4-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u1-p5-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u1-p6-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u1-p7-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u1-p8-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u2-p1-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u2-p2-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u2-p3-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u2-p4-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u2-p5-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u2-p6-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u2-p7-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u2-p8-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u3-p1-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u3-p2-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u3-p3-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u3-p4-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u3-p5-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u3-p6-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u3-p7-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u3-p8-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u3-p9-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p1-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p2-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p3-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p4-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p5-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p6a-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p6b-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p7-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p8-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    },
+    {
+      "positionId": "pp260701-u4-p9-pos",
+      "relation": "new",
+      "previousExerciseId": null,
+      "previousVariantId": null,
+      "previousPositionId": null,
+      "reason": "Odrębna pozycja nowego planu; brak przenoszenia historii.",
+      "source": {
+        "kind": "owner",
+        "reference": "PushPull_01.07.2026_SPECYFIKACJA.md",
+        "recordedAt": null
+      }
+    }
+  ],
+  "initialUserNotes": [
+    {
+      "exerciseId": "pp260701-u1-p3-ex",
+      "text": "Trzecia seria back-off. Zast. wyciskanie hantli poziomo."
+    },
+    {
+      "exerciseId": "pp260701-u1-p4-ex",
+      "text": "Siedzisko wysoko. Chwyt neutralny. Każde powtórzenie w jednakowym zakresie ruchu. Skrócenie zakresu = koniec serii."
+    },
+    {
+      "exerciseId": "pp260701-u1-p5-ex",
+      "text": "Łokieć powinien być nad nadgarstkiem, myślisz o tym, żeby odwodzić ramiona właśnie unosząc łokcie. Nadgarstek powinien być nieco poniżej łokcia jak już masz uniesione hantle."
+    },
+    {
+      "exerciseId": "pp260701-u1-p6-ex",
+      "text": "Jak jest wąska brama, to oburącz. Otwieramy klatkę, stoimy, uginamy łokcie. Barki zostawiamy w tyle. W ostatnich 2 ruchach blisko upadku łokieć może lekko przesunąć się w przód, wcześniej nie chcemy tego. Kontuzja łokcia: uginanie na wyciągu neutralnie, sznur."
+    },
+    {
+      "exerciseId": "pp260701-u2-p1-ex",
+      "text": "Utrzymuj idealną pozycję. Nie nadrabiaj ostatnich powtórzeń kosztem techniki."
+    },
+    {
+      "exerciseId": "pp260701-u2-p3-ex",
+      "text": "Maksymalnie zbliżaj łopatki podczas przyciągania ciężaru do klatki. Siedzisko ustawione niżej."
+    },
+    {
+      "exerciseId": "pp260701-u2-p4-ex",
+      "text": "Intencja pracy: góra pleców."
+    },
+    {
+      "exerciseId": "pp260701-u2-p5-ex",
+      "text": "Łokieć blisko tułowia. Intencja pracy: najszerszy grzbietu."
+    },
+    {
+      "exerciseId": "pp260701-u2-p6-ex",
+      "text": "Tylny akton barku, nie czworobok. Mocna protrakcja ramienia, obszerny ruch do boku."
+    },
+    {
+      "exerciseId": "pp260701-u2-p7-ex",
+      "text": "Dwa kroki od wyciągu. Nie unoś łokci podczas uginania."
+    },
+    {
+      "exerciseId": "pp260701-u3-p3-ex",
+      "text": "Klatkę wypnij w górę, lekki mostek, barki cofnięte. Bez protrakcji barków podczas ruchu. Duży zakres ruchu, barki pozostają w miejscu."
+    },
+    {
+      "exerciseId": "pp260701-u3-p6-ex",
+      "text": "Wykonuj naprzemiennie, aby uzyskać większą supinację nadgarstka. Nie unoś obu hantli jednocześnie."
+    },
+    {
+      "exerciseId": "pp260701-u4-p3-ex",
+      "text": "Ławka 30–45°, klatka i brzuch oparte. Wiosłuj jednorącz w kierunku biodra. Lędźwie stabilne."
+    },
+    {
+      "exerciseId": "pp260701-u4-p4-ex",
+      "text": "Ściągaj jednorącz w kierunku biodra, z intencją pracy najszerszego grzbietu."
+    },
+    {
+      "exerciseId": "pp260701-u4-p5-ex",
+      "text": "Siedzisko niżej, łokcie na zewnątrz. Bez zamachu tułowiem."
+    },
+    {
+      "exerciseId": "pp260701-u4-p8-ex",
+      "text": "Kontuzja łokcia: uginanie na wyciągu, chwyt neutralny, sznur."
+    }
+  ]
+}

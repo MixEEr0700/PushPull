@@ -1,0 +1,271 @@
+{
+  "status": "UNIMPLEMENTED_SOURCE_EXTRACTION",
+  "source": "PushPull_01.07.2026_SPECYFIKACJA.md",
+  "units": [
+    {
+      "name": "Push A",
+      "positions": [
+        {
+          "position": "1",
+          "name": "Prostowanie nóg na maszynie siedząc obunóż",
+          "prescription": "3×8–10",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "2",
+          "name": "Wyciskanie na Smithie, skos 30°",
+          "prescription": "2×5–7",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "3",
+          "name": "Wyciskanie na klatkę na maszynie siedząc (poziomo)",
+          "prescription": "2×5–7 + 1×8–10 BO",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "4",
+          "name": "Wyciskanie na maszynie poziomej (chwyt neutralny)",
+          "prescription": "2×8–10",
+          "rir": "0",
+          "tempo": "3111"
+        },
+        {
+          "position": "5",
+          "name": "Wznosy hantli bokiem stojąc",
+          "prescription": "3×10–12; DS po każdej",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "6",
+          "name": "Bayesian curl",
+          "prescription": "2×6–8 + 1×10–12 BO",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "7",
+          "name": "Prostowanie z sznurem zza głowy przed siebie siedząc na ławce skos 60° tyłem do wyciągu",
+          "prescription": "3×8–10",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "8",
+          "name": "Brzuch",
+          "prescription": "1 pusta seria, parametry nieustalone",
+          "rir": "—",
+          "tempo": "—"
+        }
+      ]
+    },
+    {
+      "name": "Pull A",
+      "positions": [
+        {
+          "position": "1",
+          "name": "Uginanie nóg na maszynie leżąc jednonóż",
+          "prescription": "3×8–10 na nogę",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "2",
+          "name": "Odwodzenie ud na maszynie siedząc",
+          "prescription": "2×10–12",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "3",
+          "name": "T-bar row nachwytem (maszyna)",
+          "prescription": "2×5–7 + 1×8–10 BO",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "4",
+          "name": "Ściąganie drążka wyciągu górnego nachwytem w odchyleniu tułowia",
+          "prescription": "2×8–10",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "5",
+          "name": "Wiosłowanie jednorącz siedząc",
+          "prescription": "2×10–12 na rękę",
+          "rir": "0",
+          "tempo": "2011"
+        },
+        {
+          "position": "6",
+          "name": "Odwodzenie ramienia jednorącz na wyciągu górnym",
+          "prescription": "2×10–12 na rękę",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "7",
+          "name": "Uginanie ramion na wyciągu ze sznurem (chwyt neutralny)",
+          "prescription": "2×6–8 + 1×10–12 BO",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "8",
+          "name": "Łydki",
+          "prescription": "1 pusta seria, parametry nieustalone",
+          "rir": "—",
+          "tempo": "—"
+        }
+      ]
+    },
+    {
+      "name": "Push B",
+      "positions": [
+        {
+          "position": "1",
+          "name": "Prostowanie nóg na maszynie siedząc obunóż",
+          "prescription": "3×10–12",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "2",
+          "name": "Przywodzenie ud na maszynie siedząc",
+          "prescription": "2×10–12",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "3",
+          "name": "Butterfly",
+          "prescription": "2×8–10",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "4",
+          "name": "Wyciskanie na Smithie, skos 60–75°",
+          "prescription": "2×5–7 + 1×8–10 BO",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "5",
+          "name": "Wyciskanie hantli na ławce skośnej 30°",
+          "prescription": "2×6–8",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "6",
+          "name": "Uginanie ramion z hantlami z supinacją stojąc",
+          "prescription": "2×8–10",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "7",
+          "name": "Cross cable tricep extension jednorącz",
+          "prescription": "3×8–10 na rękę",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "8",
+          "name": "Wznosy w bok z wyciągu dolnego jednorącz",
+          "prescription": "1×12 + 1×15–20 na rękę",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "9",
+          "name": "Brzuch",
+          "prescription": "1 pusta seria, parametry nieustalone",
+          "rir": "—",
+          "tempo": "—"
+        }
+      ]
+    },
+    {
+      "name": "Pull B",
+      "positions": [
+        {
+          "position": "1",
+          "name": "Uginanie nóg na maszynie leżąc jednonóż",
+          "prescription": "3×8–10 na nogę",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "2",
+          "name": "Odwodzenie ud na maszynie siedząc",
+          "prescription": "2×10–12",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "3",
+          "name": "Wiosłowanie hantlem jednorącz w oparciu o ławkę",
+          "prescription": "2×8–10 na rękę",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "4",
+          "name": "Ściąganie jednorącz do biodra",
+          "prescription": "3×8–10 na rękę",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "5",
+          "name": "Wiosłowanie na maszynie z podparciem klatki (góra/środek pleców)",
+          "prescription": "2×8–10",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "6a",
+          "name": "Narciarz drążek łamany",
+          "prescription": "2×8–10",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "6b",
+          "name": "Szrugsy hantle",
+          "prescription": "2×8–10",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "7",
+          "name": "Odwrotny butterfly",
+          "prescription": "3×12–15; DS po każdej",
+          "rir": "0",
+          "tempo": "2111"
+        },
+        {
+          "position": "8",
+          "name": "Uginanie na biceps modlitewnik jednorącz",
+          "prescription": "2×8–10 na rękę",
+          "rir": "0",
+          "tempo": "2010"
+        },
+        {
+          "position": "9",
+          "name": "Łydki",
+          "prescription": "1 pusta seria, parametry nieustalone",
+          "rir": "—",
+          "tempo": "—"
+        }
+      ]
+    }
+  ]
+}
