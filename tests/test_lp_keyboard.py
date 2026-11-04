@@ -16,6 +16,8 @@ class KeyboardLP(BrowserHarness):
             form=self.page.locator('.performanceForm');quick=form.locator('[data-quick=kg]');expect(quick).to_be_editable();quick.focus();expect(quick).to_be_focused();quick.press_sequentially('24');expect(quick).to_be_focused()
             reps=form.locator('[data-quick=reps]');expect(reps).to_be_editable();reps.focus();reps.press_sequentially('10');expect(reps).to_be_focused()
             form.locator('[data-rich-action=toggle]').click()
+            expect(form.locator('[data-compact-row]')).to_have_count(2)
+            expect(form.locator('[data-side-exception]')).to_have_count(0)
             for field in form.locator('[data-field=kg]').all():expect(field).to_have_value('24')
             for field in form.locator('[data-field=reps]').all():expect(field).to_have_value('10')
             form.locator('[data-load-basis]').select_option('per-implement');form.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()

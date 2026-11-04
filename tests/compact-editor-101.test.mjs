@@ -34,8 +34,8 @@ test('101: old empty optional evidence is unknown until explicit choice; single 
  change(optional,'data-execution-choice','single');act(optional,'add-set');assert.deepEqual(current(optional).performance.rows.map(r=>r.side),[null]);
  setup(optional,fill(newPerformance(optional)));for(let i=0;i<3;i++)act(optional,'remove-set');act(optional,'add-set');assert.deepEqual(current(optional).performance.rows.map(r=>r.side),[null]);
 });
-test('101: unknown/combined or contradictory plan kg never authorizes adding pairs after deletion',()=>{
- for(const basis of [null,'combined']){const x={...required,loadConvention:{...required.loadConvention,basis}};setup(x);for(let i=0;i<3;i++)act(x,'remove-set');const before=current(x);act(x,'add-set');assert.deepEqual(current(x),before);}
+test('101: fresh unknown convention can add pairs while combined remains protected',()=>{
+ for(const basis of [null,'combined']){const x={...required,loadConvention:{...required.loadConvention,basis}};setup(x);for(let i=0;i<3;i++)act(x,'remove-set');const before=current(x);act(x,'add-set');if(basis===null){assert.equal(current(x).performance.rows.length,2);assert.equal(current(x).performance.loadConvention.basis,null);}else assert.deepEqual(current(x),before);}
  const p=fill(newPerformance(required));p.loadConvention.basis='per-implement';setup(required,p);assert.match(editor.editor(required,'s',{performance:p},null),/readonly data-quick/);
 });
 test('101: ad-hoc drop targets the chosen parent, preserves goals/IDs, uses explicit marker and blank segment',()=>{
