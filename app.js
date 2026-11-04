@@ -86,7 +86,7 @@ function paintPwa(){
  const main=document.querySelector('#app .app');if(!main)return;
  let notice=main.querySelector('[data-pwa-notice]');
  if(!notice){notice=document.createElement('p');notice.className='hint';notice.setAttribute('role','status');notice.setAttribute('data-pwa-notice','');main.prepend(notice);}
- const message=pwaStatus.ready?'Dostępna nowa wersja PushPull. Zapisz bieżące wyniki i zamknij wszystkie okna aplikacji, następnie uruchom ją ponownie.':pwaStatus.error;
+ const message=pwaStatus.ready?'Dostępna nowa wersja Dziennika Treningowego. Zapisz bieżące wyniki i zamknij wszystkie okna aplikacji, następnie uruchom ją ponownie.':pwaStatus.error;
  if(notice.textContent!==message)notice.textContent=message;notice.hidden=!message;
  document.querySelectorAll('[data-pwa-version]').forEach(el=>{el.textContent='Wersja aplikacji: '+(pwaStatus.release?pwaStatus.release.slice(0,12):'identyfikator niedostępny');});
 }

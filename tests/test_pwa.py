@@ -59,14 +59,15 @@ class ArtifactBuild(unittest.TestCase):
     def test_rename_preserves_pwa_identity_icons_and_data_contract(self):
         old=json.loads(subprocess.check_output(['git','show',STAGE3+':manifest.webmanifest'],cwd=ROOT))
         current=json.loads((ROOT/'manifest.webmanifest').read_text())
-        self.assertEqual(current['name'],'Aplikacja Treningowa')
-        self.assertEqual(current['short_name'],'Aplikacja Treningowa')
-        self.assertIn('Aplikacja Treningowa',current['description'])
+        self.assertEqual(current['name'],'Dziennik Treningowy')
+        self.assertEqual(current['short_name'],'Dziennik Treningowy')
+        self.assertIn('Dziennik Treningowy',current['description'])
         for field in set(old)-{'name','short_name','description'}:
             self.assertEqual(current[field],old[field],field)
-        # Issue43 explicitly authorizes Compact Matrix v0.4 CSS; identity/icons remain frozen.
-        for name in ['icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','PushPull_PLAN_PROJEKTU_v1.md']:
-            self.assertEqual((ROOT/name).read_bytes(),subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT),name)
+        # The requested icon refresh must retain PWA identity and the project plan.
+        self.assertEqual((ROOT/'PushPull_PLAN_PROJEKTU_v1.md').read_bytes(),subprocess.check_output(['git','show',STAGE3+':PushPull_PLAN_PROJEKTU_v1.md'],cwd=ROOT))
+        for name in ['icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png']:
+            self.assertNotEqual((ROOT/name).read_bytes(),subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT),name)
 
     def test_artifact_server_refuses_modified_assets_and_source_checkout(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -251,7 +252,7 @@ class PWADeployment(unittest.TestCase):
         other=self.context.new_page();other.goto(self.url);expect(other.locator('[data-act=finish]')).to_be_visible()
         before=self.notification_state()
         newer=self.next_release('notice-two-tabs');self.controller['directory']=newer;self.wait_update()
-        message='Dostępna nowa wersja PushPull. Zapisz bieżące wyniki i zamknij wszystkie okna aplikacji, następnie uruchom ją ponownie.'
+        message='Dostępna nowa wersja Dziennika Treningowego. Zapisz bieżące wyniki i zamknij wszystkie okna aplikacji, następnie uruchom ją ponownie.'
         for page in [self.page,other]:expect(page.locator('[data-pwa-notice]')).to_have_text(message,timeout=30000)
         self.assertTrue(self.page.evaluate('window.__keptEditor===document.querySelector(".performanceForm")&&window.__keptInput===document.activeElement'))
         self.assertEqual(self.notification_state(),before)
@@ -1238,18 +1239,18 @@ class PWADeployment(unittest.TestCase):
         expect(self.page).to_have_title('PushPull · Dziennik') # No forced reload.
         self.assertEqual(self.snapshot(),before)
         self.reopen()
-        expect(self.page).to_have_title('Aplikacja Treningowa')
-        expect(self.page.locator('meta[name=description]')).to_have_attribute('content','Aplikacja Treningowa — kompaktowy dziennik treningowy')
+        expect(self.page).to_have_title('Dziennik Treningowy')
+        expect(self.page.locator('meta[name=description]')).to_have_attribute('content','Dziennik Treningowy — kompaktowy dziennik treningowy')
         manifest=json.loads(self.context.new_cdp_session(self.page).send('Page.getAppManifest')['data'])
-        self.assertEqual(manifest['name'],'Aplikacja Treningowa')
-        self.assertEqual(manifest['short_name'],'Aplikacja Treningowa')
+        self.assertEqual(manifest['name'],'Dziennik Treningowy')
+        self.assertEqual(manifest['short_name'],'Dziennik Treningowy')
         for field in ['id','start_url','scope','icons']:
             self.assertEqual(manifest[field],old_manifest[field])
         self.assertEqual(self.snapshot(),before)
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key+"_backup_test")',KEY),'old backup preserved')
         self.context.set_offline(True);self.reopen()
-        expect(self.page).to_have_title('Aplikacja Treningowa')
+        expect(self.page).to_have_title('Dziennik Treningowy')
         self.assertEqual(self.snapshot(),before)
         self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
