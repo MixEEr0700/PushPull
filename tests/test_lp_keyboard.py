@@ -22,6 +22,7 @@ class KeyboardLP(BrowserHarness):
             for field in form.locator('[data-field=reps]').all():expect(field).to_have_value('10')
             form.locator('[data-load-basis]').select_option('per-implement');form.locator('[type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
         d=self.state();self.assertEqual(len(d['entries']),2)
-        for e in d['entries']:self.assertEqual(len(e['series']),4)
+        for e in d['entries']:
+            self.assertEqual(len(e['series']),2);self.assertEqual({r['side'] for r in e['performance']['rows']},{'both'})
         self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible();self.page.locator('[data-expand="pp260701-u2-p5-ex"]').click();open_result_panel(self.page)
         form=self.page.locator('.performanceForm');expect(form.locator('[data-quick=kg]')).to_be_editable();form.locator('[data-quick=kg]').focus();expect(form.locator('[data-quick=kg]')).to_be_focused()

@@ -3,6 +3,7 @@ import {canonical,requireThat as check} from './backup-json.mjs';
 /** Explicit per-result extension; never rewrites the plan's drop prescription. */
 export const userDrop=row=>row?.dropOrigin==='user'&&Array.isArray(row.segments)&&row.segments.length>1;
 export function flatten(performance){return performance.rows.flatMap(row=>row.segments.map(s=>({...s,parentId:row.id,side:row.side})));}
+export function performanceTonnage(p){if(!p.loadConvention?.basis)return null;return flatten(p).reduce((n,s)=>n+(Number(String(s.kg).replace(',','.'))||0)*(Number(s.reps)||0)*(p.loadConvention.basis==='per-implement'&&s.side==='both'?2:1),0);}
 export function validatePerformance(performance,snapshot,entry){
  check(performance?.version===2&&Array.isArray(performance.rows)&&performance.rows.length,'missing performance');
  const position=snapshot.model.positions.find(p=>p.id===entry.journalPositionId);

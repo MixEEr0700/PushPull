@@ -5,7 +5,7 @@ import {buildPlan,views,PLAN_ID} from '../model/v2-plan.mjs';
 import {newPerformance,identicalSeries} from '../model/performance.mjs';
 import {editorValueValid} from '../model/workout-drafts.mjs';
 const ex=views(buildPlan('pairs-test'),PLAN_ID,'PULL A',{}).find(e=>e.id==='PULL-A-1');
-function setup(){editor.clear();editor.editor(ex,'s',null,null);globalThis.confirm=()=>true;globalThis.alert=()=>{};}
+function setup(){editor.clear();editor.editor(ex,'s',{performance:newPerformance(ex)},null);globalThis.confirm=()=>true;globalThis.alert=()=>{};}
 function act(action,row=0){const form={dataset:{id:ex.id,session:'s'},innerHTML:''},button={dataset:{richAction:action,row:String(row)},closest:()=>form};editor.click({target:{closest:()=>button}});return editor.state(ex.id,'s');}
 test('deletion removes the entire first pair including IDs and adding restores exactly two blank rows',()=>{setup();let d=editor.state(ex.id,'s'),old=structuredClone(d.performance.rows);d=act('remove-set');assert.deepEqual(d.performance.rows,old.slice(2));act('remove-set');d=act('remove-set');assert.equal(d.performance.rows.length,0);d=act('add-set');assert.equal(d.performance.rows.length,2);assert.deepEqual(d.performance.rows.map(r=>r.side),['left','right']);assert.ok(d.performance.rows.every(r=>r.segments[0].kg===''));});
 test('explicit merge copies only chosen values, retaining both sides, segment IDs and metadata; cancel retains asymmetry',()=>{

@@ -106,7 +106,7 @@ test('repeated activation of already active V2 is a complete no-op, including ro
 test('side linking is recoverable editor state; old asymmetric results and drafts are never normalized',async()=>{
  const editor=await import('../model/performance-editor.mjs');
  const ex=views(buildPlan('owner'),PLAN_ID,'PULL A',{}).find(e=>e.id==='PULL-A-1');
- editor.editor(ex,'test-side-state',null,null);
+ editor.editor(ex,'test-side-state',{performance:newPerformance(ex)},null);
  const fresh=editor.state(ex.id,'test-side-state');assert.equal(fresh.sidePairs.length,3);assert.ok(fresh.sidePairs.every(p=>!p.linked));
  fresh.sidePairs[1].linked=false;editor.restore(ex.id,'test-side-state',fresh);editor.editor(ex,'test-side-state',null,null);
  assert.deepEqual(editor.state(ex.id,'test-side-state'),fresh,'separate mode persists even with equal or empty values');
