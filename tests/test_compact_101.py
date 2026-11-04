@@ -1,7 +1,7 @@
 """Issue101: real disposable IndexedDB, explicit sides, ad-hoc drop roundtrips."""
 from pathlib import Path
 from playwright.sync_api import expect
-from test_browser import BrowserHarness,add_drop,confirm_restore,wait_for_service_worker_controller,seed_historical_editor
+from test_browser import BrowserHarness,add_drop,confirm_restore,wait_for_service_worker_controller,seed_historical_editor,LEGACY_PAIRS
 import test_v2_training as v2
 
 class Compact101(BrowserHarness):
@@ -93,7 +93,7 @@ class Compact101(BrowserHarness):
     def test_common_lp_user_drop_offline_finish_counts_both_records_once(self):
         self.context=self.new_context(service_workers='allow');self.page=self.context.new_page();self.page.on('dialog',self.dialog);self.page.goto(self.url)
         wait_for_service_worker_controller(self.page);self.activate();f=self.open_result('PULL A','PULL-A-1');self.fill_rows(f,'24','10');before=self.state()
-        self.context.set_offline(True);add_drop(f,0);self.fill_rows(f,'24','10');snapshot=self.memory()['performance']
+        f=seed_historical_editor(self.page,LEGACY_PAIRS);self.context.set_offline(True);add_drop(f,0);self.fill_rows(f,'24','10');snapshot=self.memory()['performance']
         self.assertEqual([len(r['segments']) for r in snapshot['rows']],[2,2,1,1,1,1]);expect(f.locator('[data-compact-row]')).to_have_count(4)
         f=self.restart();self.assertEqual(self.memory()['performance'],snapshot)
         self.page.locator('[data-act=finish]').click();self.page.locator('[data-finish-save]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
@@ -114,7 +114,7 @@ class Compact101(BrowserHarness):
 
     def test_historical_asymmetry_survives_additional_segment_on_chosen_side(self):
         self.activate();f=self.open_result('PULL A','PULL-A-1');self.fill_rows(f,'24','10');before=self.state()
-        f=seed_historical_editor(self.page,"d.performance.rows[1].segments[0].kg='21'");snapshot=self.memory()['performance'];add_drop(f,1)
+        f=seed_historical_editor(self.page,LEGACY_PAIRS+"d.performance.rows[1].segments[0].kg='21'");snapshot=self.memory()['performance'];add_drop(f,1)
         expect(f.locator('[data-row="1"][data-segment="1"][data-field=kg]')).to_have_value('')
         f.locator('[data-row="1"][data-segment="1"][data-field=kg]').fill('10');f.locator('[data-row="1"][data-segment="1"][data-field=reps]').fill('6')
         self.assertEqual(self.memory()['performance']['rows'][0],snapshot['rows'][0]);f=self.restart();self.save_form(f)

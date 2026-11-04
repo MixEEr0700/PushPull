@@ -1,5 +1,5 @@
 """Synthetic data-only V3/V4 through the existing mobile UI; no owner plan."""
-from test_browser import add_drop,seed_historical_editor,confirm_restore,open_result_panel
+from test_browser import add_drop,seed_historical_editor,LEGACY_PAIRS,confirm_restore,open_result_panel
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -126,7 +126,7 @@ class PlanImport(BrowserHarness):
         self.page.reload();self.page.locator('[data-draft-resume]').first.click()
         expect(self.page.locator('.performanceForm input[data-field=kg]')).to_have_count(5)
         self.page.locator('.performanceForm [type=submit]').click();expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
-        f=self.form('TEST-5');self.fill(f);self.save(f)
+        f=self.form('TEST-5');self.fill(f);f=seed_historical_editor(self.page,LEGACY_PAIRS);self.save(f)
         state=self.state();sid=state['activeId'];self.assertEqual(len(state['entries'][-1]['performance']['rows']),4)
         snapshot=state['trainingJournal']['sessionSnapshots'][-1]
         self.page.locator('[data-panel=stats]').click();expect(self.page.locator('.stat-table')).to_contain_text('640')
