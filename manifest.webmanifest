@@ -1,6 +1,6 @@
 {
-  "name": "Aplikacja Treningowa",
-  "short_name": "Aplikacja Treningowa",
+  "name": "Dziennik Treningowy",
+  "short_name": "Dziennik Treningowy",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -34,6 +34,6 @@
     }
   ],
   "id": "./index.html",
-  "description": "Aplikacja Treningowa — wersja testowa. Parametry planu V2 wymagają potwierdzenia z dokumentem trenera.",
+  "description": "Dziennik Treningowy — wersja testowa. Parametry planu V2 wymagają potwierdzenia z dokumentem trenera.",
   "prefer_related_applications": false
 }
