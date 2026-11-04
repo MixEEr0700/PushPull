@@ -140,3 +140,6 @@ button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-off
 [data-data-section][open]>summary::after{content:"⌃"}
 [data-data-section]>summary[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
 [data-data-section]>summary+section,[data-data-section]>summary+div{margin-top:8px}
+
+/* Two logical prescription lines in training and calendar cards. */
+.exercise-card .detail{white-space:pre-line}

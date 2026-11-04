@@ -28,9 +28,9 @@ test('95: incompatible load or target context is never used to seed a new result
  for(const wrong of ['load','target']){const e=result();if(wrong==='load')e.performance.loadConvention.unit='lb';else e.performance.rows[0].setId='foreign-target';editor(ex,wrong,null,e);assert.equal(state(ex.id,wrong).performance.rows[0].segments[0].kg,'');forget(ex.id,wrong);}
 });
 test('95: compact plan text preserves real ranges, tempo, unknown values and backoff/drop roles',()=>{
- assert.equal(parameters({...ex,targets:ex.targets.map(t=>({...t,reps:{min:8,max:10},tempo:[2,1,1,1],rir:{min:0,max:0}}))}),'3 × 8–10 | tempo 2111 | RIR 0');
- assert.doesNotMatch(parameters(exercises.find(e=>e.id==='PUSH-A-3')),/back-off/);assert.ok(exercises.find(e=>e.id==='PUSH-A-3').targets.some(t=>t.role==='backoff'));assert.match(parameters(exercises.find(e=>e.id==='PUSH-A-5')),/drop/);
- assert.equal(parameters({...ex,targets:[{reps:null,tempo:null,rir:null,role:'main'}]}),'1 × nieokreślone | tempo nieokreślone | RIR nieokreślone');
+ assert.equal(parameters({...ex,targets:ex.targets.map(t=>({...t,reps:{min:8,max:10},tempo:[2,1,1,1],rir:{min:0,max:0}}))}),'3 × 8–10\nTempo 2111 · RIR 0');
+ assert.match(parameters(exercises.find(e=>e.id==='PUSH-A-3')),/back-off/);assert.ok(exercises.find(e=>e.id==='PUSH-A-3').targets.some(t=>t.role==='backoff'));assert.match(parameters(exercises.find(e=>e.id==='PUSH-A-5')),/drop/);
+ assert.equal(parameters({...ex,targets:[{reps:null,tempo:null,rir:null,role:'main'}]}),'1 × nieokreślone\nTempo nieokreślone · RIR nieokreślone');
 });
 test('95: equal numeric values with different side/role/segment semantics never become one fictional result',()=>{
  const e=result(['10','10','10']);e.performance.rows[1].side='left';const html=summary(e,ex.targets);assert.match(text(html),/L 10 × 80 kg/);assert.equal((html.match(/last-series-row/g)||[]).length,3);
@@ -42,4 +42,11 @@ test('95: identical drops compact the entire ordered segment sequence, not its f
  for(const r of performance.rows){r.segments[0].kg='20';r.segments[0].reps='10';r.segments[1].kg='10';r.segments[1].reps='6';}
  const before=structuredClone(performance);assert.equal(text(summary({performance},drop.targets)),'dropset: 10 × 20 kg → 6 × 10 kg');assert.deepEqual(performance,before);
  performance.rows[2].segments[1].reps='5';assert.equal((summary({performance},drop.targets).match(/last-series-row/g)||[]).length,3);
+});
+
+test('approved plan displays main sets, back-off and dropsets in two logical lines',async()=>{
+ const fs=await import('node:fs');const p=JSON.parse(fs.readFileSync('plans/PushPull-01.07.2026.json'));
+ const targets=name=>{const pos=p.positions.find(x=>x.unitId==='PUSH A'&&x.label===name);return p.sets.filter(x=>x.positionId===pos.id).map(x=>({...x,drop:p.drops.some(d=>d.setId===x.id)}))};
+ assert.equal(parameters({targets:targets('Bayesian curl')}),'2 × 6–8 · 1 × 10–12 (back-off)\nTempo 2111 · RIR 0');
+ assert.equal(parameters({targets:targets('Wznosy hantli bokiem stojąc')}),'3 × 10–12 + dropset\nTempo 2010 · RIR 0');
 });
