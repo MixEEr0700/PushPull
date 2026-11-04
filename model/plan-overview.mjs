@@ -82,7 +82,12 @@ export function entryTotals(data,entry){
  const segments=native?flatten(entry.performance):entry.series;
  if(!Array.isArray(segments)||!segments.length)return {tonnage:null,sets:null,reps:null};
  const valid=segments.every(s=>Number.isFinite(Number(s.kg))&&Number(s.kg)>=0&&Number.isSafeInteger(Number(s.reps))&&Number(s.reps)>0);
- return {sets:native?entry.performance.rows.length:segments.length,reps:valid?segments.reduce((n,s)=>n+Number(s.reps),0):null,tonnage:valid?segments.reduce((n,s)=>n+Number(s.kg)*Number(s.reps),0):null};
+ const basis=native?entry.performance.loadConvention?.basis:null;
+ const totals={sets:native?entry.performance.rows.length:segments.length,reps:valid?segments.reduce((n,s)=>n+Number(s.reps),0):null,tonnage:valid?segments.reduce((n,s)=>n+Number(s.kg)*Number(s.reps)*(basis==='per-implement'&&s.side==='both'?2:1),0):null};
+ if(native&&basis===null)totals.tonnage=null;
+ if(basis==='bodyweight-extra'){totals.additionalLoadTonnage=totals.tonnage;totals.tonnage=null;totals.tonnageKind='additional-load';}
+ if(basis==='sled')totals.tonnageKind='recorded-load';
+ return totals;
 }
 export function weeklyStats(data,planId,{from,to,today=warsawDate(),catalog=null}={}){
  date(today);to??=today;from??=iso(new Date(+date(weekOf(to).from)-77*DAY));date(from);date(to);
@@ -90,7 +95,7 @@ export function weeklyStats(data,planId,{from,to,today=warsawDate(),catalog=null
  if((date(to)-date(from))/DAY>36400)throw Error('Wybierz zakres nie dłuższy niż 100 lat.');
  const rows=[],byWeek=new Map();
  for(let d=date(weekOf(from).from);iso(d)<=to;d=new Date(+d+7*DAY)){
-  const w={...weekOf(iso(d)),tonnage:0,sets:0,reps:0,workouts:0,missing:{tonnage:0,sets:0,reps:0,workouts:0},unknownConvention:0};
+  const w={...weekOf(iso(d)),tonnage:0,sets:0,reps:0,workouts:0,missing:{tonnage:0,sets:0,reps:0,workouts:0},unknownConvention:0,additionalLoadTonnage:0,recordedSledTonnage:0};
   w.partial=w.from<from||w.to>to||w.to>today;rows.push(w);byWeek.set(w.id,w);
  }
  let invalidDates=0;
@@ -102,6 +107,8 @@ export function weeklyStats(data,planId,{from,to,today=warsawDate(),catalog=null
   if(!entries.length){for(const k of ['tonnage','sets','reps'])w.missing[k]++;}
   for(const e of entries){
    const totals=entryTotals(data,e);
+   if(totals.tonnageKind==='additional-load'&&totals.additionalLoadTonnage!==null)w.additionalLoadTonnage+=totals.additionalLoadTonnage;
+   if(totals.tonnageKind==='recorded-load'&&totals.tonnage!==null)w.recordedSledTonnage+=totals.tonnage;
    for(const k of ['tonnage','sets','reps']){if(totals[k]===null)w.missing[k]++;else w[k]+=totals[k];}
    if(!e.performance?.loadConvention?.basis)w.unknownConvention++;
   }

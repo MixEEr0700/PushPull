@@ -99,7 +99,7 @@ export function validatePlanVersion(x) {
 export function validateLoadConvention(x) {
   json(x); record(x, 'unit basis description');
   requireThat(oneOf(x.unit,[null,'kg','lb','stack-unit','bodyweight']) &&
-    oneOf(x.basis,[null,'per-implement','combined','machine-indication','bodyweight']) && nullable(x.description,text), 'load convention');
+    oneOf(x.basis,[null,'per-implement','combined','machine-indication','bodyweight','barbell','sled','bodyweight-extra']) && nullable(x.description,text), 'load convention');
   requireThat(x.unit !== 'bodyweight' || x.basis === null || x.basis === 'bodyweight', 'bodyweight convention');
   return x;
 }
@@ -305,14 +305,14 @@ function resultReferenceValid(x,snapshot) {
     x.snapshotId===snapshot.id && x.sessionId===snapshot.sessionId && x.planVersionId===snapshot.planVersionId, 'result snapshot binding');
   const model=snapshot.model, position=model.positions.find(p=>p.id===x.positionId);
   requireThat(position && position.planVersionId===snapshot.planVersionId && position.unitId===snapshot.unitId && position.exerciseId===x.exerciseId && position.variantId===x.variantId, 'result exercise/variant/unit binding');
-  requireThat(nullable(x.setId,id) && oneOf(x.side,[null,Side.LEFT,Side.RIGHT,Side.BILATERAL]) && nullable(x.groupId,id) && nullable(x.round,positive), 'result reference');
+  requireThat(nullable(x.setId,id) && oneOf(x.side,[null,Side.LEFT,Side.RIGHT,Side.BILATERAL,'both']) && nullable(x.groupId,id) && nullable(x.round,positive), 'result reference');
   const variant=model.variants.find(v=>v.id===position.variantId);
   requireThat(!(variant.laterality==='unilateral' && x.side===Side.BILATERAL) &&
-    !(variant.laterality==='bilateral' && [Side.LEFT,Side.RIGHT].includes(x.side)), 'result side contradicts variant');
+    !(variant.laterality==='bilateral' && [Side.LEFT,Side.RIGHT,'both'].includes(x.side)), 'result side contradicts variant');
   if (x.setId!==null) {
     const set=model.sets.find(s=>s.id===x.setId);
     requireThat(set && set.positionId===position.id && (set.side===null || x.side===null ||
-      set.side===Side.EACH && [Side.LEFT,Side.RIGHT].includes(x.side) || set.side===x.side), 'result set binding');
+      set.side===Side.EACH && [Side.LEFT,Side.RIGHT,'both'].includes(x.side) || set.side===x.side), 'result set binding');
   }
   const membership=model.groups.find(g=>g.positionIds.includes(position.id));
   requireThat(x.groupId===null ? !membership && x.round===null : membership?.id===x.groupId &&
