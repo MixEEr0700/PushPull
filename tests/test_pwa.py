@@ -252,7 +252,7 @@ class PWADeployment(unittest.TestCase):
         other=self.context.new_page();other.goto(self.url);expect(other.locator('[data-act=finish]')).to_be_visible()
         before=self.notification_state()
         newer=self.next_release('notice-two-tabs');self.controller['directory']=newer;self.wait_update()
-        message='Dostępna nowa wersja PushPull. Zapisz bieżące wyniki i zamknij wszystkie okna aplikacji, następnie uruchom ją ponownie.'
+        message='Dostępna nowa wersja Dziennika Treningowego. Zapisz bieżące wyniki i zamknij wszystkie okna aplikacji, następnie uruchom ją ponownie.'
         for page in [self.page,other]:expect(page.locator('[data-pwa-notice]')).to_have_text(message,timeout=30000)
         self.assertTrue(self.page.evaluate('window.__keptEditor===document.querySelector(".performanceForm")&&window.__keptInput===document.activeElement'))
         self.assertEqual(self.notification_state(),before)
