@@ -64,9 +64,17 @@ async function selectedSource(r){
  const contexts=new Map();for(const view of displayed)for(const ex of view.members??[view]){if(!contexts.has(ex.id))contexts.set(ex.id,[]);contexts.get(ex.id).push(ex)}
  for(const [id,views] of contexts){
   const c=await r.runtime('context',id);if(!c)continue;
+  // Legacy context heads do not contain position IDs. Only for a repeated
+  // exercise identity, include its authenticated history descriptors so the
+  // caller can select the latest result for the exact position without a migration.
+  if(new Set(views.map(ex=>ex.positionId).filter(Boolean)).size>1){
+   const history=await r.runtime('history',id);check(Array.isArray(history),'runtime position history');
+   for(const h of history){const [variant,plan,unit]=h.selector;if(!views.some(ex=>(ex.journalVariantId?variant===ex.journalVariantId:variant===null)&&(!ex.planVersionId||plan===ex.planVersionId)&&(!ex.v2||unit===ex.loadConvention.unit)))continue;entryIds.add(h.id);sessionIds.add(h.session.id);if(h.snapshotId)snapshotIds.add(h.snapshotId);}
+  }
+
   for(const h of c.heads){
    const [variant,plan,unit,basis]=h.selector;
-   if(!views.some(ex=>(ex.journalVariantId?variant===ex.journalVariantId:variant===null)&&(!ex.planVersionId||plan===ex.planVersionId)&&(!ex.imported||(ex.loadConvention.basis===null||basis===ex.loadConvention.basis)&&unit===ex.loadConvention.unit)))continue;
+   if(!views.some(ex=>(ex.journalVariantId?variant===ex.journalVariantId:variant===null)&&(!ex.planVersionId||plan===ex.planVersionId)&&(!ex.imported||unit===ex.loadConvention.unit)))continue;
    entryIds.add(h.id);sessionIds.add(h.sessionId);if(h.snapshotId)snapshotIds.add(h.snapshotId);
   }
   for(const [key,age] of c.ages)ages.set(key,age);
