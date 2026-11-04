@@ -973,7 +973,7 @@ class PWADeployment(unittest.TestCase):
             button=self.page.locator(f'[data-expand="{eid}"]')
             expect(button.locator('.num')).to_have_text(number)
             expect(button).to_contain_text('Brak zapisanego wyniku')
-            expect(button).to_contain_text('2 × 8–10 | tempo do uzupełnienia | RIR do uzupełnienia')
+            expect(button).to_contain_text('2 × 8–10 Tempo do uzupełnienia · RIR do uzupełnienia')
             button.click();open_result_panel(self.page)
             form=self.page.locator('.seriesResultForm')
             expect(form.locator('[data-main=kg]')).to_have_value('')

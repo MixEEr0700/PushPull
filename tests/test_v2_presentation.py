@@ -48,7 +48,7 @@ class V2Presentation(BrowserHarness):
             card=self.page.locator('.exercise-card').filter(has=self.page.locator(f'[data-expand="{eid}"]'))
             expect(card.locator('.name')).to_have_text(label)
             expect(card.locator('.exercise-description')).to_have_count(0)
-            expect(card).to_contain_text('2 × 8–10 | tempo 2010 | RIR 0')
+            expect(card).to_contain_text('2 × 8–10 Tempo 2010 · RIR 0')
             card.locator('[data-expand]').click()
             open_notes(card);expect(card.locator('[data-instructions]')).to_have_count(0)
             expect(card.locator('.exercise-notes')).not_to_contain_text('C1: narciarz')
