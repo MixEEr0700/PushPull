@@ -1,5 +1,5 @@
 """V2 in the existing phone journal, using only synthetic history."""
-from test_browser import add_drop,confirm_restore,open_result_panel,open_notes,seed_historical_editor
+from test_browser import add_drop,confirm_restore,open_result_panel,open_notes,seed_historical_editor,LEGACY_PAIRS
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -120,7 +120,7 @@ class V2Training(BrowserHarness):
         form=self.open_result('PULL A','PULL-A-1')
         # Quick input fills both sides; asymmetric correction requires explicit separation.
         form.locator('[data-quick=kg]').fill('40');form.locator('[data-quick=reps]').fill('9')
-        form=seed_historical_editor(self.page,"d.performance.rows[1].segments[0].kg='39'")
+        form=seed_historical_editor(self.page,LEGACY_PAIRS+"d.performance.rows[1].segments[0].kg='39'")
         form.locator('[data-row="1"][data-field=kg]').fill('35')
         self.save_form(form)
         sides=self.state()['entries'][-1]
@@ -187,6 +187,7 @@ class V2Training(BrowserHarness):
         expect(form.get_by_label('Ciężar (kg)',exact=True)).to_be_visible()
         expect(form).not_to_contain_text('Szybki ciężar')
         form.locator('[data-quick=kg]').fill('40');form.locator('[data-quick=reps]').fill('9')
+        form=seed_historical_editor(self.page,LEGACY_PAIRS)
         for row in [0,2,4]:
             expect(form.locator(f'[data-row="{row}"][data-field=kg]')).to_have_value('40')
             expect(form.locator(f'[data-row="{row}"][data-field=reps]')).to_have_value('9')

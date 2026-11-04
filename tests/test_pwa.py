@@ -1133,7 +1133,9 @@ class PWADeployment(unittest.TestCase):
         form.locator('[type=submit]').click()
         expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
         self.page.reload();self.ready()
-        self.assertEqual(self.snapshot()['data']['entries'][-1]['performance']['rows'][1]['segments'][0]['kg'],'20')
+        rows=self.snapshot()['data']['entries'][-1]['performance']['rows']
+        self.assertEqual([r['side'] for r in rows],['both']*3)
+        self.assertEqual([r['segments'][0]['kg'] for r in rows],['20','25','25'])
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
 
     def test_issue99_update_from_pr98_preserves_asymmetric_draft_ids_offline_and_history(self):
