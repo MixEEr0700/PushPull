@@ -93,7 +93,11 @@ class PlanImport(BrowserHarness):
         expect(card('TEST-1').locator('[data-result-change]')).to_contain_text('2 sesje temu')
         self.page.locator('[data-act=finish]').click();self.page.locator('[data-type="TEST-A"]').click()
         expect(card('TEST-1').locator('[data-result-change]')).to_contain_text('1 sesję temu')
-        expect(card('TEST-2').locator('[data-result-change]')).to_contain_text('2 sesje temu')
+        # The third completed session now contains an actual repeated TEST-2 result.
+        repeats=[e for e in self.state()['entries'] if e['exerciseId']=='TEST-2']
+        self.assertEqual(len(repeats),3)
+        self.assertEqual([[ (s['kg'],s['reps']) for s in e['series']] for e in repeats],[[(s['kg'],s['reps']) for s in repeats[0]['series']]]*3)
+        expect(card('TEST-2').locator('[data-result-change]')).to_contain_text('3 sesje temu')
         self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
 
     def test_invalid_file_and_atomic_failed_import_leave_history_and_plan_intact(self):
