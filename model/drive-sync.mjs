@@ -54,7 +54,7 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
  const api={
   set onchange(fn){changed=fn;},
   get config(){return {clientId:state.clientId,selected:state.selected,label:state.accounts[state.selected]?.label??'',connected:transport.authenticated&&connectedAccount===state.selected&&connectedClient===state.clientId};},
-  get status(){return {busy,automatic:state.autoPPC1===true,connected:api.config.connected,pending:!!state.ppc1Queue,verified:state.accounts[state.selected]?.ppc1?.verified??null,detail:notice||('Automatyczne kopie '+(state.autoPPC1?'włączone':'wyłączone')+'. Trening i szkice są zapisywane lokalnie.')};},
+  get status(){return {busy,automatic:state.autoPPC1===true,connected:api.config.connected,pending:!!state.ppc1Queue,backupFailed:!!state.ppc1Queue&&state.ppc1Failure===state.ppc1Queue,verified:state.accounts[state.selected]?.ppc1?.verified??null,detail:notice||('Automatyczne kopie '+(state.autoPPC1?'włączone':'wyłączone')+'. Trening i szkice są zapisywane lokalnie.')};},
   async configure(clientId){
    await mutex(async()=>{await refresh();state.clientId=clientId.trim();state.enabled=false;await save();});
    transport.clear();connectedAccount=null;connectedClient=null;notice='Konfiguracja zapisana. Połącz Google przy wykonywaniu kopii.';emit();
@@ -87,10 +87,10 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
     notice='Trening zapisany lokalnie / Zapisywanie kopii na Drive';emit();
     const result=await runIncremental('upload',pending,transport);
     account=state.accounts[state.selected];account.ppc1.last=result.fileId;delete account.ppc1.pending;
-    if(state.ppc1Queue===pending.queue)delete state.ppc1Queue;
+    if(state.ppc1Queue===pending.queue){delete state.ppc1Queue;delete state.ppc1Failure;}
     account.ppc1.verified=new Date().toISOString();await save();
     notice='Kopia zweryfikowana';emit();return result;
-   }).catch(error=>{failed=true;notice=(error.auth||!transport.authenticated)?'Trening zapisany lokalnie / Wymagane logowanie':'Trening zapisany lokalnie / Oczekuje na wysłanie: '+error.message;emit();}).finally(()=>{incrementalRunning=null;if(!closed&&state.ppc1Queue&&transport.authenticated&&online()&&typeof window!=='undefined'){retryDelay=failed?Math.min(retryDelay*2,600000):1000;retryTimer=setTimeout(()=>void api.retryCanonical(),failed?retryDelay:0);}});return incrementalRunning;
+   }).catch(async error=>{failed=true;await mutex(async()=>{await refresh();if(state.ppc1Queue){state.ppc1Failure=state.ppc1Queue;await save();}}).catch(()=>{});notice=(error.auth||!transport.authenticated)?'Trening zapisany lokalnie / Wymagane logowanie':'Trening zapisany lokalnie / Oczekuje na wysłanie: '+error.message;emit();}).finally(()=>{incrementalRunning=null;if(!closed&&state.ppc1Queue&&transport.authenticated&&online()&&typeof window!=='undefined'){retryDelay=failed?Math.min(retryDelay*2,600000):1000;retryTimer=setTimeout(()=>void api.retryCanonical(),failed?retryDelay:0);}});return incrementalRunning;
   },
   async canonicalPoints(){return operation(async()=>{try{const rows=await transport.listPoints();notice=rows.length?'Wybierz punkt odzyskiwania PPC1.':'Brak punktów PPC1 na Drive.';return rows;}catch(e){notice='Nie pobrano listy punktów: '+e.message;throw e;}});},
   async canonicalPoint(fileId,{signal,isCurrent=()=>!signal?.aborted}={}){return operation(async()=>{try{const result=await runIncremental('restore',{fileId},transport,{signal});if(isCurrent())notice='Punkt PPC1 zweryfikowany. Sprawdź podgląd przed przywróceniem.';return result;}catch(e){if(isCurrent())notice='Nie zweryfikowano punktu PPC1: '+e.message;throw e;}},isCurrent);},

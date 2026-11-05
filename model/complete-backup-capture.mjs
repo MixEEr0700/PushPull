@@ -19,7 +19,7 @@ function budget(limits,guard){
  };
 }
 function locals(storage,charge,guard){
- const keys=[];for(let i=0;i<storage.length;i++){guard();const k=storage.key(i);check(typeof k==='string','localStorage enumeration');if(localSource(k))keys.push(k);else check(!k.startsWith('pushpull'),'unclassified PushPull localStorage key');}
+ const keys=[];for(let i=0;i<storage.length;i++){guard();const k=storage.key(i);check(typeof k==='string','localStorage enumeration');if(localSource(k))keys.push(k);else check(k==='pushpull-drive-reminder-shown-v1'||!k.startsWith('pushpull'),'unclassified PushPull localStorage key');}
  keys.sort();check(new Set(keys).size===keys.length,'localStorage inventory changed');
  return keys.map(key=>{guard();const raw=storage.getItem(key);check(typeof raw==='string','localStorage value disappeared');const row={key,raw};charge?.(row);return row;});
 }
