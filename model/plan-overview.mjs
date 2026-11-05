@@ -62,7 +62,7 @@ export function plans(data,catalog=null){
  for(const v of j?.model.planVersions??[])add(v,j.model);
  for(const s of j?.sessionSnapshots??[]){const v=s.model.planVersions.find(v=>v.id===s.planVersionId);if(v)add(v,s.model);}
  for(const p of j?.importedPlans??[])if(p.planVersion)add(p.planVersion,null);
- if(!rows.has(PLAN_ID)){const model=buildPlan('preview');add(model.planVersions[0],model);}
+ if(!rows.has(PLAN_ID)&&j?.hiddenBuiltinV2!==true){const model=buildPlan('preview');add(model.planVersions[0],model);}
  rows.set(SOURCE,{id:SOURCE,label:'Szkielet źródłowy · zapisane ID / bieżące dane',kind:'source',model:null,version:null});
  for(const s of data.sessions){const v=recordedVersion(catalog,s),id=v&&'@legacy:'+v.id;if(v&&sessionPlanId(data,s,catalog)===id)rows.set(id,{id,label:'Szkielet zapisany · '+v.planId+' · '+v.id,kind:'recorded',version:v,model:null});}
  if(data.sessions.some(s=>sessionPlanId(data,s,catalog)===UNASSIGNED))rows.set(UNASSIGNED,{id:UNASSIGNED,label:'Nieprzypisane / historyczne',kind:'unassigned',model:null,version:null});

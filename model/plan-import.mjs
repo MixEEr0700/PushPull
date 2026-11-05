@@ -170,3 +170,24 @@ export function stageActivation(data,versionId,at){
  for(const p of j.model.positions.filter(p=>p.planVersionId===versionId))if(!Object.values(next.exercises).flat().some(e=>e.id===p.exerciseId))next.exercises[p.unitId].push({id:p.exerciseId,name:p.label,sets:Math.max(1,j.model.sets.filter(s=>s.positionId===p.id).length),target:'',initialKg:'',tempo:'',rir:'',notes:'',journalOnly:true});
  j.activePlanVersionId=versionId;j.nextUnitId=ordered(version.units)[0].id;(j.activations??=[]).push({planVersionId:versionId,at,...(data.activeId?{ongoingSessionId:data.activeId}:{})});return next;
 }
+
+/** Remove only a plan without session or prescription dependencies. */
+export function removeInactivePlan(data,versionId){
+ const next=structuredClone(data),j=next.trainingJournal;
+ check(j&&j.model,'brak dziennika planów');
+ check(j.activePlanVersionId!==versionId,'nie można usunąć aktywnego planu');
+ check(versionId===PLAN_ID||j.model.planVersions.some(v=>v.id===versionId)||(j.importedPlans??[]).some(p=>p.planVersion?.id===versionId),'brak planu');
+ check(!j.sessionSnapshots.some(s=>s.planVersionId===versionId||s.model.planVersions.some(v=>v.id===versionId)),'plan jest powiązany z historią treningów');
+ const positions=new Set(j.model.positions.filter(p=>p.planVersionId===versionId).map(p=>p.id));
+ check(!j.model.positions.some(p=>p.planVersionId!==versionId&&positions.has(p.replacesPositionId)),'inne plany odwołują się do tej wersji');
+ const sets=new Set(j.model.sets.filter(s=>positions.has(s.positionId)).map(s=>s.id));
+ j.model.planVersions=j.model.planVersions.filter(v=>v.id!==versionId);
+ j.model.positions=j.model.positions.filter(p=>!positions.has(p.id));
+ j.model.sets=j.model.sets.filter(s=>!sets.has(s.id));
+ j.model.drops=j.model.drops.filter(d=>!sets.has(d.setId));
+ j.model.groups=j.model.groups.filter(g=>g.planVersionId!==versionId);
+ j.model.coachInstructions=j.model.coachInstructions.filter(i=>i.planVersionId!==versionId);
+ if(j.importedPlans)j.importedPlans=j.importedPlans.filter(p=>p.planVersion?.id!==versionId);
+ if(versionId===PLAN_ID)j.hiddenBuiltinV2=true;
+ validateModel(j.model);return next;
+}

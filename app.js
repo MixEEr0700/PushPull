@@ -360,7 +360,7 @@ function planScreen(){
  const all=overview.plans(data,planCatalog()),active=all.find(p=>p.current),selected=all.find(p=>p.id===selectedPlanId)??active;selectedPlanId=selected.id;
  const choices=all.filter(p=>p.canActivate&&!p.current&&p.status!=='available');if(!choices.some(p=>p.id===switchPlanId))switchPlanId=null;
  const picker=switchPlans?`<div class="stack" data-plan-switcher>${choices.length?`<label>Zapisany plan<select id="switchPlanId"><option value="">Wybierz plan</option>${choices.map(p=>`<option value="${esc(p.id)}" ${p.id===switchPlanId?'selected':''}>${esc(p.label)} · wersja ${esc(p.version.number??'nieustalona')}</option>`).join('')}</select></label><button class="btn" data-switch-preview ${switchPlanId?'':'disabled'}>Podgląd wybranego planu</button><button class="btn primary" data-switch-activate data-plan-id="${esc(switchPlanId)}" ${switchPlanId?'':'disabled'}>Aktywuj wybrany plan dla następnych treningów</button>`:'<p class="hint">Brak innych gotowych do aktywacji wersji planu. Historyczny szkielet lub same ID treningów nie są pełnym planem V1. Aby korzystać z takiego planu, jednorazowo zaimportuj jego kompletną, zatwierdzoną definicję poniżej.</p>'}<button class="btn" data-switch-cancel>Anuluj</button></div>`:'';
- const row=p=>`<div class="spaced" data-plan-row="${esc(p.id)}"><strong>${esc(p.label)}</strong><p class="hint">${p.version?.number!=null?'Wersja '+p.version.number+' · ':''}${p.activatedAt?'Aktywacja: '+esc(new Date(p.activatedAt).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'})):p.kind==='version'&&p.current?'Data aktywacji nieznana':'Bez nowej aktywacji'} · Sesje: ${p.sessions}</p>${planUsage(p)}<button class="btn" data-select-plan="${esc(p.id)}">Podgląd</button></div>`;
+ const row=p=>`<div class="spaced" data-plan-row="${esc(p.id)}"><strong>${esc(p.label)}</strong><p class="hint">${p.version?.number!=null?'Wersja '+p.version.number+' · ':''}${p.activatedAt?'Aktywacja: '+esc(new Date(p.activatedAt).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'})):p.kind==='version'&&p.current?'Data aktywacji nieznana':'Bez nowej aktywacji'} · Sesje: ${p.sessions}</p>${planUsage(p)}<button class="btn" data-select-plan="${esc(p.id)}">Podgląd</button>${!p.current&&p.kind==='version'?` <button class="btn" data-plan-delete="${esc(p.id)}">Usuń</button>`:''}</div>`;
  return `<button class="btn" data-view="data">‹ Dane</button><h1>Plany treningowe</h1><div class="card"><h2>Aktualny plan</h2>${row(active)}<button class="btn" data-plan-switch>Zmień plan</button>${picker}</div>${[['Poprzednie plany',all.filter(p=>!p.current&&(p.status==='previous'||p.kind==='unassigned'))],['Zapisane / dostępne plany',all.filter(p=>!p.current&&p.status!=='previous'&&p.kind!=='unassigned')]].map(([title,ps])=>ps.length?`<div class="card"><h2>${title}</h2>${ps.map(row).join('')}</div>`:'').join('')}<div class="card stack"><label>Wersja do podglądu<select id="importedPlanId">${all.map(p=>`<option value="${esc(p.id)}" ${p.id===selected.id?'selected':''}>${esc(p.label)}${p.current?' · Aktualny plan':''}</option>`).join('')}</select></label><div data-selected-plan><h3>${esc(selected.label)}</h3>${planDetails(selected)}</div>${selected.current?'<p class="hint" data-current-plan>Ten plan jest aktywny. Sam podgląd nie zapisuje danych; notatkę zatwierdź osobno.</p>':selected.canActivate?'<button class="btn primary" data-plan-activate>Aktywuj dla przyszłych treningów</button>':''}${data.trainingJournal?.importedPlans?.some(p=>p.planVersion.id===selected.id)?'<button class="btn" data-plan-export>Eksportuj plik planu</button>':''}</div>${importedPlanPanel()}`;
 }
 const weeklyMetrics=[['tonnage','Tonaż','kg'],['sets','Serie (L/P osobno)',''],['reps','Powtórzenia',''],['workouts','Treningi','']];
@@ -564,6 +564,19 @@ on('submit',e=>{if(e.target.id!=='weeklyRange')return;weeklyFrom=e.target.elemen
 async function commitPlan(next){await database.commit(next,{backupBefore:true});data=database.value;journalAPI=journal;}
 on('change',async e=>{if(e.target.id!=='planFile')return;planCandidate=null;planError='';const file=e.target.files[0];if(!file)return;try{const p=planImport.parsePlan(await file.text());planImport.previewPlan(data,p);planCandidate=p;}catch(error){planError=error.message;}render();});
 on('click',async e=>{
+ const deletion=e.target.closest('[data-plan-delete]');
+ if(deletion){
+  const id=deletion.dataset.planDelete,target=overview.plans(data,planCatalog()).find(p=>p.id===id);
+  if(!target||target.current)throw Error('Nie można usunąć aktywnego planu.');
+  if(!confirm('Usunąć plan „'+target.label+'”? Przed zmianą zostanie zachowana kopia ratunkowa.'))return;
+  if(!await requireFullData())return;
+  if(database.historyDeferred){await database.ensureHistory();data=database.value;}
+  const verified=overview.plans(data,database.catalog).find(p=>p.id===id);
+  if(!verified||verified.current||verified.sessions)throw Error('Plan jest aktywny lub powiązany z historią treningów.');
+  const revision=database.revision,next=planImport.removeInactivePlan(data,id);
+  await database.commit(next,{backupBefore:true,expectedRevision:revision});data=database.value;journalAPI=journal;
+  selectedPlanId=null;switchPlanId=null;render();toast('Plan usunięty');return;
+ }
  if(e.target.closest('[data-plan-cancel]')){planCandidate=null;planError='';render();}
  if(e.target.closest('[data-plan-save]')){
   const ownerId=data.trainingJournal?.model.ownerId||database.model?.model.ownerId||uid();
