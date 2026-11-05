@@ -38,10 +38,11 @@ class IncrementalDriveUI(BrowserHarness):
             p.set_viewport_size({'width':width,'height':844});self.assertLessEqual(p.evaluate('document.documentElement.scrollWidth'),width)
     def test_auth_failure_keeps_finished_session_and_queue_then_restart_reconnect(self):
         google=IncrementalGoogle();google.install(self.context);self.page.wait_for_selector('[data-act=start]');self.configure();google.error=401
-        self.page.locator('[data-tab=training]').click();self.start();self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible();self.page.locator('[data-tab=settings]').click();self.backup_flow('save');expect(self.page.locator('[data-drive-status]')).to_contain_text('Wymagane logowanie',timeout=30000)
+        self.page.locator('[data-tab=training]').click();self.start();self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible();expect(self.page.locator('[data-drive-reminder]')).to_be_visible(timeout=30000)
         self.assertEqual(self.state()['sessions'][-1]['status'],'done');self.assertEqual(google.posts,0)
         self.assertTrue(self.page.evaluate("""async()=>{const h=await PushPullDB.open(()=>{});try{return !!(await h.readDriveState()).ppc1Queue}finally{h.close()}}"""))
-        google.error=0;self.page.reload();self.page.wait_for_selector('[data-act=start]');self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.data_section('google');self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zweryfikowana',timeout=60000);self.assertEqual(google.posts,1)
+        google.error=0;self.page.locator('[data-reminder-connect]').click();expect(self.page.locator('[data-drive-reminder]')).to_have_count(0);expect(self.page.locator('[data-drive-global]')).to_contain_text('Kopia zweryfikowana',timeout=60000);self.assertEqual(google.posts,1)
+        self.page.reload();self.page.wait_for_selector('[data-act=start]');expect(self.page.locator('[data-drive-reminder]')).to_have_count(0)
     def test_offline_finish_and_offline_restart_keep_intent(self):
         from test_browser import wait_for_service_worker_controller
         self.context.close();self.context=self.new_context(service_workers='allow');self.page=self.context.new_page();self.page.on('dialog',self.dialog);self.page.on('pageerror',lambda e:self.errors.append(str(e)));google=IncrementalGoogle();google.install(self.context);self.page.goto(self.url);self.page.wait_for_selector('[data-act=start]');wait_for_service_worker_controller(self.page);self.configure();self.context.set_offline(True)

@@ -383,7 +383,8 @@ function backupControls({preview=true}={}){
 function driveStatusText(){return restoreCancelled?'Anulowano podgląd. Nie przywrócono danych.':downloadCancelled?'Anulowano pobieranie. Nie zlecono pobrania pliku.':drive?.status.detail||'Zapis lokalny działa.'+(driveInitError?' Drive niedostępny: '+driveInitError:'');}
 const {drivePresentation}=await import('./model/drive-status.mjs');
 function driveSummaryText(){if(downloadCancelled||restoreCancelled)return driveStatusText();return drive?drivePresentation({...drive.status,busy:drive.status.busy||downloadBusy||!!driveUpload}).summary:'Kopie lokalne działają. Google Drive jest niedostępny.';}
-function paintDrive(){document.querySelectorAll('[data-drive-operation-detail]').forEach(el=>el.hidden=!(downloadCancelled||restoreCancelled||drive&&drivePresentation(drive.status).detail));document.querySelectorAll('[data-drive-detail],[data-drive-global],[data-drive-operation-detail]').forEach(el=>el.textContent=driveStatusText());document.querySelectorAll('[data-auto-ppc1]').forEach(el=>el.checked=drive.automatic);document.querySelectorAll('[data-drive-status]').forEach(el=>el.textContent=driveSummaryText());document.querySelectorAll('[data-drive-action="connect"],[data-connect-from-advanced]').forEach(el=>el.hidden=!!drive?.config.connected);document.querySelectorAll('[data-drive-action="upload"],[data-drive-action="restore"],[data-drive-action="preview"],[data-drive-action="download"],[data-drive-action="download-file"]').forEach(el=>el.disabled=!drive||restoreCommitting||!!drive.status.busy||downloadBusy||!!driveUpload&&el.dataset.driveAction==='upload');}
+let driveReminder=null;
+function paintDrive(){void driveReminder?.refresh();document.querySelectorAll('[data-drive-operation-detail]').forEach(el=>el.hidden=!(downloadCancelled||restoreCancelled||drive&&drivePresentation(drive.status).detail));document.querySelectorAll('[data-drive-detail],[data-drive-global],[data-drive-operation-detail]').forEach(el=>el.textContent=driveStatusText());document.querySelectorAll('[data-auto-ppc1]').forEach(el=>el.checked=drive.automatic);document.querySelectorAll('[data-drive-status]').forEach(el=>el.textContent=driveSummaryText());document.querySelectorAll('[data-drive-action="connect"],[data-connect-from-advanced]').forEach(el=>el.hidden=!!drive?.config.connected);document.querySelectorAll('[data-drive-action="upload"],[data-drive-action="restore"],[data-drive-action="preview"],[data-drive-action="download"],[data-drive-action="download-file"]').forEach(el=>el.disabled=!drive||restoreCommitting||!!drive.status.busy||downloadBusy||!!driveUpload&&el.dataset.driveAction==='upload');}
 const localV4=await import('./model/local-backup-v4.mjs');
 let localV4Busy=false,localV4Error='',localV4Preview=null,localV4Metrics=null;
 function localV4Panel(){
@@ -860,7 +861,13 @@ function draftStatus(){
  });
 }
 savedDrafts.onchange=draftStatus;
-if(drive){drive.onchange=paintDrive;addEventListener('online',()=>void drive.retryCanonical());void drive.retryCanonical();}
+if(drive){
+ const {openDriveReminder}=await import('./model/drive-reminder.mjs');
+ driveReminder=openDriveReminder({drive,safe:()=>!canonicalLocked&&!canonicalLocalBlocked()&&!database.error&&!data.activeId&&!historicalId&&!trainingWrite&&!restoreBusy&&!restoreCandidate&&!restoreCommitting&&!canonicalExport&&!fullAudit&&!document.querySelector('.performanceForm,.seriesResultForm,.historicalResultForm,.editForm,dialog[open]:not([data-drive-reminder])')});
+ document.addEventListener('visibilitychange',()=>void driveReminder.refresh());
+ addEventListener('storage',()=>void driveReminder.refresh());
+ drive.onchange=paintDrive;addEventListener('online',()=>void drive.retryCanonical());void drive.retryCanonical();void driveReminder.refresh();
+}
 // Run synchronously after each editor input, before yielding back to the browser.
 function captureDraft(event){
  const form=event.target.closest('.performanceForm,.seriesResultForm');if(!form)return;

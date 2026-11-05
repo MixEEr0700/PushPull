@@ -2,7 +2,7 @@
 const prefixes=['pushpull_workout_draft_v1:','pushpull-note-ui-v1:'];
 export function localCanonicalBuffers(restoreId=null){
  const pending=localStorage.getItem('pushpull_canonical_restore_pending');if(pending&&pending!==restoreId)throw Error('Przywracanie pending.');
- const keys=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(prefixes.some(p=>key?.startsWith(p)))keys.push(key);else if(key?.startsWith('pushpull')&&!['pushpull_skeleton_v1','pushpull_indexeddb_owner','pushpull_canonical_restore_pending'].includes(key)&&!key.startsWith('pushpull_skeleton_v1_backup_'))throw Error('Nieznane trwałe dane localStorage.');}
+ const keys=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(prefixes.some(p=>key?.startsWith(p)))keys.push(key);else if(key?.startsWith('pushpull')&&!['pushpull_skeleton_v1','pushpull_indexeddb_owner','pushpull_canonical_restore_pending','pushpull-drive-reminder-shown-v1'].includes(key)&&!key.startsWith('pushpull_skeleton_v1_backup_'))throw Error('Nieznane trwałe dane localStorage.');}
  let bytes=0;if(keys.length>10000)throw Error('Limit buforów PPC1.');return keys.sort().map(key=>{const raw=localStorage.getItem(key);if(typeof raw!=='string')throw Error('Bufor zmienił się.');bytes+=2*(key.length+raw.length);if(bytes>64*1024*1024)throw Error('Limit pamięci buforów PPC1.');return {key,raw};});
 }
 export function exportCanonicalLocal({getRevision,signal,onProgress=()=>{}}={}){
