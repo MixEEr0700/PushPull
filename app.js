@@ -863,8 +863,9 @@ function draftStatus(){
 savedDrafts.onchange=draftStatus;
 if(drive){
  const {openDriveReminder}=await import('./model/drive-reminder.mjs');
- driveReminder=openDriveReminder({drive,safe:()=>!data.activeId&&!historicalId&&!trainingWrite&&!restoreCommitting&&!fullAudit&&!document.querySelector('.performanceForm,.seriesResultForm,.historicalResultForm,.editForm,dialog[open]:not([data-drive-reminder])')});
+ driveReminder=openDriveReminder({drive,safe:()=>!canonicalLocked&&!canonicalLocalBlocked()&&!database.error&&!data.activeId&&!historicalId&&!trainingWrite&&!restoreBusy&&!restoreCandidate&&!restoreCommitting&&!canonicalExport&&!fullAudit&&!document.querySelector('.performanceForm,.seriesResultForm,.historicalResultForm,.editForm,dialog[open]:not([data-drive-reminder])')});
  document.addEventListener('visibilitychange',()=>void driveReminder.refresh());
+ addEventListener('storage',()=>void driveReminder.refresh());
  drive.onchange=paintDrive;addEventListener('online',()=>void drive.retryCanonical());void drive.retryCanonical();void driveReminder.refresh();
 }
 // Run synchronously after each editor input, before yielding back to the browser.

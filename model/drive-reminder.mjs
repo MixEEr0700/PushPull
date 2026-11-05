@@ -14,7 +14,7 @@ export function openDriveReminder({drive,safe,storage=localStorage,now=Date.now,
    const time=now();if(!reminderDue(storage.getItem(REMINDER_KEY),time))return;
    // Fail closed if the rate limit cannot survive a restart.
    storage.setItem(REMINDER_KEY,String(time));
-   dialog=doc.createElement('dialog');dialog.className='card';dialog.style.cssText='max-width:min(90vw,420px);background:#101010;color:#eee;border:1px solid #39FF74;border-radius:12px';
+   dialog=doc.createElement('dialog');dialog.className='card';dialog.style.cssText='position:relative;margin:12px auto;max-width:min(90vw,420px);background:#101010;color:#eee;border:1px solid #39FF74;border-radius:12px';
    dialog.setAttribute('aria-labelledby','drive-reminder-title');dialog.dataset.driveReminder='';
    dialog.innerHTML='<h2 id="drive-reminder-title">Kopia Google Drive nieaktualna</h2><p>Treningi są zapisane na tym urządzeniu, ale najnowsza kopia na Google Drive nie została wykonana.</p><p role="status" data-reminder-status></p><div class="row"><button class="btn primary" data-reminder-connect>Połącz z Google</button><button class="btn" data-reminder-later>Później</button></div>';
    const connect=dialog.querySelector('[data-reminder-connect]');
@@ -29,7 +29,7 @@ export function openDriveReminder({drive,safe,storage=localStorage,now=Date.now,
      if(!drive.status.pending)dismiss();else if(dialog)dialog.querySelector('[data-reminder-status]').textContent=drive.status.detail;
     }).catch(error=>{if(dialog)dialog.querySelector('[data-reminder-status]').textContent=error.message;}).finally(()=>{running=false;if(dialog)connect.disabled=false;});
    };
-   doc.body.append(dialog);dialog.showModal();
+   doc.body.prepend(dialog);dialog.show();
   });}catch{dismiss();}finally{checking=false;}
  }
  return {refresh};
