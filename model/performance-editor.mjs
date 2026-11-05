@@ -1,6 +1,6 @@
 import {canonical} from './backup-json.mjs';
 import {rangeText,tempoText} from './v2-plan.mjs';
-import {newPerformance,flatten,userDrop} from './performance.mjs';
+import {newPerformance,flatten,userDrop,performanceTonnage} from './performance.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const drafts=new Map(),key=(id,sid)=>sid+'::'+id;
 export const clear=()=>drafts.clear();
@@ -20,10 +20,12 @@ export function editor(ex,sid,entry,last){
 }
 // A comparable saved result is an editor seed, not a new planned result.
 // Retain removed/added rows and all segments; only fresh result identities change.
+function freshEditorPerformance(ex){const p=newPerformance(ex);if(ex.sideMode==='required')p.rows=p.rows.filter(r=>r.side==='left').map(r=>({...r,side:'both'}));return p;}
 function prefill(ex,previous){
- if(!previous?.rows?.length||previous.loadConvention.unit!==ex.loadConvention.unit||ex.loadConvention.basis!==null&&previous.loadConvention.basis!==ex.loadConvention.basis)return newPerformance(ex);
- if(previous.rows.some(r=>r.setId!==null&&!ex.targets.some(t=>t.id===r.setId)))return newPerformance(ex);
- const p=structuredClone(previous);for(const row of p.rows){row.id=crypto.randomUUID();for(const s of row.segments)s.id=crypto.randomUUID();}return p;
+ if(!previous?.rows?.length||previous.loadConvention.unit!==ex.loadConvention.unit)return freshEditorPerformance(ex);
+ if(previous.rows.some(r=>r.setId!==null&&!ex.targets.some(t=>t.id===r.setId)))return freshEditorPerformance(ex);
+ const p=structuredClone(previous);for(const row of p.rows){row.id=crypto.randomUUID();for(const s of row.segments)s.id=crypto.randomUUID();}
+ if(ex.sideMode==='required'&&p.loadConvention.basis==='per-implement'&&p.rows.every(r=>r.side==='left'||r.side==='right')){const d={performance:p};preparePairs(d);if(d.sidePairs.length*2===p.rows.length&&d.sidePairs.every(pair=>{const l=p.rows.find(r=>r.id===pair.leftId),r=p.rows.find(r=>r.id===pair.rightId);return equalSides(l,r)&&sideMetadata(l)===sideMetadata(r);}))p.rows=p.rows.filter(r=>r.side==='left').map(r=>({...r,side:'both'}));}return p;
 }
 // Pairing is editor state, never a new workout/result field. Prescribed rows
 // match by stable set/group/round. Unprescribed ambiguous old rows stay separate.
@@ -44,9 +46,9 @@ function preparePairs(d){
  // New unprescribed pairs have an explicit adjacent L/R order. Accept that
  // order only when the entire remaining context alternates; odd/ambiguous
  // historical layouts stay untouched and require an explicit pairing choice.
- for(const row of rows.filter(r=>r.side&&!used.has(r.id)&&r.setId===null)){
+ for(const row of rows.filter(r=>(r.side==='left'||r.side==='right')&&!used.has(r.id)&&r.setId===null)){
   if(used.has(row.id))continue;
-  const context=rows.filter(r=>r.side&&!used.has(r.id)&&sameSet(r,row));
+  const context=rows.filter(r=>(r.side==='left'||r.side==='right')&&!used.has(r.id)&&sameSet(r,row));
   if(context.length%2||!context.every((r,i)=>i%2===0||r.side!==context[i-1].side))continue;
   for(let i=0;i<context.length;i+=2){const a=context[i],b=context[i+1];pairs.push({leftId:a.side==='left'?a.id:b.id,rightId:a.side==='right'?a.id:b.id,linked:false});used.add(a.id);used.add(b.id);}
  }
@@ -67,10 +69,11 @@ export function parameters(ex){
  if(!main)return 'Liczba serii nieokreślona';
  return `${groups.map(g=>`${g.count} × ${g.text}`).join(' · ')}\nTempo ${tempoText(main.tempo).replace(/ /g,'')} · RIR ${rangeText(main.rir)}`;
 }
-function contents(d){const ex=d.ex,p=d.performance,first=d.quickValues;return `${ex.loadConvention.basis===null?`<label>Znaczenie ciężaru<select data-load-basis><option value="">Nieokreślone</option>${[['per-implement','Jeden hantel'],['machine-indication','Maszyna'],['combined','Łącznie']].map(([v,l])=>`<option value="${v}" ${p.loadConvention.basis===v?'selected':''}>${l}</option>`).join('')}</select></label>`:''}<div class="grid2 quick-result"><input ${sideExceptions(d)?'readonly':''} data-quick="reps" inputmode="numeric" aria-label="Szybkie powtórzenia" placeholder="powtórzenia" value="${esc(first?.reps)}"><input ${sideExceptions(d)?'readonly':''} data-quick="kg" inputmode="decimal" aria-label="Ciężar (kg)" placeholder="kg" value="${esc(first?.kg)}"></div><p class="hint warning" data-side-guard ${sideExceptions(d)?'':'hidden'}>Zachowano różnice lub niejednoznaczność stron. Otwórz Edytuj serie i szczegóły.</p><div data-rich-details ${d.open?'':'hidden'}>${details(d)}</div><p class="series-total sr-only">Tonaż: <strong>${flatten(p).reduce((n,s)=>n+(Number(s.kg.replace(',','.'))||0)*(Number(s.reps)||0),0).toLocaleString('pl-PL')} kg</strong></p><div class="result-controls"><div class="result-buttons"><button class="btn primary" type="submit">${d.open?'Zapisz korektę':'Zapisz wynik'}</button><button type="button" class="btn" data-rich-action="toggle">✎ ${d.open?'Zwiń':'Edytuj'} serie</button></div><div class="result-secondary"><button type="button" class="btn" data-panel="history" data-id="${esc(ex.id)}">Historia</button><button type="button" class="btn" data-panel="stats" data-id="${esc(ex.id)}">Statystyki</button></div></div>`;}
+function loadHelp(basis){return basis==='per-implement'?'Jeden hantel: dla serii zapisanej jako obie strony tonaż uwzględnia obie strony.':basis==='sled'?'Suwnica: tonaż ewidencyjny wpisanego obciążenia, bez masy sanek.':basis==='bodyweight-extra'?'Masa ciała +: ciężar dodatkowy; bez masy ciała nie ustalamy pełnego tonażu.':'';}
+function contents(d){const ex=d.ex,p=d.performance,first=d.quickValues;return `${`<label>Znaczenie ciężaru<select data-load-basis>${p.loadConvention.basis==='bodyweight'?'<option value="bodyweight" selected hidden>Historyczna konwencja masy ciała</option>':''}<option value="">Nieokreślony</option>${[['per-implement','Jeden hantel'],['barbell','Sztanga'],['machine-indication','Maszyna'],['sled','Suwnica'],['bodyweight-extra','Masa ciała +'],['combined','Łącznie']].map(([v,l])=>`<option value="${v}" ${p.loadConvention.basis===v?'selected':''}>${l}</option>`).join('')}</select><span class="hint" data-load-help>${esc(loadHelp(p.loadConvention.basis))}</span></label>`}<div class="grid2 quick-result"><input ${sideExceptions(d)?'readonly':''} data-quick="reps" inputmode="numeric" aria-label="Szybkie powtórzenia" placeholder="powtórzenia" value="${esc(first?.reps)}"><input ${sideExceptions(d)?'readonly':''} data-quick="kg" inputmode="decimal" aria-label="Ciężar (kg)" placeholder="kg" value="${esc(first?.kg)}"></div><p class="hint warning" data-side-guard ${sideExceptions(d)?'':'hidden'}>Zachowano różnice lub niejednoznaczność stron. Otwórz Edytuj serie i szczegóły.</p><div data-rich-details ${d.open?'':'hidden'}>${details(d)}</div><p class="series-total sr-only">Tonaż: <strong>${(performanceTonnage(p)?.toLocaleString('pl-PL')??'nieokreślony')} kg</strong></p><div class="result-controls"><div class="result-buttons"><button class="btn primary" type="submit">${d.open?'Zapisz korektę':'Zapisz wynik'}</button><button type="button" class="btn" data-rich-action="toggle">✎ ${d.open?'Zwiń':'Edytuj'} serie</button></div><div class="result-secondary"><button type="button" class="btn" data-panel="history" data-id="${esc(ex.id)}">Historia</button><button type="button" class="btn" data-panel="stats" data-id="${esc(ex.id)}">Statystyki</button></div></div>`;}
 const trash='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6m4-6v6"/></svg>';
 const sideMetadata=r=>canonical({...r,id:null,side:null,segments:r.segments.map(s=>({...s,id:null,kg:null,reps:null}))});
-const perSide=d=>d.performance.loadConvention.unit==='kg'&&d.ex.loadConvention.unit==='kg'&&['per-implement','machine-indication'].includes(d.performance.loadConvention.basis)&&(d.ex.loadConvention.basis===null||d.ex.loadConvention.basis===d.performance.loadConvention.basis);
+const perSide=d=>d.performance.loadConvention.unit==='kg'&&d.ex.loadConvention.unit==='kg'&&(['per-implement','machine-indication'].includes(d.performance.loadConvention.basis)||d.performance.loadConvention.basis===null&&d.allowSideDeclaration)&&(d.ex.loadConvention.basis===null||d.ex.loadConvention.basis===d.performance.loadConvention.basis);
 function sharedPair(d,p){
  if(!p||!perSide(d))return false;
  const left=d.performance.rows.find(r=>r.id===p.leftId),right=d.performance.rows.find(r=>r.id===p.rightId);
@@ -80,19 +83,19 @@ function sharedPair(d,p){
 // Missing mode in an old empty optional draft is unknown, never guessed.
 function establishExecution(d){
  const rows=d.performance.rows;
- if(d.ex.sideMode==='required'){d.executionMode='paired';return;}
+ if(d.ex.sideMode==='required'){d.executionMode=rows.length&&rows.every(r=>r.side==='both')||!rows.length&&d.executionMode==='both'?'both':'paired';return;}
  if(d.ex.sideMode==='bilateral'){d.executionMode=rows.some(r=>r.side!==null)?'unknown':'single';return;}
  if(!['single','paired','unknown'].includes(d.executionMode)){
   d.executionMode=!rows.length?'unknown':rows.every(r=>r.side===null)?'single':rows.every(r=>r.side&&pairFor(d,r))?'paired':'unknown';
  }
  if(d.executionMode==='single'&&rows.some(r=>r.side!==null)||d.executionMode==='paired'&&(d.ex.laterality==='bilateral'||rows.some(r=>r.side===null)))d.executionMode='unknown';
 }
-function canAddSet(d){return !d.performance.rows.some(r=>r.side&&!pairFor(d,r))&&(d.executionMode==='single'||d.executionMode==='paired'&&perSide(d)&&d.ex.laterality!=='bilateral')&&(!d.ex.group||d.ex.targets.some(t=>!d.performance.rows.some(r=>r.setId===t.id)));}
+function canAddSet(d){return !d.performance.rows.some(r=>r.side&&r.side!=='both'&&!pairFor(d,r))&&(d.executionMode==='single'||d.executionMode==='both'||d.executionMode==='paired'&&perSide(d)&&d.ex.laterality!=='bilateral')&&(!d.ex.group||d.ex.targets.some(t=>!d.performance.rows.some(r=>r.setId===t.id)));}
 function dropTargets(d){
  const options=[],used=new Set();let number=0;
  for(const [index,row] of d.performance.rows.entries()){
   if(used.has(row.id))continue;number++;
-  if(row.side===null){options.push({row,index,number,shared:false,label:'Seria '+number});continue;}
+  if(row.side===null||row.side==='both'){options.push({row,index,number,shared:false,label:'Seria '+number});continue;}
   const p=pairFor(d,row);
   if(!p||!perSide(d))continue;
   const members=[d.performance.rows.find(r=>r.id===p.leftId),d.performance.rows.find(r=>r.id===p.rightId)];members.forEach(r=>used.add(r.id));
@@ -112,14 +115,14 @@ function addControls(d){
  const options=dropTargets(d),unknown=d.executionMode==='unknown'&&!d.performance.rows.length;
  return `<div class="series-add-actions"><button type="button" class="btn" data-rich-action="add-set" ${canAddSet(d)?'':'disabled'}>+ Dodaj serię</button><button type="button" class="btn" data-rich-action="add-drop" ${options.length?'':'disabled'}>+ Dodaj dropset</button></div>${unknown?`<label class="hint warning">Nieustalone wykonanie pustego szkicu. Wybierz rzeczywisty sposób wykonania.<select data-execution-choice><option value="">Wybierz wykonanie</option><option value="single">Jeden zapis</option>${perSide(d)&&d.ex.laterality!=='bilateral'?'<option value="paired">Obie strony (L/P)</option>':''}</select></label>`:d.executionMode==='paired'&&!perSide(d)?'<p class="hint warning">Nie dodano stron: najpierw określ znaczenie kg. Nie przeliczamy dawnych danych.</p>':''}${d.choosingDropTarget?`<label class="drop-target">Do której serii?<select data-drop-target><option value="">Wybierz serię</option>${options.map(t=>`<option value="${esc(t.row.id)}" data-row="${t.index}">${esc(t.label)}</option>`).join('')}</select></label>`:''}`;
 }
-function sideExceptions(d){return d.performance.rows.some(r=>{if(r.side===null)return false;const pair=pairFor(d,r);if(sharedPair(d,pair))return false;if(d.performance.loadConvention.basis!==null||!d.allowSideDeclaration||!pair)return true;const left=d.performance.rows.find(x=>x.id===pair.leftId),right=d.performance.rows.find(x=>x.id===pair.rightId);return !left||!right||!equalSides(left,right)||sideMetadata(left)!==sideMetadata(right);});}
+function sideExceptions(d){return d.performance.rows.some(r=>{if(r.side===null||r.side==='both')return false;const pair=pairFor(d,r);if(sharedPair(d,pair))return false;if(d.performance.loadConvention.basis!==null||!d.allowSideDeclaration||!pair)return true;const left=d.performance.rows.find(x=>x.id===pair.leftId),right=d.performance.rows.find(x=>x.id===pair.rightId);return !left||!right||!equalSides(left,right)||sideMetadata(left)!==sideMetadata(right);});}
 function sideCaption(rows){return rows.map(r=>(r.side==='left'?'L':'P')+': '+r.segments.map(s=>`${s.reps||'?'} × ${s.kg||'?'} kg`).join(' → ')).join(' | ');}
 function updateSideGuard(form,d){const blocked=sideExceptions(d);form.querySelectorAll('[data-quick]').forEach(el=>el.readOnly=blocked);const hint=form.querySelector('[data-side-guard]');if(hint)hint.hidden=!blocked;}
 function details(d){
  const rows=d.performance.rows,used=new Set();let number=0;
  const groups=rows.map((row,i)=>{
   if(used.has(row.id))return '';number++;
-  if(row.side===null)return rowHTML(d,row,i,number,false);
+  if(row.side===null||row.side==='both')return rowHTML(d,row,i,number,false);
   const pair=pairFor(d,row),members=pair?[rows.find(r=>r.id===pair.leftId),rows.find(r=>r.id===pair.rightId)]:[row];members.forEach(r=>used.add(r.id));
   if(sharedPair(d,pair))return `<div data-side-pair>${rowHTML(d,members[0],rows.indexOf(members[0]),number,true)}</div>`;
   const choices=rows.filter(r=>r.side&&r.side!==row.side&&!pairFor(d,r)&&sameSet(row,r));
@@ -153,7 +156,7 @@ export function input(event){if(event.target.matches('[data-load-basis]')){chang
  }
  updateSideGuard(form,d);
  form.querySelectorAll('[data-side-exception]').forEach(section=>{const first=section.querySelector('[data-row]');if(first){const r=d.performance.rows[+first.dataset.row],p=pairFor(d,r),members=p?[d.performance.rows.find(x=>x.id===p.leftId),d.performance.rows.find(x=>x.id===p.rightId)]:[r];section.querySelector('[data-side-caption]').textContent=sideCaption(members);}});
- form.querySelector('.series-total strong').textContent=flatten(d.performance).reduce((n,s)=>n+(Number(s.kg.replace(',','.'))||0)*(Number(s.reps)||0),0).toLocaleString('pl-PL')+' kg';
+ form.querySelector('.series-total strong').textContent=(performanceTonnage(d.performance)?.toLocaleString('pl-PL')??'nieokreślony')+' kg';
 }
 export function change(event){
  if(event.target.matches('[data-drop-target],[data-execution-choice]')){
@@ -162,7 +165,7 @@ export function change(event){
   else if(!d.performance.rows.length&&d.executionMode==='unknown'&&['single','paired'].includes(event.target.value)){if(event.target.value==='paired'&&(!perSide(d)||d.ex.laterality==='bilateral'))return;d.executionMode=event.target.value;d.custom=true;}
   refresh(form,d);return;
  }
- if(event.target.matches('[data-quick]')){const form=event.target.closest('.performanceForm');if(form)drafts.get(key(form.dataset.id,form.dataset.session)).quickInput=null;return;}if(!event.target.matches('[data-load-basis]'))return;const form=event.target.closest('form'),d=drafts.get(key(form.dataset.id,form.dataset.session));d.performance.loadConvention.basis=event.target.value||null;d.performance.loadConvention.description=event.target.selectedOptions[0].textContent;form.querySelector('[data-rich-details]').innerHTML=details(d);updateSideGuard(form,d);}
+ if(event.target.matches('[data-quick]')){const form=event.target.closest('.performanceForm');if(form)drafts.get(key(form.dataset.id,form.dataset.session)).quickInput=null;return;}if(!event.target.matches('[data-load-basis]'))return;const form=event.target.closest('form'),d=drafts.get(key(form.dataset.id,form.dataset.session));d.performance.loadConvention.basis=event.target.value||null;d.performance.conventionExplicit=true;d.performance.loadConvention.description=event.target.selectedOptions[0].textContent;const help=form.querySelector('[data-load-help]');if(help)help.textContent=loadHelp(d.performance.loadConvention.basis);form.querySelector('[data-rich-details]').innerHTML=details(d);updateSideGuard(form,d);}
 export function click(event){const b=event.target.closest('[data-rich-action]');if(!b)return;const form=b.closest('form'),d=drafts.get(key(form.dataset.id,form.dataset.session)),rows=d.performance.rows,row=rows[+b.dataset.row],act=b.dataset.richAction;
  const pair=row&&pairFor(d,row),other=row&&otherSide(d,row),common=b.dataset.commonPair==='true';
  if(common&&!sharedPair(d,pair)){alert('Strony zmieniły się. Zachowano wartości; sprawdź szczegóły.');refresh(form,d);return;}
@@ -204,7 +207,7 @@ export function click(event){const b=event.target.closest('[data-rich-action]');
  if(act==='add-set'){
   if(!canAddSet(d)){alert('Nie można potwierdzić wykonania stron, znaczenia kg lub rundy. Nie dodano serii.');return false;}
   const target=d.ex.targets.find(t=>!rows.some(r=>r.setId===t.id));
-  const sides=d.executionMode==='paired'?['left','right']:[null],added=[];
+  const sides=d.executionMode==='both'?['both']:d.executionMode==='paired'?['left','right']:[null],added=[];
   for(const side of sides){const r={id:crypto.randomUUID(),setId:target?.id??null,side,groupId:d.ex.group?.id??null,round:d.ex.group?target.order+1:null,segments:Array.from({length:target?.drop?2:1},()=>({id:crypto.randomUUID(),kg:'',reps:''}))};rows.push(r);added.push(r);}
   if(added.length===2)d.sidePairs.push({leftId:added[0].id,rightId:added[1].id,linked:false});d.open=true;
  }
@@ -223,7 +226,7 @@ export function click(event){const b=event.target.closest('[data-rich-action]');
 export function performanceValue(value){
  const d=structuredClone({performance:value.performance,sidePairs:value.sidePairs});preparePairs(d);const p=d.performance;
  if(!p.rows.length)throw Error('Brak serii. Dodaj przynajmniej jedną rzeczywistą serię.');
- if(p.rows.some(r=>r.side!==null&&!pairFor(d,r)))throw Error('Niepełna lub nieustalona para L/P. Ustal brakującą stronę w edytorze.');
+ if(p.rows.some(r=>r.side!==null&&r.side!=='both'&&!pairFor(d,r)))throw Error('Niepełna lub nieustalona para L/P. Ustal brakującą stronę w edytorze.');
  for(const [i,row] of p.rows.entries())for(const [j,s] of row.segments.entries()){s.kg=s.kg.trim().replace(',','.');s.reps=s.reps.trim();if(!/^\d+(\.\d+)?$/.test(s.kg)||!/^[1-9]\d*$/.test(s.reps))throw Error(`Seria ${i+1}${row.side?' '+(row.side==='left'?'L':'P'):''}, segment ${j+1}: uzupełnij poprawne kg i powtórzenia.`);}
  return p;
 }
@@ -246,13 +249,13 @@ export function summary(e,targets=[],asSets=false,compact=false){
  }
  // Preserve the actual order of the recorded groups.
  const complete=r=>Array.isArray(r.segments)&&r.segments.length>0&&r.segments.every(s=>/^\d+(\.\d+)?$/.test(s.kg??'')&&/^[1-9]\d*$/.test(s.reps??''));
- const equal=g=>g.members.length===2&&equalSides(...g.members),unpaired=g=>g.members.length===1&&g.members[0].side!==null;
+ const equal=g=>g.members.length===2&&equalSides(...g.members),unpaired=g=>g.members.length===1&&g.members[0].side!==null&&g.members[0].side!=='both';
  const special=g=>g.members.some(r=>r.round&&!asSets);
  const role=r=>targets.find(t=>t.id===r.setId)?.role??(r.setId===null&&r.groupId===null&&r.segments?.length===1?'main':null);
  const drop=r=>!!targets.find(t=>t.id===r.setId)?.drop||userDrop(r);
  const semantic=r=>canonical({...r,id:null,setId:null,side:null,round:asSets?null:r.round,segments:r.segments.map(s=>({...s,id:null,kg:Number(s.kg),reps:Number(s.reps)}))});
- const prescribedPairs=rows.every(r=>r.setId===null||r.side===null||rows.some(other=>other.side&&other.side!==r.side&&sameSet(r,other)));
- const first=rows[0],balanced=rows.every(r=>r.side===null)||rows.every(r=>r.side==='left'||r.side==='right')&&rows.filter(r=>r.side==='left').length===rows.filter(r=>r.side==='right').length;
+ const prescribedPairs=rows.every(r=>r.setId===null||r.side===null||r.side==='both'||rows.some(other=>other.side&&other.side!==r.side&&sameSet(r,other)));
+ const first=rows[0],balanced=rows.every(r=>r.side===null||r.side==='both')||rows.every(r=>r.side==='left'||r.side==='right')&&rows.filter(r=>r.side==='left').length===rows.filter(r=>r.side==='right').length;
  const compactValue=r=>(r.segments??[]).map(s=>`${s.reps||'?'}×${s.kg||'?'}`).join(' + drop ');
  if(first&&balanced&&prescribedPairs&&rows.every(r=>complete(r)&&semantic(r)===semantic(first)&&role(r)===role(first)&&drop(r)===drop(first)&&r.groupId===first.groupId&&(asSets||r.round===null))){
   if(compact)return adaptiveResult([(first.side?'L/P ':'')+compactValue(first)]);

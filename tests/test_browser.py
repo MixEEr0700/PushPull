@@ -68,6 +68,8 @@ def add_drop(form,row=0):
         choice.select_option(option.get_attribute('value'))
 
 
+LEGACY_PAIRS = "d.performance.rows=d.performance.rows.flatMap(r=>['left','right'].map(side=>({...structuredClone(r),id:crypto.randomUUID(),side,segments:r.segments.map(s=>({...s,id:crypto.randomUUID()}))})));d.executionMode='paired';d.sidePairs=[];"
+
 def seed_historical_editor(page,patch):
     """Synthetic PR98-era editor evidence; no user/history records are changed.
 

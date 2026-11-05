@@ -1,6 +1,6 @@
 """Issue99 real isolated IndexedDB and compact editor. Synthetic evidence only."""
 from playwright.sync_api import expect
-from test_browser import add_drop,BrowserHarness,seed_historical_editor,wait_for_service_worker_controller
+from test_browser import add_drop,BrowserHarness,seed_historical_editor,LEGACY_PAIRS,wait_for_service_worker_controller
 import test_v2_training as v2
 import test_plan_import as plans_fixture
 
@@ -22,7 +22,7 @@ class Compact99(BrowserHarness):
 
     def test_common_lp_mobile_three_two_one_zero_add_restart_save_history_tonnage(self):
         self.activate();f=self.open_result('PULL A','PULL-A-1');before=self.state()
-        f.locator('[data-quick=kg]').fill('24');f.locator('[data-quick=reps]').fill('10')
+        f.locator('[data-quick=kg]').fill('24');f.locator('[data-quick=reps]').fill('10');f=seed_historical_editor(self.page,LEGACY_PAIRS)
         original=self.memory()['performance']
         for width in [360,390,412]:
             self.page.set_viewport_size({'width':width,'height':844})
@@ -74,7 +74,7 @@ class Compact99(BrowserHarness):
 
     def test_historical_asymmetry_unfinished_fields_exception_cancel_confirm_and_restart(self):
         self.activate();f=self.open_result('PULL A','PULL-A-1');self.fill_rows(f,'24','10');before=self.state()
-        f=seed_historical_editor(self.page,"d.performance.rows[1].segments[0].kg='21';d.sidePairs.forEach(p=>p.linked=true)")
+        f=seed_historical_editor(self.page,LEGACY_PAIRS+"d.performance.rows[1].segments[0].kg='21';d.sidePairs.forEach(p=>p.linked=true)")
         expect(f.locator('[data-side-exception]')).to_have_count(1);expect(f.locator('[data-side-caption]')).to_have_text('L: 10 × 24 kg | P: 10 × 21 kg')
         expect(f.locator('[data-quick=kg]')).to_have_attribute('readonly','')
         for width in [360,390,412]:
@@ -97,7 +97,7 @@ class Compact99(BrowserHarness):
     def test_three_verified_pairs_1440_offline_finish_and_restart(self):
         self.context=self.new_context(service_workers='allow');self.page=self.context.new_page();self.page.on('dialog',self.dialog)
         self.page.goto(self.url);wait_for_service_worker_controller(self.page);self.activate();f=self.open_result('PULL A','PULL-A-1')
-        self.context.set_offline(True);self.fill_rows(f,'24','10');expected=self.memory()['performance']
+        self.fill_rows(f,'24','10');f=seed_historical_editor(self.page,LEGACY_PAIRS);self.context.set_offline(True);expected=self.memory()['performance']
         expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         self.page.locator('[data-act=finish]').click();self.page.locator('[data-finish-save]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
         saved=self.state();entry=saved['entries'][-1];self.assertEqual(entry['performance'],expected)
@@ -140,6 +140,7 @@ class Compact99Conventions(BrowserHarness):
         self.prepare();self.ready();self.preview(p);self.store();self.activate()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="TEST-A"]').click();self.page.locator('[data-act=start]').click();f=self.form('TEST-1');before=self.state()
+        f=seed_historical_editor(self.page,"d.performance.rows=d.performance.rows.flatMap(r=>['left','right'].map(side=>({...structuredClone(r),id:crypto.randomUUID(),side,segments:r.segments.map(s=>({...s,id:crypto.randomUUID()}))})));d.executionMode='paired';d.sidePairs=[]")
         expect(f.locator('[data-common-pair]')).to_have_count(0);expect(f.locator('[data-side-exception]')).to_have_count(2)
         expect(f.locator('[data-quick=kg]')).to_have_attribute('readonly','')
         expect(f.locator('[data-rich-action=merge-left]')).to_have_count(0)

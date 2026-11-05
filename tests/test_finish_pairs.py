@@ -1,6 +1,6 @@
 """Isolated real IndexedDB: pairs, finish orchestration, failure/restart and offline."""
 from playwright.sync_api import expect
-from test_browser import BrowserHarness,open_notes,wait_for_service_worker_controller,seed_historical_editor
+from test_browser import BrowserHarness,open_notes,wait_for_service_worker_controller,seed_historical_editor,LEGACY_PAIRS
 import test_v2_training as v2
 
 class FinishPairs(BrowserHarness):
@@ -20,7 +20,7 @@ class FinishPairs(BrowserHarness):
     def test_pairs_remove_first_last_add_independent_merge_and_restart_at_mobile_widths(self):
         self.activate();f=self.open_result('PULL A','PULL-A-1')
         self.page.evaluate("()=>{const c=window.confirm;window.confirm=m=>{(window.quickPrompts??=[]).push(m);return c(m)}}")
-        self.fill(f);self.assertEqual(self.page.evaluate('window.quickPrompts||[]'),[])
+        self.fill(f);f=seed_historical_editor(self.page,LEGACY_PAIRS);self.assertEqual(self.page.evaluate('window.quickPrompts||[]'),[])
         before=self.state();original=[r['id'] for r in self.drafts()[0]['value']['performance']['rows']]
         for width in [360,390,412]:
             self.page.set_viewport_size({'width':width,'height':844})
@@ -104,7 +104,7 @@ class FinishPairs(BrowserHarness):
         self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible();self.assertEqual(self.state(),after)
 
     def test_existing_odd_layout_is_retained_and_missing_side_added_only_explicitly(self):
-        self.activate();f=self.open_result('PULL A','PULL-A-1');self.fill(f)
+        self.activate();f=self.open_result('PULL A','PULL-A-1');self.fill(f);f=seed_historical_editor(self.page,LEGACY_PAIRS)
         original=self.page.evaluate("""async()=>{const m=await import('./model/performance-editor.mjs'),f=document.querySelector('.performanceForm'),d=m.state(f.dataset.id,f.dataset.session);d.performance.rows.pop();d.sidePairs=[];m.restore(f.dataset.id,f.dataset.session,d);return d.performance.rows}""")
         self.page.locator('[data-expand="PULL-A-1"]').click();self.page.locator('[data-expand="PULL-A-1"]').click();f=self.page.locator('.performanceForm')
         expect(f.locator('[data-missing-side]')).to_have_count(1)

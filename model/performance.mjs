@@ -1,20 +1,23 @@
-import {createResultReferences} from './training-model.mjs';
+import {createResultReferences,validateLoadConvention} from './training-model.mjs';
 import {canonical,requireThat as check} from './backup-json.mjs';
 /** Explicit per-result extension; never rewrites the plan's drop prescription. */
 export const userDrop=row=>row?.dropOrigin==='user'&&Array.isArray(row.segments)&&row.segments.length>1;
 export function flatten(performance){return performance.rows.flatMap(row=>row.segments.map(s=>({...s,parentId:row.id,side:row.side})));}
+export function performanceTonnage(p){if(!p.loadConvention?.basis)return null;return flatten(p).reduce((n,s)=>n+(Number(String(s.kg).replace(',','.'))||0)*(Number(s.reps)||0)*(p.loadConvention.basis==='per-implement'&&s.side==='both'?2:1),0);}
 export function validatePerformance(performance,snapshot,entry){
  check(performance?.version===2&&Array.isArray(performance.rows)&&performance.rows.length,'missing performance');
  const position=snapshot.model.positions.find(p=>p.id===entry.journalPositionId);
  check(position?.exerciseId===entry.exerciseId&&position.variantId===entry.journalVariantId,'performance position mismatch');
- check(canonical(performance.loadConvention)===canonical(position.loadConvention)||position.loadConvention.basis===null&&performance.loadConvention.unit===position.loadConvention.unit&&['per-implement','combined','machine-indication',null].includes(performance.loadConvention.basis),'load convention mismatch');
+ validateLoadConvention(performance.loadConvention);check(performance.conventionExplicit===undefined||performance.conventionExplicit===true,'invalid explicit convention marker');
+ check(canonical(performance.loadConvention)===canonical(position.loadConvention)||(position.loadConvention.basis===null||performance.conventionExplicit===true)&&performance.loadConvention.unit===position.loadConvention.unit&&['per-implement','combined','machine-indication','barbell','sled','bodyweight-extra',null].includes(performance.loadConvention.basis),'load convention mismatch');
  const ids=new Set(),specifications=[],bindings=new Set();
+ const unbound=performance.rows.filter(r=>r.setId===null);check(!(unbound.some(r=>r.side==='both')&&unbound.some(r=>r.side==='left'||r.side==='right')),'overlapping unbound sides');
  for(const row of performance.rows){
   check(typeof row.id==='string'&&row.id&&!ids.has(row.id),'duplicate row ID');ids.add(row.id);
   specifications.push({resultId:row.id,positionId:position.id,setId:row.setId,side:row.side,groupId:row.groupId,round:row.round});
-  if(position.sideMode==='required')check(row.side==='left'||row.side==='right','separate left/right required');
+  if(position.sideMode==='required')check(row.side==='left'||row.side==='right'||row.side==='both','left/right or explicitly both required');
   const key=canonical([row.setId,row.side,row.groupId,row.round]);
-  if(row.setId!==null){check(!bindings.has(key),'duplicate prescribed set/side');bindings.add(key);}
+  if(row.setId!==null){check(!bindings.has(key),'duplicate prescribed set/side');if(row.side==='both')check(!bindings.has(canonical([row.setId,'left',row.groupId,row.round]))&&!bindings.has(canonical([row.setId,'right',row.groupId,row.round])),'overlapping sides');else if(row.side==='left'||row.side==='right')check(!bindings.has(canonical([row.setId,'both',row.groupId,row.round])),'overlapping sides');bindings.add(key);}
   check(Array.isArray(row.segments)&&row.segments.length,'empty segments');
   if(row.groupId!==null){const prescribed=snapshot.model.sets.find(s=>s.id===row.setId);check(prescribed&&row.round===prescribed.order+1,'group round/set mismatch');}
   const drop=snapshot.model.drops.some(d=>d.setId===row.setId);
@@ -43,7 +46,7 @@ export function comparison(data,entry){
  const p=snap.model.positions.find(p=>p.id===entry.journalPositionId),variant=snap.model.variants.find(v=>v.id===entry.journalVariantId);
  const performance=entry.performance,load=performance?.loadConvention;
  if(!p||!variant||p.exerciseId!==entry.exerciseId||p.variantId!==variant.id||variant.exerciseId!==entry.exerciseId||p.planVersionId!==snap.planVersionId||p.unitId!==snap.unitId||!load?.unit||!load.basis)return null;
- if(load.unit!==p.loadConvention.unit||p.loadConvention.basis!==null&&load.basis!==p.loadConvention.basis)return null;
+ if(load.unit!==p.loadConvention.unit||p.loadConvention.basis!==null&&load.basis!==p.loadConvention.basis&&performance.conventionExplicit!==true)return null;
  if(performance.version!==2||!Array.isArray(performance.rows)||!performance.rows.length||!snap.model.planVersions.some(v=>v.id===snap.planVersionId&&v.executionVersion===2))return null;
  const targets=snap.model.sets.filter(t=>t.positionId===p.id).slice().sort((a,b)=>a.order-b.order);
  const sides=[...new Set(performance.rows.map(r=>r.side))].sort();

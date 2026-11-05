@@ -1,5 +1,5 @@
 """Unified plans + real local workouts; all plans/data synthetic, Google simulated."""
-from test_browser import add_drop,confirm_restore,open_result_panel,seed_historical_editor
+from test_browser import add_drop,confirm_restore,open_result_panel,seed_historical_editor,LEGACY_PAIRS
 from pathlib import Path
 import json
 from playwright.sync_api import expect
@@ -33,14 +33,16 @@ class PlanOverview(BrowserHarness):
         training.V2Training.activate(self)
         self.page.locator('#trainingDate').fill('2026-10-19')
         f=training.V2Training.open_result(self,'PULL A','PULL-A-1')
-        f.locator('[data-quick=kg]').fill('10');f.locator('[data-quick=reps]').fill('10');training.V2Training.save_form(self,f)
+        f.locator('[data-quick=kg]').fill('10');f.locator('[data-quick=reps]').fill('10');f=seed_historical_editor(self.page,LEGACY_PAIRS);training.V2Training.save_form(self,f)
         v2=self.state();sid=v2['activeId'];self.page.locator('[data-act=finish]').click()
         self.preview();self.store();stored=self.state()
         self.assertEqual(stored['trainingJournal']['activePlanVersionId'],'v2-owner-2026-10-22')
         self.activate_plan();self.page.locator('[data-tab=training]').click()
         self.page.locator('#trainingDate').fill('2026-10-20');self.page.locator('[data-type="TEST-B"]').click();self.page.locator('[data-act=start]').click()
         for eid in ['TEST-4','TEST-5']:
-            f=self.form(eid);self.fill(f);self.save(f)
+            f=self.form(eid);self.fill(f)
+            if eid=='TEST-5': f=seed_historical_editor(self.page,LEGACY_PAIRS)
+            self.save(f)
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible();before=self.state()
         self.weekly();expect(self.page.locator('#weeklyPlan')).to_have_value('synthetic-v3')
         self.metric('tonnage','1280kg');self.metric('sets','7');self.metric('reps','64');self.metric('workouts','1')
@@ -90,9 +92,9 @@ class PlanOverview(BrowserHarness):
         if self.page.locator('[data-expand="TEST-5"]').get_attribute('aria-expanded')!='true':self.page.locator('[data-expand="TEST-5"]').click()
         self.page.locator('[data-panel=stats]').click();expect(self.page.locator('[data-exercise-plan]')).to_be_visible()
         self.page.locator('[data-exercise-plan]').select_option('synthetic-v3')
-        self.assertIn('640',self.page.locator('.stat-tile').first.inner_text().replace('\xa0',''))
+        self.assertIn('320',self.page.locator('.stat-tile').first.inner_text().replace('\xa0',''))
         self.page.locator('[data-exercise-plan]').select_option('synthetic-v4')
-        self.assertIn('720',self.page.locator('.stat-tile').first.inner_text().replace('\xa0',''))
+        self.assertIn('360',self.page.locator('.stat-tile').first.inner_text().replace('\xa0',''))
         self.page.locator('[data-exercise-plan]').select_option('');self.page.locator('[data-panel=history]').click()
         expect(self.page.locator('.panel .entry')).to_have_count(2)
         saved=self.state();self.settings()
