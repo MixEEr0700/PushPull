@@ -40,7 +40,9 @@ export function newPerformance(ex,previous){
 
 // Read-only card annotation. Unknown legacy contexts are not inferred from names,
 // today's plan, technique markers or a flattened summary of a structured result.
-export function comparison(data,entry){
+// legacyIndex preserves the authenticated v1 derived-index representation only.
+// User-facing comparisons always use the corrected default. No history rewrite.
+export function comparison(data,entry,{legacyIndex=false}={}){
  const snap=data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===entry.sessionId);
  if(!snap||snap.id!==entry.journalSnapshotId)return null;
  const p=snap.model.positions.find(p=>p.id===entry.journalPositionId),variant=snap.model.variants.find(v=>v.id===entry.journalVariantId);
@@ -53,13 +55,19 @@ export function comparison(data,entry){
  const context=canonical([entry.exerciseId,variant.id,variant.machine,variant.grip,variant.support,variant.execution,variant.laterality,p.sideMode??null,load.unit,load.basis,sides]);
  // Storage/import retain full model validation. Rendering checks the measurement
  // references only; revalidating every whole snapshot per row blocks long histories.
- const extra=performance.rows.filter(r=>r.setId===null),paired=extra.some(r=>r.side!==null);
+ const extra=performance.rows.filter(r=>r.setId===null),paired=legacyIndex?extra.some(r=>r.side!==null):extra.some(r=>r.side==='left'||r.side==='right');
+ if(!legacyIndex){
+ if(extra.some(r=>r.side==='both')&&extra.some(r=>r.side!=='both'))return null;
+ const sideGroups=new Map();
+ for(const r of performance.rows.filter(r=>r.setId!==null)){const k=canonical([r.setId,r.groupId,r.round]);const a=sideGroups.get(k)??[];a.push(r.side);sideGroups.set(k,a);}
+ for(const a of sideGroups.values()){if(a.includes('both')&&a.length!==1)return null;if((a.includes('left')||a.includes('right'))&&(a.length!==2||a.filter(s=>s==='left').length!==1||a.filter(s=>s==='right').length!==1))return null;}
+ }
  if(paired&&(extra.length!==2||extra.filter(r=>r.side==='left').length!==1||extra.filter(r=>r.side==='right').length!==1))return null;
  const number=s=>String(s).replace(/^0+(?=\d)/,'').replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
  const rows=[],bindings=new Set();
  for(const r of performance.rows){
   const target=targets.find(t=>t.id===r.setId),group=snap.model.groups.find(g=>g.id===r.groupId),drop=!!target&&snap.model.drops.some(d=>d.setId===target.id)||userDrop(r);
-  if(r.setId!==null&&!target||![null,'left','right'].includes(r.side)||p.sideMode==='required'&&r.side===null)return null;
+  if(r.setId!==null&&!target||!(legacyIndex?[null,'left','right']:[null,'left','right','both']).includes(r.side)||p.sideMode==='required'&&r.side===null||!legacyIndex&&p.sideMode==='bilateral'&&r.side!==null)return null;
   if(r.groupId!==null&&(!group||!group.positionIds.includes(p.id)||r.round!==target?.order+1)||r.groupId===null&&r.round!==null)return null;
   const key=canonical([r.setId,r.side,r.groupId,r.round]);if(r.setId!==null&&bindings.has(key))return null;bindings.add(key);
   if(!Array.isArray(r.segments)||!r.segments.length||!drop&&r.segments.length!==1)return null;

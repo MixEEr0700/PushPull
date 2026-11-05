@@ -4,7 +4,7 @@ import {stagePlan,stageActivation} from '../model/plan-import.mjs';
 import assert from 'node:assert/strict';
 import {initialize,startSession,recordEntry} from '../model/journal.mjs';
 import {activate,views,PLAN_ID} from '../model/v2-plan.mjs';
-import {newPerformance,flatten,resultChangeAge as age,resultChangeLabel as label} from '../model/performance.mjs';
+import {newPerformance,flatten,performanceTonnage,resultChangeAge as age,resultChangeLabel as label} from '../model/performance.mjs';
 
 function fixture(){
  const d={exercises:Object.fromEntries(['PUSH A','PULL A','PUSH B','PULL B'].map(t=>[t,[]])),sessions:[],entries:[],activeId:null,trainingJournal:initialize('change-test')};
@@ -96,4 +96,25 @@ test('extra L/P rows use a unique pair only; ambiguous extra pairs and unknown k
  await save(d,'PULL-B-1',add);const b=await save(d,'PULL-B-1',add);b.performance.rows.reverse();refresh(b);assert.equal(age(d,b),2);
  const ambiguous=await save(d,'PULL-B-1',p=>{add(p);add(p);});assert.equal(age(d,ambiguous),null);
  const unknown=await save(d);unknown.performance.loadConvention.basis=null;snap(d,unknown).model.positions.find(p=>p.id===unknown.journalPositionId).loadConvention.basis=null;assert.equal(age(d,unknown),null);
+});
+
+const both=p=>{p.rows=p.rows.filter(r=>r.side==='left').map(r=>({...r,side:'both'}));};
+test('both results compare without mutating history or tonnage, including kg/reps changes',async()=>{
+ const d=fixture();await save(d,'PULL-B-1',both);const last=await save(d,'PULL-B-1',both);const before=structuredClone(d);
+ const tonnage=performanceTonnage(last.performance);assert.equal(age(d,last),2);assert.equal(performanceTonnage(last.performance),tonnage);assert.deepEqual(d,before);
+ const changed=await save(d,'PULL-B-1',p=>{both(p);all(p,'45','13');});assert.equal(age(d,changed),1);
+ const repeated=await save(d,'PULL-B-1',p=>{both(p);all(p,'45','13');});assert.equal(age(d,repeated),2);
+ const reps=await save(d,'PULL-B-1',p=>{both(p);all(p,'45','12');});assert.equal(age(d,reps),1);
+});
+test('unbound both rows preserve order; incomplete/mixed sides remain unknown',async()=>{
+ const unbound=p=>{both(p);for(const r of p.rows)r.setId=null;};
+ const d=fixture();await save(d,'PULL-B-1',unbound);const last=await save(d,'PULL-B-1',unbound);assert.equal(age(d,last),2);
+ last.performance.rows[0].side='left';refresh(last);assert.equal(age(d,last),null);
+ const a=fixture();const e=await save(a);e.performance.rows.pop();refresh(e);assert.equal(age(a,e),null);
+ const b=fixture();const mixed=await save(b,'PULL-B-1',both);mixed.performance.rows.push({...structuredClone(mixed.performance.rows[0]),id:crypto.randomUUID(),side:'left'});refresh(mixed);assert.equal(age(b,mixed),null);
+});
+test('both and explicit L/R stay distinct, asymmetry stays measurable, unknown convention stays unknown',async()=>{
+ const d=fixture();await save(d);const b=await save(d,'PULL-B-1',both);assert.equal(age(d,b),1);
+ const c=fixture();await save(c,'PULL-B-1',p=>{p.rows.find(r=>r.side==='right').segments[0].kg='27.5';});const e=await save(c,'PULL-B-1',p=>{p.rows.find(r=>r.side==='right').segments[0].kg='27.5';});assert.equal(age(c,e),2);
+ e.performance.loadConvention.basis=null;refresh(e);assert.equal(age(c,e),null);
 });

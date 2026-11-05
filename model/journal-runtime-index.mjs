@@ -15,7 +15,7 @@ export function descriptor(data,entry){
  const session=data.sessions.find(s=>s.id===entry.sessionId),snapshot=data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===entry.sessionId);
  check(session,'context session');
  return {id:entry.id,exerciseId:entry.exerciseId,variant:entry.journalVariantId??null,session:sessionHeader(session),snapshotId:snapshot?.id??null,
-  selector:[entry.journalVariantId??null,snapshot?.planVersionId??null,entry.performance?.loadConvention?.unit??null,entry.performance?.loadConvention?.basis??null],measurement:comparison(data,entry)};
+  selector:[entry.journalVariantId??null,snapshot?.planVersionId??null,entry.performance?.loadConvention?.unit??null,entry.performance?.loadConvention?.basis??null],measurement:comparison(data,entry,{legacyIndex:true})};
 }
 const order=(a,b)=>b.session.date.localeCompare(a.session.date)||b.session.seq-a.session.seq;
 export function contextSummary(history){

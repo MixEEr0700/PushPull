@@ -7,7 +7,7 @@ import {transact,request,same,MARKER,readRecords} from './journal-idb.mjs';
 import * as journal from './journal.mjs';
 import {validateSessionSnapshot} from './training-model.mjs';
 import {prepareLegacyBackup} from './legacy-backup.mjs';
-import {comparison} from './performance.mjs';
+import {comparison,resultChangeAge} from './performance.mjs';
 import {editUserNote} from './v2-plan.mjs';
 const proofs=new WeakMap();
 function sessionData(source,{starting=false}={}){
@@ -85,6 +85,20 @@ async function selectedSource(r){
  const entries=await Promise.all([...entryIds].map(id=>r.collection('journalResults',id))),snapshots=await Promise.all([...snapshotIds].map(id=>r.collection('journalSnapshots',id)));
  for(const snap of snapshots){validateSessionSnapshot(snap);const s=sessions.find(s=>s.id===snap.sessionId);if(!s){sessions.push(await r.collection('journalSessions',snap.sessionId))}check((sessions.find(s=>s.id===snap.sessionId)).journalSnapshotId===snap.id,'snapshot session relation');}
  const source=freeze({...base,data:{...d,sessions,entries,...(d.trainingJournal?{trainingJournal:{...d.trainingJournal,sessionSnapshots:snapshots}}:{})}});
+ // Older derived descriptors rejected both. Recompute only that missing age,
+ // in memory, from authenticated records; never migrate the stored index.
+ const refreshed=new Set();
+ for(const e of entries){
+  const c=comparison(source.data,e);
+  if(!c||ages.get(c.context)!=null||!e.performance?.rows.some(r=>r.side==='both')||refreshed.has(e.exerciseId))continue;
+  refreshed.add(e.exerciseId);
+  const history=await r.runtime('history',e.exerciseId);check(Array.isArray(history),'runtime comparison history');
+  const hs=[],he=[],hp=[];
+  for(const h of history){const entry=await r.collection('journalResults',h.id),session=await r.collection('journalSessions',entry.sessionId);hs.push(session);he.push(entry);if(session.journalSnapshotId){const snap=await r.collection('journalSnapshots',session.journalSnapshotId);validateSessionSnapshot(snap);hp.push(snap);}}
+  const scoped={...source.data,sessions:hs,entries:he,...(source.data.trainingJournal?{trainingJournal:{...source.data.trainingJournal,sessionSnapshots:hp}}:{})};
+  const computed=new Set();
+  for(const entry of he){validateEntry(scoped,entry,hs.find(s=>s.id===entry.sessionId));const context=comparison(scoped,entry);if(context&&!computed.has(context.context)){computed.add(context.context);ages.set(context.context,resultChangeAge(scoped,entry));}}
+ }
  // Required live fragments have the exact same full entry validators as writes.
  for(const e of entries){const session=sessions.find(s=>s.id===e.sessionId);check(session,'indexed result session');validateEntry(source.data,e,session);}
  await r.stable();return {source,info,ages};
