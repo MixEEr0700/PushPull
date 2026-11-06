@@ -27,7 +27,7 @@ class DeletePlan154(BrowserHarness):
         self.assertTrue(after['trainingJournal']['hiddenBuiltinV2']);expect(row).to_have_count(0)
         ids=self.page.evaluate("async()=>{const d=await PushPullDB.open(()=>{});try{return d.backups()}finally{d.close()}}")
         added=[x for x in ids if x not in backups];self.assertEqual(len(added),1)
-        old=self.page.evaluate("async id=>{const d=await PushPullDB.open(()=>{});try{return (await PushPullDB.parseModelBackup(await d.readBackup(id))).data}finally{d.close()}}",added[0]);self.assertEqual(old,before)
+        old=self.page.evaluate("async id=>{const d=await PushPullDB.open(()=>{});try{const raw=await d.readBackup(id);if(!(raw instanceof Blob))return (await PushPullDB.parseModelBackup(raw)).data;const r=await(await import('./model/canonical-json-transport.mjs')).readCanonicalJSON(await(await import('./model/compact-backup-reader.mjs')).openCompactBackup(raw));return (await(await import('./model/reference-preimage.mjs')).validateRescueBundle(r.bundle)).data}finally{d.close()}}",added[0]);self.assertEqual(old,before)
         self.page.reload();self.settings();self.page.locator('[data-view=plans]').click();expect(row).to_have_count(0);self.assertEqual(self.state(),after)
         self.settings();self.backup_flow('save')
         with self.page.expect_download(timeout=60000) as dl:self.page.locator('[data-canonical-export]').click()

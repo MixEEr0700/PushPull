@@ -28,7 +28,7 @@ class DeleteSession154(BrowserHarness):
         self.assertEqual(after['trainingJournal']['nextUnitId'],'PUSH A')
         archives=self.page.evaluate("async()=>{const d=await PushPullDB.open(()=>{});try{return await d.backups()}finally{d.close()}}")
         new_ids=[x for x in archives if x not in old_backups];self.assertEqual(len(new_ids),1)
-        recovered=self.page.evaluate("async id=>{const d=await PushPullDB.open(()=>{});try{return (await PushPullDB.parseModelBackup(await d.readBackup(id))).data}finally{d.close()}}",new_ids[0]);self.assertEqual(recovered,before)
+        recovered=self.page.evaluate("async id=>{const d=await PushPullDB.open(()=>{});try{const raw=await d.readBackup(id);if(!(raw instanceof Blob))return (await PushPullDB.parseModelBackup(raw)).data;const r=await(await import('./model/canonical-json-transport.mjs')).readCanonicalJSON(await(await import('./model/compact-backup-reader.mjs')).openCompactBackup(raw));return (await(await import('./model/reference-preimage.mjs')).validateRescueBundle(r.bundle)).data}finally{d.close()}}",new_ids[0]);self.assertEqual(recovered,before)
         self.assertFalse(self.alerts,self.alerts)
 
     def test_abort_and_delete_older_session_preserves_rotation(self):

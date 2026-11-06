@@ -143,7 +143,7 @@ export async function openDatabase(v1,fresh,{training=false}={}){
  function additions(archives,incoming){
   for(const item of incoming){const existing=archives.find(a=>a.id===item.id);if(existing&&canonical(existing)===canonical(item))continue;archives.push(existing?{...item,sourceId:item.id,id:'imported:'+crypto.randomUUID()}:item)}return archives;
  }
- async function commit(data,{importing=false,importedCatalog=null,importedArchives=[],backupBefore=false,expectedRevision=null,expectedLegacyRaw=undefined,modelOwnerId=null,modelEnabled=undefined}={}){
+ async function commit(data,{importing=false,importedCatalog=null,importedArchives=[],backupBefore=false,expectedRevision=null,expectedLegacyRaw=undefined,modelOwnerId=null,modelEnabled=undefined,portableBundle=null}={}){
   // Own the candidate before awaiting anything; callers may keep editing theirs.
   portable(data);portable(importedArchives);const own=clone(data),givenCatalog=importedCatalog&&clone(importedCatalog),incoming=clone(importedArchives);
   requireDB();if(error&&!importing)throw error;
@@ -156,7 +156,7 @@ export async function openDatabase(v1,fresh,{training=false}={}){
   if(!importing)guard();
   PushPullStorage.validate(own);const catalog=givenCatalog??v1.catalogFor(own,source?.catalog);v1.validateCatalog(own,catalog);v1.validateArchives(incoming);
   let archives=liveOnly?[]:source?clone(source.archives):[];
-  if(importing||backupBefore){
+  if(importing&&!portableBundle&&!backupBefore){
    const preimage=source?(writer?.state.modelEnabled?JSON.stringify(await createLegacyModelFromSource(source,{ownerId:writer.state.ownerId,createdAt:new Date().toISOString()})):JSON.stringify(source)):JSON.stringify(unverified);
    archives.push({id:'idb:'+crypto.randomUUID(),kind:'before-import',createdAt:new Date().toISOString(),raw:preimage});
   }
@@ -165,7 +165,7 @@ export async function openDatabase(v1,fresh,{training=false}={}){
   const candidate={format:'pushpull-backup',version:2,data:own,catalog,archives},ownerId=modelOwnerId??own.trainingJournal?.model.ownerId??writer?.state.ownerId??'local-journal';
   const operationGuard=()=>{if(closed)throw Error('Połączenie zamknięte.');if(raw()!==legacy)throw Error('Starsza wersja zmieniła dane w trakcie operacji.');if(!importing&&stale)throw error;};
   try{
-   const next=await (liveOnly?replaceLive:replaceSource)(db,candidate,{expectedState:expected,ownerId,modelEnabled:modelEnabled??(!!own.trainingJournal||writer?.state.modelEnabled||modelOwnerId!==null),legacyRaw:legacy,recovery:importing&&!writer,revision:pendingRevision,indexed:training,guard:operationGuard});
+   const next=await (liveOnly?replaceLive:replaceSource)(db,candidate,{expectedState:expected,ownerId,modelEnabled:modelEnabled??(!!own.trainingJournal||writer?.state.modelEnabled||modelOwnerId!==null),legacyRaw:legacy,recovery:importing&&!writer,revision:pendingRevision,indexed:training,guard:operationGuard,referenceBefore:backupBefore||!!portableBundle,portableBundle});
    publish(next,{live:liveOnly});if(!liveOnly)deferred=false;historyDeferred=false;unverified=null;recoveryCopies=[];announce();
   }catch(failure){
    if(failure.code==='post-complete-readback'){recoveryCopies=archives;block(failure.message);}
@@ -210,9 +210,9 @@ export async function openDatabase(v1,fresh,{training=false}={}){
   },
   async exportModelBackup(){const value=await auditExport();if(!writer.state.modelEnabled)throw Error('Model nie został przygotowany.');return exportBackup(await createLegacyModelFromSource(value,{ownerId:writer.state.ownerId,createdAt:new Date().toISOString()}));},
   async importModelBackup(text,options={}){const parsed=await parseModelBackup(text);return commit(parsed.data,{...options,importing:true,importedCatalog:parsed.catalog,importedArchives:parsed.archives??[],modelOwnerId:parsed.document.payload.model.ownerId});},
-  backups(){return [...new Set([...(source?.archives??[]),...recoveryCopies].map(a=>a.id))]},
-  backupLabel(id){const item=[...(source?.archives??[]),...recoveryCopies].find(a=>a.id===id);return ({migration:'Przed migracją','before-import':'Przed przywróceniem / importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item?.kind]??'Kopia')+' · '+new Date(item?.createdAt).toLocaleString('pl-PL')},
-  async readBackup(id){await ensureFull();const item=[...(source?.archives??[]),...recoveryCopies].find(a=>a.id===id);if(!item)throw Error('Brak kopii');return item.raw},
+  backups(){return [...new Set([...(source?.archives??[]),...recoveryCopies,...(writer?.state.checkpointRefs??[]).filter(c=>c.id.startsWith('preimage:'))].map(a=>a.id))]},
+  backupLabel(id){if(id.startsWith('preimage:'))return 'Przed zmianą · '+new Date(Number(id.split(':')[1])).toLocaleString('pl-PL');const item=[...(source?.archives??[]),...recoveryCopies].find(a=>a.id===id);return ({migration:'Przed migracją','before-import':'Przed przywróceniem / importem','legacy-conflict':'Zapis starszej wersji','legacy-backup':'Wcześniejsza kopia'}[item?.kind]??'Kopia')+' · '+new Date(item?.createdAt).toLocaleString('pl-PL')},
+  async readBackup(id){await ensureFull();const item=[...(source?.archives??[]),...recoveryCopies].find(a=>a.id===id);const bundle=await readRecords(db),cp=bundle.records.journalCheckpoints.find(c=>c.id===id&&id.startsWith('preimage:'));if(!item&&!cp)throw Error('Brak kopii');const {referenceOf,resolveReference}=await import('./reference-preimage.mjs');const pointer=cp?{checkpointId:cp.id,sha256:cp.sha256}:referenceOf(item.raw);if(!pointer)return item.raw;const resolved=await resolveReference(pointer,bundle);return (await import('./canonical-json-transport.mjs')).writeCanonicalJSON({format:'pushpull-protocol-rescue',version:1,bundle:resolved.bundle});},
   async readDriveState(){requireDB();return transact(db,['meta'],'readonly',tx=>request(tx.objectStore('meta').get('drive-sync-v1')))},
   async writeDriveState(value,expectedToken){
    requireDB();const next={...clone(value),key:'drive-sync-v1',token:crypto.randomUUID()};
