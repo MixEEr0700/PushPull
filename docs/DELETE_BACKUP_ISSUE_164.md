@@ -1,3 +1,5 @@
+> Aktualizacja: po zatwierdzeniu kierunku wdrożenie opisuje [REFERENCE_PREIMAGE_ISSUE_164_IMPLEMENTATION.md](REFERENCE_PREIMAGE_ISSUE_164_IMPLEMENTATION.md). Poniżej zachowano wcześniejsze pomiary i projekt; ich określenie „PR diagnostyczny” dotyczy poprzedniego etapu.
+
 # #164 — źródło odmowy i minimalna zmiana do zatwierdzenia
 
 Stan źródła: main 0bffe78, wyłącznie dane syntetyczne. PR diagnostyczny: **nie naprawia jeszcze produkcyjnego usuwania**. Użytkownik wymaga przedstawienia dowodów i projektu przed zmianą architektury kopii; na tej granicy implementacja została zatrzymana. Nie zmieniono aplikacji, limitów, PPC1, archiwów ani migracji.

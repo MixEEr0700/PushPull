@@ -472,3 +472,6 @@ const PushPullDB = (() => {
   api.open=async (fresh,options)=>(await import('./model/journal-database.mjs')).openDatabase(api,fresh,options);
   return api;
 })();
+
+// Recovery preview workers verify retained v1 checkpoints with the same validator.
+if(typeof DedicatedWorkerGlobalScope!=='undefined'&&globalThis instanceof DedicatedWorkerGlobalScope)globalThis.PushPullDB=PushPullDB;
