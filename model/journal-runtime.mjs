@@ -55,7 +55,20 @@ export async function reader(db,state,{signal,cache=null,batch=false}={}){
 async function selectedSource(r){
  const base=await r.metadata('source'),d=base.data,info=await r.runtime('info');check(info&&Number.isSafeInteger(info.maxSeq),'runtime info');
  const sessionIds=new Set([d.activeId,info.lastDone].filter(Boolean)),snapshotIds=new Set(info.previews),entryIds=new Set(),ages=new Map();
- const initialSessions=await Promise.all([...sessionIds].map(id=>r.collection('journalSessions',id)));
+ // Calendar rotation needs all small session headers, including sessions with no
+ // results. The authenticated catalog enumerates them; no getAll/history audit.
+ const calendarSessions=await Promise.all(Object.keys(base.catalog.sessionVersions).map(id=>r.collection('journalSessions',id)));
+ for(const s of calendarSessions)sessionIds.add(s.id);
+ for(const s of calendarSessions.filter(s=>s.status==='done').sort(journal.calendarOrder)){
+  if(!journal.units(d).some(u=>u.id===s.type))continue;
+  if(!s.journalSnapshotId){if(!d.trainingJournal?.activePlanVersionId)break;continue;}
+  const header=await r.row('journalSnapshots',s.journalSnapshotId),field=header.fields.find(([key])=>key==='planVersionId');check(field,'rotation snapshot plan');
+  const plan=await r.object(field[1]);
+  if(d.trainingJournal?.activePlanVersionId){if(plan!==d.trainingJournal.activePlanVersionId)continue;}
+  else {const snapshot=await r.collection('journalSnapshots',s.journalSnapshotId);if(journal.structuredSnapshot(snapshot))continue;}
+  snapshotIds.add(s.journalSnapshotId);break;
+ }
+ const initialSessions=calendarSessions;
  const active=initialSessions.find(s=>s.id===d.activeId);if(active?.journalSnapshotId)snapshotIds.add(active.journalSnapshotId);
  const initialSnapshots=await Promise.all([...snapshotIds].map(id=>r.collection('journalSnapshots',id)));
  const previewData={...d,sessions:initialSessions,...(d.trainingJournal?{trainingJournal:{...d.trainingJournal,sessionSnapshots:initialSnapshots}}:{})};
@@ -80,9 +93,10 @@ async function selectedSource(r){
   for(const [key,age] of c.ages)ages.set(key,age);
  }
  if(d.activeId){const entries=await r.runtime('session',d.activeId);check(Array.isArray(entries),'runtime active session');for(const id of entries)entryIds.add(id);}
+ const entries=await Promise.all([...entryIds].map(id=>r.collection('journalResults',id))),entriesForSnapshot=new Set(entries.map(e=>e.sessionId));
  const sessions=await Promise.all([...sessionIds].map(id=>r.collection('journalSessions',id)));
- for(const s of sessions)if(s.journalSnapshotId)snapshotIds.add(s.journalSnapshotId);
- const entries=await Promise.all([...entryIds].map(id=>r.collection('journalResults',id))),snapshots=await Promise.all([...snapshotIds].map(id=>r.collection('journalSnapshots',id)));
+ for(const s of sessions)if(s.journalSnapshotId&&(s.id===d.activeId||s.id===info.lastDone||entriesForSnapshot.has(s.id)))snapshotIds.add(s.journalSnapshotId);
+ const snapshots=await Promise.all([...snapshotIds].map(id=>r.collection('journalSnapshots',id)));
  for(const snap of snapshots){validateSessionSnapshot(snap);const s=sessions.find(s=>s.id===snap.sessionId);if(!s){sessions.push(await r.collection('journalSessions',snap.sessionId))}check((sessions.find(s=>s.id===snap.sessionId)).journalSnapshotId===snap.id,'snapshot session relation');}
  const source=freeze({...base,data:{...d,sessions,entries,...(d.trainingJournal?{trainingJournal:{...d.trainingJournal,sessionSnapshots:snapshots}}:{})}});
  // Older derived descriptors rejected both. Recompute only that missing age,
