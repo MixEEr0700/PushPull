@@ -42,13 +42,16 @@ export function units(data,session=null){
  const snap=session&&snapshotFor(data,session.id),m=snap?.model??data.trainingJournal?.model,id=snap?.planVersionId??data.trainingJournal?.activePlanVersionId;
  return (m?.planVersions.find(v=>v.id===id)?.units??['PUSH A','PULL A','PUSH B','PULL B'].map((id,order)=>({id,name:id,order}))).slice().sort((a,b)=>a.order-b.order);
 }
-export function nextType(data){const list=units(data);return list.some(u=>u.id===data.trainingJournal?.nextUnitId)?data.trainingJournal.nextUnitId:list.some(u=>u.id===data.nextType)?data.nextType:list[0].id;}
-export function unitLabel(data,session){return units(data,session).find(u=>u.id===session.type)?.name??session.type;}
-export function advance(data,session){
- const list=units(data),snap=snapshotFor(data,session.id);
- if(data.trainingJournal?.activePlanVersionId){if(snap?.planVersionId!==data.trainingJournal.activePlanVersionId||data.trainingJournal.activations?.at(-1)?.ongoingSessionId===session.id)return;data.trainingJournal.nextUnitId=list[(list.findIndex(u=>u.id===session.type)+1)%list.length].id;}
- const legacy=['PUSH A','PULL A','PUSH B','PULL B'];if(legacy.includes(session.type))data.nextType=legacy[(legacy.indexOf(session.type)+1)%legacy.length];
+/** Calendar order includes future-dated completed sessions; no wall-clock dependency. */
+export const calendarOrder=(a,b)=>b.date.localeCompare(a.date)||b.seq-a.seq||a.id.localeCompare(b.id);
+export function lastCompleted(data){
+ const list=units(data),plan=data.trainingJournal?.activePlanVersionId;
+ return data.sessions.filter(s=>s.status==='done'&&list.some(u=>u.id===s.type)&&/^\d{4}-\d{2}-\d{2}$/.test(s.date)&&(()=>{const snap=snapshotFor(data,s.id);return plan?snap?.planVersionId===plan:s.journalSnapshotId?!!snap&&!structuredSnapshot(snap):true;})()).sort(calendarOrder)[0]??null;
 }
+export function nextType(data){const list=units(data),last=lastCompleted(data);return last?list[(list.findIndex(u=>u.id===last.type)+1)%list.length].id:list[0].id;}
+export function unitLabel(data,session){return units(data,session).find(u=>u.id===session.type)?.name??session.type;}
+// Compatibility fields are updated only during existing writes, never as authority.
+export function advance(data){const next=nextType(data);if(data.trainingJournal?.activePlanVersionId)data.trainingJournal.nextUnitId=next;if(['PUSH A','PULL A','PUSH B','PULL B'].includes(next))data.nextType=next;}
 export function snapshotFor(data,sessionId) {return data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===sessionId)??null;}
 export function exercisesFor(data,session) {
   const snap=snapshotFor(data,session?.id);
