@@ -531,7 +531,7 @@ class PWADeployment(unittest.TestCase):
         expect(self.page.locator('[data-switch-activate]')).to_be_enabled();self.page.locator('[data-switch-cancel]').click()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-draft-resume]').click();f=self.page.locator('.performanceForm')
         expect(f).to_have_attribute('data-id','TEST-5');expect(f.locator('[data-row="0"][data-field=kg]')).to_have_value('20');save(f);finish()
-        self.assertEqual(value()['trainingJournal']['nextUnitId'],'PUSH A')
+        self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A') # Resume the latest compatible V2 calendar history.
         at(8,3);f=form('PUSH A','PUSH-A-1','2026-08-03')
         card=self.page.locator('.exercise-card').filter(has=self.page.locator('[data-expand="PUSH-A-1"]'))
         expect(card.locator('.exercise-toggle .last-result')).to_have_text('10×105 kg')
@@ -697,10 +697,10 @@ class PWADeployment(unittest.TestCase):
         f.locator('[type=submit]').click();expect(f).to_have_count(0)
         expect(self.page.locator('.exercise-toggle .result-unit')).to_have_text(['L/P 15×105 kg','L/P 15×105 kg','L 12×105 · P 14×105 kg'])
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000)
-        self.assertEqual(value()['trainingJournal']['nextUnitId'],'PUSH A') # Old PULL A must not advance this new V2 period.
+        self.assertEqual(value()['trainingJournal']['nextUnitId'],'PUSH B') # Same-version completed PULL A participates in calendar rotation.
         self.page.locator('[data-act=start]').click();self.ready()
-        self.assertEqual(value()['sessions'][-1]['type'],'PUSH A')
-        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000);self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL A')
+        self.assertEqual(value()['sessions'][-1]['type'],'PUSH B')
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000);self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL B')
         saved=value();self.page.locator('[data-tab=settings]').click()
         self.backup_flow('save')
         with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
