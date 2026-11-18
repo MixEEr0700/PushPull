@@ -47,3 +47,69 @@ class IncrementalDriveUI(BrowserHarness):
         from test_browser import wait_for_service_worker_controller
         self.context.close();self.context=self.new_context(service_workers='allow');self.page=self.context.new_page();self.page.on('dialog',self.dialog);self.page.on('pageerror',lambda e:self.errors.append(str(e)));google=IncrementalGoogle();google.install(self.context);self.page.goto(self.url);self.page.wait_for_selector('[data-act=start]');wait_for_service_worker_controller(self.page);self.configure();self.context.set_offline(True)
         self.page.locator('[data-tab=training]').click();self.start();self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible();self.assertEqual(self.state()['sessions'][-1]['status'],'done');self.assertEqual(google.posts,0);self.page.reload();self.page.wait_for_selector('[data-act=start]');self.context.set_offline(False);self.page.locator('[data-tab=settings]').click();self.backup_flow('save');self.data_section('google');self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zweryfikowana',timeout=60000);self.assertEqual(google.posts,1)
+    def test_interrupted_manual_upload_resumes_same_remote_file_after_restart(self):
+        google=IncrementalGoogle()
+        route_response=google.route
+        held=[]
+        def stall_after_post(route):
+            if '/upload/' not in route.request.url or held:
+                return route_response(route)
+            request=route.request
+            boundary=request.headers['content-type'].split('boundary=')[1]
+            parts=request.post_data.split('--'+boundary)
+            metadata=json.loads(parts[1].split('\r\n\r\n',1)[1].strip())
+            text=parts[2].split('\r\n\r\n',1)[1].rstrip('\r\n')
+            google.posts+=1
+            google.files[metadata['id']]={'id':metadata['id'],'appProperties':metadata['appProperties'],'text':text,'createdTime':'2026-11-18T12:00:00Z'}
+            held.append(metadata['id'])
+            # The remote write succeeded but its response never arrives.
+        google.route=stall_after_post
+        # Install routing before loading a fresh document with a test-only deadline.
+        js=Path('model/google-drive.mjs').read_text().replace('timeoutMs=30000','timeoutMs=5000')
+        self.page.route('**/model/google-drive.mjs',lambda r:r.fulfill(body=js,content_type='text/javascript'))
+        google.install(self.context)
+        self.page.reload();self.page.wait_for_selector('[data-act=start]')
+        legacy_drive.ManualDriveFlow.configure(self,automatic=False)
+        self.backup_flow('save')
+        self.page.locator('[data-ppc1-send]').click()
+        self.page.wait_for_function("""async()=>{const h=await PushPullDB.open(()=>{});try{return !!(await h.readDriveState()).accounts['mock-account']?.ppc1?.pending}finally{h.close()}}""")
+        # Browser round trips let the intercepted POST reach the simulated Drive.
+        deadlines=0
+        while not held and deadlines<30:
+            self.page.wait_for_timeout(50);deadlines+=1
+        self.assertEqual(len(held),1)
+        self.page.reload()
+        self.page.locator('[data-tab=settings]').click()
+        self.data_section('google')
+        self.page.locator('[data-drive-action=connect]').click()
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zweryfikowana',timeout=15000)
+        self.assertEqual(google.posts,1)
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Ostatnia kopia zweryfikowana')
+        expect(self.page.locator('[data-drive-reminder]')).to_have_count(0)
+
+    def test_stalled_api_releases_busy_and_reminder_can_retry(self):
+        google=IncrementalGoogle()
+        route_response=google.route
+        stalled=[]
+        def stall_reservation(route):
+            if route.request.url.split('?')[0].endswith('/generateIds') and not stalled:
+                stalled.append(True)
+                return
+            route_response(route)
+        google.route=stall_reservation
+        js=Path('model/google-drive.mjs').read_text().replace('timeoutMs=30000','timeoutMs=500')
+        self.page.route('**/model/google-drive.mjs',lambda r:r.fulfill(body=js,content_type='text/javascript'))
+        google.install(self.context)
+        self.page.reload();self.page.wait_for_selector('[data-act=start]');self.configure()
+        self.page.locator('[data-tab=training]').click();self.start()
+        self.page.locator('[data-act=finish]').click()
+        expect(self.page.locator('[data-act=start]')).to_be_visible()
+        reminder=self.page.locator('[data-drive-reminder]')
+        expect(reminder).to_be_visible(timeout=15000)
+        expect(self.page.locator('[data-drive-global]')).to_contain_text('Przekroczono czas')
+        self.assertEqual(google.posts,0)
+        expect(reminder.locator('[data-reminder-connect]')).to_have_text('Ponów kopię')
+        reminder.locator('[data-reminder-connect]').click()
+        expect(self.page.locator('[data-drive-global]')).to_contain_text('Kopia zweryfikowana')
+        expect(reminder).to_have_count(0)
+        self.assertEqual(google.posts,1)
