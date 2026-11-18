@@ -53,15 +53,16 @@ class LazyData(BrowserHarness):
         self.page.evaluate('__releaseAudit()');expect(self.page.locator('[data-full-audit]')).to_have_count(0,timeout=60000)
         self.assertFalse(downloads);self.assertFalse(self.alerts,self.alerts)
 
-    def test_explicit_backup_listing_and_export_preserve_complete_source(self):
-        self.prepare();self.page.locator('[data-tab=settings]').click()
-        self.advanced_data();self.page.locator('[data-load-backups]').click();expect(self.page.locator('[data-backup-export]')).to_be_visible(timeout=60000)
-        self.assertFalse(self.page.evaluate('__fastDB.archivesDeferred'))
-        self.backup_flow('save')
-        with self.page.expect_download() as item:self.legacy_control('[data-act=export]').click()
-        import json
+    def test_explicit_backup_listing_and_rescue_download_preserve_archive_bytes(self):
         from pathlib import Path
-        raw=Path(item.value.path()).read_text();self.assertIn('large-raw',raw)
+        self.prepare();self.page.locator('[data-tab=settings]').click()
+        undo=self.data_section('undo')
+        undo.locator('[data-load-backups]').click();expect(undo.locator('[data-backup-export]')).to_be_visible(timeout=60000)
+        self.assertFalse(self.page.evaluate('__fastDB.archivesDeferred'))
+        undo.locator('#backupKey').select_option('large-raw')
+        with self.page.expect_download() as item:undo.locator('[data-backup-export]').click()
+        self.assertEqual(item.value.suggested_filename,'pushpull-material-ratunkowy.json')
+        self.assertEqual(Path(item.value.path()).read_bytes(),('Ł😀"\n'*262144).encode())
         self.assertFalse(self.alerts,self.alerts)
 
     @json_release
