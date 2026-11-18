@@ -41,11 +41,11 @@ if(database.historyDeferred&&savedDrafts.records.some(r=>r.sessionId!==data.acti
 const draftCollector=await import('./model/draft-collector.mjs');
 const draftObserver=draftCollector.openDraftObserver(()=>{canonicalCaptureRevision();return savedDrafts.readEvidence();});
 let draftReport=null,draftCollectError='',draftCollecting=false,draftCollectController=null;
-let drive=null,driveInitError='',driveChoices=[],driveChoicesMode='restore',driveChoiceWarning='',downloadBusy=false,downloadCancelled=false,driveUpload=null,backupAdvancedOpen=false,googleOpen=false,undoOpen=false,technicalOpen=false;
+let drive=null,driveInitError='',drivePoints=null,backupAdvancedOpen=false,googleOpen=false,googleAdvancedOpen=false,undoOpen=false,technicalOpen=false;
 let canonicalExport=null,canonicalExportMetrics=null;
 let backupFlow=null,backupSaveStatus='',restoreController=null,restoreCommitting=false,restoreCancelled=false;
-try{const {createGoogleDrive}=await import('./model/google-drive.mjs');drive=await (await import('./model/drive-sync.mjs')).openDriveBackup({database,captureCanonical:async({signal}={})=>{const {exportCanonicalLocal}=await import('./model/canonical-export.mjs');const {readCanonicalBackup}=await import('./model/canonical-backup.mjs');if(savedDrafts.error||savedDrafts.readError)throw Error('Nie utrwalono szkiców.');return (await exportCanonicalLocal({getRevision:()=>database.error?null:database.revision,signal})).file;},transport:createGoogleDrive(),inspect:raw=>inspectForRestore(raw,null)});}catch(error){driveInitError=error.message;}
-function downloadRaw(content,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+try{const {createGoogleDrive}=await import('./model/google-drive.mjs');drive=await (await import('./model/drive-sync.mjs')).openDriveBackup({database,captureCanonical:async({signal}={})=>{const {exportCanonicalLocal}=await import('./model/canonical-export.mjs');if(savedDrafts.error||savedDrafts.readError)throw Error('Nie utrwalono szkiców.');return (await exportCanonicalLocal({getRevision:()=>database.error?null:database.revision,signal})).file;},transport:createGoogleDrive()});}catch(error){driveInitError=error.message;}
+function downloadRaw(content,name){const a=document.createElement('a');a.href=URL.createObjectURL(content instanceof Blob?content:new Blob([content],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 const handlers=new Map();let actions=Promise.resolve();
 // Feedback is volatile UI state. The existing strict commit/CAS path below
 // remains the only authority for success. Block further edits while its mutable
@@ -143,7 +143,7 @@ function on(event,handler){
    if(event==='submit')e.preventDefault();
    // Cancel read-only work immediately, before the action queue can await.
    if(event==='click'&&e.target.closest?.('[data-restore-cancel],[data-backup-flow],[data-tab],[data-view]')&&!restoreCommitting){
-    if(restoreBusy||e.target.closest('[data-restore-cancel],[data-backup-flow]'))cancelRestore();
+    if(restoreBusy||drivePoints||restoreCandidate||e.target.closest('[data-restore-cancel],[data-backup-flow]'))cancelRestore();
    }
    if(event==='click'&&e.target.closest?.('[data-canonical-export]')){startCanonicalExport();return;}
    if(event==='click'&&e.target.closest?.('[data-canonical-cancel],[data-tab],[data-view],[data-backup-flow]'))canonicalExport?.abort();
@@ -153,7 +153,7 @@ function on(event,handler){
     if(restoreCommitting)return;
     if(fullAudit)fullAudit.cancelled=true;
     backupFlow=backupFlow===flowButton.dataset.backupFlow?null:flowButton.dataset.backupFlow;
-    if(backupFlow==='save'){restoreCancelled=false;downloadCancelled=false;}
+    if(backupFlow==='save')restoreCancelled=false;
     render();return;
    }
    if(fullAudit&&e.target.closest?.('#app')){
@@ -167,29 +167,26 @@ function on(event,handler){
    }
    if(trainingWrite&&e.target.closest?.('#app'))return;
    if(event==='change'&&e.target.id==='importFile'){startLocalRestore(e);return;}
+   if(event==='click'){
+    const point=e.target.closest?.('[data-ppc1-list],[data-ppc1-point]');
+    if(point){startDriveRestore(point);return;}
+   }
    if(event==='input'){try{for(const callback of handlers.get(event))callback(e)}catch(error){render();alert('Operacja przerwana. '+error.message)}return;}
-   // Reserve this click before the event queue or the full-data audit can await.
-   // The detached cloud task owns the reservation once it has started.
-   if(event==='click'&&e.target.closest('[data-act="export"],[data-drive-action="upload"]')){backupSaveStatus='';restoreCancelled=false;document.querySelector('[data-backup-save-status]')?.remove();}
-   const uploadRequest=event==='click'&&e.target.closest('[data-drive-action="upload"]')?{started:false}:null;
-   if(uploadRequest){if(driveUpload||!drive||drive.status.busy||downloadBusy)return;driveUpload=uploadRequest;downloadCancelled=false;paintDrive();}
    const pending=trainingWriteFeedback(e);if(pending)trainingWrite=pending;
    actions=actions.then(async()=>{
     try{
      // A previous success must never acknowledge a newly queued data operation.
-     if(event==='click'&&e.target.closest('[data-plan-save],[data-plan-activate],[data-switch-activate],[data-enable-journal],[data-restore-confirm],[data-act="export"],[data-export-v4],[data-export-v5],[data-backup-export]')||event==='change'&&e.target.matches('#importFile'))document.querySelector('.toast')?.remove();
+     if(event==='click'&&e.target.closest('[data-plan-save],[data-plan-activate],[data-switch-activate],[data-enable-journal],[data-restore-confirm],[data-backup-export]')||event==='change'&&e.target.matches('#importFile'))document.querySelector('.toast')?.remove();
      if(pending){await feedbackFrame();if(!e.target.isConnected)return;}
-     const fullOperation=event==='click'&&e.target.closest('[data-act="export"],[data-export-v4],[data-export-v5],[data-plan-save],[data-backup-export],[data-load-backups],[data-drive-action="upload"],[data-restore-confirm]');
+     const fullOperation=event==='click'&&e.target.closest('[data-plan-save],[data-backup-export],[data-load-backups],[data-restore-confirm]');
      if(fullOperation&&!(event==='click'&&e.target.closest('[data-restore-confirm]')&&restoreCandidate?.canonical)&&!recoveryError&&database.archivesDeferred&&!await requireFullData())return;
-     const needsHistory=event==='submit'&&!e.target.matches('.performanceForm,.seriesResultForm,#resultForm,.historicalResultForm,.editForm,#driveConfig,.v2NoteForm')||event==='click'&&e.target.closest('[data-tab=calendar],[data-panel=history],[data-panel=stats],[data-view="weekly"],[data-view="plans"]')||event==='change'&&e.target.matches('[data-preview-v4]');
+     const needsHistory=event==='submit'&&!e.target.matches('.performanceForm,.seriesResultForm,#resultForm,.historicalResultForm,.editForm,#driveConfig,.v2NoteForm')||event==='click'&&e.target.closest('[data-tab=calendar],[data-panel=history],[data-panel=stats],[data-view="weekly"],[data-view="plans"]');
      if(needsHistory&&database.historyDeferred){await database.ensureHistory();data=database.value;}
      for(const callback of handlers.get(event))await callback(e);
     }catch(error){
-     if(event==='click'&&e.target.closest('[data-act="export"]'))backupSaveStatus='Nie zlecono pobrania kopii. '+error.message;
-     if(uploadRequest)drive?.report(error);
      render();alert('Operacja przerwana. '+error.message);
     }
-    finally{if(pending)clearTrainingWrite(pending);if(uploadRequest&&!uploadRequest.started&&driveUpload===uploadRequest){driveUpload=null;paintDrive();}}
+    finally{if(pending)clearTrainingWrite(pending);}
    });
   });
  }
@@ -367,50 +364,18 @@ function weeklyScreen(){
  return `<button class="btn" data-view="data">‹ Dane</button><h1>Statystyki ogólne</h1><div class="card stack"><label>Plan<select id="weeklyPlan">${all.map(p=>`<option value="${esc(p.id)}" ${p.id===plan.id?'selected':''}>${esc(p.label)}${p.current?' · Aktualny plan':''}</option>`).join('')}</select></label><form id="weeklyRange" class="stack"><div class="grid2"><label>Od<input name="from" type="date" value="${esc(weeklyFrom??report?.from)}" required></label><label>Do<input name="to" type="date" value="${esc(weeklyTo??report?.to)}" required></label></div><button class="btn">Pokaż zakres</button></form>${weeklyError?`<p role="alert">${esc(weeklyError)}</p>`:''}<p class="hint">Tygodnie ISO: poniedziałek–niedziela, Europe/Warsaw, według daty zakończonej sesji. Bez założenia liczby treningów. Szkice i sesje w toku są poza zestawieniem.</p><p class="hint">Każdy zapis L/P jest osobną serią wykonania; dropset to jedna seria z wieloma segmentami. Tonaż i powtórzenia sumują segmenty raz, bez dodatkowego ×2. Nieustalona konwencja kg pozostaje nieustalona.</p></div>${report?`<div class="card"><div class="stat-grid">${weeklyMetrics.map(([id,label,unit])=>`<button class="stat-tile ${id===k?'selected':''}" data-weekly-metric="${id}"><small>${label}</small><strong>${report.missing[id]?'≥ ':''}${fmt(report.totals[id])} ${unit}</strong></button>`).join('')}</div><p class="hint">Większy tonaż może wynikać z większej liczby treningów i serii; sam nie dowodzi poprawy siły. ≥ oznacza niepełne dane, a 0 brak zapisów w danym tygodniu, nie odtworzoną aktywność.</p>${report.invalidDates?'<p class="hint">Pominięto sesje z nieprawidłową datą.</p>':''}${!report.totals.workouts?'<p class="hint">Brak zakończonych treningów w tym zakresie.</p>':''}<h3>${esc(metric[1])} · tygodniowo</h3>${chart(report.rows)}<p class="hint">Pomarańczowy punkt: tydzień częściowy. Nie porównujemy częściowych lub niepełnych tygodni; brakujących wartości i tygodni bez treningów tego planu nie łączymy linią.</p><div class="stat-table" role="table" aria-label="Statystyki tygodniowe"><div class="stat-row" role="row"><b>Tydzień / frekwencja</b><b>${esc(metric[1])} / zmiana</b></div>${report.rows.map(w=>`<div class="stat-row" role="row" data-week="${w.id}"><span role="rowheader">${w.id}<br><small>${w.from} – ${w.to}${w.partial?'<br>Częściowy tydzień':''}<br>${w.workouts} treningów · ${w.sets} serii${w.unknownConvention?'<br>Konwencja kg nieustalona':''}</small></span><span role="cell">${w.missing[k]?'≥ ':''}${fmt(w[k])} ${metric[2]}${w.missing[k]?'<br>Brak pełnych danych':''}<br>Δ ${esc(delta(w))}</span></div>`).join('')}</div></div>`:''}`;
 }
 let historicalId=null;
-let rescueOperation=null,rescuePreview=null,rescueError='',rescueKey='',rescueRevision=null,rescueLegacyRaw=null;
+let rescuePoints=null,rescueOperation=null,rescuePreview=null,rescueError='',rescueKey='',rescueRevision=null,rescueLegacyRaw=null;
 function backupControls({preview=true}={}){
  if(database.archivesDeferred)return '<div class="card stack"><button class="btn" data-load-backups>Pokaż zachowane kopie danych</button></div>';
  const backups=database.backups();
  const panel=preview?`<button class="btn" data-rescue-preview ${rescueOperation?'disabled':''}>Podgląd kopii</button>${rescueOperation?'<p role="status">Weryfikowanie kopii…</p><button class="btn" data-rescue-cancel>Anuluj</button>':''}${rescueError?`<p role="alert">${esc(rescueError)}</p>`:''}${rescuePreview&&rescueRevision===database.revision&&rescueLegacyRaw===database.raw&&!database.error?`<p role="status" data-rescue-result tabindex="-1">Podgląd bez przywracania: plany ${rescuePreview.plans.length} · treningi ${rescuePreview.sessions} · wyniki ${rescuePreview.results} · snapshoty ${rescuePreview.snapshots}</p>`:''}`:'';
- return backups.length?`<div class="card stack"><label>Zachowane kopie danych<select id="backupKey">${backups.map((key,i)=>`<option value="${esc(key)}" ${preview&&key===rescueKey?'selected':''}>${i+1}. ${esc(database.backupLabel(key))}</option>`).join('')}</select></label>${panel}<button class="btn" data-backup-export>↓ Pobierz kopię sprzed przywrócenia</button><p class="hint">Aby przywrócić te dane, pobierz kopię i wybierz „Przywróć kopię → Z pliku”. Zachowaj również kopię poza przeglądarką.</p></div>`:'';
+ return backups.length?`<div class="card stack"><label>Zachowane kopie danych<select id="backupKey">${backups.map((key,i)=>`<option value="${esc(key)}" ${preview&&key===rescueKey?'selected':''}>${i+1}. ${esc(database.backupLabel(key))}</option>`).join('')}</select></label>${panel}<button class="btn" data-backup-export>↓ Pobierz punkt lub materiał ratunkowy</button><p class="hint">Punkt cofnięcia w pliku PPC1 możesz otworzyć przez „Przywróć kopię → Z pliku”. Starsze pliki z danymi ratunkowymi zachowaj do diagnostyki.</p></div>`:'';
 }
-function driveStatusText(){return restoreCancelled?'Anulowano podgląd. Nie przywrócono danych.':downloadCancelled?'Anulowano pobieranie. Nie zlecono pobrania pliku.':drive?.status.detail||'Zapis lokalny działa.'+(driveInitError?' Drive niedostępny: '+driveInitError:'');}
+function driveStatusText(){return drive?.status.detail||'Zapis lokalny działa.'+(driveInitError?' Drive niedostępny: '+driveInitError:'');}
 const {drivePresentation}=await import('./model/drive-status.mjs');
-function driveSummaryText(){if(downloadCancelled||restoreCancelled)return driveStatusText();return drive?drivePresentation({...drive.status,busy:drive.status.busy||downloadBusy||!!driveUpload}).summary:'Kopie lokalne działają. Google Drive jest niedostępny.';}
+function driveSummaryText(){return drive?drivePresentation(drive.status).summary:'Kopie lokalne działają. Google Drive jest niedostępny.';}
 let driveReminder=null;
-function paintDrive(){void driveReminder?.refresh();document.querySelectorAll('[data-drive-operation-detail]').forEach(el=>el.hidden=!(downloadCancelled||restoreCancelled||drive&&drivePresentation(drive.status).detail));document.querySelectorAll('[data-drive-detail],[data-drive-global],[data-drive-operation-detail]').forEach(el=>el.textContent=driveStatusText());document.querySelectorAll('[data-auto-ppc1]').forEach(el=>el.checked=drive.automatic);document.querySelectorAll('[data-drive-status]').forEach(el=>el.textContent=driveSummaryText());document.querySelectorAll('[data-drive-action="connect"],[data-connect-from-advanced]').forEach(el=>el.hidden=!!drive?.config.connected);document.querySelectorAll('[data-drive-action="upload"],[data-drive-action="restore"],[data-drive-action="preview"],[data-drive-action="download"],[data-drive-action="download-file"]').forEach(el=>el.disabled=!drive||restoreCommitting||!!drive.status.busy||downloadBusy||!!driveUpload&&el.dataset.driveAction==='upload');}
-const localV4=await import('./model/local-backup-v4.mjs');
-let localV4Busy=false,localV4Error='',localV4Preview=null,localV4Metrics=null;
-function localV4Panel(){
- const p=localV4Preview,m=localV4Metrics;
- const describe=(s,title)=>`<div><strong>${title}</strong><p class="hint">Treningi: ${s.sessions} · Wyniki: ${s.results}<br>Plany: ${s.plans.length} · Snapshoty: ${s.snapshots}<br>Aktywny plan: ${esc(s.activePlan)}<br>Wersje: ${s.plans.map(p=>esc(p.label)).join(', ')||'szkielet źródłowy'}</p></div>`;
- return `<div class="stack"><button class="btn" data-export-v4 ${localV4Busy?'disabled':''}>Pobierz kopię v4 (testowo)</button><button class="btn" data-export-v5 ${localV4Busy?'disabled':''}>Pobierz kopię v5 (testowo)</button><p class="hint">v5 dzieli duże archiwa na fragmenty. Przywracanie v5 nie jest dostępne. Live i całkowity rozmiar nadal podlegają limitom.</p>
- <p class="hint">v4: skompresowana kopia danych i archiwów. Przywracanie v4 nie jest jeszcze dostępne. Szkice pozostają lokalnie; możesz pobrać je osobno.</p>
- <label>Podgląd pliku v4 (bez przywracania)<input type="file" data-preview-v4 accept="application/json,.json,application/octet-stream,.ppc1" ${localV4Busy?'disabled':''}></label>
- ${localV4Busy?'<p class="hint" role="status" data-v4-busy>Trwa weryfikacja kopii v4…</p>':''}
- ${localV4Error?`<p class="hint warning" role="alert" data-v4-error>${esc(localV4Error)}</p>`:''}
- ${m?`<p class="hint" role="status" data-v4-metrics>${m.exported?'Kopia v'+m.version+' zweryfikowana; zlecono pobranie pliku.':'Podgląd v4 zweryfikowany.'} Czas: ${m.ms} ms · Plik: ${m.bytes} B · Archiwa: ${m.archives}</p>`:''}
- ${p?`<section class="stack" data-v4-preview tabindex="-1"><strong>Kopia v4 — tylko podgląd</strong>
- <div class="grid2">${p.current?describe(p.current,'Na tym urządzeniu'):'<p>Baza wymaga odzyskania.</p>'}${describe(p.summary,'W wybranej kopii')}</div>
- <p class="hint">Archiwa: ${p.archives} · Data kopii: ${esc(p.summary.createdAt||'nieustalona')}. Data kopii nie gwarantuje pełniejszej historii.</p>
- <p class="hint warning">Format v4: podgląd testowy, przywracanie niedostępne. Nie zmieniono danych.</p>
- <button class="btn" data-v4-close>Zamknij podgląd</button></section>`:''}</div>`;
-}
-let v5Preview=null,v5Error='',v5Busy=false,v5Controller=null,v5Sequence=0;
-function v5PreviewPanel(){const p=v5Preview;return `<div class="card stack"><label>Podgląd kopii v5<input type="file" data-preview-v5 accept="application/json,.json,application/octet-stream,.ppc1" ${v5Busy?'disabled':''}></label>${v5Busy?'<p role="status" data-v5-busy>Weryfikacja v5 i próba w pamięci…</p><button class="btn" data-v5-cancel>Anuluj</button>':''}${v5Error?`<p class="hint warning" role="alert" data-v5-error>${esc(v5Error)}</p>`:''}${p?`<section data-v5-preview tabindex="-1"><strong>v5 — zweryfikowany podgląd</strong><p class="hint">Plany: ${p.plans} · Aktywna wersja: ${p.activeVersion?'zapisana':'brak wersjonowanego planu'}<br>Sesje: ${p.sessions} · Wyniki: ${p.results} · Serie: ${p.series}<br>Snapshoty: ${p.snapshots} · Archiwa: ${p.archives} (puste raw null: ${p.nullArchives})</p><p class="hint" data-v5-trial>Próba w izolowanej bazie w pamięci: pełna zgodność z odczytanym plikiem.</p><p class="hint">Fragmenty są częściami archiwów, nie dodatkowymi archiwami. Szkice nie są zawarte w kopii v5; pozostają na urządzeniu. Nie porównano kompletności pliku z bieżącą bazą.</p><p class="hint warning">Nie zapisano danych do IndexedDB. Przywracanie rzeczywistej bazy nie jest dostępne.</p><button class="btn" data-v5-cancel>Zamknij podgląd</button></section>`:''}</div>`;}
-on('click',e=>{if(e.target.closest('[data-v5-cancel]')){v5Sequence++;v5Controller?.abort();v5Controller=null;v5Preview=null;v5Error='';v5Busy=false;render();}});
-on('change',e=>{
- if(!e.target.matches('[data-preview-v5]'))return;
- const file=e.target.files?.[0];if(!file)return;
- v5Controller?.abort();const controller=new AbortController(),sequence=++v5Sequence;v5Controller=controller;
- restoreSequence++;downloadBusy=false;driveChoices=[];driveChoiceWarning='';restoreCandidate=null;restoreError='';restoreSuccess='';v5Preview=null;v5Error='';v5Busy=true;render();
- void(async()=>{try{
-  const {previewBackupV5}=await import('./model/backup-v5-preview.mjs');
-  const report=await previewBackupV5(file,{signal:controller.signal,getRevision:()=>database.revision});
-  if(sequence===v5Sequence)v5Preview=report;
- }catch(error){if(sequence===v5Sequence)v5Error=error.name==='AbortError'?'Anulowano.':error.message;}
- finally{if(sequence===v5Sequence){v5Busy=false;v5Controller=null;render();document.querySelector('[data-v5-preview]')?.focus();}}})();
-});
+function paintDrive(){void driveReminder?.refresh();document.querySelectorAll('[data-drive-operation-detail]').forEach(el=>el.hidden=!(drive&&drivePresentation(drive.status).detail));document.querySelectorAll('[data-drive-detail],[data-drive-global],[data-drive-operation-detail]').forEach(el=>el.textContent=driveStatusText());document.querySelectorAll('[data-auto-ppc1]').forEach(el=>el.checked=drive.automatic);document.querySelectorAll('[data-drive-status]').forEach(el=>el.textContent=driveSummaryText());document.querySelectorAll('[data-drive-action="connect"]').forEach(el=>el.hidden=!!drive?.config.connected);document.querySelectorAll('[data-ppc1-list]').forEach(el=>el.disabled=!drive||restoreBusy||!!drive.status.busy);}
 function draftCollectorPanel(){return `<div class="card stack"><button class="btn" data-collect-drafts ${draftCollecting?'disabled':''}>Sprawdź szkice do kopii (testowo)</button>${draftCollecting?'<p role="status" data-draft-collecting>Odczytywanie szkiców…</p><button class="btn" data-collect-cancel>Anuluj</button>':''}${draftCollectError?`<p role="alert" data-draft-collect-error>${esc(draftCollectError)}</p>`:''}${draftReport?`<p class="hint" data-draft-collect-report>Zaobserwowane źródła: ${draftReport.diagnostics.sources} · Konflikty: ${draftReport.diagnostics.conflicts} · Kwarantanna: ${draftReport.diagnostics.quarantined}<br>Odpowiadające inne karty: ${draftReport.coverage.respondingTabs}. Stan pozostałych kart jest nieznany. Nie potwierdzono kompletności urządzenia ani atomowości wielu pamięci. Nie zapisano ani nie pobrano kopii.</p>`:''}</div>`;}
 on('click',e=>{
  if(e.target.closest('[data-collect-cancel]')){draftCollectController?.abort();return;}
@@ -419,7 +384,7 @@ on('click',e=>{
  void draftCollector.collectDrafts({database,getMemory:()=>savedDrafts.readEvidence(),peers:draftObserver,signal:controller.signal}).then(result=>{draftReport={diagnostics:result.diagnostics,coverage:result.coverage};}).catch(error=>{draftCollectError=error.name==='AbortError'?'Anulowano.':'Nie odczytano stabilnego zestawu szkiców ('+(error.code||'source-error')+'). Niczego nie usunięto.';}).finally(()=>{draftCollecting=false;draftCollectController=null;render();});
 });
 let restoreCandidate=null,restoreError='',restoreBusy=false,restoreSequence=0,restoreSuccess='';
-let restoredNotice=null;try{restoredNotice=sessionStorage.getItem('pushpull-canonical-restored');if(restoredNotice)sessionStorage.removeItem('pushpull-canonical-restored')}catch{}if(restoredNotice){tab='settings';backupFlow='restore';try{const n=JSON.parse(restoredNotice);restoreSuccess='Przywrócono kopię i potwierdzono pełny odczyt. Treningi: '+n.sessions+' · Wyniki: '+n.results+' · Szkice: '+n.drafts+' · Bufory: '+n.buffers+' · Czas: '+n.ms+' ms. Poprzedni stan: Dane → Punkty cofnięcia.';}catch{}}
+let restoredNotice=null;try{restoredNotice=sessionStorage.getItem('pushpull-canonical-restored');if(restoredNotice)sessionStorage.removeItem('pushpull-canonical-restored')}catch{}if(restoredNotice){tab='settings';backupFlow='restore';try{const n=JSON.parse(restoredNotice);restoreSuccess='Przywrócono kopię i potwierdzono pełny odczyt. Treningi: '+n.sessions+' · Wyniki: '+n.results+' · Szkice: '+n.drafts+' · Bufory: '+n.buffers+' · Czas: '+n.ms+' ms. Poprzedni stan: Dane → Narzędzia serwisowe → Punkty cofnięcia.';}catch{}}
 const backupAPI=await import('./model/legacy-model.mjs');
 function restoreResult(){return restoreSuccess?`<p class="hint" role="status" data-restore-success>${esc(restoreSuccess)}</p>`:'';}
 function restorePanel(){
@@ -429,7 +394,15 @@ function restorePanel(){
  return `${restoreBusy?`<section class="stack" data-restore-flow tabindex="-1"><p class="hint" role="status" data-restore-busy>Trwa weryfikowanie lub przywracanie kopii… Poczekaj na potwierdzenie zakończenia.</p>${restoreCommitting?'':'<button class="btn" data-restore-cancel>Anuluj podgląd</button>'}</section>`:''}${restoreError?`<p class="hint warning" role="alert" data-restore-error>${esc(restoreError)}</p>`:''}${p?`<section class="stack" data-restore-preview data-restore-flow tabindex="-1"><h3>2. Podgląd przed przywróceniem</h3>${p.canonical?`<p class="hint" data-canonical-preview>Kopia zapasowa: historia, plany i ustawienia. Szkice: ${p.canonicalCounts.drafts} · Bufory: ${p.canonicalCounts.buffers}. Przed zastąpieniem utworzymy i zweryfikujemy punkt cofnięcia. Notatki: ${p.notes?.current??0} → ${p.notes?.incoming??0} (nowe ${p.noteDiff?.added??0}, usuwane ${p.noteDiff?.removed??0}, zmienione ${p.noteDiff?.changed??0}). Ustawienia: ${p.currentCounts?.preferences??0} → ${p.canonicalCounts.preferences}. Szkice lokalne: ${p.currentCounts?.drafts??0}; bufory lokalne: ${p.currentCounts?.buffers??0}.</p>`:p.format==='PPC1'?`<p class="hint" data-ppc1-preview>PPC1: zweryfikowano kontener i model. Archiwa: ${p.source.archives.length}. Archiwa raw pozostają nieinterpretowane. Zewnętrzne szkice i ustawienia nie są importowane; lokalne szkice pozostają na urządzeniu.</p>`:''}<div class="grid2">${compact(p.current,'Na tym urządzeniu')}${compact(p.summary,'W wybranej kopii')}</div>${p.canonical?'<p class="hint warning">Przywrócenie obejmie także szkice i ustawienia. Obecny stan pozostanie w oddzielnym punkcie ratunkowym. Historie nie zostaną scalone; stare kolejki Drive zostaną odłączone. Zamknij edycję w pozostałych kartach: nie można potwierdzić stanu kart, które nie odpowiadają. Punkt zabezpiecza utrwalone dane i bufory, nie nieznaną pamięć innych kart.</p>':'<p class="hint warning">Przywrócenie ZASTĄPI lokalną bazę — nie scala historii. Zachowamy kopię obecnej bazy.</p><p class="hint">Szkice pozostaną lokalnie; nie są zawarte w kopii i mogą wymagać osobnego odzyskania.</p>'}<strong>3. Potwierdź przywrócenie</strong><div class="grid2"><button class="btn primary" data-restore-confirm ${restoreBusy?'disabled':''}>Przywróć wybraną kopię</button><button class="btn" data-restore-cancel ${restoreBusy?'disabled':''}>Anuluj</button></div><details><summary class="btn">Szczegóły kopii i porównania</summary><div class="grid2">${describe(p.current,'Na tym urządzeniu')}${describe(p.summary,'W wybranej kopii')}</div>${p.comparison?`<p class="hint">${p.comparison.identical?'Zawartość danych jest identyczna.':`Zawartość danych jest różna. Tylko lokalnie: ${p.comparison.sessions.localOnly} treningów i ${p.comparison.results.localOnly} wyników. Tylko w kopii: ${p.comparison.sessions.copyOnly} treningów i ${p.comparison.results.copyOnly} wyników. Zmienione wpisy o tych samych ID: ${p.comparison.results.changed} wyników, ${p.comparison.sessions.changed} treningów.`}</p>`:''}<p class="hint">Data kopii nie gwarantuje, że zawiera nowsze lub pełniejsze dane.</p></details></section>`:''}`;
 }
 function focusRestore(){if(tab!=='settings'&&!recoveryError)return;const flow=document.querySelector('[data-restore-preview]')||document.querySelector('[data-restore-flow]');if(flow){flow.focus({preventScroll:true});flow.scrollIntoView({block:'start'});}}
-function restoreChoicePanel(){const downloading=driveChoicesMode==='download';return `${downloadBusy?'<section class="stack" data-restore-flow tabindex="-1"><p role="status" data-drive-download-busy>Weryfikowanie kopii do pobrania…</p><button class="btn" data-restore-cancel>Anuluj pobieranie</button></section>':''}${driveChoices.length?`<section class="stack" data-restore-flow tabindex="-1"><h3>${downloading?'Wybierz plik do pobrania':'1. Wybierz kopię'}</h3><label>Kopie Google Drive<select id="driveCopy">${driveChoices.map(c=>`<option value="${esc(c.fileId)}">${esc(c.date?new Date(c.date).toLocaleString('pl-PL'):'Data nieznana')} · Sesje: ${c.sessionCount} · Wyniki: ${c.entryCount}</option>`).join('')}</select></label><p class="hint">${downloading?'Pobranie zapisze JSON na telefonie. Nie zastąpi danych aplikacji.':'Wybór otwiera podgląd. Przywrócenie wymaga osobnego potwierdzenia.'}</p>${driveChoiceWarning?`<p class="hint" data-drive-choice-warning>${esc(driveChoiceWarning)}</p>`:''}<button class="btn primary" data-drive-action="${downloading?'download-file':'preview'}">${downloading?'Pobierz wybrany plik':'Wybierz tę kopię'}</button><button class="btn" data-restore-cancel>Anuluj</button></section>`:''}`;}
+const drivePointDate=new Intl.DateTimeFormat('pl-PL',{dateStyle:'long',timeStyle:'short',timeZone:'Europe/Warsaw'});
+function drivePointsPanel(){
+ if(!drivePoints)return '';
+ if(!drivePoints.length)return '<p role="status" data-ppc1-points>Brak kopii zapasowych na Google Drive.</p>';
+ return `<section class="stack" data-ppc1-points data-restore-flow tabindex="-1">
+  <h3>Wybierz kopię</h3><p class="hint">Godziny w czasie polskim. Najnowszy zapis na Drive może zawierać mniej danych niż starsza kopia. Liczbę treningów i wyników sprawdzisz w podglądzie.</p>
+  ${drivePoints.map((point,i)=>`<button class="btn" data-ppc1-point="${esc(point.id)}">${i===0&&Number.isFinite(Date.parse(point.createdTime))?'Najnowszy zapis · ':''}${Number.isFinite(Date.parse(point.createdTime))?esc(drivePointDate.format(new Date(point.createdTime))):'Data nieznana'}</button>`).join('')}
+  <button class="btn" data-restore-cancel>Zamknij listę</button></section>`;
+}
 
 async function inspectForRestore(raw,current,signal){
  signal?.throwIfAborted();
@@ -446,34 +419,40 @@ async function inspectForRestore(raw,current,signal){
 }
 function cancelRestore(){
  if(restoreCommitting)return;
- if(downloadBusy)downloadCancelled=true;
- if(restoreBusy||restoreCandidate||driveChoices.length&&driveChoicesMode==='restore')restoreCancelled=true;
- restoreSequence++;restoreController?.abort();restoreController=null;restoreCandidate=null;driveChoices=[];driveChoiceWarning='';downloadBusy=false;restoreError='';restoreBusy=false;
+ if(restoreBusy||restoreCandidate||drivePoints)restoreCancelled=true;
+ restoreSequence++;restoreController?.abort();restoreController=null;restoreCandidate=null;drivePoints=null;restoreError='';restoreBusy=false;
 }
 function beginRestore(){
- cancelRestore();backupFlow='restore';downloadCancelled=false;restoreCancelled=false;restoreSuccess='';restoreBusy=true;
+ cancelRestore();backupFlow='restore';restoreCancelled=false;restoreSuccess='';restoreBusy=true;
  const controller=new AbortController();restoreController=controller;
  return {sequence:restoreSequence,revision:database.revision,legacyRaw:database.raw,signal:controller.signal};
 }
-async function prepareRestore(raw,revision,sequence,date=null,signal){
+async function prepareRestore(file,op,{fromDrive=false}={}){
+ const {sequence,revision,legacyRaw,signal}=op;
  if(sequence!==restoreSequence)return;
- const initialLegacyRaw=database.raw;
- if(raw instanceof Blob){const preview=await inspectForRestore(raw,null,signal);if(sequence!==restoreSequence)return;if(preview.canonical){const {exportCanonicalLocal}=await import('./model/canonical-export.mjs');const expected=(await exportCanonicalLocal({getRevision:canonicalCaptureRevision,signal})).file;const detailed=await inspectForRestore(raw,expected,signal);if(sequence!==restoreSequence)return;if(database.revision!==revision||database.raw!==initialLegacyRaw)throw Error('Dane zmieniły się.');restoreCandidate={raw,expected,revision,legacyRaw:initialLegacyRaw,...detailed,current:detailed.currentSummary};restoreBusy=false;render();focusRestore();return;}}
- // Explicit preview needs the complete local comparison. Keep this read-only
- // audit outside the event queue; navigation/cancellation remain available.
- if(!recoveryError&&database.archivesDeferred){await database.ensureFull();data=database.value;}
+ const preview=await inspectForRestore(file,null,signal);
  if(sequence!==restoreSequence)return;
- if(database.revision!==revision||database.raw!==initialLegacyRaw)throw Error('Dane zmieniły się podczas odczytu kopii. Otwórz podgląd ponownie.');
- const current=database.value,legacyRaw=database.raw;
- const preview=await inspectForRestore(raw,current,signal);
- if(raw instanceof Blob&&!preview.canonical&&sequence===restoreSequence&&database.auditExport)await database.auditExport();
+ let candidate;
+ if(preview.canonical){
+  const {exportCanonicalLocal}=await import('./model/canonical-export.mjs');
+  const expected=(await exportCanonicalLocal({getRevision:canonicalCaptureRevision,signal})).file;
+  const detailed=await inspectForRestore(file,expected,signal);
+  candidate={raw:file,expected,...detailed,current:detailed.currentSummary,fromDrive};
+ }else{
+  // Existing compact and portable rescue files use the established importer.
+  if(!recoveryError&&database.archivesDeferred){await database.ensureFull();data=database.value;}
+  if(sequence!==restoreSequence)return;
+  const current=database.value;
+  const detailed=await inspectForRestore(file,current,signal);
+  if(sequence===restoreSequence&&database.auditExport)await database.auditExport();
+  candidate={raw:file,...detailed,current:backupAPI.backupSummary(current)};
+ }
  if(sequence!==restoreSequence)return;
  if(database.revision!==revision||database.raw!==legacyRaw)throw Error('Dane zmieniły się podczas odczytu kopii. Otwórz podgląd ponownie.');
- restoreCandidate={raw,revision,legacyRaw,...preview,current:backupAPI.backupSummary(current)};
- restoreCandidate.summary.createdAt??=typeof date==='string'&&Number.isFinite(Date.parse(date))?date:null;
- restoreBusy=false;if(tab==='settings'||recoveryError){render();focusRestore();}
+ restoreCandidate={...candidate,revision,legacyRaw};
+ restoreBusy=false;render();focusRestore();
 }
-function legacyJournalControls(){return !data.trainingJournal?'<details data-journal-advanced><summary class="btn">Opcje zaawansowane</summary><div class="stack"><p class="hint">Tylko starsza baza bez wersjonowania. Przed zmianą zostanie pobrana kopia JSON. Nie aktywuje V2 i nie przenosi historii.</p><button class="btn" data-enable-journal>Włącz zapis z wersją planu</button></div></details>':'';}
+function legacyJournalControls(){return !data.trainingJournal?'<details data-journal-advanced><summary class="btn">Opcje zaawansowane</summary><div class="stack"><p class="hint">Tylko starsza baza bez wersjonowania. Przed zmianą zachowamy lokalny punkt ratunkowy. Nie aktywuje V2 i nie przenosi historii.</p><button class="btn" data-enable-journal>Włącz zapis z wersją planu</button></div></details>':'';}
 let backupSizeOperation=null,backupSizeReport=null,backupSizePartial=null,backupSizeRevision=null,backupSizeError='';
 function backupSizePanel(){
  const current=backupSizeRevision===database.revision&&!database.error,valid=backupSizeReport&&current,partialValid=backupSizePartial&&current;
@@ -535,12 +514,14 @@ function drivePanel(){
  ${drive?'<button class="btn" data-ppc1-send>Zapisz kopię na Google Drive</button>':''}${backupSaveStatus?`<p role="status" data-backup-save-status>${esc(backupSaveStatus)}</p>`:''}</section>
  </details><details data-data-section="restore" ${backupFlow==='restore'?'open':''}><summary class="btn" data-backup-flow="restore" aria-expanded="${backupFlow==='restore'}" aria-controls="backup-restore" aria-disabled="${restoreCommitting}">Przywróć kopię</summary>
  <section class="stack" id="backup-restore" data-backup-body="restore" ${backupFlow==='restore'?'':'hidden'}>
- <label class="btn backup-import">Z pliku<input type="file" id="importFile" accept="application/json,.json,application/octet-stream,.ppc1,.ppc1.txt" ${restoreCommitting?'disabled':''}></label>
- <button class="btn" data-drive-action="restore" ${!drive?'disabled':''}>Przywróć z Google Drive</button>
- <button class="btn" data-ppc1-list>Punkty odzyskiwania na Drive</button><div data-ppc1-points></div>${restoreChoicePanel()}${restorePanel()}${restoreResult()}
-
- <details><summary class="btn">Pobierz plik z Drive bez przywracania</summary><button class="btn" data-drive-action="download" ${!drive?'disabled':''}>Pobierz kopię z Google Drive</button></details></section></details></div>
- <details data-data-section="google" ${googleOpen?'open':''}><summary class="btn">Google Drive</summary><div class="stack spaced">${drive?`<label><input type="checkbox" data-auto-ppc1 ${drive.automatic?'checked':''}> Automatyczna kopia zapasowa po treningu</label>`:''}${status}${drive?`<details><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}</div></details><details data-data-section="undo" ${undoOpen?'open':''}><summary class="btn">Punkty cofnięcia</summary><div class="stack spaced"><button class="btn" data-rescue-points>Pokaż punkty cofnięcia</button><div data-rescue-points-list></div><section><h3>Zachowane kopie ratunkowe</h3>${backupControls()}</section></div></details><details data-data-section="service" data-backup-advanced ${backupAdvancedOpen?'open':''}><summary class="btn">Narzędzia serwisowe</summary><div class="stack spaced"><section><h3>Historyczny eksport JSON</h3><div class="stack"><button class="btn" data-act="export">Pobierz historyczną kopię JSON</button><button class="btn" data-drive-action="upload" ${!drive?'disabled':''}>Zapisz historyczną kopię JSON na Drive</button></div></section><section><h3>Diagnostyka kopii</h3>${backupSizePanel()}</section><details data-technical ${technicalOpen?'open':''}><summary class="btn">Narzędzia techniczne</summary>${localV4Panel()}${v5PreviewPanel()}${draftCollectorPanel()}${legacyJournalControls()}</details></div></details></div>`;
+ <label class="btn backup-import">Z pliku<input type="file" id="importFile" accept="application/octet-stream,.ppc1,.ppc1.txt" ${restoreCommitting?'disabled':''}></label>
+ <button class="btn" data-ppc1-list ${!drive||restoreBusy?'disabled':''}>Przywróć z Google Drive</button>
+ ${drivePointsPanel()}${restorePanel()}${restoreCancelled?'<p class="hint" role="status" data-restore-cancelled>Anulowano podgląd. Nie przywrócono danych.</p>':''}${restoreResult()}</section></details></div>
+ <details data-data-section="google" ${googleOpen?'open':''}><summary class="btn">Google Drive</summary><div class="stack spaced">${drive?`<label><input type="checkbox" data-auto-ppc1 ${drive.automatic?'checked':''}> Automatyczna kopia zapasowa po treningu</label>`:''}${status}</div></details>
+ <details data-data-section="service" data-backup-advanced ${backupAdvancedOpen?'open':''}><summary class="btn">Narzędzia serwisowe</summary><div class="stack spaced">
+ ${drive?`<details data-data-section="google-advanced" ${googleAdvancedOpen?'open':''}><summary class="btn">Opcje zaawansowane Google</summary><form id="driveConfig" class="stack"><label>Identyfikator klienta Google OAuth<input name="clientId" value="${esc(drive.config.clientId)}" placeholder="…apps.googleusercontent.com" required></label><button class="btn">Zapisz konfigurację</button></form><p class="hint">${esc(drive.config.label)}</p>${drive.config.selected?'<button class="btn" data-drive-action="disconnect">Odłącz Google</button>':''}</details>`:''}
+ <details data-data-section="undo" ${undoOpen?'open':''}><summary class="btn">Punkty cofnięcia</summary><div class="stack spaced"><button class="btn" data-rescue-points>Pokaż punkty cofnięcia</button><div class="stack" data-rescue-points-list>${rescuePointsPanel()}</div><section><h3>Zachowane kopie ratunkowe</h3>${backupControls()}</section></div></details>
+ <section><h3>Diagnostyka kopii</h3>${backupSizePanel()}</section><details data-technical ${technicalOpen?'open':''}><summary class="btn">Narzędzia techniczne</summary>${draftCollectorPanel()}${legacyJournalControls()}</details></div></details></div>`;
 }
 function settings(){if(dataView==='plans')return planScreen();if(dataView==='weekly')return weeklyScreen();return `<div class="eyebrow">DANE</div><h1>Dane i kopia zapasowa</h1><div class="card stack"><button class="btn" data-view="plans">Plany treningowe</button><button class="btn" data-view="weekly">Statystyki ogólne</button></div>${drivePanel()}${pwaInfo()}`;}
 
@@ -585,18 +566,18 @@ on('click',async e=>{
   if(id===data.trainingJournal?.activePlanVersionId){toast('Ten plan jest aktywny');return;}
   const target=overview.plans(data,planCatalog()).find(p=>p.id===id);if(!target?.canActivate)return;
   const first=target.version.units.slice().sort((a,b)=>a.order-b.order)[0];
-  if(!confirm('Aktywować „'+target.label+'” dla przyszłych treningów? Rozpoczniesz nowy okres używania i wrócisz do pierwszej jednostki „'+first.name+'”. Poprzednie wyniki i statystyki tej wersji pozostają dostępne i będą kontynuowane. Pobierzemy i zachowamy pełną kopię. Rozpoczęta sesja zachowa swój plan, szkice i snapshot; historia i wyniki pozostaną bez zmian.'))return;
+  if(!confirm('Aktywować „'+target.label+'” dla przyszłych treningów? Rozpoczniesz nowy okres używania i wrócisz do pierwszej jednostki „'+first.name+'”. Poprzednie wyniki i statystyki tej wersji pozostają dostępne i będą kontynuowane. Zachowamy lokalny punkt ratunkowy. Rozpoczęta sesja zachowa swój plan, szkice i snapshot; historia i wyniki pozostaną bez zmian.'))return;
   if(database.archivesDeferred&&!await requireFullData())return;
   let next;
   if(id===v2.PLAN_ID&&target.status==='available'){
-   if(!data.trainingJournal){const raw=JSON.stringify(database.export(),null,2),ownerId=database.model?.model.ownerId||uid();downloadRaw(raw,'pushpull-przed-zmiana-planu.json');await database.prepareModel({backupText:raw,ownerId});next=structuredClone(data);next.trainingJournal=journal.initialize(ownerId);}
-   else {downloadRaw(await database.exportModelBackup(),'pushpull-przed-zmiana-planu.json');next=structuredClone(data);}
+   if(!data.trainingJournal){const raw=JSON.stringify(database.export(),null,2),ownerId=database.model?.model.ownerId||uid();await database.prepareModel({backupText:raw,ownerId});next=structuredClone(data);next.trainingJournal=journal.initialize(ownerId);}
+   else {next=structuredClone(data);}
    v2.activate(next,new Date().toISOString());
-  }else {next=planImport.stageActivation(data,id,new Date().toISOString());downloadRaw(await database.exportModelBackup(),'pushpull-przed-zmiana-planu.json');}
+  }else {next=planImport.stageActivation(data,id,new Date().toISOString());}
   await commitPlan(next);switchPlans=false;switchPlanId=null;selectedPlanId=id;chosenType=null;render();toast('Plan aktywny dla przyszłych treningów');
  }
 });
-function recovery(){return `<main class="app"><h1>Dane wymagają odzyskania</h1>${draftRecoveryPanel()}<div class="card stack" role="alert"><p>Zapis został zablokowany. Aplikacja nie wyzerowała historii ani nie nadpisała oryginalnego zapisu localStorage. Pobierz je przed próbą odzyskania. Jeśli dane zmieniono w innej karcie lub pamięć jest niedostępna, odśwież stronę po zabezpieczeniu kopii.</p><p>${esc(recoveryError.message)}</p><button class="btn" data-recovery-current>↓ Pobierz historię z IndexedDB</button><button class="btn" data-recovery-export>↓ Pobierz oryginalne dane</button><label>Przywróć z pliku JSON<input type="file" id="importFile" accept="application/json,.json,application/octet-stream,.ppc1,.ppc1.txt"></label></div>${restorePanel()}${backupControls({preview:false})}</main>`}
+function recovery(){return `<main class="app"><h1>Dane wymagają odzyskania</h1>${draftRecoveryPanel()}<div class="card stack" role="alert"><p>Zapis został zablokowany. Aplikacja nie wyzerowała historii ani nie nadpisała oryginalnego zapisu localStorage. Pobierz je przed próbą odzyskania. Jeśli dane zmieniono w innej karcie lub pamięć jest niedostępna, odśwież stronę po zabezpieczeniu kopii.</p><p>${esc(recoveryError.message)}</p><button class="btn" data-recovery-current>↓ Pobierz historię z IndexedDB</button><button class="btn" data-recovery-export>↓ Pobierz oryginalne dane</button><label>Przywróć kopię z pliku<input type="file" id="importFile" accept="application/octet-stream,.ppc1,.ppc1.txt"></label></div>${restorePanel()}${backupControls({preview:false})}</main>`}
 // details.toggle is queued; capture DOM state before replacing the drawer.
 const resultWidths=new WeakMap();
 const resultWidthObserver=new ResizeObserver(entries=>{
@@ -608,7 +589,7 @@ const resultWidthObserver=new ResizeObserver(entries=>{
 });
 // Font loading/zoom can change content without changing the outer card width.
 document.fonts?.addEventListener('loadingdone',()=>{document.querySelectorAll('[data-adaptive-result]').forEach(el=>{resultWidths.delete(el);resultWidthObserver.unobserve(el);resultWidthObserver.observe(el);});});
-function render(){if(canonicalLocked)return;if(canonicalLocalBlocked()){canonicalLocked=true;canonicalGate.showCanonicalPending();return;}resultWidthObserver.disconnect();let app=$('#app');const drawer=app.querySelector('[data-backup-advanced]');if(drawer)backupAdvancedOpen=drawer.open;const google=app.querySelector('[data-data-section="google"]');if(google)googleOpen=google.open;const undo=app.querySelector('[data-data-section="undo"]');if(undo)undoOpen=undo.open;const technical=app.querySelector('[data-technical]');if(technical)technicalOpen=technical.open;if(recoveryError){app.innerHTML=recovery();paintPwa();return}app.innerHTML=`<main class="app">${tab==='training'?main():tab==='calendar'?(historicalId?historical():calendar()):settings()}</main><p class="hint" role="status" data-drive-global ${tab==='settings'?'hidden':''}>${esc(driveStatusText())}</p><nav class="bottom"><div class="inner"><button class="btn ${tab==='training'?'active':''}" data-tab="training"><svg class="nav-icon" data-nav-icon="training" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M3 8l5-5m8 18 5-5M1 6l5-5m12 22 5-5M4 11l7-7m2 16 7-7"/></svg><span>Trening</span></button><button class="btn ${tab==='calendar'?'active':''}" data-tab="calendar"><svg class="nav-icon" data-nav-icon="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18m-13 4h2m4 0h2m-8 3h2"/></svg><span>Kalendarz</span></button><button class="btn ${tab==='settings'?'active':''}" data-tab="settings"><svg class="nav-icon" data-nav-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 4 18 4 18 0V5M3 12c0 4 18 4 18 0"/></svg><span>Dane</span></button></div></nav>`;paintPwa();paintFullAudit();paintDrive();document.querySelectorAll('[data-adaptive-result]').forEach(el=>resultWidthObserver.observe(el))}
+function render(){if(canonicalLocked)return;if(canonicalLocalBlocked()){canonicalLocked=true;canonicalGate.showCanonicalPending();return;}resultWidthObserver.disconnect();let app=$('#app');const drawer=app.querySelector('[data-backup-advanced]');if(drawer)backupAdvancedOpen=drawer.open;const google=app.querySelector('[data-data-section="google"]');if(google)googleOpen=google.open;const googleAdvanced=app.querySelector('[data-data-section="google-advanced"]');if(googleAdvanced)googleAdvancedOpen=googleAdvanced.open;const undo=app.querySelector('[data-data-section="undo"]');if(undo)undoOpen=undo.open;const technical=app.querySelector('[data-technical]');if(technical)technicalOpen=technical.open;if(recoveryError){app.innerHTML=recovery();paintPwa();return}app.innerHTML=`<main class="app">${tab==='training'?main():tab==='calendar'?(historicalId?historical():calendar()):settings()}</main><p class="hint" role="status" data-drive-global ${tab==='settings'?'hidden':''}>${esc(driveStatusText())}</p><nav class="bottom"><div class="inner"><button class="btn ${tab==='training'?'active':''}" data-tab="training"><svg class="nav-icon" data-nav-icon="training" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M3 8l5-5m8 18 5-5M1 6l5-5m12 22 5-5M4 11l7-7m2 16 7-7"/></svg><span>Trening</span></button><button class="btn ${tab==='calendar'?'active':''}" data-tab="calendar"><svg class="nav-icon" data-nav-icon="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18m-13 4h2m4 0h2m-8 3h2"/></svg><span>Kalendarz</span></button><button class="btn ${tab==='settings'?'active':''}" data-tab="settings"><svg class="nav-icon" data-nav-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 4 18 4 18 0V5M3 12c0 4 18 4 18 0"/></svg><span>Dane</span></button></div></nav>`;paintPwa();paintFullAudit();paintDrive();document.querySelectorAll('[data-adaptive-result]').forEach(el=>resultWidthObserver.observe(el))}
 let finishing=null;
 const finishRecords=sid=>savedDrafts.records.filter(r=>r.sessionId===sid);
 const finishTokens=rows=>JSON.stringify(rows.map(r=>[r.id,r.token,r.sequence]).sort((a,b)=>String(a[0]).localeCompare(String(b[0]))));
@@ -707,52 +688,28 @@ on('submit',async e=>{
 on('change',e=>{if(e.target.matches('[data-main]'))quickInputs.delete(e.target.closest('form'))});
 on('input',e=>{let form=e.target.closest('.seriesResultForm');if(!form)return;const d=resultDrafts.get(draftKey(form.dataset.id,form.dataset.session));if(!d)return;const el=e.target;if(el.dataset.main){const field=el.dataset.main;const value=el.value;d.quickLocks=Array.from({length:d.series.length},(_,i)=>d.quickLocks?.[i]??{});d.series.forEach((r,i)=>{if(r[field]!==''&&String(r[field])!==String(d[field]))d.quickLocks[i][field]=true;});rich.updateQuick(d.series,field,value,d[field],d.series.map((_,i)=>!!d.quickLocks?.[i]?.[field]));d[field]=value;d.custom=true;refreshSeriesForm(form,d)}else if(el.dataset.seriesIndex!==undefined){quickInputs.delete(form);const i=Number(el.dataset.seriesIndex);d.series[i][el.dataset.field]=el.value;d.quickLocks=Array.from({length:d.series.length},(_,i)=>d.quickLocks?.[i]??{});(d.quickLocks[i]??={})[el.dataset.field]=true;if(d.series.every(r=>String(r[el.dataset.field])===el.value)){d[el.dataset.field]=el.value;for(const locks of d.quickLocks)if(locks)delete locks[el.dataset.field];}d.custom=true;refreshSeriesForm(form,d,false)}});
 on('click',e=>{let b=e.target.closest('[data-series-toggle],[data-series-add],[data-series-remove]');if(!b)return;const form=b.closest('.seriesResultForm'),d=resultDrafts.get(draftKey(form.dataset.id,form.dataset.session));if(!d)return;if(b.hasAttribute('data-series-toggle')){d.open=!d.open;form.querySelector('.series-details').hidden=!d.open;b.textContent=d.open?'✎ Zwiń serie':'✎ Edytuj serie';form.querySelector('[type=submit]').textContent=d.open?'Zapisz korektę':'Zapisz wynik'}else if(b.hasAttribute('data-series-add')){const row={...d.series.at(-1)||{kg:d.kg,reps:d.reps}};delete row.id;delete row.setId;d.series.push(row);d.quickLocks=Array.from({length:d.series.length},(_,i)=>d.quickLocks?.[i]??{});d.custom=true;refreshSeriesForm(form,d)}else if(b.hasAttribute('data-series-remove')){d.series.splice(Number(b.dataset.seriesRemove),1);d.quickLocks?.splice(Number(b.dataset.seriesRemove),1);d.kg=d.series[0]?.kg??'';d.reps=d.series[0]?.reps??'';d.custom=true;refreshSeriesForm(form,d)}if(!b.hasAttribute('data-series-toggle'))captureDraft({target:form});});
-on('click',async e=>{let b=e.target.closest('[data-tab],[data-panel],[data-act],[data-day],[data-type],[data-expand],[data-metric]');if(!b)return;if(b.dataset.metric){statMetric=b.dataset.metric;render();return}if(b.dataset.expand){closedEditors.clear();expandedExercise=expandedExercise===b.dataset.expand?null:b.dataset.expand;panel=null;render();return}if(b.dataset.type&&!session()){chosenType=b.dataset.type;expandedExercise=null;panel=null;render();return}if(b.dataset.tab){tab=b.dataset.tab;if(tab==='settings')dataView='data';historicalId=null;panel=null;render();return}if(b.dataset.day){selectedDay=b.dataset.day;render();return}if(b.dataset.panel){let id=b.dataset.id,kind=b.dataset.panel;panel=panel?.id===id&&panel.kind===kind?null:{id,kind};expandedExercise=id;render();return}let act=b.dataset.act;if(!act)return;let s=session();if(act==='next'&&!s){const us=journal.units(data);chosenType=us[(us.findIndex(u=>u.id===(chosenType||journal.nextType(data)))+1)%us.length].id}if(act==='previous'&&!s){const us=journal.units(data);chosenType=us[(us.findIndex(u=>u.id===(chosenType||journal.nextType(data)))+us.length-1)%us.length].id}if(act==='start'&&!s){let d=$('#trainingDate').value;if(!d){toast('Wybierz datę');return}let type=chosenType||journal.nextType(data);if(type==='PULL B'&&!data.trainingJournal?.activePlanVersionId&&!data.sessions.some(s=>s.sourceExerciseIds)&&!confirm('Rozpocząć PULL B z osobnymi kartami 6A Narciarz i 6B Szrugsy? Stare wspólne wyniki i szkice pozostaną przy poprzednich sesjach. To nie aktywuje V2.'))return;if(database.startSession){await database.startSession({id:uid(),type,date:d,startedAt:new Date().toISOString()});data=database.value;}else{let seq=Math.max(0,...data.sessions.map(s=>s.seq))+1;let ns={id:uid(),seq,type,date:d,status:'active'};data.sessions.push(ns);data.activeId=ns.id;journal.prepareSourceSession(data,ns);if(journalAPI)await journalAPI.startSession(data,ns,new Date().toISOString());await persist();}panel=null}if(act==='finish'){await finish();return}if(act==='prevMonth'||act==='nextMonth'){let [y,m]=month.split('-').map(Number);month=new Date(Date.UTC(y,m-1+(act==='nextMonth'?1:-1),1)).toISOString().slice(0,7);selectedDay=month+'-01'}if(act==='deleteSession'){await deleteCompletedSession(b.dataset.id);return}if(act==='openSession'){historicalId=b.dataset.id;panel=null}if(act==='backCalendar'){historicalId=null;panel=null}if(act==='openEntrySession'){let e=data.entries.find(x=>x.id===b.dataset.entry);if(e){historicalId=e.sessionId;tab='calendar';const ss=data.sessions.find(s=>s.id===e.sessionId),card=sessionExercises(ss).find(x=>x.id===e.exerciseId||x.members?.some(m=>m.id===e.exerciseId));expandedExercise=card?.id||e.exerciseId;panel={id:expandedExercise,kind:'historicalResult'};render();return}}if(act==='export'){let blob=new Blob([data.trainingJournal?await database.exportModelBackup():JSON.stringify(database.auditExport?await database.auditExport():database.export(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pushpull-backup-'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);backupSaveStatus='Zlecono pobranie kopii na telefon';toast(backupSaveStatus)}render()});
+on('click',async e=>{let b=e.target.closest('[data-tab],[data-panel],[data-act],[data-day],[data-type],[data-expand],[data-metric]');if(!b)return;if(b.dataset.metric){statMetric=b.dataset.metric;render();return}if(b.dataset.expand){closedEditors.clear();expandedExercise=expandedExercise===b.dataset.expand?null:b.dataset.expand;panel=null;render();return}if(b.dataset.type&&!session()){chosenType=b.dataset.type;expandedExercise=null;panel=null;render();return}if(b.dataset.tab){tab=b.dataset.tab;if(tab==='settings')dataView='data';historicalId=null;panel=null;render();return}if(b.dataset.day){selectedDay=b.dataset.day;render();return}if(b.dataset.panel){let id=b.dataset.id,kind=b.dataset.panel;panel=panel?.id===id&&panel.kind===kind?null:{id,kind};expandedExercise=id;render();return}let act=b.dataset.act;if(!act)return;let s=session();if(act==='next'&&!s){const us=journal.units(data);chosenType=us[(us.findIndex(u=>u.id===(chosenType||journal.nextType(data)))+1)%us.length].id}if(act==='previous'&&!s){const us=journal.units(data);chosenType=us[(us.findIndex(u=>u.id===(chosenType||journal.nextType(data)))+us.length-1)%us.length].id}if(act==='start'&&!s){let d=$('#trainingDate').value;if(!d){toast('Wybierz datę');return}let type=chosenType||journal.nextType(data);if(type==='PULL B'&&!data.trainingJournal?.activePlanVersionId&&!data.sessions.some(s=>s.sourceExerciseIds)&&!confirm('Rozpocząć PULL B z osobnymi kartami 6A Narciarz i 6B Szrugsy? Stare wspólne wyniki i szkice pozostaną przy poprzednich sesjach. To nie aktywuje V2.'))return;if(database.startSession){await database.startSession({id:uid(),type,date:d,startedAt:new Date().toISOString()});data=database.value;}else{let seq=Math.max(0,...data.sessions.map(s=>s.seq))+1;let ns={id:uid(),seq,type,date:d,status:'active'};data.sessions.push(ns);data.activeId=ns.id;journal.prepareSourceSession(data,ns);if(journalAPI)await journalAPI.startSession(data,ns,new Date().toISOString());await persist();}panel=null}if(act==='finish'){await finish();return}if(act==='prevMonth'||act==='nextMonth'){let [y,m]=month.split('-').map(Number);month=new Date(Date.UTC(y,m-1+(act==='nextMonth'?1:-1),1)).toISOString().slice(0,7);selectedDay=month+'-01'}if(act==='deleteSession'){await deleteCompletedSession(b.dataset.id);return}if(act==='openSession'){historicalId=b.dataset.id;panel=null}if(act==='backCalendar'){historicalId=null;panel=null}if(act==='openEntrySession'){let e=data.entries.find(x=>x.id===b.dataset.entry);if(e){historicalId=e.sessionId;tab='calendar';const ss=data.sessions.find(s=>s.id===e.sessionId),card=sessionExercises(ss).find(x=>x.id===e.exerciseId||x.members?.some(m=>m.id===e.exerciseId));expandedExercise=card?.id||e.exerciseId;panel={id:expandedExercise,kind:'historicalResult'};render();return}}render()});
 on('submit',async e=>{e.preventDefault();let f=e.target;if(f.classList.contains('changeForm')){let id=f.dataset.id;(data.changes[id] ||= []).push({date:f.elements.date.value,kind:f.elements.kind.value,text:f.elements.text.value.trim()});await persist();render();toast('Zmiana oznaczona');return}if(f.classList.contains('seriesResultForm')){const key=draftKey(f.dataset.id,f.dataset.session),d=resultDrafts.get(key);if(!d)return;const normalized=d.series.map(x=>({...x,kg:String(x.kg).trim().replace(',','.'),reps:String(x.reps).trim()}));if(!normalized.length||normalized.some(x=>!/^(?:\d+(?:\.\d+)?)$/.test(x.kg)||!/^[1-9]\d*$/.test(x.reps))){toast('Sprawdź ciężary i powtórzenia we wszystkich seriach');return}f.inert=true;await submitResult(f.dataset.id,normalized[0].kg,normalized[0].reps,f.dataset.session,normalized);resultDrafts.delete(key)}else if(f.id==='resultForm'){let s=session();if(s)await submitResult(f.dataset.id,f.elements.kg.value,f.elements.reps.value,s.id)}else if(f.classList.contains('historicalResultForm'))await submitResult(f.dataset.id,f.elements.kg.value,f.elements.reps.value,f.dataset.session);else if(f.classList.contains('editForm')){let entry=data.entries.find(x=>x.id===f.dataset.entry);if(entry){await submitResult(entry.exerciseId,f.elements.kg.value,f.elements.reps.value,entry.sessionId);editing=null}}else if(f.id==='historicalDate'){let s=data.sessions.find(x=>x.id===f.dataset.id);if(s){s.date=f.elements.date.value;journal.advance(data);await persist();render();toast('Data zmieniona')}}});
-async function importFullBackup(rawText,expectedRevision,expectedLegacyRaw,compactSource=null,portableBundle=null){
- const candidate=compactSource??JSON.parse(rawText);
- const incoming=candidate.version===3?null:PushPullDB.parseBackup(candidate);
- if(database.revision!==expectedRevision)throw Error('Dane zmieniły się podczas odczytu pliku. Spróbuj ponownie.');
- if(candidate.version===3)await database.importModelBackup(rawText,{expectedRevision,expectedLegacyRaw});
- else await database.commit(incoming.data,{importing:true,importedCatalog:incoming.catalog,importedArchives:incoming.archives,expectedRevision,expectedLegacyRaw,portableBundle});
+async function restoreCompactBackup(p){
+ const incoming=PushPullDB.parseBackup(p.source);
+ if(database.revision!==p.revision)throw Error('Dane zmieniły się podczas odczytu pliku. Spróbuj ponownie.');
+ await database.commit(incoming.data,{importing:true,importedCatalog:incoming.catalog,importedArchives:incoming.archives,expectedRevision:p.revision,expectedLegacyRaw:p.legacyRaw,portableBundle:p.portableBundle??null});
  data=database.value;journalAPI=data.trainingJournal?journal:null;data.changes ||= {};recoveryError=null;resultDrafts.clear();rich.clear();await savedDrafts.reset();
  tab='settings';backupFlow='restore';dataView='data';switchPlans=false;switchPlanId=null;selectedPlanId=null;weeklyPlanId=null;exercisePlanFilters.clear();historicalId=null;panel=null;expandedExercise=null;chosenType=null;editing=null;
- restoreSuccess='Przywrócono: '+backupAPI.backupSummary(data).plans.map(p=>p.label).join(', ')+'; aktywny plan: '+backupAPI.backupSummary(data).activePlan+'; treningi: '+data.sessions.length+'; wyniki: '+data.entries.length+'. Szkice pozostają lokalnie.';restoreCandidate=null;driveChoices=[];
+ const summary=backupAPI.backupSummary(data);
+ restoreSuccess='Przywrócono: '+summary.plans.map(p=>p.label).join(', ')+'; aktywny plan: '+summary.activePlan+'; treningi: '+summary.sessions+'; wyniki: '+summary.results+'. Szkice pozostają lokalnie.';restoreCandidate=null;
  render();toast('Dane zaimportowane');
 }
-// Separate from restore candidates and the production Google Drive flow.
-on('click',async e=>{
- if(e.target.closest('[data-v4-close]')){localV4Preview=null;localV4Metrics=null;render();return;}
- const version=e.target.closest('[data-export-v5]')?5:4;
- if(!e.target.closest('[data-export-v4],[data-export-v5]')||localV4Busy)return;
- localV4Busy=true;localV4Error='';localV4Metrics=null;const started=performance.now();render();
- try{const result=await localV4[version===5?'exportLocalV5':'exportLocalV4'](database,{createdAt:new Date().toISOString()});downloadRaw(result.text,'pushpull-backup-v'+version+'-'+today()+'.json');localV4Metrics={version,exported:true,ms:Math.round(performance.now()-started),bytes:result.diagnostics.fileBytes,archives:result.diagnostics.archiveRecords};toast('Kopia v'+version+' zweryfikowana i pobrana');}
- catch(error){localV4Error=error.message;}
- finally{localV4Busy=false;render();}
-});
-on('change',async e=>{
- if(!e.target.matches('[data-preview-v4]')||localV4Busy)return;
- v5Sequence++;v5Controller?.abort();v5Preview=null;v5Error='';v5Busy=false;
- const file=e.target.files?.[0];if(!file)return;
- // Discard any previous restore candidate before entering read-only preview.
- restoreSequence++;downloadBusy=false;driveChoices=[];driveChoiceWarning='';restoreCandidate=null;restoreError='';restoreSuccess='';
- localV4Busy=true;localV4Preview=null;localV4Error='';localV4Metrics=null;const started=performance.now();render();
- try{const preview=await localV4.previewLocalV4(file);localV4Preview={...preview,current:backupAPI.backupSummary(database.value)};localV4Metrics={exported:false,ms:Math.round(performance.now()-started),bytes:file.size,archives:preview.archives};}
- catch(error){localV4Error=error.message;}
- finally{localV4Busy=false;render();document.querySelector('[data-v4-preview]')?.focus();}
-});
 on('change',e=>{if(e.target.id==='trainingDate')draftDate=e.target.value;});
 function startLocalRestore(e){
  const file=e.target.files?.[0];if(!file||restoreCommitting)return;
- v5Sequence++;v5Controller?.abort();v5Preview=null;v5Error='';v5Busy=false;
  const op=beginRestore();document.querySelector('.toast')?.remove();render();
  void(async()=>{try{
   const header=new Uint8Array(await file.slice(0,4).arrayBuffer());
-  const compact=header[0]===80&&header[1]===80&&header[2]===67&&header[3]===49;
-  const raw=compact?file:await file.text();
   if(op.sequence!==restoreSequence)return;
+  if(header.length!==4||String.fromCharCode(...header)!=='PPC1')throw Error('Wybierz plik kopii zapasowej PPC1. Starsze kopie JSON nie są obsługiwane.');
   if(database.raw!==op.legacyRaw)throw Error('Dane zmieniły się podczas odczytu kopii. Otwórz podgląd ponownie.');
-  await prepareRestore(raw,op.revision,op.sequence,null,op.signal);
+  await prepareRestore(file,op);
  }catch(error){if(op.sequence===restoreSequence){restoreBusy=false;restoreError=error.message;if(tab==='settings'||recoveryError)render();}}
  finally{if(op.sequence===restoreSequence)restoreController=null;e.target.value='';}
  })();
@@ -772,50 +729,18 @@ on('click',async e=>{
   await savedDrafts.flush();await savedDrafts.reload();
   if(database.revision!==p.revision||database.raw!==p.legacyRaw)throw Error('Dane zmieniły się od podglądu. Otwórz kopię ponownie.');
   if(!confirm('Przywrócić wybraną kopię? ZASTĄPI ona lokalną bazę, nie scali historii. Zachowamy kopię sprzed przywrócenia. Lokalne szkice ('+savedDrafts.records.length+') pozostaną na urządzeniu i mogą wymagać osobnego odzyskania.'))return;
-  await importFullBackup(p.raw,p.revision,p.legacyRaw,p.source??null,p.portableBundle??null);
+  await restoreCompactBackup(p);
  }catch(error){restoreError=error.message;if(p.canonical){let pending=true;try{pending=!!await canonicalGate.pendingCanonicalRestore()}catch{}if(pending){canonicalLocked=true;canonicalGate.showCanonicalPending(error.message);return;}}throw error;}finally{restoreCommitting=false;restoreBusy=false;render();}
 });
 // Explicit cloud operations never hold the workout event queue or local writes.
-on('submit',async e=>{if(e.target.id==='driveConfig'&&drive){try{await drive.configure(e.target.elements.clientId.value);driveChoices=[];if(tab==='settings')render();}catch(error){drive.report(error)}}});
+on('submit',async e=>{if(e.target.id==='driveConfig'&&drive){try{await drive.configure(e.target.elements.clientId.value);cancelRestore();if(tab==='settings')render();}catch(error){drive.report(error)}}});
 on('click',e=>{const button=e.target.closest('[data-drive-action]');if(!button||!drive)return;
- const action=button.dataset.driveAction,selected=$('#driveCopy')?.value;
- const uploadRequest=action==='upload'?driveUpload:null;
- if(action==='upload'){if(!uploadRequest)return;uploadRequest.started=true;}
- downloadCancelled=false;restoreCancelled=false;
- if(action==='download'||action==='download-file'){
-  if(downloadBusy||drive.status.busy)return;
-  const sequence=++restoreSequence;downloadBusy=true;restoreBusy=false;restoreCandidate=null;restoreError='';restoreSuccess='';driveChoiceWarning='';driveChoicesMode='download';if(action==='download')driveChoices=[];
-  document.querySelector('.toast')?.remove();render();focusRestore();
-  void(async()=>{try{
-   const result=await drive.download(action==='download-file'?selected:undefined,{choose:action==='download',forRestore:false,isCurrent:()=>sequence===restoreSequence});
-   if(sequence!==restoreSequence)return;
-   if(result.backup){downloadRaw(result.backup,'pushpull-drive-'+today()+'.json');driveChoices=[];}
-   else {driveChoices=result.choices;driveChoiceWarning=result.warning||'';}
-  }catch(error){if(sequence===restoreSequence)drive.report(error);}
-  finally{if(sequence===restoreSequence){downloadBusy=false;if(tab==='settings'){render();focusRestore();}else paintDrive();}}
-  })();return;
- }
- if(action==='restore'||action==='preview'){
-  if(restoreBusy||drive.status.busy)return;
-  v5Sequence++;v5Controller?.abort();v5Preview=null;v5Error='';v5Busy=false;
-  const op=beginRestore();driveChoicesMode='restore';render();focusRestore();
-  void(async()=>{try{
-   const result=await drive.download(action==='preview'?selected:undefined,{choose:action==='restore',forRestore:true,isCurrent:()=>op.sequence===restoreSequence});
-   if(op.sequence!==restoreSequence)return;
-   if(result.backup){if(database.raw!==op.legacyRaw)throw Error('Dane zmieniły się podczas odczytu kopii. Otwórz podgląd ponownie.');driveChoices=[];await prepareRestore(result.backup,op.revision,op.sequence,result.date,op.signal);}
-   else {driveChoices=result.choices;driveChoiceWarning=result.warning||'';restoreBusy=false;if(tab==='settings'){render();focusRestore();}}
-  }catch(error){if(op.sequence===restoreSequence){restoreBusy=false;restoreError=error.message;drive.report(error);if(tab==='settings')render();}}
-  finally{if(op.sequence===restoreSequence)restoreController=null;}
-  })();return;
- }
  void (async()=>{
-  if(action==='connect'){await drive.connect();void drive.retryCanonical();}
-  if(action==='disconnect'){await drive.disconnect();driveChoices=[];}
-  if(action==='upload'){backupSaveStatus='';await drive.upload();driveChoices=[];}
+  if(button.dataset.driveAction==='connect'){await drive.connect();void drive.retryCanonical();}
+  if(button.dataset.driveAction==='disconnect'){await drive.disconnect();cancelRestore();}
   if(tab==='settings')render();else paintDrive();
- })().catch(error=>drive.report(error)).finally(()=>{if(uploadRequest&&driveUpload===uploadRequest){driveUpload=null;paintDrive();}});
+ })().catch(error=>drive.report(error));
 });
-on('click',e=>{if(e.target.isConnected&&e.target.closest('[data-connect-from-advanced]'))document.querySelector('[data-primary-backups] [data-drive-action=connect]')?.click();});
 on('click',e=>{
  if(!e.target.isConnected)return;
  if(e.target.closest('[data-rescue-cancel]')){rescueOperation?.abort();rescueOperation=null;rescuePreview=null;rescueError='';render();document.querySelector('[data-rescue-preview]')?.focus({preventScroll:true});return;}
@@ -827,9 +752,9 @@ on('click',e=>{
 on('change',e=>{if(e.target.id==='backupKey'){rescueKey=e.target.value;rescueOperation?.abort();rescueOperation=null;rescuePreview=null;rescueError='';render();document.querySelector('#backupKey')?.focus({preventScroll:true});}});
 on('click',async e=>{
  if(e.target.closest('[data-enable-journal]')){
-  if(!confirm('Włączyć zapis z wersją planu dla przyszłych sesji? Zachowamy i pobierzemy kopię. Bieżący plan i stare treningi pozostaną bez zmian. To nie aktywuje nowego V2.'))return;
+  if(!confirm('Włączyć zapis z wersją planu dla przyszłych sesji? Zachowamy lokalny punkt ratunkowy. Bieżący plan i stare treningi pozostaną bez zmian. To nie aktywuje nowego V2.'))return;
   if(database.archivesDeferred&&!await requireFullData())return;
-  const backupText=JSON.stringify(database.export(),null,2);downloadRaw(backupText,'pushpull-przed-nowym-zapisem.json');
+  const backupText=JSON.stringify(database.export(),null,2);
   const ownerId=database.model?.model.ownerId||uid();await database.prepareModel({backupText,ownerId});
   journalAPI=await import('./model/journal.mjs');data.trainingJournal=journalAPI.initialize(ownerId);await persist();render();toast('Nowy zapis włączony');
  }
@@ -839,7 +764,7 @@ on('click',async e=>{
  }
  if(e.target.closest('[data-recovery-current]')){const copy=database.recoveryEvidence?await database.recoveryEvidence():database.recovery();if(!copy)throw Error('Brak odczytanej bazy IndexedDB.');downloadRaw(JSON.stringify(copy,null,2),'pushpull-odzyskiwanie-indexeddb.json')}
  if(e.target.closest('[data-backup-export]')){
-  const key=$('#backupKey').value;if(key){const file=await database.readBackup(key);downloadRaw(file,file instanceof Blob?'pushpull-przed-zmiana.ppc1':'pushpull-przed-importem.json');}
+  const key=$('#backupKey').value;if(key){const file=await database.readBackup(key);downloadRaw(file,file instanceof Blob?'pushpull-przed-zmiana.ppc1':'pushpull-material-ratunkowy.json');}
  }
 });
 
@@ -909,16 +834,53 @@ on('change',e=>{if(e.target.matches('[data-auto-ppc1]')&&drive)void drive.setAut
 on('click',e=>{
  if(!drive)return;
  if(e.target.closest('[data-ppc1-send]'))void drive.queueCanonical({manual:true}).catch(error=>drive.report(error));
- if(e.target.closest('[data-ppc1-list]'))void drive.canonicalPoints().then(rows=>{const host=document.querySelector('[data-ppc1-points]');if(host)host.innerHTML=(rows.length>1?'<p class="hint">Kopie z różnych urządzeń mogą zawierać różne historie. Przed przywróceniem sprawdź podgląd. Data zapisu nie potwierdza aktualności danych.</p>':'')+rows.map(r=>`<button class="btn" data-ppc1-point="${esc(r.id)}">${esc(r.createdTime||'Kopia zapasowa')}</button>`).join('');}).catch(error=>drive.report(error));
- const chosen=e.target.closest('[data-ppc1-point]');if(!chosen)return;
- const op=beginRestore();render();focusRestore();
- void drive.canonicalPoint(chosen.dataset.ppc1Point,{signal:op.signal,isCurrent:()=>op.sequence===restoreSequence}).then(async result=>{await prepareRestore(result.file,op.revision,op.sequence,null,op.signal);if(op.sequence===restoreSequence&&restoreCandidate)restoreCandidate.fromDrive=true;}).catch(error=>{if(op.sequence===restoreSequence){restoreBusy=false;restoreError=error.message;render();}});
 });
+function startDriveRestore(button){
+ if(!drive||!button.isConnected||restoreBusy||restoreCommitting)return;
+ const op=beginRestore();render();focusRestore();
+ const isCurrent=()=>op.sequence===restoreSequence;
+ void (async()=>{
+  try{
+   if(button.hasAttribute('data-ppc1-list')){
+    const points=await drive.canonicalPoints({signal:op.signal,isCurrent});
+    if(!isCurrent())return;
+    drivePoints=points;restoreBusy=false;render();focusRestore();
+   }else{
+    const result=await drive.canonicalPoint(button.dataset.ppc1Point,{signal:op.signal,isCurrent});
+    if(isCurrent())await prepareRestore(result.file,op,{fromDrive:true});
+   }
+  }catch(error){
+   if(isCurrent()){restoreBusy=false;restoreError=error.message;render();focusRestore();}
+  }finally{if(isCurrent())restoreController=null;}
+ })();
+}
 
 
+function rescuePointsPanel(){
+ if(!rescuePoints)return '';
+ if(!rescuePoints.length)return '<p class="hint">Brak punktów cofnięcia.</p>';
+ return rescuePoints.map(point=>`<div><span>${esc(point.createdAt)}</span><button class="btn" data-rescue-load="${esc(point.id)}">Podgląd i przywrócenie</button><button class="btn" data-rescue-file="${esc(point.id)}">Pobierz kopię</button></div>`).join('');
+}
 on('click',e=>{
- if(e.target.closest('[data-rescue-points]'))void import('./model/canonical-rescue.mjs').then(m=>m.listRescues()).then(rows=>{const host=document.querySelector('[data-rescue-points-list]');if(host)host.innerHTML=rows.map(r=>`<div><span>${esc(r.createdAt)}</span><button class="btn" data-rescue-load="${esc(r.id)}">Podgląd i przywrócenie</button><button class="btn" data-rescue-file="${esc(r.id)}">Pobierz kopię</button></div>`).join('');}).catch(error=>toast(error.message));
+ if(e.target.closest('[data-rescue-points]'))void import('./model/canonical-rescue.mjs').then(m=>m.listRescues()).then(rows=>{
+  rescuePoints=rows;
+  const host=document.querySelector('[data-rescue-points-list]');
+  if(host)host.innerHTML=rescuePointsPanel();
+ }).catch(error=>toast(error.message));
  const b=e.target.closest('[data-rescue-load],[data-rescue-file]');if(!b)return;
- void(async()=>{const m=await import('./model/canonical-rescue.mjs'),point=await m.loadRescueFile(b.dataset.rescueLoad??b.dataset.rescueFile);if(b.hasAttribute('data-rescue-file')){const a=document.createElement('a'),url=URL.createObjectURL(point.file);a.href=url;a.download='pushpull-cofniecie.ppc1';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return;}const op=beginRestore();render();await prepareRestore(point.file,op.revision,op.sequence,null,op.signal);})().catch(error=>toast(error.message));
+ if(b.hasAttribute('data-rescue-file')){
+  void import('./model/canonical-rescue.mjs').then(m=>m.loadRescueFile(b.dataset.rescueFile)).then(point=>downloadRaw(point.file,'pushpull-cofniecie.ppc1')).catch(error=>toast(error.message));
+  return;
+ }
+ if(restoreCommitting||restoreBusy||!b.isConnected)return;
+ const op=beginRestore();render();focusRestore();
+ void(async()=>{
+  try{
+   const {loadRescueFile}=await import('./model/canonical-rescue.mjs');
+   const point=await loadRescueFile(b.dataset.rescueLoad);
+   await prepareRestore(point.file,op);
+  }catch(error){if(op.sequence===restoreSequence){restoreBusy=false;restoreError=error.message;render();focusRestore();}}
+  finally{if(op.sequence===restoreSequence)restoreController=null;}
+ })();
 });
 })().catch(error=>{document.getElementById('app').textContent='Nie udało się otworzyć bazy. Nie wyczyszczono historii. '+error.message});

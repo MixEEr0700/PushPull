@@ -1,8 +1,8 @@
 """Production HTTP routes, OAuth and stores; Google service is simulated."""
-import json,uuid
+import json,re,uuid
 from urllib.parse import urlsplit,parse_qs
 from pathlib import Path
-from playwright.sync_api import expect
+from playwright.sync_api import Error,expect
 from test_browser import BrowserHarness
 import test_drive_sync as legacy_drive
 import test_canonical_export_ui as canonical_ui
@@ -31,11 +31,62 @@ class IncrementalDriveUI(BrowserHarness):
         print('DRIVE_PPC1_BYTES',*[len(f['text'].encode()) for f in google.files.values()]);points=[json.loads(f['text']) for f in google.files.values()];self.assertEqual([p['generation'] for p in points],[0,1]);self.assertLess(len(json.dumps(points[1])),len(json.dumps(points[0])))
         with self.page.expect_download() as dl:self.page.locator('[data-canonical-export]').click()
         expected=self.decode(Path(dl.value.path()).read_bytes())
-        ctx=self.new_context(service_workers='allow');google.install(ctx);p=ctx.new_page();p.on('dialog',self.dialog);p.goto(self.url);p.wait_for_selector('[data-act=start]');self.page=p;self.configure();self.backup_flow('restore');p.locator('[data-ppc1-list]').click();expect(p.locator('[data-ppc1-point]')).to_have_count(2);last=list(google.files)[-1];p.locator('[data-ppc1-point="'+last+'"]').click();expect(p.locator('[data-canonical-preview]')).to_be_visible(timeout=60000);p.locator('[data-restore-confirm]').click();expect(p.locator('[data-restore-success]')).to_be_visible(timeout=30000);p.reload();p.wait_for_selector('[data-act=start]');p.locator('[data-tab=settings]').click();self.backup_flow('save')
+        first,last=list(google.files)
+        google.files[first]['createdTime']='2026-07-03T05:15:00Z'
+        google.files[last]['createdTime']='2026-11-02T23:30:00Z'
+        # The mock deliberately returns a legacy row with a newer date too.
+        google.files['legacy-json']={'id':'legacy-json','createdTime':'2026-11-08T23:30:00Z','appProperties':{'pushpull':'sync-v1'},'text':'unread legacy backup'}
+        ctx=self.new_context(service_workers='allow');google.install(ctx)
+        requests=[];ctx.on('request',lambda request:requests.append(request.url))
+        p=ctx.new_page();p.on('dialog',self.dialog);p.goto(self.url);p.wait_for_selector('[data-act=start]');self.page=p;self.configure()
+        self.backup_flow('restore')
+        p.get_by_role('button',name='Przywróć z Google Drive',exact=True).click()
+        entries=p.locator('[data-ppc1-point]');expect(entries).to_have_count(2)
+        expect(entries).to_have_text([re.compile(r'Najnowszy zapis.*3 listopada 2026.*00:30'),re.compile(r'3 lipca 2026.*07:15')])
+        expect(p.locator('[data-ppc1-points]')).to_contain_text('Najnowszy zapis na Drive może zawierać mniej danych')
+        self.assertFalse(any('alt=media' in url for url in requests))
+        self.assertTrue(any('ppc1-incremental-v1' in url for url in requests))
+        for width in (360,390,412):
+            p.set_viewport_size({'width':width,'height':844})
+            self.assertLessEqual(p.evaluate('document.documentElement.scrollWidth'),width)
+        entries.first.click();expect(p.locator('[data-canonical-preview]')).to_be_visible(timeout=60000)
+        expect(p.locator('[data-restore-preview]')).to_contain_text('Treningi: 2')
+        self.assertFalse(any('legacy-json' in url for url in requests))
+        p.locator('[data-restore-confirm]').click();expect(p.locator('[data-restore-success]')).to_be_visible(timeout=30000)
+        p.reload();p.wait_for_selector('[data-act=start]');p.locator('[data-tab=settings]').click();self.backup_flow('save')
         with p.expect_download() as dl:p.locator('[data-canonical-export]').click()
         self.assertEqual(self.decode(Path(dl.value.path()).read_bytes()),expected)
         for width in (360,390,412):
             p.set_viewport_size({'width':width,'height':844});self.assertLessEqual(p.evaluate('document.documentElement.scrollWidth'),width)
+    def test_cancel_metadata_and_selected_file_ignores_late_responses(self):
+        google=IncrementalGoogle();google.install(self.context);self.page.wait_for_selector('[data-act=start]');self.configure()
+        self.backup_flow('save');self.page.locator('[data-ppc1-send]').click()
+        expect(self.page.locator('[data-drive-status]')).to_contain_text('Kopia zweryfikowana',timeout=60000)
+        self.backup_flow('restore')
+        before=self.state()
+        held=[]
+        def stall(route):
+            held.append(route)
+        metadata='https://www.googleapis.com/drive/v3/files?*'
+        point='https://www.googleapis.com/drive/v3/files/*?alt=media'
+        for pattern,selector in ((metadata,'[data-ppc1-list]'),(point,'[data-ppc1-point]')):
+            if pattern==point:
+                self.page.locator('[data-ppc1-list]').click()
+                expect(self.page.locator(selector)).to_have_count(1)
+            self.page.route(pattern,stall)
+            with self.page.expect_request(pattern):
+                self.page.locator(selector).click()
+            expect(self.page.locator('[data-restore-cancel]')).to_be_visible()
+            self.page.locator('[data-restore-cancel]').click()
+            self.page.unroute(pattern,stall)
+            route=held.pop()
+            try:route.fulfill(status=500,headers={'access-control-allow-origin':'*'},body='{}')
+            except Error as error:self.assertIn('Route is already handled',str(error))
+            expect(self.page.locator('[data-restore-preview],[data-restore-error],[data-ppc1-point]')).to_have_count(0)
+            expect(self.page.locator('[data-restore-cancelled]')).to_be_visible()
+            expect(self.page.locator('[data-ppc1-list]')).to_be_enabled()
+            self.assertEqual(self.state(),before)
+
     def test_auth_failure_keeps_finished_session_and_queue_then_restart_reconnect(self):
         google=IncrementalGoogle();google.install(self.context);self.page.wait_for_selector('[data-act=start]');self.configure();google.error=401
         self.page.locator('[data-tab=training]').click();self.start();self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible();expect(self.page.locator('[data-drive-reminder]')).to_be_visible(timeout=30000)

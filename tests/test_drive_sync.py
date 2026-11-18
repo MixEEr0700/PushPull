@@ -48,6 +48,7 @@ class MockGoogle:
         self.held=[]
 
 class ManualDriveFlow(BrowserHarness):
+    json_backup_ui = True
     prepare=legacy.IndexedDBMigration.prepare
     ready=legacy.IndexedDBMigration.ready
     activate=training.V2Training.activate
@@ -58,7 +59,8 @@ class ManualDriveFlow(BrowserHarness):
     def configure(self,automatic=False):
         self.page.locator('[data-tab=settings]').click()
         self.advanced_data()
-        self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
+        if self.page.locator('[data-data-section=google-advanced]').count():self.data_section('google-advanced')
+        else:self.page.get_by_text('Opcje zaawansowane Google',exact=True).click()
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com')
         self.page.locator('#driveConfig button').click()
         self.backup_flow('save')

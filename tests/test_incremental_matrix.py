@@ -1,4 +1,5 @@
 """Current Matrix + protocol 2, real browser storage and strict transactions."""
+from test_browser import json_release
 import json
 from pathlib import Path
 from playwright.sync_api import expect
@@ -76,6 +77,7 @@ class IncrementalMatrix(BrowserHarness):
         }""")
         self.assertEqual(result,dict.fromkeys(['blocked','currentDetached','entryDetached','frozen'],True))
 
+    @json_release
     def test_confirmed_restore_can_quarantine_corrupt_v2_records_without_losing_preimage(self):
         self.start();self.result('24','8');self.save();before=self.state()
         backup=self.page.evaluate("async()=>{const d=await PushPullDB.open(()=>{});try{return JSON.stringify(d.export())}finally{d.close()}}")

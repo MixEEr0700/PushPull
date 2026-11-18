@@ -6,6 +6,7 @@ from test_browser import BrowserHarness,wait_for_service_worker_controller
 import test_indexeddb as legacy
 
 class LocalBackupV5(BrowserHarness):
+    json_backup_ui = True
     records=legacy.IndexedDBMigration.records
 
     def new_context(self, **options):

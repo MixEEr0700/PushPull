@@ -1,7 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
-import {openDriveBackup,makeNode,properties,readNode,inspectBackup} from '../model/drive-sync.mjs';
+import {mkdtempSync,readFileSync,rmSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+// Keep the retired JSON transport scenarios on the last release that shipped them.
+const historical=mkdtempSync(join(tmpdir(),'pushpull-json-drive-'));
+try{
+ const cwd=fileURLToPath(new URL('../',import.meta.url));
+ const archive=execFileSync('git',['archive','2b1cd460907ed72e23d52522fad424006c08629b','model','indexeddb.js','storage.js'],{cwd});
+ execFileSync('tar',['-xf','-','-C',historical],{input:archive});
+}catch(error){rmSync(historical,{recursive:true,force:true});throw error;}
+test.after(()=>rmSync(historical,{recursive:true,force:true}));
+const {openDriveBackup,makeNode,properties,readNode,inspectBackup}=await import(pathToFileURL(join(historical,'model/drive-sync.mjs')).href);
 const fixture=()=>JSON.parse(readFileSync(new URL('fixtures/v1.json',import.meta.url)));
 const clone=structuredClone;
 class Database {

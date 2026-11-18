@@ -1,37 +1,6 @@
-/** Manual, append-only Drive backups. Legacy files remain readable.
- * No timers, outbox execution, automatic upload or cloud-to-database restore.
- */
+/** Append-only PPC1 recovery points in Drive appDataFolder. */
 import {runIncremental} from './drive-incremental-client.mjs';
 import {canonical} from './backup-json.mjs';
-import {parseModelBackup,backupSummary} from './legacy-model.mjs';
-import {readLegacyBackup} from './legacy-backup.mjs';
-const uuid=x=>typeof x==='string'&&/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(x);
-const sorted=x=>[...x].sort();
-const same=(a,b)=>canonical(a)===canonical(b);
-const hash=async x=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical(x)))),b=>b.toString(16).padStart(2,'0')).join('');
-export async function inspectBackup(text){
- const value=JSON.parse(text);
- if(value.version===3)return parseModelBackup(text);
- const legacy=readLegacyBackup(text);return legacy.formatVersion===2?legacy.original:{data:legacy.data};
-}
-export async function makeNode(backup,parents,inspect=inspectBackup){
- await inspect(backup);
- const node={format:'pushpull-drive-backup',version:1,id:crypto.randomUUID(),parents:sorted(parents),createdAt:new Date().toISOString(),backup};
- return {...node,digest:await hash(node)};
-}
-export function properties(node){
- // Drive private properties: <=30 total, each key+value <=124 bytes.
- if(node.parents.length>60)throw Error('Zbyt wiele rozbieżnych kopii. Pobierz je do ręcznego odzyskania.');
- const p={pushpull:'sync-v1',node:node.id,digest:node.digest};
- for(let i=0;i<node.parents.length;i+=3)p['p'+i/3]=node.parents.slice(i,i+3).join(',');
- return p;
-}
-export async function readNode(transport,row,inspect=inspectBackup){
- const node=JSON.parse(await transport.read(row.fileId));
- const {digest,...body}=node;
- if(node.format!=='pushpull-drive-backup'||node.version!==1||node.id!==row.id||!same(node.parents,row.parents)||digest!==row.digest||await hash(body)!==digest)throw Error('Kopia Drive nie przeszła weryfikacji integralności.');
- await inspect(node.backup);return node;
-}
 // Keep the existing metadata key and archive ALL legacy account/outbox fields.
 const initial=()=>({clientId:'',enabled:false,selected:null,accounts:{}});
 async function driveLock(fn){
@@ -42,7 +11,7 @@ async function driveLock(fn){
  finally{clearTimeout(timer);}
 }
 const withoutIntent=({token,ppc1Queue,ppc1Failure,...rest})=>rest;
-export async function openDriveBackup({database,transport,inspect=inspectBackup,online=()=>navigator.onLine,captureCanonical,withLock=driveLock}={}){
+export async function openDriveBackup({database,transport,online=()=>navigator.onLine,captureCanonical,withLock=driveLock}={}){
  let state,serial=Promise.resolve(),changed=()=>{},notice='',busy=false,connectedAccount=null,connectedClient=null,closed=false;
  const emit=()=>changed();
  const deviceId=crypto.randomUUID();
@@ -54,7 +23,7 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
   const baseline=state;
   for(let i=0;i<3;i++){
    await refresh();
-   if(state.token!==baseline.token&&!same(withoutIntent(state),withoutIntent(baseline)))throw Error('Stan Google Drive zmienił się w innej karcie. Ponów operację.');
+   if(state.token!==baseline.token&&canonical(withoutIntent(state))!==canonical(withoutIntent(baseline)))throw Error('Stan Google Drive zmienił się w innej karcie. Ponów operację.');
    const current=state;state=structuredClone(current);change(state);
    try{await save();return;}catch(error){
     await refresh();
@@ -165,63 +134,19 @@ export async function openDriveBackup({database,transport,inspect=inspectBackup,
    });
    return incrementalRunning;
   },
-  async canonicalPoints(){return operation(async()=>{try{const rows=await transport.listPoints();notice=rows.length?'Wybierz punkt odzyskiwania PPC1.':'Brak punktów PPC1 na Drive.';return [...rows].sort((a,b)=>(Date.parse(b.createdTime)||0)-(Date.parse(a.createdTime)||0)||a.id.localeCompare(b.id));}catch(e){notice='Nie pobrano listy punktów: '+e.message;throw e;}});},
-  async canonicalPoint(fileId,{signal,isCurrent=()=>!signal?.aborted}={}){return operation(async()=>{try{const result=await runIncremental('restore',{fileId},transport,{signal});if(isCurrent())notice='Punkt PPC1 zweryfikowany. Sprawdź podgląd przed przywróceniem.';return result;}catch(e){if(isCurrent())notice='Nie zweryfikowano punktu PPC1: '+e.message;throw e;}},isCurrent);},
-  async upload(){return operation(async()=>{
-   if(database.error)throw Error('Najpierw odzyskaj lokalne dane. Nie wysłano pustej kopii.');
-   const revision=database.revision,current=database.value;
-   const backup=database.model?await database.exportModelBackup():JSON.stringify(database.export());
-   const node=await makeNode(backup,[],inspect);
-   if(database.error||database.revision!==revision)throw Error('Dane zmieniły się podczas przygotowania kopii. Kliknij zapis ponownie.');
-   // Each click is an independent CURRENT snapshot, never the old sync outbox.
-   const file=await transport.create(JSON.stringify(node),{...properties(node),mode:'manual',device:state.deviceId});
-   if(!file?.id)throw Error('Google nie potwierdził pliku. Kopia mogła powstać; możesz zapisać kolejną.');
-   const verified=await readNode(transport,{...node,fileId:file.id},inspect);
-   // readNode already checks the whole returned body against node.digest.
-   // Compare exact text without allocating two more escaped copies of a large backup.
-   if(node.backup!==verified.backup||node.digest!==verified.digest)throw Error('Google zwrócił inną zawartość kopii. Nie potwierdzono zapisu.');
-   const summary=backupSummary(current,{createdAt:node.createdAt});
-   notice='Kopia zapisana i zweryfikowana na Google Drive. '+new Date(node.createdAt).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'})+' · Sesje: '+summary.sessions+' · Wyniki: '+summary.results+' · Kompletne wersje planów: '+summary.completePlans+'. Szkice pozostają lokalnie.'+(database.revision!==revision?' W międzyczasie zmieniono dane lokalne — zapisz kolejną kopię.':'');
-   return {fileId:file.id,revision,summary};
-  });},
-  async download(fileId,{choose=false,forRestore=false,isCurrent=()=>true}={}){return operation(async()=>{
-   const files=await transport.list(),valid=[];let skipped=0;
-   for(const file of files){
+  async canonicalPoints({signal,isCurrent=()=>!signal?.aborted}={}){
+   return operation(async()=>{
     try{
-     const p=file.appProperties;
-     if(p?.pushpull!=='sync-v1'||!uuid(p.node))throw Error('Nieznany plik');
-     const parents=Object.keys(p).filter(k=>/^p\d+$/.test(k)).sort((a,b)=>Number(a.slice(1))-Number(b.slice(1))).flatMap(k=>p[k].split(','));
-     if(parents.some(id=>!uuid(id)||id===p.node)||new Set(parents).size!==parents.length)throw Error('Nieprawidłowe relacje');
-     let parsed;
-     const node=await readNode(transport,{id:p.node,digest:p.digest,parents:sorted(parents),fileId:file.id},async raw=>{parsed=await inspect(raw);});
-     valid.push({fileId:file.id,node,origin:p.mode==='manual'&&uuid(p.device)?p.device:null,time:Date.parse(file.createdTime),date:file.createdTime,sessionCount:parsed.summary?.sessions??parsed.data.sessions.length,entryCount:parsed.summary?.results??parsed.data.entries.length});
-    }catch(error){if(error.auth||error.status)throw error;skipped++;}
-   }
-   if(!valid.length)throw Error(files.length?'Nie znaleziono prawidłowej kopii. Istniejące pliki pozostają na Drive.':'Brak kopii w Google Drive.');
-   // Dates come from Drive, never the phone clock in node.createdAt. Legacy
-   // ancestry identifies superseded copies; independent devices need a choice.
-   const parents=new Set(valid.flatMap(c=>c.node.parents));
-   const tips=valid.filter(c=>!parents.has(c.node.id));
-   const origins=new Set(tips.map(c=>c.origin??c.node.id));
-   const candidates=tips.length?tips:valid;
-   candidates.sort((a,b)=>(Number.isFinite(b.time)?b.time:0)-(Number.isFinite(a.time)?a.time:0));
-   const ambiguous=!tips.length||origins.size>1||candidates.some(c=>!Number.isFinite(c.time))||candidates.some((c,i)=>i&&c.time===candidates[0].time&&!same(c.node.backup,candidates[0].node.backup));
-   const warning=(skipped?'Pominięto nieprawidłowe lub niedostępne kopie. ':'')+(ambiguous?'Kopie mogą zawierać różne historie urządzeń. Data zapisu w Drive nie rozstrzyga, która historia jest pełniejsza. Wybierz plik; pobranie nie zmieni danych lokalnych.':'');
-   if(!fileId&&(choose||ambiguous||skipped)){
-    if(isCurrent())notice=forRestore?'Wybierz kopię do podglądu. Różne urządzenia mogą mieć różne historie; niczego nie przywrócono. '+(skipped?'Pominięto nieprawidłowe kopie.':''):warning;return {choices:(choose?valid.slice().sort((a,b)=>(b.time||0)-(a.time||0)):candidates).map(c=>({fileId:c.fileId,date:c.date,sessionCount:c.sessionCount,entryCount:c.entryCount})),warning};
-   }
-   const chosen=fileId?valid.find(c=>c.fileId===fileId):candidates[0];
-   if(!chosen)throw Error('Wybrana kopia nie jest już dostępna lub jest nieprawidłowa. Wybierz ponownie.');
-   if(isCurrent())notice=forRestore?'Kopia zweryfikowana. Sprawdź podgląd przed zastąpieniem lokalnej bazy.':'Kopia sprawdzona. Pobieramy JSON na telefon; baza lokalna pozostaje bez zmian.';
-   return {backup:chosen.node.backup,date:chosen.date};
-  },isCurrent);},
+     const rows=await transport.listPoints({signal});
+     if(isCurrent())notice=rows.length?'Wybierz kopię do podglądu.':'Brak kopii zapasowych na Google Drive.';
+     return [...rows].sort((a,b)=>(Date.parse(b.createdTime)||0)-(Date.parse(a.createdTime)||0)||a.id.localeCompare(b.id));
+    }catch(error){if(isCurrent())notice='Nie pobrano listy kopii: '+error.message;throw error;}
+   },isCurrent);
+  },
+  async canonicalPoint(fileId,{signal,isCurrent=()=>!signal?.aborted}={}){return operation(async()=>{try{const result=await runIncremental('restore',{fileId},transport,{signal});if(isCurrent())notice='Punkt PPC1 zweryfikowany. Sprawdź podgląd przed przywróceniem.';return result;}catch(e){if(isCurrent())notice='Nie zweryfikowano punktu PPC1: '+e.message;throw e;}},isCurrent);},
   pauseForRestore(){clearTimeout(retryTimer);transport.clear();connectedAccount=null;connectedClient=null;},
   report(error){notice='Błąd: '+error.message;busy=false;emit();},
   close(){closed=true;clearTimeout(retryTimer);transport.clear();},
-  // Passive compatibility for older cached shells used during PWA upgrades.
-  // These calls must NEVER resume the former automatic queue.
-  localChanged(){},retryNow(){return Promise.resolve();},
  };
  return api;
 }
-export const openDriveSync=openDriveBackup;

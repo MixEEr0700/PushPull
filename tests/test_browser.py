@@ -89,6 +89,7 @@ def seed_historical_editor(page,patch):
 class QuietServer(http.server.SimpleHTTPRequestHandler):
     upgrade_latest = False
     runtime_ref = None
+    backup_ui_ref = None
 
     def do_GET(self):
         prefix = '/upgrade/' if self.path.startswith('/upgrade/') else '/legacy/' if self.path.startswith('/legacy/') else None
@@ -112,27 +113,37 @@ class QuietServer(http.server.SimpleHTTPRequestHandler):
         # release, including its hash-matched worker. Functional suites default
         # to the current v2 application; assertions are never disabled.
         asset=self.path.split('?')[0].lstrip('/') or 'index.html'
-        if self.runtime_ref and asset in self.legacy_assets:
-            body=subprocess.check_output(['git','show',self.runtime_ref+':'+asset],cwd=ROOT)
+        ref=(self.backup_ui_ref or self.runtime_ref) if asset in getattr(self,'legacy_assets',()) else None
+        if ref:
+            body=subprocess.check_output(['git','show',ref+':'+asset],cwd=ROOT)
             self.send_response(200);self.send_header('Content-Type',self.guess_type(asset));self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body);return
         super().do_GET()
 
     def log_message(self, *args):
         pass
 
+LAST_JSON_RELEASE = '2b1cd460907ed72e23d52522fad424006c08629b'
+
+def json_release(test):
+    """Keep testing retired UI on the exact last release that shipped it."""
+    test.json_release = True
+    return test
+
 class BrowserHarness(unittest.TestCase):
+    json_backup_ui = False
     legacy_backend = False
     mock_clock = True
     @classmethod
     def setUpClass(cls):
         handler=QuietServer
-        if cls.legacy_backend:
+        if cls.legacy_backend or cls.json_backup_ui or any(getattr(getattr(cls,name),'json_release',False) for name in dir(cls) if name.startswith('test_')):
             import runpy
             ref='6002889'
             assets=runpy.run_path(str(ROOT/'scripts/build_release.py'))['ASSETS']
             # The v2 modules are isolated test modules, unused by that release.
-            assets={*assets,'sw.js'}-{'model/backup-size.mjs','model/backup-size-json.mjs','model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'}
-            handler=type('V1CompatibilityServer',(QuietServer,),{'runtime_ref':ref,'legacy_assets':assets})
+            assets={*assets,'sw.js'}
+            if cls.legacy_backend:assets-={'model/backup-size.mjs','model/backup-size-json.mjs','model/journal-runtime-index.mjs','model/journal-runtime.mjs','model/journal-index.mjs','model/journal-protocol.mjs','model/journal-idb.mjs','model/journal-database.mjs'}
+            handler=type('CompatibilityServer',(QuietServer,),{'runtime_ref':ref if cls.legacy_backend else None,'legacy_assets':assets})
         cls.server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(handler, directory=str(ROOT)))
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.thread.start()
@@ -155,6 +166,7 @@ class BrowserHarness(unittest.TestCase):
         return context
 
     def setUp(self):
+        self.server.RequestHandlerClass.func.backup_ui_ref=LAST_JSON_RELEASE if self.json_backup_ui or getattr(getattr(self,self._testMethodName),'json_release',False) else None
         self.context = self.new_context(service_workers='block')
         self.page = self.context.new_page()
         self.alerts = []
@@ -222,6 +234,9 @@ class BrowserHarness(unittest.TestCase):
     def data_section(self,name,page=None):
         p=page or self.page
         section=p.locator('[data-data-section='+name+']')
+        parent=p.locator('[data-data-section=service]').filter(has=section)
+        if parent.count() and not parent.evaluate('(e)=>e.open'):
+            parent.locator(':scope > summary').click()
         if section.count() and not section.evaluate('(e)=>e.open'):
             section.locator(':scope > summary').click()
         return section
@@ -315,6 +330,7 @@ class BrowserRegression(BrowserHarness):
         self.page.locator('[data-act=prevMonth]').click()
         expect(self.page.locator('.row.between.card strong')).to_have_text('wrzesień 2026')
 
+    @json_release
     def test_export_import_cancel_backup_restore_and_invalid_file(self):
         self.start(); self.result(); self.save()
         original=self.raw()
@@ -348,6 +364,7 @@ class BrowserRegression(BrowserHarness):
             expect(self.page.locator('[data-backup-body=restore] [data-restore-error]')).to_be_visible()
         self.assertFalse(self.alerts,self.alerts)
 
+    @json_release
     def test_corrupt_and_unsupported_boot_recovery_download_and_import(self):
         self.start()
         good=self.raw()
@@ -376,6 +393,7 @@ class BrowserRegression(BrowserHarness):
         self.start()
         self.assertEqual(len(self.state()['sessions']),1)
 
+    @json_release
     def test_import_backup_failure_keeps_active_session_and_drafts(self):
         self.start(); self.result()
         self.page.locator('[data-main=kg]').fill('120')
@@ -442,7 +460,7 @@ class BrowserRegression(BrowserHarness):
         # Own notes need a saved plan context; unversioned source text is protected
         # by test_series_tonnage_history_notes_and_reload and test_user_notes.
         self.plans('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click()
         for width,height in [(360,800),(390,844),(412,915)]:

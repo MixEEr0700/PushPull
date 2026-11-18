@@ -7,6 +7,7 @@ import test_indexeddb as legacy
 import test_v2_training as native
 
 class BackupV5Preview(BrowserHarness):
+    json_backup_ui = True
     prepare=legacy.IndexedDBMigration.prepare
     ready=legacy.IndexedDBMigration.ready
     records=legacy.IndexedDBMigration.records

@@ -1,4 +1,5 @@
 """Synthetic data-only V3/V4 through the existing mobile UI; no owner plan."""
+from test_browser import json_release
 from test_browser import add_drop,seed_historical_editor,LEGACY_PAIRS,confirm_restore,open_result_panel
 import json
 from pathlib import Path
@@ -27,7 +28,7 @@ class PlanImport(BrowserHarness):
     def store(self):
         self.page.locator('[data-plan-save]').click();expect(self.page.get_by_text('Plan zapisany bez aktywacji',exact=True)).to_be_visible()
     def activate(self):
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
     def form(self,id):
         self.page.locator(f'[data-expand="{id}"]').click();open_result_panel(self.page)
@@ -121,6 +122,7 @@ class PlanImport(BrowserHarness):
         self.page.evaluate('()=>{IDBObjectStore.prototype.put=window.__put;IDBObjectStore.prototype.add=window.__add}')
         self.store();self.assertEqual(len(self.state()['trainingJournal']['importedPlans']),1)
 
+    @json_release
     def test_native_sets_restart_edit_full_backup_restore_and_independent_group_drafts(self):
         self.prepare();self.ready();self.preview();self.store();self.activate()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
@@ -159,6 +161,7 @@ class PlanImport(BrowserHarness):
         self.page.locator('[data-draft-resume]').click();expect(self.page.locator('.performanceForm')).to_have_attribute('data-id','TEST-2')
         self.assertEqual(self.local_raw(),legacy.RAW)
 
+    @json_release
     def test_import_keeps_active_v2_until_confirmation_and_manual_drive_preserves_full_history(self):
         import test_v2_training as training
         from test_drive_sync import MockGoogle,ManualDriveFlow

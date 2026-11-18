@@ -1,4 +1,5 @@
 """V2 in the existing phone journal, using only synthetic history."""
+from test_browser import json_release
 from test_browser import add_drop,confirm_restore,open_result_panel,open_notes,seed_historical_editor,LEGACY_PAIRS
 import json
 from pathlib import Path
@@ -19,7 +20,7 @@ class V2Training(BrowserHarness):
         self.confirm=False;self.page.locator('[data-plan-activate]').click()
         self.assertNotIn('trainingJournal',self.state())
         self.confirm=True
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         # Old in-progress session has not acquired new prescriptions.
         self.assertEqual(self.state()['sessions'],self.before['sessions'])
@@ -56,6 +57,7 @@ class V2Training(BrowserHarness):
         form.locator('[data-rich-action=toggle]').click()
         return form
 
+    @json_release
     def test_backoff_restart_edit_notes_statistics_and_full_restore(self):
         self.activate()
         form=self.open_result('PUSH A','PUSH-A-3')
@@ -102,6 +104,7 @@ class V2Training(BrowserHarness):
         self.assertEqual(self.local_raw(),legacy.RAW)
         self.assertFalse(self.alerts,self.alerts)
 
+    @json_release
     def test_drop_sides_and_two_round_group_mobile_corrections(self):
         self.activate()
         form=self.open_result('PUSH A','PUSH-A-5');self.fill_rows(form)

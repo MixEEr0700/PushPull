@@ -1,4 +1,5 @@
 """The opt-in journal through the real mobile forms, calendar and JSON controls."""
+from test_browser import json_release
 from test_browser import confirm_restore,open_result_panel
 import json
 from pathlib import Path
@@ -23,7 +24,7 @@ class JournalFlow(BrowserHarness):
         expect(self.page.locator('[data-act=start]')).to_be_visible()
         self.before=self.state()
         self.settings()
-        with self.page.expect_download():self.page.locator('[data-enable-journal]').click()
+        self.page.locator('[data-enable-journal]').click()
         expect(self.page.get_by_text('Nowy zapis włączony',exact=True)).to_be_visible()
         self.assertEqual(self.state()['entries'],self.before['entries'])
         self.assertEqual(self.state()['sessions'],self.before['sessions'])
@@ -45,6 +46,7 @@ class JournalFlow(BrowserHarness):
         self.page.locator('.seriesResultForm [type=submit]').click()
         expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
 
+    @json_release
     def test_issue48_advanced_options_legacy_confirmation_backup_and_native_plans(self):
         from test_plan_import import PlanImport
         self.prepare();self.ready();before=self.state();records=self.records()
@@ -77,6 +79,7 @@ class JournalFlow(BrowserHarness):
         self.assertEqual(self.state()['sessions'],before['sessions']);self.assertEqual(self.state()['entries'],before['entries'])
         self.assertFalse(self.alerts,self.alerts)
 
+    @json_release
     def test_real_session_restart_correction_statistics_and_v3_restore(self):
         self.enable();self.start_result()
         saved=self.state();entry=saved['entries'][-1];sid=saved['activeId']
@@ -176,7 +179,7 @@ class JournalFlow(BrowserHarness):
     def test_interrupted_optin_keeps_legacy_usable_and_can_be_retried(self):
         self.prepare();self.ready();self.settings()
         self.page.evaluate("""() => {window.__alert=window.alert;window.alert=text=>{window.__optinError=text};window.__put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v){if(this.name==='journalState' && v.id==='active')throw new DOMException('Optin quota','QuotaExceededError');return window.__put.call(this,v)}}""")
-        with self.page.expect_download():self.page.locator('[data-enable-journal]').click()
+        self.page.locator('[data-enable-journal]').click()
         self.page.wait_for_function('window.__optinError?.includes("Optin quota")')
         self.assertNotIn('trainingJournal',self.state())
         self.assertIn('Optin quota',self.page.evaluate('window.__optinError'))
@@ -184,10 +187,11 @@ class JournalFlow(BrowserHarness):
         self.page.locator('[data-tab=training]').click()
         expect(self.page.locator('[data-act=finish]')).to_be_visible()
         self.settings()
-        with self.page.expect_download():self.page.locator('[data-enable-journal]').click()
+        self.page.locator('[data-enable-journal]').click()
         expect(self.page.get_by_text('Nowy zapis włączony',exact=True)).to_be_visible()
         self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'],[])
 
+    @json_release
     def test_source_pair_snapshot_and_v3_roundtrip_without_v2_activation(self):
         self.enable()
         self.page.locator('[data-tab=training]').click()

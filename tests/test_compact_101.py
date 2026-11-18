@@ -1,4 +1,5 @@
 """Issue101: real disposable IndexedDB, explicit sides, ad-hoc drop roundtrips."""
+from test_browser import json_release
 from pathlib import Path
 from playwright.sync_api import expect
 from test_browser import BrowserHarness,add_drop,confirm_restore,wait_for_service_worker_controller,seed_historical_editor,LEGACY_PAIRS
@@ -64,6 +65,7 @@ class Compact101(BrowserHarness):
         e=self.state()['entries'][-1];self.assertEqual(len(e['performance']['rows']),1);self.assertEqual(len(e['series']),2)
         self.assertEqual(self.state()['entries'][:-1],before['entries']);self.assertEqual(self.state()['trainingJournal'],before['trainingJournal'])
 
+    @json_release
     def test_ad_hoc_plain_and_new_series_target_draft_restart_v3_restore_and_tonnage(self):
         self.activate();f=self.open_result('PUSH A','PUSH-A-1');self.fill_rows(f,'24','10');before=self.state();original=self.memory()['performance']
         f.locator('[data-rich-action=add-drop]').click();expect(f.locator('[data-drop-target]')).to_be_visible();self.assertEqual(self.memory()['performance'],original)
