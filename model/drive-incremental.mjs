@@ -34,7 +34,7 @@ export async function makePoint(value,previous=null){
 }
 export async function restorePoint(transport,fileId,{signal}={}){
  const chain=[],visited=new Set();let next=fileId,downloaded=0;
- while(next){signal?.throwIfAborted();check(!visited.has(next)&&chain.length<=DEPTH,'cycle/chain limit');visited.add(next);const raw=await (transport.readPoint??transport.read).call(transport,next);check(typeof raw==='string'&&raw.length<=MAX,'file limit');downloaded+=new TextEncoder().encode(raw).length;check(downloaded<=MAX,'chain memory limit');const p=JSON.parse(raw),{digest:sha,...body}=p;
+ while(next){signal?.throwIfAborted();check(!visited.has(next)&&chain.length<=DEPTH,'cycle/chain limit');visited.add(next);const raw=await (transport.readPoint??transport.read).call(transport,next,{signal});check(typeof raw==='string'&&raw.length<=MAX,'file limit');downloaded+=new TextEncoder().encode(raw).length;check(downloaded<=MAX,'chain memory limit');const p=JSON.parse(raw),{digest:sha,...body}=p;
   check(Object.keys(p).sort().join(',')==='changed,digest,format,generation,objects,parent,parentDigest,removed,root,version','manifest fields');
   check(p.format==='pushpull-drive-ppc1'&&p.version===1&&await digest(body)===sha,'manifest integrity');check(Number.isSafeInteger(p.generation)&&p.generation>=0&&p.generation<=DEPTH,'generation');check(p.changed&&typeof p.changed==='object'&&!Array.isArray(p.changed)&&Array.isArray(p.removed)&&p.removed.every(k=>typeof k==='string')&&new Set(p.removed).size===p.removed.length,'delta shape');check(p.removed.every(k=>!Object.hasOwn(p.changed,k)),'conflicting tombstone');
   check(p.objects&&typeof p.objects==='object'&&!Array.isArray(p.objects),'object pool');check(Object.keys(p.changed).length<=COUNT&&Object.keys(p.objects).length<=COUNT,'object count limit');const used=new Set(Object.values(p.changed));check(used.size===Object.keys(p.objects).length,'object pool references');for(const sha of used)check(typeof sha==='string'&&Object.hasOwn(p.objects,sha)&&await digest(p.objects[sha])===sha,'object integrity');chain.push(p);next=p.parent;check(next===null||typeof next==='string'&&next.length>0&&next.length<=256,'parent');
@@ -46,9 +46,11 @@ export async function restorePoint(transport,fileId,{signal}={}){
 /** Caller persists pending BEFORE network. Reuse the same reserved Google ID
  * after ambiguous POST; GET never trusts an HTTP success alone. */
 export async function uploadPoint(transport,pending,{signal}={}){
- signal?.throwIfAborted();let remote;
- try{remote=await (transport.readPoint??transport.read).call(transport,pending.fileId);}catch(e){if(e.status!==404)throw e;}
- if(remote===undefined){try{await transport.createPoint(pending.fileId,canonical(pending.packet),pending.packet.digest);}catch(e){if(e.auth)throw e;/* POST may have committed; authoritative GET follows. */}}
- signal?.throwIfAborted();const raw=await (transport.readPoint??transport.read).call(transport,pending.fileId);check(raw.length<=MAX&&canonical(JSON.parse(raw))===canonical(pending.packet),'upload readback');
+ signal?.throwIfAborted();let remote,postError;
+ try{remote=await (transport.readPoint??transport.read).call(transport,pending.fileId,{signal});}catch(e){if(e.status!==404)throw e;}
+ if(remote===undefined){try{await transport.createPoint(pending.fileId,canonical(pending.packet),pending.packet.digest,{signal});}catch(e){signal?.throwIfAborted();if(e.auth)throw e;postError=e;/* POST may have committed; authoritative GET follows. */}}
+ signal?.throwIfAborted();let raw;
+ try{raw=await (transport.readPoint??transport.read).call(transport,pending.fileId,{signal});}catch(error){throw error.status===404&&postError?postError:error;}
+ check(raw.length<=MAX&&canonical(JSON.parse(raw))===canonical(pending.packet),'upload readback');
  const restored=await restorePoint(transport,pending.fileId,{signal});check(restored.digest===pending.packet.digest,'readback identity');return restored;
 }
