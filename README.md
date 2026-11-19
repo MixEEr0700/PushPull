@@ -1,6 +1,6 @@
 # Aplikacja Treningowa
 
-Mobilny dziennik treningowy offline, rozwijany w istniejącym repozytorium `MixEEr0700/PushPull`. Zachowany interfejs Matrix v0.3 — szlif 3, lokalna baza IndexedDB i pełne kopie JSON. Nazwa aplikacji nie zmienia technicznych identyfikatorów ani historii.
+Mobilny dziennik treningowy offline, rozwijany w istniejącym repozytorium `MixEEr0700/PushPull`. Zachowany interfejs Matrix v0.3 — szlif 3, lokalna baza IndexedDB i kopie PPC1. Nazwa aplikacji nie zmienia technicznych identyfikatorów ani historii.
 
 **Wersja testowa:** parametry V2 wymagają potwierdzenia z dokumentem trenera. Instalacja na fizycznym Androidzie pozostaje niewykonana. Obecnie dane rozdziela origin/profil przeglądarki; nie ma kont użytkowników ani synchronizacji Drive.
 
@@ -18,7 +18,7 @@ python3 scripts/build_release.py --output dist/releases/stage-4
 python3 scripts/serve_test.py --directory dist/releases/stage-4 --port 8000
 ```
 
-Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budować do nowego katalogu. Nie publikować checkoutu, backupów ani sekretów. Pełne JSON zachowywać także poza przeglądarką. Nazwy plików kopii `pushpull-*` i format kopii pozostają kompatybilne.
+Serwer nasłuchuje lokalnie; nie aktywuje hostingu HTTPS. Każde wydanie budować do nowego katalogu. Nie publikować checkoutu, backupów ani sekretów. Pliki PPC1 zachowywać także poza przeglądarką. Starsze archiwa można odczytywać jako materiał ratunkowy w Narzędziach serwisowych.
 
 ## Dokumentacja
 

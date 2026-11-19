@@ -29,6 +29,10 @@ def open_backup_flow(page, mode):
         drawer=page.locator('[data-backup-body=restore] > details').last
         if not drawer.evaluate('(e)=>e.open'):drawer.locator(':scope > summary').click()
 
+def accept_restore_differences(page):
+    consent=page.locator('[data-restore-allow-loss]')
+    if consent.count():consent.check()
+
 def confirm_restore(page):
     expect(page.locator('[data-restore-confirm]')).to_be_visible(timeout=60000)
     page.locator('[data-restore-confirm]').click()

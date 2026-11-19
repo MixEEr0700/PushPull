@@ -213,14 +213,18 @@ export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled
  if(rescueReference)check(restoreId&&rescueReference.id===restoreId&&['sha','evidenceSHA'].every(k=>/^[a-f0-9]{64}$/.test(rescueReference[k])),'verified rescue reference');
  const checkpoint=recovery?{id:'recovery:'+crypto.randomUUID(),protocol:2,raw:JSON.stringify(rescueReference?{format:'pushpull-rescue-reference',version:1,...rescueReference}:before.records)}:null;
  if(checkpoint)checkpoint.sha256=await sha(checkpoint.raw);
- let bundle=await createProtocol(source,{epoch:recovery?crypto.randomUUID():before.state.epoch,revision:previousRevision+1,ownerId,modelEnabled,legacyRaw,checkpoints:recovery?[checkpoint]:[...before.records.journalCheckpoints,...(portableBundle?.records.journalCheckpoints??[]),...(reference?[reference.cp]:[])].filter((c,i,a)=>a.findIndex(v=>v.id===c.id)===i),signal});
+ // Canonical replacement starts a new epoch while retaining the verified
+ // device-local archives and the immutable references of earlier checkpoints.
+ const retain=!!rescueReference||!recovery;
+ const checkpoints=retain?[...before.records.journalCheckpoints,...(portableBundle?.records.journalCheckpoints??[]),...(reference?[reference.cp]:[]),...(checkpoint?[checkpoint]:[])].filter((c,i,a)=>a.findIndex(v=>v.id===c.id)===i):[checkpoint];
+ let bundle=await createProtocol(source,{epoch:recovery?crypto.randomUUID():before.state.epoch,revision:previousRevision+1,ownerId,modelEnabled,legacyRaw,checkpoints,signal});
  if(indexed||before.state?.runtime){
   const runtime=await (await import('./journal-runtime-index.mjs')).buildRuntime(source,{signal,sourceRoot:bundle.state.indexRoot});
   const records={...bundle.records,journalObjects:[...new Map([...bundle.records.journalObjects,...runtime.objects].map(r=>[r.id,r])).values()],journalIndex:[...new Map([...bundle.records.journalIndex,...runtime.nodes].map(r=>[r.id,r])).values()]};
   const state=await sealState({...bundle.state,runtime:{...runtime.runtime,sourceRoot:bundle.state.indexRoot}});records.journalState=[state];bundle=freeze({state,records});
  }
  const anticipated={...bundle.records};
- for(const store of ['journalObjects','journalIndex'])anticipated[store]=[...new Map([...(recovery?[]:before.records[store]),...(portableBundle?.records[store]??[]),...bundle.records[store]].map(r=>[r.id,r])).values()];
+ for(const store of ['journalObjects','journalIndex'])anticipated[store]=[...new Map([...(retain?before.records[store]:[]),...(portableBundle?.records[store]??[]),...bundle.records[store]].map(r=>[r.id,r])).values()];
  anticipated.journalCheckpoints=bundle.records.journalCheckpoints;
  const allocated=await sealState({...bundle.state,allocation:await allocationFor(anticipated)});
  anticipated.journalState=[allocated];bundle=freeze({state:allocated,records:{...bundle.records,journalState:[allocated]}});
@@ -228,7 +232,7 @@ export async function replaceSource(db,input,{expectedState,ownerId,modelEnabled
  check(same(await materialize({state:bundle.state,records:anticipated},{signal}),source),'bulk retained capacity/source oracle');
  await transact(db,[...STORES,'meta'],'readwrite',async tx=>{
   guard();await equalRows(tx,before.records);
-  if(recovery){
+  if(!retain){
    // Explicit restore only, with the complete raw preimage kept in this same
    // transaction. Corrupt hash-addressed records cannot stay in the active set.
    for(const store of STORES)tx.objectStore(store).clear();

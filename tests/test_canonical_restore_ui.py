@@ -1,4 +1,4 @@
-from test_browser import BrowserHarness,wait_for_service_worker_controller,open_result_panel
+from test_browser import BrowserHarness,accept_restore_differences,wait_for_service_worker_controller,open_result_panel
 from playwright.sync_api import expect
 from pathlib import Path
 import test_indexeddb as legacy
@@ -56,6 +56,7 @@ class CanonicalRestoreUI(BrowserHarness):
         p.locator('[data-tab=training]').click();p.locator('[data-act=start]').click();expect(p.locator('[data-act=finish]')).to_be_visible();p.locator('[data-tab=settings]').click()
         if p.locator('[data-backup-flow=restore]').get_attribute('aria-expanded')=='false':p.locator('[data-backup-flow=restore]').click()
         p.locator('#importFile').set_input_files({'name':'new.ppc1','mimeType':'application/octet-stream','buffer':raw});expect(p.locator('[data-canonical-preview]')).to_be_visible(timeout=60000)
+        expect(p.locator('[data-restore-confirm]')).to_be_disabled();accept_restore_differences(p)
         p.locator('[data-restore-confirm]').click();expect(p.locator('[data-restore-success]')).to_be_visible(timeout=60000);p.reload();p.wait_for_selector('[data-tab=settings]');p.locator('[data-tab=settings]').click();p.locator('[data-backup-flow=save]').click()
         with p.expect_download() as dl:p.locator('[data-canonical-export]').click()
         self.assertEqual(self.decode(p,Path(dl.value.path()).read_bytes()),self.decode(self.page,raw));self.assertIsNone(p.evaluate('localStorage.getItem("pushpull_canonical_restore_pending")'))
