@@ -41,7 +41,7 @@ class AdvancedData110(BrowserHarness):
         expect(self.page.locator('[data-rescue-result]')).to_contain_text('Podgląd bez przywracania')
         expect(self.page.locator('[data-restore-preview],[data-restore-confirm]')).to_have_count(0)
         self.assertEqual(self.records(),before);self.assertEqual(self.page.evaluate('({...localStorage})'),local)
-        self.page.locator('[data-technical] > summary').click();expect(self.page.locator('[data-export-v4]')).to_be_visible();expect(self.page.locator('[data-preview-v5]')).to_be_attached();expect(self.page.locator('[data-collect-drafts]')).to_be_visible()
+        self.page.locator('[data-technical] > summary').click();expect(self.page.locator('[data-export-v4],[data-preview-v5]')).to_have_count(0);expect(self.page.locator('[data-collect-drafts]')).to_be_visible()
         self.assertFalse(self.alerts,self.alerts)
 
     def test_cancel_and_concurrent_revision_never_publish_stale_preview(self):
@@ -65,7 +65,7 @@ class AdvancedData110(BrowserHarness):
         self.page.locator('#driveConfig input').fill('123-test.apps.googleusercontent.com');self.page.locator('#driveConfig button').click()
         expect(self.page.locator('[data-drive-action=connect]')).to_be_visible()
         self.data_section('google');self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()
-        self.page.get_by_text('Opcje zaawansowane Google',exact=True).click();self.page.locator('[data-drive-action=disconnect]').click()
+        self.data_section('google-advanced');self.page.locator('[data-drive-action=disconnect]').click()
         self.backup_flow('save')
         expect(self.page.locator('[data-drive-action=connect]')).to_be_visible()
         self.data_section('google');self.page.locator('[data-drive-action=connect]').click();expect(self.page.locator('[data-drive-action=connect]')).to_be_hidden()

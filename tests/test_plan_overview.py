@@ -1,4 +1,5 @@
 """Unified plans + real local workouts; all plans/data synthetic, Google simulated."""
+from test_browser import json_release
 from test_browser import add_drop,confirm_restore,open_result_panel,seed_historical_editor,LEGACY_PAIRS
 from pathlib import Path
 import json
@@ -66,6 +67,7 @@ class PlanOverview(BrowserHarness):
         self.assertEqual(self.state()['trainingJournal']['sessionSnapshots'],before['trainingJournal']['sessionSnapshots'])
         self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'));self.assertFalse(self.alerts,self.alerts)
 
+    @json_release
     def test_versions_read_only_draft_restart_exercise_filter_and_json(self):
         self.prepare();self.ready()
         self.preview();self.store();self.activate_plan();self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
@@ -117,7 +119,7 @@ class PlanOverview(BrowserHarness):
         self.page.locator('[data-act=start]').click();f=self.form('TEST-1');self.fill(f)
         expect(f.locator('[data-draft-status]')).to_contain_text('Szkic zapisany lokalnie')
         self.plans('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         # Only the synthetic fixture loses its redundant registry/packet, not its full snapshot.
         self.page.evaluate("""async()=>{const d=await PushPullDB.open(()=>{});try{const v=structuredClone(d.value),j=v.trainingJournal,s=j.sessionSnapshots.find(s=>s.planVersionId==='synthetic-v3');delete j.importedPlans;for(const k of ['exercises','variants','planVersions','positions','sets','drops','groups','coachInstructions'])j.model[k]=j.model[k].filter(x=>!s.model[k].some(y=>y.id===x.id));await d.commit(v)}finally{d.close()}}""")
@@ -127,7 +129,7 @@ class PlanOverview(BrowserHarness):
         self.page.locator('[data-switch-preview]').click();expect(self.page.locator('[data-selected-plan]')).to_contain_text('Test Narciarz')
         self.confirm=False;self.page.locator('[data-switch-activate]').click();self.assertEqual(self.state(),before)
         self.confirm=True
-        with self.page.expect_download():self.page.locator('[data-switch-activate]').click()
+        self.page.locator('[data-switch-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         after=self.state();self.assertEqual(after['trainingJournal']['activePlanVersionId'],'synthetic-v3')
         self.assertEqual(after['trainingJournal']['nextUnitId'],'PUSH A');self.assertNotIn('importedPlans',after['trainingJournal'])

@@ -1,6 +1,6 @@
 """Selective startup reads and lossless live operations against native IndexedDB."""
 from playwright.sync_api import expect
-from test_browser import BrowserHarness,ROOT
+from test_browser import BrowserHarness
 
 TRACE=r"""(()=>{window.__reads=[];for(const op of ['get','getAll']){const f=IDBObjectStore.prototype[op];IDBObjectStore.prototype[op]=function(...a){const r=f.apply(this,a),name=this.name;r.addEventListener('success',()=>__reads.push({name,op,ids:op==='getAll'?r.result.map(x=>x.id):[r.result?.id]}));return r}}})();"""
 
@@ -11,7 +11,7 @@ class FastStart(BrowserHarness):
          const {nativeData,AT}=await import('./tests/fixtures/backup-v4-fixture.mjs'),data=nativeData(await(await fetch('./tests/fixtures/v1.json')).json(),await(await fetch('./tests/fixtures/plan-v3.json')).json());
          await h.commit(data,{importing:true,importedArchives:[{id:'large-raw',kind:'opaque',createdAt:AT,raw:'Ł😀\\\"\\n'.repeat(262144)}]});
         }finally{h.close()}}""")
-        code=(ROOT/'app.js').read_text();marker='const database=await PushPullDB.open(fresh,{training:true});';self.assertEqual(code.count(marker),1)
+        code=self.page.request.get(self.url+'app.js').text();marker='const database=await PushPullDB.open(fresh,{training:true});';self.assertEqual(code.count(marker),1)
         self.page.route('**/app.js',lambda r:r.fulfill(body=code.replace(marker,marker+'window.__fastDB=database;'),content_type='text/javascript'))
         self.page.add_init_script(TRACE);self.page.reload();expect(self.page.locator('[data-act=finish]')).to_be_visible()
 

@@ -1,4 +1,5 @@
 """Real service workers + installability metadata + isolated artifact/HTTPS tests."""
+from test_browser import json_release, LAST_JSON_RELEASE
 from test_browser import confirm_restore,open_result_panel,add_drop,open_backup_flow
 import functools
 from datetime import datetime, timezone
@@ -110,6 +111,34 @@ class PWADeployment(unittest.TestCase):
     def backup_flow(self,mode,page=None):
         open_backup_flow(page or self.page,mode)
 
+    def export_ppc1(self):
+        self.backup_flow('save')
+        with self.page.expect_download() as download:
+            self.page.locator('[data-canonical-export]').click()
+        return Path(download.value.path()).read_bytes()
+
+    def restore_ppc1(self,page,raw):
+        self.backup_flow('restore',page)
+        page.locator('#importFile').set_input_files({'name':'backup.ppc1','mimeType':'application/octet-stream','buffer':raw})
+        preview=page.locator('[data-restore-preview],[data-restore-error]')
+        expect(preview.first).to_be_visible(timeout=60000)
+        self.assertEqual(page.locator('[data-restore-error]').all_text_contents(),[])
+        confirm_restore(page)
+        result=page.locator('[data-restore-success],[data-restore-error]')
+        expect(result.first).to_be_visible(timeout=60000)
+        self.assertEqual(page.locator('[data-restore-error]').all_text_contents(),[])
+
+    def fresh_offline_target(self,day=None):
+        target=self.browser.new_context(service_workers='allow')
+        self.addCleanup(target.close)
+        page=target.new_page();page.on('dialog',self.accept_dialog)
+        if day:page.clock.set_fixed_time(datetime.fromisoformat(day+'T12:00:00+00:00'))
+        page.goto(self.url);expect(page.locator('[data-act=start]')).to_be_visible()
+        self.poll('navigator.serviceWorker.controller !== null',page)
+        page.locator('[data-tab=settings]').click()
+        target.set_offline(True)
+        return page
+
     def data_section(self,name,page=None):
         """Open a current Data accordion; historical PWA releases have none."""
         scope=page or self.page
@@ -137,7 +166,10 @@ class PWADeployment(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.path=Path(self.tmp.name)
         self.controller={'directory':self.path/'a','broken':None,'base':'/'}
-        build(self.controller['directory'])
+        if getattr(getattr(self,self._testMethodName),'json_release',False):
+            build_historical(LAST_JSON_RELEASE,self.path/'json-source',self.controller['directory'])
+        else:
+            build(self.controller['directory'])
         controller=self.controller
         class Handler(ReleaseHandler):
             def __init__(self,*args,**kwargs):super().__init__(*args,directory=controller['directory'],base_path=controller['base'],**kwargs)
@@ -230,7 +262,7 @@ class PWADeployment(unittest.TestCase):
         self.page.reload();self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
         self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="PULL A"]').click();self.page.locator('[data-act=start]').click()
@@ -352,13 +384,10 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.page.reload();self.ready()
         self.assertEqual(self.snapshot(),before)
         self.page.locator('[data-tab=settings]').click()
-        self.backup_flow('save')
-        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
-        raw=Path(download.value.path()).read_text();self.assertEqual(json.loads(raw),before)
-        self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
-        confirm_restore(self.page)
-        expect(self.page.locator('h1')).to_have_text('Dane i kopia zapasowa')
-        self.assertEqual(self.snapshot()['data'],FIXTURE)
+        raw=self.export_ppc1()
+        target=self.fresh_offline_target();self.restore_ppc1(target,raw)
+        self.assertEqual(target.evaluate("async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}"),FIXTURE)
+        self.assertEqual(self.snapshot(),before)
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
 
     def test_update_after_release_switch_does_not_reuse_old_inflight_check(self):
@@ -422,6 +451,7 @@ class PWADeployment(unittest.TestCase):
         self.context.set_offline(True);self.reopen()
         self.assertEqual(self.snapshot(),saved)
 
+    @json_release
     def test_issue40_update_preview_and_large_v3_restore_offline_keeps_local_drafts(self):
         source=self.path/'restore-old-source'
         old_release=self.path/'restore-old';build_historical('8d327a7',source,old_release)
@@ -429,7 +459,7 @@ class PWADeployment(unittest.TestCase):
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
         self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-expand="PUSH-A-1"]').click();open_result_panel(self.page)
         self.page.locator('[data-main=kg]').fill('81.123');self.page.locator('[data-main=reps]').fill('7')
@@ -492,7 +522,7 @@ class PWADeployment(unittest.TestCase):
             f.locator('[type=submit]').click();expect(f).to_have_count(0);expect(self.page.get_by_text('Wynik zapisany',exact=True)).to_be_visible()
         def finish():self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000)
         plans();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();finish()
         for day,kg in [(2,'100'),(9,'105')]:
@@ -501,7 +531,7 @@ class PWADeployment(unittest.TestCase):
         at(2,10);plans();self.page.locator('#planFile').set_input_files(ROOT/'tests/fixtures/plan-v3.json')
         self.page.locator('[data-plan-save]').click();expect(self.page.get_by_text('Plan zapisany bez aktywacji',exact=True)).to_be_visible()
         self.page.locator('#importedPlanId').select_option('synthetic-v3')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();at(2,11);f=form('TEST-A','TEST-1','2026-02-11')
         f.locator('[data-quick=kg]').fill('20');f.locator('[data-quick=reps]').fill('8');save(f);finish()
@@ -516,7 +546,7 @@ class PWADeployment(unittest.TestCase):
         confirmations=[]
         def confirm(d):confirmations.append(d.message);d.accept()
         self.page.remove_listener('dialog',self.accept_dialog);self.page.on('dialog',confirm)
-        with self.page.expect_download():self.page.locator('[data-switch-activate]').click()
+        self.page.locator('[data-switch-activate]').click()
         # Full plan replacement retains/imports preimages; it is a bulk path,
         # separate from the result-save timing acceptance in Issue #82.
         bulk_started=time.monotonic()
@@ -556,13 +586,10 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(saved['trainingJournal']['sessionSnapshots'][:-1],before['data']['trainingJournal']['sessionSnapshots'])
         self.assertEqual(drafts(),[]);self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         self.page.locator('[data-tab=settings]').click()
-        self.backup_flow('save')
-        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
-        raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
+        raw=self.export_ppc1();other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
         page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url);page.locator('[data-tab=settings]').click()
-        page.locator('#importFile').set_input_files({'name':'continuous-plans.json','mimeType':'application/json','buffer':raw})
-        confirm_restore(page)
-        expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=30000);self.assertEqual(value(page),saved)
+        self.restore_ppc1(page,raw)
+        self.assertEqual(value(page),saved)
         self.page.close();self.page=self.context.new_page();self.page.on('dialog',self.accept_dialog);self.page.goto(self.url)
         self.page.locator('[data-type="PUSH A"]').click();expect(self.page.locator('[data-expand="PUSH-A-1"] .last-result')).to_have_text('10×95 kg')
         self.assertEqual(value(),saved)
@@ -575,7 +602,7 @@ class PWADeployment(unittest.TestCase):
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
         self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         def card(page=None):
@@ -627,14 +654,10 @@ class PWADeployment(unittest.TestCase):
         expect(card().locator('[data-result-change]')).to_contain_text('4 sesje temu')
         self.assertEqual(self.snapshot(),expected);self.assertEqual(drafts(),[])
         self.page.locator('[data-tab=settings]').click()
-        self.backup_flow('save')
-        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
-        raw=Path(download.value.path()).read_bytes()
+        raw=self.export_ppc1()
         other=self.browser.new_context(service_workers='block');self.addCleanup(other.close)
         page=other.new_page();page.on('dialog',lambda d:d.accept());page.goto(self.url);page.locator('[data-tab=settings]').click()
-        page.locator('#importFile').set_input_files({'name':'change-age.json','mimeType':'application/json','buffer':raw})
-        confirm_restore(page)
-        expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=30000)
+        self.restore_ppc1(page,raw)
         page.locator('[data-tab=training]').click();page.locator('[data-type="PULL B"]').click()
         expect(card(page).locator('.exercise-toggle .last-result')).to_have_text('L/P 15×105 kg')
         expect(card(page).locator('[data-result-change]')).to_contain_text('4 sesje temu')
@@ -654,7 +677,7 @@ class PWADeployment(unittest.TestCase):
         def drafts():
             return self.page.evaluate('async()=>{const d=await PushPullDB.open(()=>{});try{return await d.readDrafts()}finally{d.close()}}')
         plans();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="PULL A"]').click();self.page.locator('[data-act=start]').click()
@@ -677,13 +700,13 @@ class PWADeployment(unittest.TestCase):
         self.page.locator('[data-switch-activate]').click();self.page.remove_listener('dialog',cancel);self.page.on('dialog',self.accept_dialog)
         self.assertEqual(self.snapshot(),before)
         self.page.clock.set_fixed_time(datetime(2026,10,22,22,30,tzinfo=timezone.utc)) # 23 October in Warsaw.
-        with self.page.expect_download():self.page.locator('[data-switch-activate]').click()
+        self.page.locator('[data-switch-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.assertEqual(value()['trainingJournal']['nextUnitId'],'TEST-A')
         self.page.clock.set_fixed_time(datetime(2026,10,25,12,tzinfo=timezone.utc))
         self.page.locator('[data-plan-switch]').click();self.page.locator('#switchPlanId').select_option('v2-owner-2026-10-22')
         self.page.locator('[data-switch-preview]').click();expect(self.page.locator('#importedPlanId')).to_have_value('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-switch-activate]').click()
+        self.page.locator('[data-switch-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         current=value();self.assertEqual(current['entries'],before['data']['entries']);self.assertEqual(current['sessions'],before['data']['sessions'])
         self.assertEqual(current['trainingJournal']['sessionSnapshots'],before['data']['trainingJournal']['sessionSnapshots']);self.assertEqual(drafts(),old_drafts)
@@ -702,16 +725,12 @@ class PWADeployment(unittest.TestCase):
         self.assertEqual(value()['sessions'][-1]['type'],'PUSH B')
         self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible(timeout=60000);self.assertEqual(value()['trainingJournal']['nextUnitId'],'PULL B')
         saved=value();self.page.locator('[data-tab=settings]').click()
-        self.backup_flow('save')
-        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
-        raw=Path(download.value.path()).read_bytes();other=self.browser.new_context(service_workers='block',accept_downloads=True);self.addCleanup(other.close)
+        raw=self.export_ppc1();other=self.browser.new_context(service_workers='block',accept_downloads=True);self.addCleanup(other.close)
         page=other.new_page();messages=[]
         def accept_restore(d):messages.append((d.type,d.message));d.accept()
         page.on('dialog',accept_restore);page.goto(self.url);page.locator('[data-tab=settings]').click()
-        page.locator('#importFile').set_input_files({'name':'full-periods.json','mimeType':'application/json','buffer':raw})
-        confirm_restore(page)
-        try:expect(page.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=30000)
-        except AssertionError as error:self.fail(str(error)+'\nRestore dialogs: '+repr(messages))
+        self.restore_ppc1(page,raw)
+        self.assertEqual([kind for kind,_ in messages],['confirm'])
         self.assertEqual(value(page),saved)
         page.locator('[data-tab=settings]').click();page.locator('[data-view=plans]').click()
         expect(page.locator('[data-plan-row="v2-owner-2026-10-22"] [data-plan-period]')).to_have_text(['Używany: 21.10.2026 – 23.10.2026','Używany: od 25.10.2026'])
@@ -724,7 +743,7 @@ class PWADeployment(unittest.TestCase):
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
         self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="PULL B"]').click();self.page.locator('[data-act=start]').click()
@@ -861,7 +880,7 @@ class PWADeployment(unittest.TestCase):
         self.page.locator('#planFile').set_input_files({'name':'test-v3.json','mimeType':'application/json','buffer':plan})
         expect(self.page.locator('[data-plan-preview]')).to_be_visible()
         self.page.locator('[data-plan-save]').click();expect(self.page.get_by_text('Plan zapisany bez aktywacji',exact=True)).to_be_visible()
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.assertEqual(self.snapshot()['data']['sessions'],before['data']['sessions'])
         self.page.locator('[data-tab=training]').click();open_result_panel(self.page)
@@ -879,6 +898,7 @@ class PWADeployment(unittest.TestCase):
         saved=self.snapshot();self.reopen();self.assertEqual(self.snapshot(),saved)
         self.assertEqual(saved['data']['entries'][-1]['performance']['rows'][0]['segments'][1]['kg'],'21')
 
+    @json_release
     def test_issue26_update_from_conflict_preserves_data_copies_drafts_and_disables_automation(self):
         from test_drive_sync import MockGoogle
         source=self.path/'issue26-old-source'
@@ -1004,18 +1024,19 @@ class PWADeployment(unittest.TestCase):
             self.page.locator('[data-panel=history]').click()
             expect(self.page.locator('.panel .entry')).to_have_count(1)
         self.page.locator('[data-tab=settings]').click()
-        self.backup_flow('save')
-        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
-        raw=Path(download.value.path()).read_bytes()
-        self.page.locator('#importFile').set_input_files({'name':'pair.json','mimeType':'application/json','buffer':raw})
-        confirm_restore(self.page)
+        raw=self.export_ppc1()
+        old_day=next(session['date'] for session in state['sessions'] if session['id']==old_session)
+        target=self.fresh_offline_target(old_day);self.restore_ppc1(target,raw)
+        original=self.page;self.page=target
         self.page.locator('[data-tab=training]').click()
         self.ready();self.assertEqual(self.snapshot()['data'],state)
         self.page.locator('[data-tab=calendar]').click()
+        self.page.locator(f'[data-day="{old_day}"]').click()
         self.page.locator(f'[data-act=openSession][data-id="{old_session}"]').click()
         expect(self.page.locator('[data-expand="PULL-B-6"]')).to_contain_text('73 kg')
         expect(self.page.locator('[data-expand="PULL-B-6-SKI"]')).to_have_count(0)
-        self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+        self.assertEqual(original.evaluate('(key)=>localStorage.getItem(key)',KEY),RAW)
+        self.assertIsNone(target.evaluate('(key)=>localStorage.getItem(key)',KEY))
 
     def test_issue17_card_copy_after_update_preserves_saved_sessions_and_drafts(self):
         source=self.path/'issue17-old-source'
@@ -1110,7 +1131,7 @@ class PWADeployment(unittest.TestCase):
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click()
         self.page.locator('[data-view=plans]').click();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="PULL A"]').click();self.page.locator('[data-act=start]').click()
@@ -1145,7 +1166,7 @@ class PWADeployment(unittest.TestCase):
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click()
         self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click()
         self.page.locator('[data-type="PULL A"]').click();self.page.locator('[data-act=start]').click()
@@ -1178,7 +1199,7 @@ class PWADeployment(unittest.TestCase):
         current=self.controller['directory'];self.controller['directory']=old_release
         self.seed();self.page.goto(self.url);self.ready()
         self.page.locator('[data-tab=settings]').click();self.page.locator('[data-view=plans]').click();self.page.locator('#importedPlanId').select_option('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.page.locator('[data-act=finish]').click();self.page.locator('[data-type="PUSH A"]').click();self.page.locator('[data-act=start]').click()
         self.page.locator('[data-expand="PUSH-A-5"]').click();f=self.page.locator('.performanceForm');f.locator('[data-rich-action=toggle]').click()
@@ -1255,17 +1276,14 @@ class PWADeployment(unittest.TestCase):
         expect(self.page).to_have_title('Dziennik Treningowy')
         self.assertEqual(self.snapshot(),before)
         self.page.locator('[data-tab=settings]').click()
-        self.backup_flow('save')
-        with self.page.expect_download() as download:self.legacy_control('[data-act=export]').click()
-        raw=Path(download.value.path()).read_text()
-        self.assertEqual(json.loads(raw),before)
-        self.page.locator('#importFile').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':raw.encode()})
-        confirm_restore(self.page)
-        expect(self.page.locator('h1')).to_have_text('Dane i kopia zapasowa')
-        restored=self.snapshot()
+        raw=self.export_ppc1()
+        target=self.fresh_offline_target();self.restore_ppc1(target,raw)
+        expect(target.locator('h1')).to_have_text('Dane i kopia zapasowa')
+        restored=target.evaluate("async()=>{const d=await PushPullDB.open(()=>{});try{return d.export()}finally{d.close()}}")
         self.assertEqual(restored['data'],before['data'])
         self.assertEqual(restored['catalog'],before['catalog'])
-        self.assertGreater(len(restored['archives']),len(before['archives']))
+        self.assertTrue(target.evaluate("async()=> (await (await import('./model/canonical-rescue.mjs')).listRescues()).length===1"))
+        self.assertEqual(self.snapshot(),before)
 
     def test_pwa_survives_browser_process_restart_offline(self):
         profile=self.path/'persistent-profile'

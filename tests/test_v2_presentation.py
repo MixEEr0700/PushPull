@@ -29,7 +29,7 @@ class V2Presentation(BrowserHarness):
         self.confirm=False;self.page.locator('[data-plan-activate]').click()
         self.assertEqual(self.state(),before)
         self.confirm=True
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click()
         # Activation does not relabel the already-started source session.

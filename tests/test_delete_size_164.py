@@ -1,5 +1,4 @@
 """Reference preimages on isolated synthetic stores; never user data."""
-import base64
 from pathlib import Path
 from playwright.sync_api import expect
 from test_browser import BrowserHarness
@@ -24,8 +23,16 @@ class DeleteSize164(BrowserHarness):
         point=self.page.evaluate("async old=>{const d=await PushPullDB.open(()=>{});try{return d.backups().find(id=>!old.includes(id))}finally{d.close()}}",old_ids)
         self.page.reload();expect(self.page.locator('[data-act=start]')).to_be_visible();self.delete(after['sessions'][-1])
         second=self.page.evaluate("async()=>{const d=await PushPullDB.open(()=>{});try{return d.backups().at(-1)}finally{d.close()}}")
-        raw=self.page.evaluate("async id=>{const d=await PushPullDB.open(()=>{});try{const f=await d.readBackup(id),a=new Uint8Array(await f.arrayBuffer());let s='';for(let i=0;i<a.length;i+=8192)s+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(s)}finally{d.close()}}",second)
-        ctx=self.new_context(service_workers='block');p=ctx.new_page();p.on('dialog',self.dialog);p.goto(self.url);p.wait_for_selector('[data-act=start]');p.locator('[data-tab=settings]').click();p.locator('[data-backup-flow=restore]').click();p.locator('#importFile').set_input_files({'name':'rescue.ppc1','mimeType':'application/octet-stream','buffer':base64.b64decode(raw)})
+        self.page.locator('[data-tab=settings]').click();undo=self.data_section('undo')
+        if undo.locator('[data-load-backups]').count():undo.locator('[data-load-backups]').click()
+        undo.locator('#backupKey').select_option(second)
+        undo.locator('[data-rescue-preview]').click()
+        expect(undo.locator('[data-rescue-result]')).to_be_visible(timeout=60000)
+        with self.page.expect_download(timeout=60000) as download:
+            undo.locator('[data-backup-export]').click()
+        self.assertTrue(download.value.suggested_filename.endswith('.ppc1'))
+        raw=Path(download.value.path()).read_bytes()
+        ctx=self.new_context(service_workers='block');p=ctx.new_page();p.on('dialog',self.dialog);p.goto(self.url);p.wait_for_selector('[data-act=start]');p.locator('[data-tab=settings]').click();p.locator('[data-backup-flow=restore]').click();p.locator('#importFile').set_input_files({'name':'rescue.ppc1','mimeType':'application/octet-stream','buffer':raw})
         expect(p.locator('[data-ppc1-preview]')).to_be_visible(timeout=60000);p.locator('[data-restore-confirm]').click();expect(p.get_by_text('Dane zaimportowane',exact=True)).to_be_visible(timeout=60000)
         p.reload();p.wait_for_selector('[data-tab=settings]');actual=p.evaluate("async()=>{const d=await PushPullDB.open(()=>{});try{return d.value}finally{d.close()}}")
         self.assertEqual(actual,after)

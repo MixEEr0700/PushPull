@@ -60,7 +60,7 @@ class BackupV4(BrowserHarness):
         before=self.records();self.page.evaluate(SETUP);text=self.page.evaluate('text')
         self.page.locator('[data-tab=settings]').click()
         self.page.locator('#importFile').set_input_files({'name':'synthetic-v4.json','mimeType':'application/json','buffer':text.encode()})
-        expect(self.page.locator('[data-restore-error]')).to_contain_text('wersja')
+        expect(self.page.locator('[data-restore-error]')).to_contain_text('PPC1')
         expect(self.page.locator('[data-restore-confirm]')).to_have_count(0)
         self.assertEqual(self.records(),before)
 

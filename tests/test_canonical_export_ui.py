@@ -14,7 +14,7 @@ class CanonicalExportUI(BrowserHarness):
     def test_new_training_ui_export_exact_auxiliary_no_archives_no_writes_mobile(self):
         self.page.wait_for_selector('[data-act=start]');self.start();self.result('22','9');self.save()
         self.open_export();self.data_section('google')
-        self.page.locator('#driveConfig').evaluate('(f)=>{f.closest("details").open=true}')
+        self.data_section('google-advanced')
         self.page.locator('#driveConfig input').fill('synthetic-client.apps.googleusercontent.com');self.page.locator('#driveConfig button').click()
         self.page.wait_for_function("""async()=>{const db=await new Promise(r=>{const q=indexedDB.open('pushpull');q.onsuccess=()=>r(q.result)});try{return await new Promise(r=>{const q=db.transaction('meta').objectStore('meta').get('drive-sync-v1');q.onsuccess=()=>r(q.result?.clientId==='synthetic-client.apps.googleusercontent.com')})}finally{db.close()}}""")
         self.page.evaluate("""async()=>{const db=await new Promise(r=>{const q=indexedDB.open('pushpull');q.onsuccess=()=>r(q.result)});await new Promise((r,j)=>{const tx=db.transaction('meta','readwrite');tx.objectStore('meta').put({key:'canonical-preferences-v1',value:{units:'kg',unicode:'Ł😀'}});tx.objectStore('meta').put({key:'workout-draft:synthetic',id:'synthetic',token:'conflict',value:{kg:'12,',reps:''}});tx.oncomplete=r;tx.onabort=()=>j(tx.error)});db.close();localStorage.setItem('pushpull-note-ui-v1:unfinished','{raw unfinished');}""")
@@ -45,7 +45,7 @@ class CanonicalExportUI(BrowserHarness):
         self.context.close();self.context=self.new_context(service_workers='allow');self.page=self.context.new_page();self.page.on('dialog',self.dialog);self.page.goto(self.url)
         self.page.wait_for_selector('[data-act=start]');wait_for_service_worker_controller(self.page)
         self.plans('v2-owner-2026-10-22')
-        with self.page.expect_download():self.page.locator('[data-plan-activate]').click()
+        self.page.locator('[data-plan-activate]').click()
         expect(self.page.get_by_text('Plan aktywny dla przyszłych treningów',exact=True)).to_be_visible()
         self.page.locator('[data-tab=training]').click();self.start()
         self.page.locator('[data-expand]').first.click();open_result_panel(self.page)

@@ -1,4 +1,5 @@
 """Issue90: navigation is read-only, explicit operations retain full audit."""
+from test_browser import json_release
 from test_browser import BrowserHarness
 import test_fast_start
 from playwright.sync_api import expect
@@ -25,6 +26,7 @@ class LazyData(BrowserHarness):
             expect(self.page.locator('h1')).to_have_text(title)
             self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred&&!__fastDB.historyDeferred'))
 
+    @json_release
     def test_corrupt_archive_refuses_all_exports_and_drive_without_navigation_failure(self):
         self.prepare()
         self.page.evaluate("""async()=>{const a=await import('./model/journal-idb.mjs'),db=await a.connectV2('pushpull');try{await a.transact(db,['journalArchives','journalObjects'],'readwrite',async tx=>{const arc=await a.request(tx.objectStore('journalArchives').get('large-raw')),o=await a.request(tx.objectStore('journalObjects').get(arc.ref));tx.objectStore('journalObjects').put({...o,json:o.json+' '})})}finally{db.close()}}""")
@@ -38,6 +40,7 @@ class LazyData(BrowserHarness):
         self.assertGreaterEqual(len(self.alerts),5,self.alerts)
         self.assertTrue(self.page.evaluate('__fastDB.archivesDeferred'))
 
+    @json_release
     def test_cancel_before_operation_no_download_and_navigation_remains_available(self):
         self.prepare()
         self.page.evaluate("""()=>{const original=__fastDB.ensureFull;__fastDB.ensureFull=async()=>{await new Promise(r=>window.__releaseAudit=r);return original()}}""")
@@ -50,17 +53,19 @@ class LazyData(BrowserHarness):
         self.page.evaluate('__releaseAudit()');expect(self.page.locator('[data-full-audit]')).to_have_count(0,timeout=60000)
         self.assertFalse(downloads);self.assertFalse(self.alerts,self.alerts)
 
-    def test_explicit_backup_listing_and_export_preserve_complete_source(self):
-        self.prepare();self.page.locator('[data-tab=settings]').click()
-        self.advanced_data();self.page.locator('[data-load-backups]').click();expect(self.page.locator('[data-backup-export]')).to_be_visible(timeout=60000)
-        self.assertFalse(self.page.evaluate('__fastDB.archivesDeferred'))
-        self.backup_flow('save')
-        with self.page.expect_download() as item:self.legacy_control('[data-act=export]').click()
-        import json
+    def test_explicit_backup_listing_and_rescue_download_preserve_archive_bytes(self):
         from pathlib import Path
-        raw=Path(item.value.path()).read_text();self.assertIn('large-raw',raw)
+        self.prepare();self.page.locator('[data-tab=settings]').click()
+        undo=self.data_section('undo')
+        undo.locator('[data-load-backups]').click();expect(undo.locator('[data-backup-export]')).to_be_visible(timeout=60000)
+        self.assertFalse(self.page.evaluate('__fastDB.archivesDeferred'))
+        undo.locator('#backupKey').select_option('large-raw')
+        with self.page.expect_download() as item:undo.locator('[data-backup-export]').click()
+        self.assertEqual(item.value.suggested_filename,'pushpull-material-ratunkowy.json')
+        self.assertEqual(Path(item.value.path()).read_bytes(),('Ł😀"\n'*262144).encode())
         self.assertFalse(self.alerts,self.alerts)
 
+    @json_release
     def test_cancelled_file_selection_can_be_selected_again(self):
         self.prepare();self.page.locator('[data-tab=settings]').click()
         self.page.evaluate("""()=>{const original=__fastDB.ensureFull;__fastDB.ensureFull=async()=>{await new Promise(r=>window.__releaseAudit=r);return original()}}""")

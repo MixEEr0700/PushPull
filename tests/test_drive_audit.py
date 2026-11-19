@@ -10,6 +10,7 @@ import test_indexeddb as legacy
 
 
 class DriveAudit(BrowserHarness):
+    json_backup_ui = True
     configure = cloud.ManualDriveFlow.configure
     prepare = fast.FastStart.prepare
     records = legacy.IndexedDBMigration.records

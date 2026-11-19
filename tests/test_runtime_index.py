@@ -1,4 +1,5 @@
 """Stage E native reader / strict commands against independent full oracle."""
+from test_browser import json_release
 from test_browser import BrowserHarness,confirm_restore,open_result_panel
 import test_fast_start
 from playwright.sync_api import expect
@@ -117,6 +118,7 @@ class RuntimeIndex(BrowserHarness):
         }""")
         self.assertTrue(all(result.values()),result)
 
+    @json_release
     def test_restore_after_missing_root_immediately_supports_incremental_session_commands(self):
         self.prepare()
         raw=self.page.evaluate("""async()=>{const source=structuredClone(await __fastDB.auditExport());source.data.sessions.forEach(s=>s.status='done');source.data.activeId=null;
