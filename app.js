@@ -384,14 +384,30 @@ on('click',e=>{
  void draftCollector.collectDrafts({database,getMemory:()=>savedDrafts.readEvidence(),peers:draftObserver,signal:controller.signal}).then(result=>{draftReport={diagnostics:result.diagnostics,coverage:result.coverage};}).catch(error=>{draftCollectError=error.name==='AbortError'?'Anulowano.':'Nie odczytano stabilnego zestawu szkiców ('+(error.code||'source-error')+'). Niczego nie usunięto.';}).finally(()=>{draftCollecting=false;draftCollectController=null;render();});
 });
 let restoreCandidate=null,restoreError='',restoreBusy=false,restoreSequence=0,restoreSuccess='';
-let restoredNotice=null;try{restoredNotice=sessionStorage.getItem('pushpull-canonical-restored');if(restoredNotice)sessionStorage.removeItem('pushpull-canonical-restored')}catch{}if(restoredNotice){tab='settings';backupFlow='restore';try{const n=JSON.parse(restoredNotice);restoreSuccess='Przywrócono kopię i potwierdzono pełny odczyt. Treningi: '+n.sessions+' · Wyniki: '+n.results+' · Szkice: '+n.drafts+' · Bufory: '+n.buffers+' · Czas: '+n.ms+' ms. Poprzedni stan: Dane → Narzędzia serwisowe → Punkty cofnięcia.';}catch{}}
+let restoredNotice=null;try{restoredNotice=sessionStorage.getItem('pushpull-canonical-restored');if(restoredNotice)sessionStorage.removeItem('pushpull-canonical-restored')}catch{}if(restoredNotice){tab='settings';backupFlow='restore';try{const n=JSON.parse(restoredNotice);restoreSuccess='Przywrócono kopię i potwierdzono pełny odczyt. Treningi: '+n.sessions+' · Wyniki: '+n.results+' · Szkice: '+n.drafts+' · Bufory: '+n.buffers+' · Czas: '+n.ms+' ms. Poprzedni stan: Dane → Narzędzia serwisowe → Punkty cofnięcia.'+(drive?.automatic?' Połącz Google na tym urządzeniu, aby wznowić automatyczne kopie.':'');}catch{}}
 const backupAPI=await import('./model/legacy-model.mjs');
 function restoreResult(){return restoreSuccess?`<p class="hint" role="status" data-restore-success>${esc(restoreSuccess)}</p>`:'';}
+const restoreSectionLabels={
+ sessions:'Treningi',results:'Wyniki',snapshots:'Snapshoty treningów',sessionVersions:'Wersje przypisane do treningów',
+ plans:'Plany',planVersions:'Wersje planów',currentExercises:'Parametry ćwiczeń',planModel:'Model planów',
+ notes:'Notatki użytkownika',technique:'Zmiany techniki',journal:'Ustawienia i aktywacje dziennika',
+ other:'Pozostałe dane',drafts:'Szkice',buffers:'Bufory edycji',preferences:'Preferencje',drive:'Konfiguracja Drive'
+};
+function restoreReviewPanel(p){
+ const sections=p.review?.sections??(p.comparison?{sessions:p.comparison.sessions,results:p.comparison.results}:null);
+ if(!sections)return '';
+ const rows=Object.entries(sections).filter(([,r])=>r.localOnly||r.changed||r.copyOnly);
+ return `<section class="stack" data-restore-comparison><strong>Porównanie zawartości</strong>
+ ${rows.length?`<ul class="hint">${rows.map(([key,r])=>`<li><b>${restoreSectionLabels[key]}</b> · tylko lokalnie ${r.localOnly} · tylko w kopii ${r.copyOnly} · zmienione ${r.changed}</li>`).join('')}</ul>`:
+ `<p class="hint">${(p.review?.sameContent??p.comparison?.identical)?'Zawartość danych jest identyczna.':'Brak różnic w porównanych rekordach.'}</p>`}
+ ${p.risky?`<p class="hint warning" data-restore-warning>Wybrana kopia pomija lub zmienia lokalne dane. Przywrócenie jest zablokowane do czasu świadomej zgody na zastąpienie.</p>
+ <label><input type="checkbox" data-restore-allow-loss ${p.lossAccepted?'checked':''} ${restoreBusy?'disabled':''}> Zgadzam się zastąpić dane mimo pokazanych różnic</label>`:''}</section>`;
+}
 function restorePanel(){
  const p=restoreCandidate;
  const describe=(s,label)=>`<div><strong>${label}</strong>${s?`<p class="hint">Data kopii: ${s.createdAt?esc(new Date(s.createdAt).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'})):'nieustalona'}<br>Aktywny plan: ${esc(s.activePlan)}<br>Zapisane wersje (${s.plans.length}; kompletne: ${s.completePlans}): ${s.plans.map(x=>esc(x.label)+(x.complete?'':' (niekompletna)')).join(', ')||'brak pełnych wersji; szkielet źródłowy'}<br>Treningi: ${s.sessions} (zakończone: ${s.completed}, rozpoczęte: ${s.ongoing})<br>Wyniki: ${s.results} · Snapshoty: ${s.snapshots} · Aktywacje: ${s.activations}<br>Ostatnia data treningu: ${esc(s.latestSession||'brak')}</p>`:'<p class="hint warning">Baza nie została odczytana poprawnie. Jej dostępne dane zostaną zabezpieczone przed przywróceniem.</p>'}</div>`;
  const compact=(s,label)=>`<div><strong>${label}</strong><p class="hint">${s?`Plany: ${s.plans.length}<br>Treningi: ${s.sessions}<br>Wyniki: ${s.results}`:'Baza wymaga odzyskania'}</p></div>`;
- return `${restoreBusy?`<section class="stack" data-restore-flow tabindex="-1"><p class="hint" role="status" data-restore-busy>Trwa weryfikowanie lub przywracanie kopii… Poczekaj na potwierdzenie zakończenia.</p>${restoreCommitting?'':'<button class="btn" data-restore-cancel>Anuluj podgląd</button>'}</section>`:''}${restoreError?`<p class="hint warning" role="alert" data-restore-error>${esc(restoreError)}</p>`:''}${p?`<section class="stack" data-restore-preview data-restore-flow tabindex="-1"><h3>2. Podgląd przed przywróceniem</h3>${p.canonical?`<p class="hint" data-canonical-preview>Kopia zapasowa: historia, plany i ustawienia. Szkice: ${p.canonicalCounts.drafts} · Bufory: ${p.canonicalCounts.buffers}. Przed zastąpieniem utworzymy i zweryfikujemy punkt cofnięcia. Notatki: ${p.notes?.current??0} → ${p.notes?.incoming??0} (nowe ${p.noteDiff?.added??0}, usuwane ${p.noteDiff?.removed??0}, zmienione ${p.noteDiff?.changed??0}). Ustawienia: ${p.currentCounts?.preferences??0} → ${p.canonicalCounts.preferences}. Szkice lokalne: ${p.currentCounts?.drafts??0}; bufory lokalne: ${p.currentCounts?.buffers??0}.</p>`:p.format==='PPC1'?`<p class="hint" data-ppc1-preview>PPC1: zweryfikowano kontener i model. Archiwa: ${p.source.archives.length}. Archiwa raw pozostają nieinterpretowane. Zewnętrzne szkice i ustawienia nie są importowane; lokalne szkice pozostają na urządzeniu.</p>`:''}<div class="grid2">${compact(p.current,'Na tym urządzeniu')}${compact(p.summary,'W wybranej kopii')}</div>${p.canonical?'<p class="hint warning">Przywrócenie obejmie także szkice i ustawienia. Obecny stan pozostanie w oddzielnym punkcie ratunkowym. Historie nie zostaną scalone; stare kolejki Drive zostaną odłączone. Zamknij edycję w pozostałych kartach: nie można potwierdzić stanu kart, które nie odpowiadają. Punkt zabezpiecza utrwalone dane i bufory, nie nieznaną pamięć innych kart.</p>':'<p class="hint warning">Przywrócenie ZASTĄPI lokalną bazę — nie scala historii. Zachowamy kopię obecnej bazy.</p><p class="hint">Szkice pozostaną lokalnie; nie są zawarte w kopii i mogą wymagać osobnego odzyskania.</p>'}<strong>3. Potwierdź przywrócenie</strong><div class="grid2"><button class="btn primary" data-restore-confirm ${restoreBusy?'disabled':''}>Przywróć wybraną kopię</button><button class="btn" data-restore-cancel ${restoreBusy?'disabled':''}>Anuluj</button></div><details><summary class="btn">Szczegóły kopii i porównania</summary><div class="grid2">${describe(p.current,'Na tym urządzeniu')}${describe(p.summary,'W wybranej kopii')}</div>${p.comparison?`<p class="hint">${p.comparison.identical?'Zawartość danych jest identyczna.':`Zawartość danych jest różna. Tylko lokalnie: ${p.comparison.sessions.localOnly} treningów i ${p.comparison.results.localOnly} wyników. Tylko w kopii: ${p.comparison.sessions.copyOnly} treningów i ${p.comparison.results.copyOnly} wyników. Zmienione wpisy o tych samych ID: ${p.comparison.results.changed} wyników, ${p.comparison.sessions.changed} treningów.`}</p>`:''}<p class="hint">Data kopii nie gwarantuje, że zawiera nowsze lub pełniejsze dane.</p></details></section>`:''}`;
+ return `${restoreBusy?`<section class="stack" data-restore-flow tabindex="-1"><p class="hint" role="status" data-restore-busy>Trwa weryfikowanie lub przywracanie kopii… Poczekaj na potwierdzenie zakończenia.</p>${restoreCommitting?'':'<button class="btn" data-restore-cancel>Anuluj podgląd</button>'}</section>`:''}${restoreError?`<p class="hint warning" role="alert" data-restore-error>${esc(restoreError)}</p>`:''}${p?`<section class="stack" data-restore-preview data-restore-flow tabindex="-1"><h3>2. Podgląd przed przywróceniem</h3>${p.canonical?`<p class="hint" data-canonical-preview>Kopia zapasowa: historia, plany i ustawienia. Szkice: ${p.canonicalCounts.drafts} · Bufory: ${p.canonicalCounts.buffers}. Przed zastąpieniem utworzymy i zweryfikujemy punkt cofnięcia. Ustawienia: ${p.currentCounts?.preferences??0} → ${p.canonicalCounts.preferences}. Szkice lokalne: ${p.currentCounts?.drafts??0}; bufory lokalne: ${p.currentCounts?.buffers??0}.</p>`:p.format==='PPC1'?`<p class="hint" data-ppc1-preview>PPC1: zweryfikowano kontener i model. Archiwa: ${p.source.archives.length}. Archiwa raw pozostają nieinterpretowane. Zewnętrzne szkice i ustawienia nie są importowane; lokalne szkice pozostają na urządzeniu.</p>`:''}<div class="grid2">${compact(p.current,'Na tym urządzeniu')}${compact(p.summary,'W wybranej kopii')}</div>${p.canonical?'<p class="hint warning">Przywrócenie obejmie także szkice i ustawienia. Obecny stan pozostanie w oddzielnym punkcie ratunkowym. Przywrócenie zastępuje historię i odłącza stare kolejki Drive. Punkt zabezpiecza utrwalone dane i bufory. Przed przywróceniem zakończ edycję w pozostałych kartach, ponieważ aplikacja może sprawdzić tylko karty, które odpowiadają.</p>':'<p class="hint warning">Przywrócenie ZASTĄPI lokalną bazę — nie scala historii. Zachowamy kopię obecnej bazy.</p><p class="hint">Szkice pozostaną lokalnie; nie są zawarte w kopii i mogą wymagać osobnego odzyskania.</p>'}${restoreReviewPanel(p)}<strong>3. Potwierdź przywrócenie</strong><div class="grid2"><button class="btn primary" data-restore-confirm ${restoreBusy||p.risky&&!p.lossAccepted?'disabled':''}>Przywróć wybraną kopię</button><button class="btn" data-restore-cancel ${restoreBusy?'disabled':''}>Anuluj</button></div><details><summary class="btn">Szczegóły kopii i porównania</summary><div class="grid2">${describe(p.current,'Na tym urządzeniu')}${describe(p.summary,'W wybranej kopii')}</div><p class="hint">Data kopii nie gwarantuje, że zawiera nowsze lub pełniejsze dane.</p></details></section>`:''}`;
 }
 function focusRestore(){if(tab!=='settings'&&!recoveryError)return;const flow=document.querySelector('[data-restore-preview]')||document.querySelector('[data-restore-flow]');if(flow){flow.focus({preventScroll:true});flow.scrollIntoView({block:'start'});}}
 const drivePointDate=new Intl.DateTimeFormat('pl-PL',{dateStyle:'long',timeStyle:'short',timeZone:'Europe/Warsaw'});
@@ -404,7 +420,7 @@ function drivePointsPanel(){
   <button class="btn" data-restore-cancel>Zamknij listę</button></section>`;
 }
 
-async function inspectForRestore(raw,current,signal){
+async function inspectForRestore(raw,current,signal,starter){
  signal?.throwIfAborted();
  if(typeof Worker==='undefined'){if(raw instanceof Blob)throw Error('Podgląd PPC1 wymaga obsługi workerów. Nie zmieniono danych.');return backupAPI.inspectFullBackup(raw,current);}
  return new Promise((resolve,reject)=>{
@@ -414,7 +430,7 @@ async function inspectForRestore(raw,current,signal){
   signal?.addEventListener('abort',abort,{once:true});
   worker.onmessage=({data})=>{cleanup();data.error?reject(Error(data.error)):resolve(data.preview);};
   worker.onerror=()=>{cleanup();reject(Error('Nie udało się zweryfikować kopii. Nie zmieniono danych; spróbuj ponownie.'));};
-  try{worker.postMessage({raw,current});}catch(error){cleanup();reject(error);}
+  try{worker.postMessage({raw,current,starter});}catch(error){cleanup();reject(error);}
  });
 }
 function cancelRestore(){
@@ -427,17 +443,19 @@ function beginRestore(){
  const controller=new AbortController();restoreController=controller;
  return {sequence:restoreSequence,revision:database.revision,legacyRaw:database.raw,signal:controller.signal};
 }
-async function prepareRestore(file,op,{fromDrive=false}={}){
+async function prepareRestore(file,op){
  const {sequence,revision,legacyRaw,signal}=op;
  if(sequence!==restoreSequence)return;
  const preview=await inspectForRestore(file,null,signal);
  if(sequence!==restoreSequence)return;
  let candidate;
  if(preview.canonical){
+  if(database.error)throw Error('Przywracanie PPC1 wymaga zweryfikowanej bazy IndexedDB v2. '+database.error.message);
   const {exportCanonicalLocal}=await import('./model/canonical-export.mjs');
   const expected=(await exportCanonicalLocal({getRevision:canonicalCaptureRevision,signal})).file;
-  const detailed=await inspectForRestore(file,expected,signal);
-  candidate={raw:file,expected,...detailed,current:detailed.currentSummary,fromDrive};
+  const starterData=fresh(),starter={data:starterData,catalog:PushPullDB.catalogFor(starterData,null,true)};
+  const detailed=await inspectForRestore(file,expected,signal,starter);
+  candidate={raw:file,expected,starter,...detailed,current:detailed.currentSummary,risky:detailed.review?.risky??true};
  }else{
   // Existing compact and portable rescue files use the established importer.
   if(!recoveryError&&database.archivesDeferred){await database.ensureFull();data=database.value;}
@@ -445,7 +463,8 @@ async function prepareRestore(file,op,{fromDrive=false}={}){
   const current=database.value;
   const detailed=await inspectForRestore(file,current,signal);
   if(sequence===restoreSequence&&database.auditExport)await database.auditExport();
-  candidate={raw:file,...detailed,current:backupAPI.backupSummary(current)};
+  const comparison=detailed.comparison;
+  candidate={raw:file,...detailed,current:backupAPI.backupSummary(current),risky:!!comparison&&[comparison.sessions,comparison.results].some(row=>row.localOnly||row.changed)};
  }
  if(sequence!==restoreSequence)return;
  if(database.revision!==revision||database.raw!==legacyRaw)throw Error('Dane zmieniły się podczas odczytu kopii. Otwórz podgląd ponownie.');
@@ -714,16 +733,21 @@ function startLocalRestore(e){
  finally{if(op.sequence===restoreSequence)restoreController=null;e.target.value='';}
  })();
 }
+on('change',e=>{
+ if(!e.target.matches('[data-restore-allow-loss]')||!restoreCandidate||!e.target.isConnected)return;
+ restoreCandidate.lossAccepted=e.target.checked;
+ document.querySelector('[data-restore-confirm]').disabled=!restoreCandidate.lossAccepted;
+});
 on('click',async e=>{
  if(e.target.closest('[data-restore-cancel]')){render();return;}
  if(!e.target.closest('[data-restore-confirm]')||!restoreCandidate)return;
- const p=restoreCandidate;restoreCommitting=true;restoreBusy=true;restoreError='';render();
+ const p=restoreCandidate;if(p.risky&&!p.lossAccepted)return;restoreCommitting=true;restoreBusy=true;restoreError='';render();
  try{
   if(p.canonical){
    canonicalCaptureRevision();const peers=await draftObserver?.observe();if(peers?.some(p=>p.error))throw Error('Nie utrwalono edycji w innej karcie. Zachowaj jej szkice i wróć do podglądu.');
    if(database.revision!==p.revision||database.raw!==p.legacyRaw)throw Error('Dane zmieniły się od podglądu.');if(!confirm('ZASTĄPIĆ obecną historię, szkice i ustawienia wybraną kopią zapasową? Najpierw zweryfikujemy punkt cofnięcia. Historie nie zostaną scalone.'))return;drive?.pauseForRestore();
    const {restoreCanonicalFile}=await import('./model/canonical-restore.mjs');
-   const result=await restoreCanonicalFile(p.raw,{data:fresh(),catalog:PushPullDB.catalogFor(fresh(),null,true),allowDriveConnection:!!p.fromDrive,replace:true,revision:p.revision,expected:p.expected});
+   const result=await restoreCanonicalFile(p.raw,{starter:p.starter,previewLegacyRaw:p.legacyRaw,revision:p.revision,expected:p.expected,allowLoss:p.lossAccepted===true});
    try{sessionStorage.setItem('pushpull-canonical-restored',JSON.stringify(result))}catch{}location.reload();return;
   }
   await savedDrafts.flush();await savedDrafts.reload();
@@ -847,7 +871,7 @@ function startDriveRestore(button){
     drivePoints=points;restoreBusy=false;render();focusRestore();
    }else{
     const result=await drive.canonicalPoint(button.dataset.ppc1Point,{signal:op.signal,isCurrent});
-    if(isCurrent())await prepareRestore(result.file,op,{fromDrive:true});
+    if(isCurrent())await prepareRestore(result.file,op);
    }
   }catch(error){
    if(isCurrent()){restoreBusy=false;restoreError=error.message;render();focusRestore();}

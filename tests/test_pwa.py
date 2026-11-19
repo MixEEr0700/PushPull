@@ -65,8 +65,11 @@ class ArtifactBuild(unittest.TestCase):
         self.assertIn('Dziennik Treningowy',current['description'])
         for field in set(old)-{'name','short_name','description'}:
             self.assertEqual(current[field],old[field],field)
-        # The requested icon refresh must retain PWA identity and the project plan.
-        self.assertEqual((ROOT/'PushPull_PLAN_PROJEKTU_v1.md').read_bytes(),subprocess.check_output(['git','show',STAGE3+':PushPull_PLAN_PROJEKTU_v1.md'],cwd=ROOT))
+        # The approved Matrix and functional plan survive the icon refresh and
+        # later backup decisions. Backup policy below these sections may evolve.
+        plan='PushPull_PLAN_PROJEKTU_v1.md'
+        old_plan=subprocess.check_output(['git','show',STAGE3+':'+plan],cwd=ROOT).decode()
+        self.assertEqual((ROOT/plan).read_text().split('## Kolejność wdrożenia')[0],old_plan.split('## Kolejność wdrożenia')[0])
         for name in ['icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png']:
             self.assertNotEqual((ROOT/name).read_bytes(),subprocess.check_output(['git','show',STAGE3+':'+name],cwd=ROOT),name)
 

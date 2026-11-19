@@ -1,7 +1,7 @@
 """In-place canonical replacement + real rollback; isolated browser stores only."""
 from pathlib import Path
 from playwright.sync_api import expect
-from test_browser import BrowserHarness
+from test_browser import BrowserHarness,accept_restore_differences
 import test_canonical_restore_ui as old
 import test_indexeddb as native
 
@@ -22,7 +22,9 @@ class UsedRestore(BrowserHarness):
     def choose(self,p,raw):
         if p.locator('[data-backup-flow=restore]').get_attribute('aria-expanded')=='false':p.locator('[data-backup-flow=restore]').click()
         p.locator('#importFile').set_input_files({'name':'selected.ppc1','mimeType':'application/octet-stream','buffer':raw});expect(p.locator('[data-canonical-preview]')).to_be_visible(timeout=60000)
+        accept_restore_differences(p)
     def apply(self,p):
+        accept_restore_differences(p)
         p.locator('[data-restore-confirm]').click();expect(p.locator('[data-restore-success]')).to_be_visible(timeout=60000);p.reload();p.wait_for_selector('[data-tab=settings]')
     def test_used_profile_exact_replacement_cancel_and_actual_rollback(self):
         raw,ctx,p,before=self.used();original=native.IndexedDBMigration.records(self,p);self.choose(p,raw)

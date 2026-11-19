@@ -11,11 +11,11 @@ Zachowaj sesje, wyniki serii, notatki, statystyki i historię zmian techniki. St
 
 ## Kolejność
 1. Import i audyt zatwierdzonego kodu; dokumentacja uruchomienia i bazowe testy regresji.
-2. IndexedDB offline-first oraz eksport/import JSON z walidacją i odtworzeniem backupu.
+2. IndexedDB offline-first oraz zapis/przywracanie PPC1 z walidacją i odtworzeniem backupu.
 3. Weryfikacja parametrów V2 z dokumentem trenera wskazanym w specyfikacji; nie uznawaj wartości makietowych za dane treningowe.
 4. Testy regresji i trwałości danych.
 5. Dopiero po testach przygotowanie publikacji PWA przez HTTPS, manifestu i service workera, sprawdzenie na Androidzie.
-6. Synchronizacja Drive dopiero po stabilnym offline i backupach JSON.
+6. Kopie PPC1 w Google Drive korzystają ze stabilnego zapisu offline. Naprzemienna praca urządzeń odbywa się przez podgląd i zatwierdzone przywracanie.
 
 ## Weryfikacja przed publikacją
 - Start/zakończenie, wybór daty i rotacja PUSH A → PULL A → PUSH B → PULL B.
@@ -23,7 +23,7 @@ Zachowaj sesje, wyniki serii, notatki, statystyki i historię zmian techniki. St
 - Serie wspólne i indywidualne, back-offy, dodawanie/usuwanie serii i tonaż liczony z zapisanych serii.
 - Osobne wykresy i tabele, zachowanie ID i oznaczenie zmian techniki.
 - Trwałość po ponownym uruchomieniu, działanie offline, aktualizacja PWA bez utraty danych.
-- Eksport/import JSON, odrzucanie wadliwych danych bez uszkodzenia obecnej bazy, przywracanie kopii.
+- Zapis/przywracanie PPC1, odrzucanie wadliwych danych bez uszkodzenia obecnej bazy, przywracanie kopii.
 - Zgodność interfejsu z zatwierdzonym wzorcem na telefonie.
 
 Po każdym zadaniu podaj: co zmieniono, co zachowano, rzeczywiście wykonane testy i wyniki, ograniczenia. Nie deklaruj gotowości na podstawie samej implementacji. Dopasuj narzędzia, build i CI do otrzymanego kodu; nie zgaduj stosu technologicznego.

@@ -1,5 +1,5 @@
 """Local PPC1 confirmation uses the existing native transaction and no cloud path."""
-from test_browser import BrowserHarness,wait_for_service_worker_controller,ROOT
+from test_browser import BrowserHarness,wait_for_service_worker_controller,accept_restore_differences,ROOT
 import test_indexeddb as legacy
 from playwright.sync_api import expect
 import base64
@@ -24,6 +24,7 @@ class CompactRestore(BrowserHarness):
         self.assertEqual(self.records(),before);self.assertEqual(self.page.evaluate('({...localStorage})'),local)
         for w in (360,390,412):
             self.page.set_viewport_size({'width':w,'height':844});self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+        expect(self.page.locator('[data-restore-confirm]')).to_be_disabled();accept_restore_differences(self.page)
         self.page.evaluate(legacy.PAUSE);self.page.locator('[data-restore-confirm]').click();self.page.wait_for_function('window.__held===true',timeout=60000)
         expect(self.page.locator('[data-restore-success]')).to_have_count(0);self.page.evaluate('__hold=false')
         expect(self.page.locator('[data-restore-success]')).to_be_visible(timeout=60000)
@@ -44,12 +45,15 @@ class CompactRestore(BrowserHarness):
         legacy.IndexedDBMigration.prepare(self);payload=self.make_file();self.open_file(payload);expect(self.page.locator('[data-ppc1-preview]')).to_be_visible(timeout=60000)
         before=self.records();local=self.page.evaluate('({...localStorage})')
         self.page.evaluate("""()=>{window.originalPPCPut=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(...a){if(this.name==='journalState')throw new DOMException('test quota','QuotaExceededError');return originalPPCPut.apply(this,a)}}""")
+        accept_restore_differences(self.page)
         self.page.locator('[data-restore-confirm]').click();expect(self.page.locator('[data-restore-error]')).to_be_visible(timeout=60000);self.assertEqual(self.records(),before);self.assertEqual(self.page.evaluate('({...localStorage})'),local)
         self.page.evaluate('()=>{IDBObjectStore.prototype.put=originalPPCPut}')
         self.open_file(payload);expect(self.page.locator('[data-ppc1-preview]')).to_be_visible(timeout=60000)
         self.page.evaluate("""()=>{IDBObjectStore.prototype.put=function(...a){if(this.name==='journalState'){this.transaction.abort();throw new DOMException('test abort','AbortError')}return originalPPCPut.apply(this,a)}}""")
+        accept_restore_differences(self.page)
         self.page.locator('[data-restore-confirm]').click();expect(self.page.locator('[data-restore-error]')).to_be_visible(timeout=60000);self.assertEqual(self.records(),before);self.assertEqual(self.page.evaluate('({...localStorage})'),local)
         self.page.evaluate('()=>{IDBObjectStore.prototype.put=originalPPCPut}')
         self.open_file(payload);expect(self.page.locator('[data-ppc1-preview]')).to_be_visible(timeout=60000)
+        accept_restore_differences(self.page)
         self.page.evaluate("""async()=>{window.BroadcastChannel=undefined;const h=await PushPullDB.open(()=>{});try{const d=h.value;d.concurrentPPC=true;await h.commit(d)}finally{h.close()}}""")
         changed=self.records();self.page.locator('[data-restore-confirm]').click();expect(self.page.locator('[data-restore-error]')).to_contain_text('zmieni',timeout=60000);expect(self.page.locator('[data-restore-success]')).to_have_count(0);self.assertEqual(self.records(),changed);self.assertEqual(self.page.evaluate('({...localStorage})'),local)

@@ -33,7 +33,7 @@ Przed oddaniem aplikacji do codziennego użytku zweryfikować w nim nazwy ćwicz
 
 ### 2. Trwała baza danych
 - IndexedDB offline-first: ćwiczenia, plany i ich wersje, sesje, serie, notatki, historia zmian.
-- Eksport i import JSON z walidacją i możliwością odtworzenia backupu.
+- Zapis i przywracanie PPC1 z walidacją i punktem cofnięcia. Od PR #171 PPC1 jest jedynym formatem kopii użytkownika. Wewnętrzny odczyt starszych struktur pozostaje potrzebny do obsługi istniejącej bazy i materiału ratunkowego.
 - Nigdy nie traktować samej pamięci przeglądarki jako bezpiecznej kopii zapasowej.
 
 ### 3. Weryfikacja rzeczywistego planu V2
@@ -47,14 +47,14 @@ Przed oddaniem aplikacji do codziennego użytku zweryfikować w nim nazwy ćwicz
 - Hosting HTTPS (np. GitHub Pages), manifest i service worker; instalacja na Androidzie; testy na realnym telefonie.
 
 ### 6. Google Drive
-- Dopiero po stabilnym działaniu offline i kopiach JSON wdrożyć synchronizację/kopie na Drive, autoryzację, rozwiązywanie konfliktów i odtwarzanie po zmianie telefonu.
+- Google Drive przechowuje ręczne i automatyczne punkty PPC1. Aplikacja potwierdza zapis po zweryfikowanym odczycie. Drugie urządzenie otwiera wybrany punkt, porównuje zawartość z lokalnym stanem i przywraca po potwierdzeniu. Rozbieżność wymagająca zastąpienia lokalnych danych wymaga dodatkowej zgody.
 
 ## Warunki gotowości do codziennego użytkowania
 
 - Zapisane treningi i serie przetrwają zamknięcie i uruchomienie aplikacji.
 - Edycja historii nie powoduje duplikatów ani błędów rotacji.
 - Obliczenia bazują na rzeczywistych danych; braki danych są jawnie sygnalizowane.
-- Działa offline oraz eksport i odtwarzanie kopii JSON.
+- Działa offline oraz zapis i odtwarzanie kopii PPC1.
 - Plan V2 jest zweryfikowany z dokumentem trenera.
 - Aktualizacje nie kasują danych.
 

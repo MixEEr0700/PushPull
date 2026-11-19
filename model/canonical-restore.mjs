@@ -3,11 +3,13 @@ import {LOCAL_RESTORE_KEY,pendingCanonicalRestore} from './canonical-restore-gat
 export async function restoreCanonicalFile(file,baseline){
  if(baseline.recovery){const p=await pendingCanonicalRestore({databaseOnly:true});if(p?p.id!==baseline.recovery:localStorage.getItem(LOCAL_RESTORE_KEY)!==baseline.recovery)throw Error('Brak własnej przerwanej operacji. Użyj zwykłego podglądu punktu cofnięcia.');}
  const original=localCanonicalBuffers(baseline.recovery??null);
- if((!baseline.replace&&!baseline.recovery&&original.length)||localStorage.getItem('pushpull_skeleton_v1')!==null)throw Error('Przywracanie wymaga czystego profilu bez buforów i starej historii.');
+ const {previewLegacyRaw,...workerBaseline}=baseline;
+ const legacyRaw=localStorage.getItem('pushpull_skeleton_v1');
+ if(!baseline.recovery&&previewLegacyRaw!==legacyRaw)throw Error('Stary zapis zmienił się od podglądu. Otwórz podgląd ponownie.');
  return new Promise((resolve,reject)=>{
   const w=new Worker(new URL('./canonical-restore-worker.mjs',import.meta.url),{type:'module'});let id=null,claimed=!!baseline.recovery,dirty=false,settled=false;const owner=localStorage.getItem('pushpull_indexeddb_owner');
   const keepClosed=()=>{try{if(id&&!localStorage.getItem(LOCAL_RESTORE_KEY))localStorage.setItem(LOCAL_RESTORE_KEY,id)}catch{}};
-  const checkAnchor=()=>{if(localStorage.getItem('pushpull_skeleton_v1')!==null||localStorage.getItem('pushpull_indexeddb_owner')!==owner)throw Error('Zmieniono kotwicę lokalnego profilu.');};
+  const checkAnchor=()=>{if(localStorage.getItem('pushpull_skeleton_v1')!==legacyRaw||localStorage.getItem('pushpull_indexeddb_owner')!==owner)throw Error('Zmieniono kotwicę lokalnego profilu.');};
   const changed=e=>{if(e.storageArea===localStorage&&(e.key===null||e.key.startsWith('pushpull')))dirty=true;};addEventListener('storage',changed);
   const stop=async(error,result)=>{if(settled)return;settled=true;clearTimeout(timer);w.terminate();removeEventListener('storage',changed);
    if(error){if(claimed)keepClosed();try{if(id&&!claimed&&!await pendingCanonicalRestore({databaseOnly:true})&&localStorage.getItem(LOCAL_RESTORE_KEY)===id)localStorage.removeItem(LOCAL_RESTORE_KEY);}catch{}reject(error);return;}
@@ -17,11 +19,11 @@ export async function restoreCanonicalFile(file,baseline){
   w.onerror=()=>void stop(Error('Przerwano worker restore. Sprawdź stan pending.'));
   w.onmessage=({data})=>{
    if(settled)return;
-   if(data.reserve){try{if(JSON.stringify(localCanonicalBuffers(baseline.recovery??null))!==JSON.stringify(original)||localStorage.getItem('pushpull_skeleton_v1')!==null)throw Error('Cel localStorage zmienił się.');id=data.reserve;localStorage.setItem(LOCAL_RESTORE_KEY,id);w.postMessage({reserveOK:true});}catch{w.postMessage({reserveOK:false});}return;}
+   if(data.reserve){try{checkAnchor();if(dirty||JSON.stringify(localCanonicalBuffers(baseline.recovery??null))!==JSON.stringify(original))throw Error('Cel localStorage zmienił się.');id=data.reserve;localStorage.setItem(LOCAL_RESTORE_KEY,id);w.postMessage({reserveOK:true});}catch{w.postMessage({reserveOK:false});}return;}
    if(data.claimed){claimed=true;return;}
    if(data.local){try{checkAnchor();if(dirty||localStorage.getItem(LOCAL_RESTORE_KEY)!==id||JSON.stringify(localCanonicalBuffers(id))!==JSON.stringify(original))throw Error('Konflikt celu');for(const row of original)localStorage.removeItem(row.key);for(const row of data.local){if(localStorage.getItem(row.key)!==null)throw Error('Konflikt bufora');localStorage.setItem(row.key,row.raw);}const actual=localCanonicalBuffers(id);if(JSON.stringify(actual)!==JSON.stringify([...data.local].sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:0)))throw Error('Odczyt buforów różni się.');w.postMessage({localOK:true});}catch{w.postMessage({localOK:false});}return;}
    void stop(data.error?Error(data.error):null,data.result);
   };
-  w.postMessage({file,baseline:{...baseline,buffers:original}});
+  w.postMessage({file,baseline:{...workerBaseline,buffers:original,legacyRaw}});
  });
 }
