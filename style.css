@@ -87,6 +87,10 @@ button:focus-visible,summary:focus-visible{outline:2px solid #39ff74;outline-off
 .nav-icon{width:23px;height:23px;flex-shrink:0}
 
 /* Final Compact Matrix polish: only exercise cards and their result controls. */
+[data-active-workout] .exercise-card:has(> .exercise-heading > [data-expand][aria-expanded="true"]){
+ background:#131b15;
+ border-color:#375a40;
+}
 .exercise-heading{display:flex;align-items:flex-start;gap:4px}
 .exercise-heading .exercise-toggle{flex:1;min-width:0}
 .exercise-toggle .num{width:38px;height:38px;font-size:22px;background:#176b45;color:#fff}
