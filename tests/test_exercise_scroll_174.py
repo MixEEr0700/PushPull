@@ -58,12 +58,23 @@ class ExerciseScroll174(BrowserHarness):
         header = self.page.locator('[data-expand]').nth(2)
         card = header.locator('xpath=ancestor::section[1]')
         colors = lambda: card.evaluate("(el)=>{const s=getComputedStyle(el);return [s.backgroundColor,s.borderTopColor,s.borderTopWidth]}")
-        closed, height = colors(), header.bounding_box()['height']
+        closed = colors()
         self.toggle_at(header,180,True)
         opened = colors()
         self.assertNotEqual(closed[:2],opened[:2])
         self.assertEqual(closed[2],opened[2])
-        self.assertEqual(header.bounding_box()['height'],height)
+        # The existing expanded layout can wrap its title beside the note button.
+        # Compare the very same DOM with and without the active-workout colors.
+        with_style, without_style = card.evaluate("""el=>{
+            const workout = el.closest('[data-active-workout]');
+            const id = workout.dataset.activeWorkout;
+            const size = ()=>[el.offsetWidth,el.offsetHeight,el.querySelector('[data-expand]').offsetHeight];
+            const styled = size();
+            delete workout.dataset.activeWorkout;
+            try{return [styled,size()];}
+            finally{workout.dataset.activeWorkout=id;}
+        }""")
+        self.assertEqual(with_style,without_style)
         open_result_panel(card)
         editor = card.locator('.performanceForm')
         kg = editor.locator('[data-quick=kg]')
