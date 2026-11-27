@@ -1,5 +1,12 @@
 # Issue #36 — ostatnia zmiana zapisanego wyniku
 
+## Punkt kontrolny po PR #177 — 27.11.2026
+
+- [PR #177](https://github.com/MixEEr0700/PushPull/pull/177) zatwierdzono dla `e4bd686cae5c1803b3fa787faebe8b15d690b7c5`. Tag `checkpoint-pr177` wskazuje commit scalenia `e1db0d84796beebdb53a176f47a91b687d0944ad`.
+- [CI przed scaleniem](https://github.com/MixEEr0700/PushPull/actions/runs/45995745108) zakończyło się sukcesem. Przeszło 359 testów Node, 371 testów regresyjnych Python/Chromium/PWA, build i kontrola hashy.
+- [Vercel](https://vercel.com/mixeer-4437/pushpull/Fg9aAXXw89pphvNWZcJUVRUDhfvd) zgłosił zakończenie wdrożenia commitu scalenia. Identyfikator paczki to `251e29aa206871423da9b388`. Proxy środowiska Codex zwróciło HTTP 403 przy bezpośrednim odczycie produkcyjnego service workera.
+- Chromium potwierdził aktualizację na danych syntetycznych między dokładnymi buildami `17a8a83bab26a4f83611903c` i `251e29aa206871423da9b388`. Nowy worker czekał do zamknięcia starej karty, następnie przejął kontrolę. Po ponownym uruchomieniu offline stan danych był identyczny. Odbiór na fizycznym telefonie pozostaje po stronie użytkownika.
+
 ## Punkt kontrolny po PR #176 — 27.11.2026
 
 Na karcie treningu „Ostatnia zmiana” pokazuje wiek ostatniego zapisanego znacznika z funkcji „Oznacz zmianę”. Zapis dzisiejszego znacznika aktualizuje komunikat również podczas aktywnej sesji. Edycja historyczna domyślnie używa daty sesji. Gdy ćwiczenie nie ma znacznika właściwego dla bieżącej daty, obowiązuje licznik zakończonych sesji opisany poniżej.
