@@ -11,6 +11,12 @@ Zaakceptowane ograniczenie porównania. Aplikacja porównuje rodzaj i opis z ost
 - [Vercel](https://vercel.com/mixeer-4437/pushpull/8M7yZfkQmihXKXrEHTXoEG6zfG1e) potwierdził zakończenie wdrożenia commitu scalenia. Identyfikator jego paczki PWA to `17a8a83bab26a4f83611903c`. Bezpośredni odczyt produkcyjnego adresu przez środowisko Codex został zablokowany przez proxy HTTP 403.
 - Chromium potwierdził aktualizację dokładnych buildów z `4f01237937a29f6b166e0b9f` do `17a8a83bab26a4f83611903c`. Nowy worker pozostał w stanie oczekiwania do zamknięcia starej karty, po czym przejął kontrolę i działał offline z identycznymi danymi testowymi. Odbiór zainstalowanej PWA na fizycznym telefonie pozostaje do wykonania przez użytkownika.
 
+## Zmiana wyniku w aktywnej sesji
+
+Pierwszy zapis w sesji porównuje serie z poprzednim porównywalnym wynikiem tej pozycji. Kolejny zapis porównuje je z utrwalonym wynikiem bieżącej sesji. Różnica ciężaru, powtórzeń, struktury albo wartości poszczególnych serii utrwala datę w tym samym rekordzie wyniku. Liczy się dopiero potwierdzony zapis. Powtórzenie tych samych wartości, również w innym formacie liczbowym, zachowuje wcześniejszą datę. Pierwszy wynik bez punktu odniesienia stanowi bazę porównania.
+
+W aktywnej sesji karta prezentuje nowszą datę zmiany wyniku lub znacznika techniki. Zapis aktywny używa lokalnego dnia, a korekta wyniku z kalendarza używa daty sesji. Po zakończeniu nadal działa licznik sesji opisany poniżej oraz znaczniki techniki. Pole daty zmiany wyniku jest opcjonalne, zachowywane przez PPC1 i nie wymaga migracji IndexedDB ani przerabiania istniejących wyników.
+
 ## Pierwotny licznik wieku zapisanego wyniku
 
 Baza: `main` po PR #37 (`fd708b0`). Zmiana wyłącznie odczytu/prezentacji; bez migracji i nowego pola bazy.

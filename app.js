@@ -221,8 +221,17 @@ function refreshSeriesForm(form,d,rows=true){if(rows){form.querySelector('.serie
 let statMetric='tonnage';const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function persist(){try{await database.commit(data);data=database.value;journalAPI=data.trainingJournal?journal:null;}catch(error){data=database.value||fresh();journalAPI=data.trainingJournal?await import('./model/journal.mjs'):null;data.changes ||= {};throw error}}
 async function persistResult(entry){
- if(!database.saveResult){if(data.entries.some(e=>e.id===entry.id))data.entries=data.entries.map(e=>e.id===entry.id?entry:e);else data.entries.push(entry);await persist();return;}
- const ack=await database.saveResult({sessionId:entry.sessionId,exerciseId:entry.exerciseId,entry,...database.resultContext(entry.sessionId,entry.exerciseId)});
+ const resultDate=today();
+ if(!database.saveResult){
+  const s=data.sessions.find(s=>s.id===entry.sessionId),old=data.entries.find(e=>e.id===entry.id);
+  const previous=old??entriesFor(entry.exerciseId).find(e=>{
+   const prior=data.sessions.find(s=>s.id===e.sessionId);
+   return prior.status==='done'&&journal.calendarOrder(s,prior)<0&&e.journalPositionId===entry.journalPositionId&&e.journalVariantId===entry.journalVariantId;
+  });
+  if(performanceAPI.resultChanged(data,entry,previous))entry.resultChangedOn=s.status==='active'?resultDate:s.date;
+  if(old)data.entries=data.entries.map(e=>e.id===entry.id?entry:e);else data.entries.push(entry);await persist();return;
+ }
+ const ack=await database.saveResult({sessionId:entry.sessionId,exerciseId:entry.exerciseId,entry,resultDate,...database.resultContext(entry.sessionId,entry.exerciseId)});
  const index=data.entries.findIndex(e=>e.id===ack.entry.id);if(index<0)data.entries.push(structuredClone(ack.entry));else data.entries[index]=structuredClone(ack.entry);
 }
 function toast(msg,detail=''){document.querySelector('.toast')?.remove();let e=document.createElement('div');e.className='toast';if(detail)e.innerHTML='<span>'+esc(msg)+'</span><div class="small">'+esc(detail)+'</div>';else e.textContent=msg;document.body.append(e);clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.remove(),2400)}
@@ -247,9 +256,13 @@ function resultSummary(entry, suffix='',compact=false){
 function cardResult(entry,exerciseId){
  const result=resultSummary(entry,'',true),date=today();
  const marker=performanceAPI.latestExerciseChange(data.changes[exerciseId],date);
+ const changedOn=data.activeId&&(entry?.sessionId===data.activeId?entry:data.entries.find(e=>e.sessionId===data.activeId&&e.exerciseId===exerciseId))?.resultChangedOn;
  if(!entry&&!marker)return result;
  let label,title;
- if(marker){
+ if(changedOn&&changedOn<=date&&(!marker||changedOn>marker.date)){
+  label=performanceAPI.exerciseChangeLabel(changedOn,date);
+  title=changedOn+' · Zmiana zapisanego wyniku w bieżącym treningu';
+ }else if(marker){
   label=performanceAPI.exerciseChangeLabel(marker.date,date);
   title=marker.date+' · '+marker.kind+': '+marker.text;
  }else{
@@ -662,7 +675,10 @@ function draftEntry(record){
  else {if(record.kind!=='legacy')throw Error('Niezgodny rodzaj szkicu.');entry.series=structuredClone(record.value.series);for(const [i,r] of entry.series.entries()){r.kg=String(r.kg).trim().replace(',','.');r.reps=String(r.reps).trim();if(!/^\d+(\.\d+)?$/.test(r.kg)||!Number.isFinite(Number(r.kg))||!/^[1-9]\d*$/.test(r.reps)||!Number.isSafeInteger(Number(r.reps)))throw Error('Seria '+(i+1)+': uzupełnij kg i powtórzenia.');}if(!entry.series.length)throw Error('Brak serii.');}
  entry.kg=entry.series[0].kg;entry.reps=entry.series[0].reps;
  if(journalAPI)journalAPI.recordEntry(data,entry);
- const current=data.entries.find(e=>e.sessionId===s.id&&e.exerciseId===ex.id),already=!!current&&performanceAPI.sameResult(current,entry);
+ const current=data.entries.find(e=>e.sessionId===s.id&&e.exerciseId===ex.id);
+ // The durable write may have added a change date to this same draft result.
+ if(current?.resultChangedOn)entry.resultChangedOn=current.resultChangedOn;
+ const already=!!current&&performanceAPI.sameResult(current,entry);
  if(!already&&!savedDrafts.compatible(record,binding))throw Error('Konflikt szkicu z zatwierdzonym wynikiem.');
  return {record,entry,already};
 }

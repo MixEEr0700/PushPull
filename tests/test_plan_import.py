@@ -91,7 +91,7 @@ class PlanImport(BrowserHarness):
         self.assertEqual(self.records(),before)
         self.page.locator('[data-act=start]').click();f=self.form('TEST-1');self.fill(f)
         f.locator('[data-row="0"][data-field=kg]').fill('10');self.save(f)
-        expect(card('TEST-1').locator('[data-result-change]')).to_contain_text('2 sesje temu')
+        expect(card('TEST-1').locator('[data-result-change]')).to_contain_text('dziś')
         self.page.locator('[data-act=finish]').click();self.page.locator('[data-type="TEST-A"]').click()
         expect(card('TEST-1').locator('[data-result-change]')).to_contain_text('1 sesję temu')
         # The third completed session now contains an actual repeated TEST-2 result.

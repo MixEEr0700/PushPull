@@ -81,16 +81,20 @@ class FinishPairs(BrowserHarness):
         self.assertEqual(self.state()['entries'],before['entries']);self.assertFalse(self.drafts())
 
     def test_abort_second_result_retains_all_drafts_and_restart_retry_is_idempotent(self):
-        self.activate();f=self.open_result('PUSH A','PUSH-A-1');self.fill(f)
+        self.activate();f=self.open_result('PUSH A','PUSH-A-1');self.fill(f);self.save_form(f)
+        self.page.locator('[data-act=finish]').click();expect(self.page.locator('[data-act=start]')).to_be_visible()
+        f=self.open_result('PUSH A','PUSH-A-1');self.fill(f);f.locator('[data-quick=kg]').fill('45')
         self.page.locator('[data-expand="PUSH-A-2"]').click();self.fill(self.page.locator('.performanceForm'))
         before=self.state();drafts=self.drafts();self.finish_panel()
         self.page.evaluate('''id=>{window.failResultId=id;for(const method of ['add','put']){const original=IDBObjectStore.prototype[method];IDBObjectStore.prototype[method]=function(v,...rest){if(this.name==='journalResults'&&v.id===window.failResultId){window.failedSecond=true;this.transaction.abort();}return original.call(this,v,...rest)}}}''','draft-result-'+next(d['id'] for d in drafts if d['exerciseId']=='PUSH-A-2'))
         self.page.locator('[data-finish-save]').click();expect(self.page.locator('[data-finish-panel] [role=alert]')).to_be_visible()
         self.assertTrue(self.page.evaluate('window.failedSecond===true'));self.assertEqual(len(self.drafts()),2);self.assertEqual(self.state()['activeId'],before['activeId'])
         self.assertEqual(len(self.state()['entries']),len(before['entries'])+1)
+        partial=self.state()['entries'][-1];self.assertEqual(partial['resultChangedOn'],'2026-10-21')
         self.page.reload();self.ready();self.finish_panel();self.page.locator('[data-finish-save]').click()
         expect(self.page.locator('[data-act=start]')).to_be_visible();after=self.state()
         self.assertEqual(len(after['entries']),len(before['entries'])+2);self.assertEqual(after['entries'][:-2],before['entries']);self.assertFalse(self.drafts())
+        self.assertIn(partial,after['entries'])
 
     def test_large_equal_rows_after_individual_editor_add_and_offline_finish(self):
         self.context=self.new_context(service_workers='allow');self.page=self.context.new_page();self.page.on('dialog',self.dialog)

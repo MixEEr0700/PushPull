@@ -36,6 +36,7 @@ function validateV1(x) {
     if (e.series!=null) check(Array.isArray(e.series) && e.series.length>0 && e.series.every(r=>record(r) && number(r.kg) && number(r.reps,true) && Number.isFinite(Number(r.kg)*Number(r.reps))), 'legacy series');
     if (e.series?.length) check(Number(e.kg)===Number(e.series[0].kg) && Number(e.reps)===Number(e.series[0].reps), 'legacy first series');
     for (const key of ['createdAt','correctedAt']) if (e[key]!==undefined) check(text(e[key]) && Number.isFinite(Date.parse(e[key])), 'legacy result timestamp');
+    if (e.resultChangedOn!==undefined) check(date(e.resultChangedOn), 'legacy result change date');
     entries.add(e.id);pairs.add(pair);
   }
   if (x.changes!==undefined) {

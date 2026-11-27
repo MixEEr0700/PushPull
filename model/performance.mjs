@@ -42,12 +42,12 @@ export function newPerformance(ex,previous){
 // today's plan, technique markers or a flattened summary of a structured result.
 // legacyIndex preserves the authenticated v1 derived-index representation only.
 // User-facing comparisons always use the corrected default. No history rewrite.
-export function comparison(data,entry,{legacyIndex=false}={}){
+export function comparison(data,entry,{legacyIndex=false,allowUnknownLoad=false}={}){
  const snap=data.trainingJournal?.sessionSnapshots.find(s=>s.sessionId===entry.sessionId);
  if(!snap||snap.id!==entry.journalSnapshotId)return null;
  const p=snap.model.positions.find(p=>p.id===entry.journalPositionId),variant=snap.model.variants.find(v=>v.id===entry.journalVariantId);
  const performance=entry.performance,load=performance?.loadConvention;
- if(!p||!variant||p.exerciseId!==entry.exerciseId||p.variantId!==variant.id||variant.exerciseId!==entry.exerciseId||p.planVersionId!==snap.planVersionId||p.unitId!==snap.unitId||!load?.unit||!load.basis)return null;
+ if(!p||!variant||p.exerciseId!==entry.exerciseId||p.variantId!==variant.id||variant.exerciseId!==entry.exerciseId||p.planVersionId!==snap.planVersionId||p.unitId!==snap.unitId||!load?.unit||!load.basis&&!(allowUnknownLoad&&load.basis===null))return null;
  if(load.unit!==p.loadConvention.unit||p.loadConvention.basis!==null&&load.basis!==p.loadConvention.basis&&performance.conventionExplicit!==true)return null;
  if(performance.version!==2||!Array.isArray(performance.rows)||!performance.rows.length||!snap.model.planVersions.some(v=>v.id===snap.planVersionId&&v.executionVersion===2))return null;
  const targets=snap.model.sets.filter(t=>t.positionId===p.id).slice().sort((a,b)=>a.order-b.order);
@@ -63,7 +63,6 @@ export function comparison(data,entry,{legacyIndex=false}={}){
  for(const a of sideGroups.values()){if(a.includes('both')&&a.length!==1)return null;if((a.includes('left')||a.includes('right'))&&(a.length!==2||a.filter(s=>s==='left').length!==1||a.filter(s=>s==='right').length!==1))return null;}
  }
  if(paired&&(extra.length!==2||extra.filter(r=>r.side==='left').length!==1||extra.filter(r=>r.side==='right').length!==1))return null;
- const number=s=>String(s).replace(/^0+(?=\d)/,'').replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
  const rows=[],bindings=new Set();
  for(const r of performance.rows){
   const target=targets.find(t=>t.id===r.setId),group=snap.model.groups.find(g=>g.id===r.groupId),drop=!!target&&snap.model.drops.some(d=>d.setId===target.id)||userDrop(r);
@@ -73,10 +72,22 @@ export function comparison(data,entry,{legacyIndex=false}={}){
   if(!Array.isArray(r.segments)||!r.segments.length||!drop&&r.segments.length!==1)return null;
   if(r.segments.some(s=>typeof s.kg!=='string'||typeof s.reps!=='string'||!(/^\d+(\.\d+)?$/.test(s.kg))||!Number.isFinite(Number(s.kg))||!/^[1-9]\d*$/.test(s.reps)||!Number.isSafeInteger(Number(s.reps))))return null;
   rows.push({order:target?targets.indexOf(target):targets.length+(paired?0:extra.indexOf(r)),side:r.side,
-   value:[target?.role??null,drop,group?.kind??null,r.round,r.segments.map(s=>[number(s.kg),number(s.reps)])]});
+   value:[target?.role??null,drop,group?.kind??null,r.round,r.segments.map(s=>[measurementNumber(s.kg),measurementNumber(s.reps)])]});
  }
  rows.sort((a,b)=>a.order-b.order||String(a.side).localeCompare(String(b.side)));
  return {context,value:canonical(rows.map(r=>[r.side,r.value]))};
+}
+const measurementNumber=s=>String(s).replace(/^0+(?=\d)/,'').replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
+
+// Compare saved measurements without counting a result in the completed-session age.
+export function resultChanged(data,entry,previous){
+ if(!previous||entry.exerciseId!==previous.exerciseId||entry.journalPositionId!==previous.journalPositionId||entry.journalVariantId!==previous.journalVariantId)return false;
+ if(entry.performance||previous.performance){
+  const a=comparison(data,entry,{allowUnknownLoad:true}),b=comparison(data,previous,{allowUnknownLoad:true});
+  return !!a&&!!b&&a.context===b.context&&a.value!==b.value;
+ }
+ const rows=e=>(e.series?.length?e.series:[e]).map(r=>[measurementNumber(r.kg),measurementNumber(r.reps)]);
+ return canonical(rows(entry))!==canonical(rows(previous));
 }
 // The explicit technique/setup markers also feed the exercise charts.
 export function latestExerciseChange(changes,throughDate){

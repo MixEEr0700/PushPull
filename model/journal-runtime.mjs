@@ -7,7 +7,7 @@ import {transact,request,same,MARKER,readRecords} from './journal-idb.mjs';
 import * as journal from './journal.mjs';
 import {validateSessionSnapshot} from './training-model.mjs';
 import {prepareLegacyBackup} from './legacy-backup.mjs';
-import {comparison,resultChangeAge} from './performance.mjs';
+import {comparison,resultChanged,resultChangeAge} from './performance.mjs';
 import {editUserNote} from './v2-plan.mjs';
 const proofs=new WeakMap();
 function sessionData(source,{starting=false}={}){
@@ -224,19 +224,39 @@ export async function openIndexedWriter(db,{token,guard=()=>{},signal,completeSo
  async function saveResult(command,options={}){
   portable(command);const cmd=protocolInput(command);
   return change(async({collection,putNew,index,before})=>{
-   const e=cmd.entry,d=source.data,oldId=await r.runtime('pair',cmd.sessionId,cmd.exerciseId),old=oldId?await r.collection('journalResults',oldId):null;
+   const e={...cmd.entry},d=source.data,oldId=await r.runtime('pair',cmd.sessionId,cmd.exerciseId),old=oldId?await r.collection('journalResults',oldId):null;
    const session=await r.collection('journalSessions',e.sessionId);let snapshots=d.trainingJournal?.sessionSnapshots??[];
    if(session.journalSnapshotId){const verified=await r.collection('journalSnapshots',session.journalSnapshotId);snapshots=snapshots.some(s=>s.id===verified.id)?snapshots.map(s=>s.id===verified.id?verified:s):[...snapshots,verified];}
    const data={...d,sessions:d.sessions.some(s=>s.id===session.id)?d.sessions.map(s=>s.id===session.id?session:s):[...d.sessions,session],...(d.trainingJournal?{trainingJournal:{...d.trainingJournal,sessionSnapshots:snapshots}}:{})};
    check(cmd.expectedEpoch===before.epoch&&cmd.expectedRevision===before.revision&&cmd.expectedEntryHash===(oldId?r.maps.journalResults.get(oldId).ref:null),'result CAS');
    const snap=snapshots.find(s=>s.sessionId===session.id),snapHash=snap?r.maps.journalSnapshots.get(snap.id)?.fields.find(([k])=>k==='model')[1]:null;
-   check(cmd.snapshotHash===snapHash,'result snapshot CAS');check(e.sessionId===cmd.sessionId&&e.exerciseId===cmd.exerciseId&&(!old||e.id===old.id),'result identity');validateEntry(data,e,session);
+   check(cmd.snapshotHash===snapHash,'result snapshot CAS');check(e.sessionId===cmd.sessionId&&e.exerciseId===cmd.exerciseId&&(!old||e.id===old.id),'result identity');
+   delete e.resultChangedOn;
+   const history=[...(await r.runtime('history',e.exerciseId)??[])];
+   let previous=old,comparisonData=data;
+   if(!previous&&history.length){
+    const selector=[e.journalVariantId??null,snap?.planVersionId??null,e.performance?.loadConvention?.unit??null,e.performance?.loadConvention?.basis??null];
+    const candidates=history.filter(h=>h.session.status==='done'&&journal.calendarOrder(session,h.session)<0&&same(h.selector,selector)).sort((a,b)=>journal.calendarOrder(a.session,b.session));
+    for(const h of candidates){
+     const candidate=await r.collection('journalResults',h.id);
+     if(candidate.journalPositionId!==e.journalPositionId)continue;
+     previous=candidate;
+     if(h.snapshotId&&!snapshots.some(s=>s.id===h.snapshotId)){
+      const prior=await r.collection('journalSnapshots',h.snapshotId);
+      comparisonData={...data,trainingJournal:{...data.trainingJournal,sessionSnapshots:[...snapshots,prior]}};
+     }
+     break;
+    }
+   }
+   if(old?.resultChangedOn)e.resultChangedOn=old.resultChangedOn;
+   if(resultChanged(comparisonData,e,previous))e.resultChangedOn=session.status==='active'?(cmd.resultDate??session.date):session.date;
+   validateEntry(data,e,session);
    const newIds=resultIds(data,e);check(new Set(newIds).size===newIds.length,'duplicate global result ID');
    for(const id of newIds){const owner=await r.runtime('global',id);check(owner===null||owner===oldId,'duplicate global result ID');await index(['global',id],e.id)}
    if(old)for(const id of resultIds(data,old))if(!newIds.includes(id))await index(['global',id],undefined);
    const row=old?await collection('journalResults',e):await putNew('journalResults',e);
    await index(['pair',e.sessionId,e.exerciseId],e.id);const sessionEntries=await r.runtime('session',session.id);check(Array.isArray(sessionEntries),'runtime session');if(!old)await index(['session',session.id],[...sessionEntries,e.id]);
-   const history=[...(await r.runtime('history',e.exerciseId)??[])],at=history.findIndex(ds=>ds.id===e.id);if(at<0)history.push(descriptor(data,e));else history[at]=descriptor(data,e);const summary=contextSummary(history);
+   const at=history.findIndex(ds=>ds.id===e.id);if(at<0)history.push(descriptor(data,e));else history[at]=descriptor(data,e);const summary=contextSummary(history);
    await index(['history',e.exerciseId],history);await index(['context',e.exerciseId],summary);
    const nextAges=new Map(ages);for(const [k,v] of summary.ages)nextAges.set(k,v);
    return {source:freeze({...source,data:{...data,entries:d.entries.some(v=>v.id===e.id)?d.entries.map(v=>v.id===e.id?e:v):[...d.entries,e]}}),ages:nextAges,ack:{entry:e,entryHash:row.ref}};
