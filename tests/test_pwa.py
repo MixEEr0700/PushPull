@@ -640,7 +640,7 @@ class PWADeployment(unittest.TestCase):
         expect(card().locator('[data-result-change]')).to_contain_text('3 sesje temu')
         save(f)
         expect(card().locator('.exercise-toggle .last-result')).to_have_text('L/P 12×95 kg')
-        expect(card().locator('[data-result-change]')).to_contain_text('3 sesje temu') # In-progress session does not count.
+        expect(card().locator('[data-result-change]')).to_contain_text('dziś') # Durable result change during an active session.
         sid=self.snapshot()['data']['activeId']
         self.page.locator('[data-act=finish]').click();self.page.locator('[data-type="PULL B"]').click()
         expect(card().locator('[data-result-change]')).to_contain_text('1 sesję temu') # Decrease is a change, too.

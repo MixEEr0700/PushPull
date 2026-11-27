@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {initialize,startSession,recordEntry} from '../model/journal.mjs';
 import {activate,views,PLAN_ID} from '../model/v2-plan.mjs';
 import {newPerformance,flatten,performanceTonnage,resultChangeAge as age,resultChangeLabel as label} from '../model/performance.mjs';
-import {exerciseChangeLabel,isNewExerciseChange,latestExerciseChange} from '../model/performance.mjs';
+import {exerciseChangeLabel,isNewExerciseChange,latestExerciseChange,resultChanged} from '../model/performance.mjs';
 
 test('exercise markers compare normalized values in date order and preserve same-day changes',()=>{
  const first={date:'2026-10-24',kind:'Technika',text:'Wyżej łokcie'};
@@ -39,6 +39,22 @@ async function save(d,id='PULL-B-1',edit=()=>{},status='done'){
 const all=(p,kg,reps)=>p.rows.forEach(r=>r.segments.forEach(s=>{s.kg=kg;s.reps=reps;}));
 function refresh(e){e.series=flatten(e.performance);e.kg=e.series[0].kg;e.reps=e.series[0].reps;}
 const snap=(d,e)=>d.trainingJournal.sessionSnapshots.find(s=>s.sessionId===e.sessionId);
+
+test('a result change compares all committed sets, back-offs and drop segments without using identifiers',async()=>{
+ for(const id of ['PUSH-A-3','PUSH-A-5']){
+  const d=fixture(),previous=await save(d,id),current=await save(d,id,p=>all(p,'0105.00','15'),'active');
+  assert.equal(resultChanged(d,current,previous),false);
+  const edit=structuredClone(current),last=edit.performance.rows.at(-1).segments.at(-1);
+  last.kg='100';assert.equal(resultChanged(d,edit,current),true);
+  last.kg='0105.00';last.reps='14';assert.equal(resultChanged(d,edit,current),true);
+  last.reps='15';assert.equal(resultChanged(d,edit,current),false);
+  edit.performance.rows.pop();assert.equal(resultChanged(d,edit,current),true);
+ }
+ const same={exerciseId:'legacy',kg:100,reps:10},different={...same,series:[{kg:'100.00',reps:'10.0'},{kg:'100',reps:10}]};
+ assert.equal(resultChanged({},same,{...same,kg:'100.00',reps:'10.0'}),false);
+ assert.equal(resultChanged({},different,same),true);
+ assert.equal(resultChanged({},same,null),false);
+});
 
 test('equal completed runs count only actual comparable exercise performances; decreases and increases both reset',async()=>{
  const d=fixture();await save(d);await save(d);const last=await save(d);

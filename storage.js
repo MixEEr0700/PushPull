@@ -53,6 +53,7 @@ const PushPullStorage = (() => {
         !object(r) || !number(r.kg) || !number(r.reps, true) || !Number.isFinite(Number(r.kg) * Number(r.reps))))) fail('serie');
       if (e.series?.length && (Number(e.kg) !== Number(e.series[0].kg) || Number(e.reps) !== Number(e.series[0].reps))) fail('pierwsza seria');
       for (const k of ['createdAt', 'correctedAt']) if (e[k] !== undefined && (!text(e[k]) || !Number.isFinite(Date.parse(e[k])))) fail('data wyniku');
+      if (e.resultChangedOn !== undefined && !date(e.resultChangedOn)) fail('data zmiany wyniku');
       entryIds.add(e.id); pairs.add(pair);
     }
     if (value.changes !== undefined) {
