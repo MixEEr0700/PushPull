@@ -1,5 +1,18 @@
 # Issue #36 — ostatnia zmiana zapisanego wyniku
 
+## Punkt kontrolny po PR #176 — 27.11.2026
+
+Na karcie treningu „Ostatnia zmiana” pokazuje wiek ostatniego zapisanego znacznika z funkcji „Oznacz zmianę”. Zapis dzisiejszego znacznika aktualizuje komunikat również podczas aktywnej sesji. Edycja historyczna domyślnie używa daty sesji. Gdy ćwiczenie nie ma znacznika właściwego dla bieżącej daty, obowiązuje licznik zakończonych sesji opisany poniżej.
+
+Zaakceptowane ograniczenie porównania. Aplikacja porównuje rodzaj i opis z ostatnim znacznikiem właściwym dla wybranej daty. Normalizuje Unicode i odstępy. Opisy są tekstem swobodnym, więc dwa różne sformułowania dotyczące tego samego kąta, ustawienia maszyny lub techniki mogą utworzyć dwa znaczniki. Zwykłe zmiany ciężaru i powtórzeń są zapisywane w historii wyników. Kolejne odmienne znaczniki zachowują swoją kolejność także tego samego dnia i pozostają na wykresie. Schemat IndexedDB i format kopii PPC1 zachowano.
+
+- [PR #176](https://github.com/MixEEr0700/PushPull/pull/176) zatwierdzono dla `5285fbffe1b9f96d1b46e196a460a13f6cb07608`. Punkt kontrolny `checkpoint-pr176` wskazuje commit scalenia `f372162c6c8a3b72a4cf88fa7d400fa9ff3179b5`.
+- [CI przed scaleniem](https://github.com/MixEEr0700/PushPull/actions/runs/45987747574) zakończyło się sukcesem. Przeszło 358 testów Node i 370 testów regresyjnych Python/Chromium/PWA, build i kontrola hashy.
+- [Vercel](https://vercel.com/mixeer-4437/pushpull/8M7yZfkQmihXKXrEHTXoEG6zfG1e) potwierdził zakończenie wdrożenia commitu scalenia. Identyfikator jego paczki PWA to `17a8a83bab26a4f83611903c`. Bezpośredni odczyt produkcyjnego adresu przez środowisko Codex został zablokowany przez proxy HTTP 403.
+- Chromium potwierdził aktualizację dokładnych buildów z `4f01237937a29f6b166e0b9f` do `17a8a83bab26a4f83611903c`. Nowy worker pozostał w stanie oczekiwania do zamknięcia starej karty, po czym przejął kontrolę i działał offline z identycznymi danymi testowymi. Odbiór zainstalowanej PWA na fizycznym telefonie pozostaje do wykonania przez użytkownika.
+
+## Pierwotny licznik wieku zapisanego wyniku
+
 Baza: `main` po PR #37 (`fd708b0`). Zmiana wyłącznie odczytu/prezentacji; bez migracji i nowego pola bazy.
 
 Na karcie V2/V3+ pozostaje ostatni faktycznie zapisany wynik wybrany przez niezmienione `lastFor`. Obok jest jedna mała etykieta „Ostatnia zmiana: N sesji temu”. Nie jest to rekord, ranking ani ocena progresu. Szkielet z nieustalonym kontekstem pokazuje „nieustalona”; karta bez wyniku nie ma etykiety. Historia pojedynczej sesji nie otrzymuje dzisiejszego licznika.
