@@ -5,6 +5,22 @@ import assert from 'node:assert/strict';
 import {initialize,startSession,recordEntry} from '../model/journal.mjs';
 import {activate,views,PLAN_ID} from '../model/v2-plan.mjs';
 import {newPerformance,flatten,performanceTonnage,resultChangeAge as age,resultChangeLabel as label} from '../model/performance.mjs';
+import {exerciseChangeLabel,isNewExerciseChange,latestExerciseChange} from '../model/performance.mjs';
+
+test('exercise markers compare normalized values in date order and preserve same-day changes',()=>{
+ const first={date:'2026-10-24',kind:'Technika',text:'Wyżej łokcie'};
+ const second={...first,text:'Niżej łokcie'};
+ const future={...first,date:'2026-10-26'};
+ assert.equal(isNewExerciseChange([first],{...first,text:'  Wyz\u0307ej   łokcie  '}),false);
+ assert.equal(isNewExerciseChange([first],{...first,text:' \n '}),false);
+ assert.equal(isNewExerciseChange([first],second),true);
+ assert.equal(isNewExerciseChange([first,second],first),true);
+ assert.equal(latestExerciseChange([future,first,second],'2026-10-24'),second);
+ assert.equal(latestExerciseChange([first],'2026-10-23'),null);
+ assert.equal(exerciseChangeLabel(first.date,first.date),'Ostatnia zmiana: dziś');
+ assert.equal(exerciseChangeLabel(first.date,'2026-10-25'),'Ostatnia zmiana: wczoraj');
+ assert.equal(exerciseChangeLabel(first.date,'2026-10-26'),'Ostatnia zmiana: 2 dni temu');
+});
 
 function fixture(){
  const d={exercises:Object.fromEntries(['PUSH A','PULL A','PUSH B','PULL B'].map(t=>[t,[]])),sessions:[],entries:[],activeId:null,trainingJournal:initialize('change-test')};

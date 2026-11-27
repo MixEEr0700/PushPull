@@ -78,6 +78,25 @@ export function comparison(data,entry,{legacyIndex=false}={}){
  rows.sort((a,b)=>a.order-b.order||String(a.side).localeCompare(String(b.side)));
  return {context,value:canonical(rows.map(r=>[r.side,r.value]))};
 }
+// The explicit technique/setup markers also feed the exercise charts.
+export function latestExerciseChange(changes,throughDate){
+ let latest=null;
+ for(const change of changes??[]){
+  if(change.date<=throughDate&&(!latest||change.date>=latest.date))latest=change;
+ }
+ return latest;
+}
+const markerText=value=>value.normalize('NFC').trim().replace(/\s+/gu,' ');
+export function isNewExerciseChange(changes,change){
+ const latest=latestExerciseChange(changes,change.date);
+ return !!markerText(change.text)&&(!latest||markerText(latest.kind)!==markerText(change.kind)||markerText(latest.text)!==markerText(change.text));
+}
+export function exerciseChangeLabel(date,today){
+ // These are calendar dates. UTC arithmetic on their ISO strings avoids DST.
+ const days=(Date.parse(today)-Date.parse(date))/86400000;
+ return 'Ostatnia zmiana: '+(days===0?'dziś':days===1?'wczoraj':days+' dni temu');
+}
+
 /** Age = length of the latest equal run among comparable completed performances.
  * An ongoing session may supply the displayed last result, but never adds a count.
  * UUIDs, notes, targets' kg examples and technique markers are not measurements.
